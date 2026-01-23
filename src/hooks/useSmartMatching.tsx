@@ -45,9 +45,6 @@ export interface MatchedClientProfile {
   // Category-specific preferences
   moto_types?: string[];
   bicycle_types?: string[];
-  yacht_types?: string[];
-  vehicle_types?: string[];
-  vehicle_body_types?: string[];
   budget?: { min?: number; max?: number };
 }
 
@@ -69,8 +66,6 @@ export interface ClientFilters {
   // Category-specific
   motoTypes?: string[];
   bicycleTypes?: string[];
-  yachtTypes?: string[];
-  vehicleTypes?: string[];
   propertyTypes?: string[]; // For property-seeking clients
 }
 
@@ -220,8 +215,8 @@ function calculateListingMatch(preferences: ClientFilterPreferences, listing: Li
 }
 
 export interface ListingFilters {
-  category?: 'property' | 'motorcycle' | 'bicycle' | 'yacht' | 'vehicle' | 'services' | 'worker';
-  categories?: ('property' | 'motorcycle' | 'bicycle' | 'yacht' | 'vehicle' | 'services' | 'worker')[]; // Support multiple categories
+  category?: 'property' | 'motorcycle' | 'bicycle' | 'services' | 'worker';
+  categories?: ('property' | 'motorcycle' | 'bicycle' | 'services' | 'worker')[]; // Support multiple categories
   listingType?: 'rent' | 'sale' | 'both';
   propertyType?: string[];
   priceRange?: [number, number];
@@ -869,7 +864,7 @@ function calculateClientMatch(ownerPrefs: any, clientProfile: any): {
 
 export function useSmartClientMatching(
   userId?: string, // PERF: Accept userId to avoid getUser() inside queryFn
-  category?: 'property' | 'moto' | 'bicycle' | 'yacht',
+  category?: 'property' | 'moto' | 'bicycle',
   page: number = 0,
   pageSize: number = 10,
   isRefreshMode: boolean = false, // When true, show disliked profiles within cooldown
@@ -984,8 +979,6 @@ export function useSmartClientMatching(
           property_types,
           moto_types,
           bicycle_types,
-          yacht_types,
-          vehicle_types,
           user_roles!inner(role)
         `;
 
@@ -1085,14 +1078,6 @@ export function useSmartClientMatching(
                   break;
                 }
                 if (category === 'bicycle' && profile.bicycle_types && profile.bicycle_types.length > 0) {
-                  hasMatchingCategory = true;
-                  break;
-                }
-                if (category === 'yacht' && profile.yacht_types && profile.yacht_types.length > 0) {
-                  hasMatchingCategory = true;
-                  break;
-                }
-                if (category === 'vehicle' && profile.vehicle_types && profile.vehicle_types.length > 0) {
                   hasMatchingCategory = true;
                   break;
                 }

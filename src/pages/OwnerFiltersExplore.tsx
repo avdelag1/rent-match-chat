@@ -4,24 +4,20 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Sparkles, Home, Bike, Ship, Car, CircleDot, Briefcase, RotateCcw } from 'lucide-react';
+import { ArrowLeft, Sparkles, Home, Bike, CircleDot, Briefcase, RotateCcw } from 'lucide-react';
 import { PropertyClientFilters } from '@/components/filters/PropertyClientFilters';
 import { MotoClientFilters } from '@/components/filters/MotoClientFilters';
 import { BicycleClientFilters } from '@/components/filters/BicycleClientFilters';
-import { YachtClientFilters } from '@/components/filters/YachtClientFilters';
-import { VehicleClientFilters } from '@/components/filters/VehicleClientFilters';
 import { WorkerClientFilters } from '@/components/filters/WorkerClientFilters';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
-type CategoryType = 'property' | 'vehicle' | 'moto' | 'bicycle' | 'yacht' | 'services';
+type CategoryType = 'property' | 'moto' | 'bicycle' | 'services';
 
 const categories: { id: CategoryType; name: string; icon: React.ElementType; color: string }[] = [
   { id: 'property', name: 'Property', icon: Home, color: 'text-emerald-500' },
-  { id: 'vehicle', name: 'Cars', icon: Car, color: 'text-blue-500' },
   { id: 'moto', name: 'Motos', icon: CircleDot, color: 'text-orange-500' },
   { id: 'bicycle', name: 'Bikes', icon: Bike, color: 'text-purple-500' },
-  { id: 'yacht', name: 'Yachts', icon: Ship, color: 'text-cyan-500' },
   { id: 'services', name: 'Jobs', icon: Briefcase, color: 'text-pink-500' },
 ];
 
@@ -30,10 +26,8 @@ export default function OwnerFiltersExplore() {
   const [activeCategory, setActiveCategory] = useState<CategoryType>('property');
   const [filterCounts, setFilterCounts] = useState<Record<CategoryType, number>>({
     property: 0,
-    vehicle: 0,
     moto: 0,
     bicycle: 0,
-    yacht: 0,
     services: 0,
   });
 
@@ -44,10 +38,8 @@ export default function OwnerFiltersExplore() {
   const handleClearAll = () => {
     setFilterCounts({
       property: 0,
-      vehicle: 0,
       moto: 0,
       bicycle: 0,
-      yacht: 0,
       services: 0,
     });
   };
@@ -102,7 +94,7 @@ export default function OwnerFiltersExplore() {
         {/* Category Tabs - IMPROVED: Larger touch targets for mobile/tablet */}
         <div className="max-w-2xl mx-auto px-4 pt-4">
           <Tabs value={activeCategory} onValueChange={(value) => setActiveCategory(value as CategoryType)} className="w-full">
-            <TabsList className="w-full grid grid-cols-6 h-16 sm:h-14 p-1 gap-1 bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl">
+            <TabsList className="w-full grid grid-cols-4 h-16 sm:h-14 p-1 gap-1 bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl">
               {categories.map((cat) => {
                 const Icon = cat.icon;
                 const count = filterCounts[cat.id];
@@ -153,12 +145,6 @@ export default function OwnerFiltersExplore() {
                     activeCount={filterCounts.property}
                   />
                 )}
-                {activeCategory === 'vehicle' && (
-                  <VehicleClientFilters
-                    onApply={(filters) => handleFilterApply('vehicle', filters)}
-                    activeCount={filterCounts.vehicle}
-                  />
-                )}
                 {activeCategory === 'moto' && (
                   <MotoClientFilters
                     onApply={(filters) => handleFilterApply('moto', filters)}
@@ -169,12 +155,6 @@ export default function OwnerFiltersExplore() {
                   <BicycleClientFilters
                     onApply={(filters) => handleFilterApply('bicycle', filters)}
                     activeCount={filterCounts.bicycle}
-                  />
-                )}
-                {activeCategory === 'yacht' && (
-                  <YachtClientFilters
-                    onApply={(filters) => handleFilterApply('yacht', filters)}
-                    activeCount={filterCounts.yacht}
                   />
                 )}
                 {activeCategory === 'services' && (

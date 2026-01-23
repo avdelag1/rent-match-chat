@@ -12,8 +12,8 @@
 import { useState, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Home, Car, Bike, Ship, Wrench, ArrowLeft, X, Check, RotateCcw
+import {
+  Home, Bike, Wrench, ArrowLeft, X, Check, RotateCcw
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -40,47 +40,33 @@ interface CategoryOption {
 }
 
 const categoryOptions: CategoryOption[] = [
-  { 
-    id: 'property', 
-    label: 'Properties', 
+  {
+    id: 'property',
+    label: 'Properties',
     description: 'Houses, apartments, rooms',
-    icon: <Home className="w-6 h-6" />, 
-    gradient: 'from-blue-500 to-indigo-600' 
+    icon: <Home className="w-6 h-6" />,
+    gradient: 'from-blue-500 to-indigo-600'
   },
-  { 
-    id: 'vehicle', 
-    label: 'Cars', 
-    description: 'Cars, trucks, SUVs',
-    icon: <Car className="w-6 h-6" />, 
-    gradient: 'from-emerald-500 to-teal-600' 
-  },
-  { 
-    id: 'motorcycle', 
-    label: 'Motorcycles', 
+  {
+    id: 'motorcycle',
+    label: 'Motorcycles',
     description: 'Bikes, scooters, ATVs',
-    icon: <MotorcycleIcon className="w-6 h-6" />, 
-    gradient: 'from-red-500 to-orange-600' 
+    icon: <MotorcycleIcon className="w-6 h-6" />,
+    gradient: 'from-red-500 to-orange-600'
   },
-  { 
-    id: 'bicycle', 
-    label: 'Bicycles', 
+  {
+    id: 'bicycle',
+    label: 'Bicycles',
     description: 'Bikes, e-bikes, accessories',
-    icon: <Bike className="w-6 h-6" />, 
-    gradient: 'from-amber-500 to-yellow-600' 
+    icon: <Bike className="w-6 h-6" />,
+    gradient: 'from-amber-500 to-yellow-600'
   },
-  { 
-    id: 'yacht', 
-    label: 'Yachts', 
-    description: 'Boats, yachts, watercraft',
-    icon: <Ship className="w-6 h-6" />, 
-    gradient: 'from-cyan-500 to-blue-600' 
-  },
-  { 
-    id: 'services', 
-    label: 'Services', 
+  {
+    id: 'services',
+    label: 'Services',
     description: 'Workers, contractors',
-    icon: <Wrench className="w-6 h-6" />, 
-    gradient: 'from-purple-500 to-pink-600' 
+    icon: <Wrench className="w-6 h-6" />,
+    gradient: 'from-purple-500 to-pink-600'
   },
 ];
 

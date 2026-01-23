@@ -40,8 +40,6 @@ const routeDepthMap: Record<string, number> = {
   '/owner/clients/property': 2,
   '/owner/clients/moto': 2,
   '/owner/clients/bicycle': 2,
-  '/owner/clients/yacht': 2,
-  '/owner/clients/vehicle': 2,
   '/owner/filters-explore': 3,
   '/owner/listings/new': 3,
 };

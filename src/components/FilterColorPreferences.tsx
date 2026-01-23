@@ -5,10 +5,8 @@ import { motion } from 'framer-motion';
 
 const FILTER_CATEGORIES = [
   { id: 'property', label: 'Properties', defaultColor: 'emerald' },
-  { id: 'cars', label: 'Cars', defaultColor: 'blue' },
   { id: 'motos', label: 'Motorcycles', defaultColor: 'orange' },
   { id: 'bikes', label: 'Bicycles', defaultColor: 'purple' },
-  { id: 'yachts', label: 'Yachts', defaultColor: 'cyan' },
   { id: 'jobs', label: 'Jobs', defaultColor: 'pink' },
 ];
 

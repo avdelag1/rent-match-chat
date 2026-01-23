@@ -1,6 +1,6 @@
 import { memo, useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, Home, Car, Bike, Wrench, X, Users, User, Briefcase } from 'lucide-react';
+import { ChevronRight, Home, Bike, Wrench, X, Users, User, Briefcase } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { QuickFilterCategory, QuickFilters, ClientGender, ClientType } from '@/types/filters';
 
@@ -48,8 +48,6 @@ type CategoryOption = {
 
 const categoryOptions: CategoryOption[] = [
   { id: 'property', label: 'Property', icon: <Home className="w-4 h-4" />, color: 'from-orange-500 to-amber-500', hasSubOptions: true },
-  { id: 'vehicle', label: 'Car', icon: <Car className="w-4 h-4" />, color: 'from-blue-500 to-cyan-500', hasSubOptions: true },
-  { id: 'yacht', label: 'Yacht', icon: <JetIcon className="w-4 h-4" />, color: 'from-purple-500 to-pink-500', hasSubOptions: true },
   { id: 'motorcycle', label: 'Motorcycle', icon: <MotorcycleIcon className="w-4 h-4" />, color: 'from-red-500 to-orange-500', hasSubOptions: true },
   { id: 'bicycle', label: 'Bicycle', icon: <Bike className="w-4 h-4" />, color: 'from-green-500 to-emerald-500', hasSubOptions: true },
   { id: 'services', label: 'Workers', icon: <Wrench className="w-4 h-4" />, color: 'from-pink-500 to-rose-500', hasSubOptions: true },
@@ -201,7 +199,7 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
             >
               {option.icon}
               <span className="whitespace-nowrap">{option.label}</span>
-            </motion.button>
+            </button>
           ))}
         </div>
       </div>

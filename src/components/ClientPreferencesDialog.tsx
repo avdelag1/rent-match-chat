@@ -24,7 +24,6 @@ export function ClientPreferencesDialog({ open, onOpenChange }: ClientPreference
     interested_in_properties: true,
     interested_in_motorcycles: false,
     interested_in_bicycles: false,
-    interested_in_yachts: false,
 
     // Property preferences
     min_price: 0,
@@ -78,28 +77,6 @@ export function ClientPreferencesDialog({ open, onOpenChange }: ClientPreference
     bicycle_condition: [] as string[],
     bicycle_is_electric: null as boolean | null,
     bicycle_battery_range_min: 0,
-
-    // Yacht preferences
-    yacht_types: [] as string[],
-    yacht_length_min: 20,
-    yacht_length_max: 300,
-    yacht_price_min: 0,
-    yacht_price_max: 10000000,
-    yacht_year_min: 1970,
-    yacht_guest_capacity_min: 1,
-    yacht_guest_capacity_max: 50,
-    yacht_cabin_count_min: 1,
-    yacht_cabin_count_max: 15,
-    yacht_condition: [] as string[],
-    yacht_fuel_types: [] as string[],
-    yacht_engine_power_min: 0,
-    yacht_engine_power_max: 10000,
-    yacht_max_speed_min: 0,
-    yacht_range_nm_min: 0,
-    yacht_hull_material: [] as string[],
-    yacht_water_activities: [] as string[],
-    yacht_navigation_equipment: [] as string[],
-    yacht_has_stabilizers: null as boolean | null,
   })
 
   useEffect(() => {
@@ -109,7 +86,6 @@ export function ClientPreferencesDialog({ open, onOpenChange }: ClientPreference
         interested_in_properties: preferences.interested_in_properties ?? true,
         interested_in_motorcycles: preferences.interested_in_motorcycles ?? false,
         interested_in_bicycles: preferences.interested_in_bicycles ?? false,
-        interested_in_yachts: preferences.interested_in_yachts ?? false,
 
         // Property preferences
         min_price: preferences.min_price || 0,
@@ -163,28 +139,6 @@ export function ClientPreferencesDialog({ open, onOpenChange }: ClientPreference
         bicycle_condition: preferences.bicycle_condition || [],
         bicycle_is_electric: preferences.bicycle_is_electric ?? null,
         bicycle_battery_range_min: preferences.bicycle_battery_range_min || 0,
-
-        // Yacht preferences
-        yacht_types: preferences.yacht_types || [],
-        yacht_length_min: preferences.yacht_length_min || 20,
-        yacht_length_max: preferences.yacht_length_max || 300,
-        yacht_price_min: preferences.yacht_price_min || 0,
-        yacht_price_max: preferences.yacht_price_max || 10000000,
-        yacht_year_min: preferences.yacht_year_min || 1970,
-        yacht_guest_capacity_min: preferences.yacht_guest_capacity_min || 1,
-        yacht_guest_capacity_max: preferences.yacht_guest_capacity_max || 50,
-        yacht_cabin_count_min: preferences.yacht_cabin_count_min || 1,
-        yacht_cabin_count_max: preferences.yacht_cabin_count_max || 15,
-        yacht_condition: preferences.yacht_condition || [],
-        yacht_fuel_types: preferences.yacht_fuel_types || [],
-        yacht_engine_power_min: preferences.yacht_engine_power_min || 0,
-        yacht_engine_power_max: preferences.yacht_engine_power_max || 10000,
-        yacht_max_speed_min: preferences.yacht_max_speed_min || 0,
-        yacht_range_nm_min: preferences.yacht_range_nm_min || 0,
-        yacht_hull_material: preferences.yacht_hull_material || [],
-        yacht_water_activities: preferences.yacht_water_activities || [],
-        yacht_navigation_equipment: preferences.yacht_navigation_equipment || [],
-        yacht_has_stabilizers: preferences.yacht_has_stabilizers ?? null,
       })
     }
   }, [preferences])
@@ -243,25 +197,6 @@ export function ClientPreferencesDialog({ open, onOpenChange }: ClientPreference
 
   const bicycleMaterialOptions = ['Aluminum', 'Carbon Fiber', 'Steel', 'Titanium']
 
-  const yachtTypeOptions = [
-    'Motor Yacht', 'Sailing Yacht', 'Catamaran', 'Fishing Boat', 'Speedboat',
-    'Gulet', 'Trimaran', 'Luxury Yacht'
-  ]
-
-  const yachtFuelTypeOptions = ['Diesel', 'Gasoline', 'Hybrid', 'Electric', 'Sail-Only']
-
-  const yachtHullMaterialOptions = ['Fiberglass', 'Aluminum', 'Steel', 'Wood', 'Carbon Fiber']
-
-  const yachtWaterActivitiesOptions = [
-    'Diving', 'Snorkeling', 'Fishing', 'Jet Skiing', 'Kayaking',
-    'Paddleboarding', 'Wakeboarding', 'Swimming'
-  ]
-
-  const yachtNavigationEquipmentOptions = [
-    'GPS', 'Radar', 'Autopilot', 'Sonar', 'VHF Radio', 'AIS',
-    'Chartplotter', 'Fish Finder'
-  ]
-
   const toggleArrayValue = (array: string[], value: string) => {
     if (array.includes(value)) {
       return array.filter(v => v !== value)
@@ -304,14 +239,6 @@ export function ClientPreferencesDialog({ open, onOpenChange }: ClientPreference
               />
               <Label htmlFor="interested_bicycles">Bicycles</Label>
             </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="interested_yachts"
-                checked={formData.interested_in_yachts}
-                onCheckedChange={(checked) => setFormData({ ...formData, interested_in_yachts: !!checked })}
-              />
-              <Label htmlFor="interested_yachts">Yachts</Label>
-            </div>
           </div>
         </div>
 
@@ -323,9 +250,6 @@ export function ClientPreferencesDialog({ open, onOpenChange }: ClientPreference
             </TabsTrigger>
             <TabsTrigger value="bicycles" disabled={!formData.interested_in_bicycles}>
               Bicycles
-            </TabsTrigger>
-            <TabsTrigger value="yachts" disabled={!formData.interested_in_yachts}>
-              Yachts
             </TabsTrigger>
           </TabsList>
 
@@ -1063,317 +987,6 @@ export function ClientPreferencesDialog({ open, onOpenChange }: ClientPreference
             </ScrollArea>
           </TabsContent>
 
-          {/* YACHTS TAB */}
-          <TabsContent value="yachts" className="flex-1 mt-0">
-            <ScrollArea className="h-full px-6">
-              <div className="space-y-6 py-4">
-                {/* Yacht Types */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Yacht Types</h3>
-                  <div className="grid grid-cols-2 gap-2">
-                    {yachtTypeOptions.map((type) => (
-                      <div key={type} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`yacht-type-${type}`}
-                          checked={formData.yacht_types.includes(type)}
-                          onCheckedChange={() => {
-                            setFormData({
-                              ...formData,
-                              yacht_types: toggleArrayValue(formData.yacht_types, type)
-                            })
-                          }}
-                        />
-                        <Label htmlFor={`yacht-type-${type}`}>{type}</Label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Price Range */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Price Range</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="yacht_price_min">Min Price ($)</Label>
-                      <Input
-                        id="yacht_price_min"
-                        type="number"
-                        value={formData.yacht_price_min}
-                        onChange={(e) => setFormData({ ...formData, yacht_price_min: parseInt(e.target.value) || 0 })}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="yacht_price_max">Max Price ($)</Label>
-                      <Input
-                        id="yacht_price_max"
-                        type="number"
-                        value={formData.yacht_price_max}
-                        onChange={(e) => setFormData({ ...formData, yacht_price_max: parseInt(e.target.value) || 10000000 })}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Length */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Length (feet)</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="yacht_length_min">Min Length</Label>
-                      <Input
-                        id="yacht_length_min"
-                        type="number"
-                        value={formData.yacht_length_min}
-                        onChange={(e) => setFormData({ ...formData, yacht_length_min: parseInt(e.target.value) || 20 })}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="yacht_length_max">Max Length</Label>
-                      <Input
-                        id="yacht_length_max"
-                        type="number"
-                        value={formData.yacht_length_max}
-                        onChange={(e) => setFormData({ ...formData, yacht_length_max: parseInt(e.target.value) || 300 })}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Year */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Minimum Year</h3>
-                  <Input
-                    type="number"
-                    value={formData.yacht_year_min}
-                    onChange={(e) => setFormData({ ...formData, yacht_year_min: parseInt(e.target.value) || 1970 })}
-                  />
-                </div>
-
-                {/* Guest Capacity */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Guest Capacity</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="yacht_guest_capacity_min">Min Guests</Label>
-                      <Input
-                        id="yacht_guest_capacity_min"
-                        type="number"
-                        value={formData.yacht_guest_capacity_min}
-                        onChange={(e) => setFormData({ ...formData, yacht_guest_capacity_min: parseInt(e.target.value) || 1 })}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="yacht_guest_capacity_max">Max Guests</Label>
-                      <Input
-                        id="yacht_guest_capacity_max"
-                        type="number"
-                        value={formData.yacht_guest_capacity_max}
-                        onChange={(e) => setFormData({ ...formData, yacht_guest_capacity_max: parseInt(e.target.value) || 50 })}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Cabin Count */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Cabins</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="yacht_cabin_count_min">Min Cabins</Label>
-                      <Input
-                        id="yacht_cabin_count_min"
-                        type="number"
-                        value={formData.yacht_cabin_count_min}
-                        onChange={(e) => setFormData({ ...formData, yacht_cabin_count_min: parseInt(e.target.value) || 1 })}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="yacht_cabin_count_max">Max Cabins</Label>
-                      <Input
-                        id="yacht_cabin_count_max"
-                        type="number"
-                        value={formData.yacht_cabin_count_max}
-                        onChange={(e) => setFormData({ ...formData, yacht_cabin_count_max: parseInt(e.target.value) || 15 })}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Condition */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Condition</h3>
-                  <div className="grid grid-cols-2 gap-2">
-                    {conditionOptions.map((cond) => (
-                      <div key={cond} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`yacht-cond-${cond}`}
-                          checked={formData.yacht_condition.includes(cond)}
-                          onCheckedChange={() => {
-                            setFormData({
-                              ...formData,
-                              yacht_condition: toggleArrayValue(formData.yacht_condition, cond)
-                            })
-                          }}
-                        />
-                        <Label htmlFor={`yacht-cond-${cond}`}>{cond}</Label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Fuel Types */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Fuel Type</h3>
-                  <div className="grid grid-cols-2 gap-2">
-                    {yachtFuelTypeOptions.map((fuel) => (
-                      <div key={fuel} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`yacht-fuel-${fuel}`}
-                          checked={formData.yacht_fuel_types.includes(fuel)}
-                          onCheckedChange={() => {
-                            setFormData({
-                              ...formData,
-                              yacht_fuel_types: toggleArrayValue(formData.yacht_fuel_types, fuel)
-                            })
-                          }}
-                        />
-                        <Label htmlFor={`yacht-fuel-${fuel}`}>{fuel}</Label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Engine Power */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Engine Power (HP)</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="yacht_engine_power_min">Min HP</Label>
-                      <Input
-                        id="yacht_engine_power_min"
-                        type="number"
-                        value={formData.yacht_engine_power_min}
-                        onChange={(e) => setFormData({ ...formData, yacht_engine_power_min: parseInt(e.target.value) || 0 })}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="yacht_engine_power_max">Max HP</Label>
-                      <Input
-                        id="yacht_engine_power_max"
-                        type="number"
-                        value={formData.yacht_engine_power_max}
-                        onChange={(e) => setFormData({ ...formData, yacht_engine_power_max: parseInt(e.target.value) || 10000 })}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Speed & Range */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Performance</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="yacht_max_speed_min">Min Speed (knots)</Label>
-                      <Input
-                        id="yacht_max_speed_min"
-                        type="number"
-                        value={formData.yacht_max_speed_min}
-                        onChange={(e) => setFormData({ ...formData, yacht_max_speed_min: parseInt(e.target.value) || 0 })}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="yacht_range_nm_min">Min Range (nm)</Label>
-                      <Input
-                        id="yacht_range_nm_min"
-                        type="number"
-                        value={formData.yacht_range_nm_min}
-                        onChange={(e) => setFormData({ ...formData, yacht_range_nm_min: parseInt(e.target.value) || 0 })}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Hull Material */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Hull Material</h3>
-                  <div className="grid grid-cols-2 gap-2">
-                    {yachtHullMaterialOptions.map((mat) => (
-                      <div key={mat} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`yacht-hull-${mat}`}
-                          checked={formData.yacht_hull_material.includes(mat)}
-                          onCheckedChange={() => {
-                            setFormData({
-                              ...formData,
-                              yacht_hull_material: toggleArrayValue(formData.yacht_hull_material, mat)
-                            })
-                          }}
-                        />
-                        <Label htmlFor={`yacht-hull-${mat}`}>{mat}</Label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Water Activities */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Water Activities</h3>
-                  <div className="grid grid-cols-2 gap-2">
-                    {yachtWaterActivitiesOptions.map((act) => (
-                      <div key={act} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`yacht-act-${act}`}
-                          checked={formData.yacht_water_activities.includes(act)}
-                          onCheckedChange={() => {
-                            setFormData({
-                              ...formData,
-                              yacht_water_activities: toggleArrayValue(formData.yacht_water_activities, act)
-                            })
-                          }}
-                        />
-                        <Label htmlFor={`yacht-act-${act}`}>{act}</Label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Navigation Equipment */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Navigation Equipment</h3>
-                  <div className="grid grid-cols-2 gap-2">
-                    {yachtNavigationEquipmentOptions.map((nav) => (
-                      <div key={nav} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`yacht-nav-${nav}`}
-                          checked={formData.yacht_navigation_equipment.includes(nav)}
-                          onCheckedChange={() => {
-                            setFormData({
-                              ...formData,
-                              yacht_navigation_equipment: toggleArrayValue(formData.yacht_navigation_equipment, nav)
-                            })
-                          }}
-                        />
-                        <Label htmlFor={`yacht-nav-${nav}`}>{nav}</Label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Stabilizers */}
-                <div className="space-y-4 pb-4">
-                  <h3 className="text-lg font-semibold">Additional Preferences</h3>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="yacht_has_stabilizers"
-                      checked={formData.yacht_has_stabilizers === true}
-                      onCheckedChange={(checked) => setFormData({ ...formData, yacht_has_stabilizers: checked ? true : null })}
-                    />
-                    <Label htmlFor="yacht_has_stabilizers">Must have stabilizers</Label>
-                  </div>
-                </div>
-              </div>
-            </ScrollArea>
-          </TabsContent>
         </Tabs>
 
         <DialogFooter className="px-6 py-4 border-t">

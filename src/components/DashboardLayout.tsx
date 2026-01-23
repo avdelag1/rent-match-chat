@@ -382,8 +382,6 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const mapCategoryToDatabase = useCallback((category: QuickFilterCategory): string => {
     const mapping: Record<QuickFilterCategory, string> = {
       'motorcycle': 'motorcycle',
-      'vehicle': 'vehicle',
-      'yacht': 'yacht',
       'property': 'property',
       'bicycle': 'bicycle',
       'services': 'worker',  // UI 'services' -> DB 'worker'

@@ -33,10 +33,8 @@ const routeImports: Record<string, RouteImport> = {
   '/owner/saved-searches': () => import('@/pages/OwnerSavedSearches'),
   '/owner/security': () => import('@/pages/OwnerSecurity'),
   '/owner/clients/property': () => import('@/pages/OwnerPropertyClientDiscovery'),
-  '/owner/clients/vehicle': () => import('@/pages/OwnerVehicleClientDiscovery'),
   '/owner/clients/moto': () => import('@/pages/OwnerMotoClientDiscovery'),
   '/owner/clients/bicycle': () => import('@/pages/OwnerBicycleClientDiscovery'),
-  '/owner/clients/yacht': () => import('@/pages/OwnerYachtClientDiscovery'),
   // Shared routes
   '/messages': () => import('@/pages/MessagingDashboard').then(m => ({ default: m.MessagingDashboard })),
   '/notifications': () => import('@/pages/NotificationsPage'),

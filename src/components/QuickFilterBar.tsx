@@ -1,6 +1,6 @@
 import { memo, useCallback, useState, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Car, Bike, Ship, RotateCcw, Briefcase, Users, User, ChevronDown, Wrench, Filter, X, Check } from 'lucide-react';
+import { Home, Bike, RotateCcw, Briefcase, Users, User, ChevronDown, Wrench, Filter, X, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { QuickFilterCategory, QuickFilters, ClientGender, ClientType } from '@/types/filters';
 
@@ -24,10 +24,8 @@ interface QuickFilterBarProps {
 
 const categories: { id: QuickFilterCategory; label: string; icon: React.ReactNode }[] = [
   { id: 'property', label: 'Property', icon: <Home className="w-4 h-4" /> },
-  { id: 'vehicle', label: 'Cars', icon: <Car className="w-4 h-4" /> },
   { id: 'motorcycle', label: 'Motos', icon: <MotorcycleIcon /> },
   { id: 'bicycle', label: 'Bikes', icon: <Bike className="w-4 h-4" /> },
-  { id: 'yacht', label: 'Yachts', icon: <Ship className="w-4 h-4" /> },
   { id: 'services', label: 'Services', icon: <Wrench className="w-4 h-4" /> },
 ];
 

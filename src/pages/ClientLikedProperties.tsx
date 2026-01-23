@@ -11,7 +11,7 @@ import { useLikedProperties } from "@/hooks/useLikedProperties";
 import { useUserSubscription } from "@/hooks/useSubscription";
 import { useStartConversation, useConversationStats } from "@/hooks/useConversations";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Flame, MessageCircle, MapPin, Bed, Bath, Square, Crown, ExternalLink, RefreshCw, Camera, ArrowLeft, Home, Car, Ship, Bike, Briefcase, Trash2, MoreVertical } from "lucide-react";
+import { Flame, MessageCircle, MapPin, Bed, Bath, Square, Crown, ExternalLink, RefreshCw, Camera, ArrowLeft, Home, Bike, Briefcase, Trash2, MoreVertical } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { useMessagingQuota } from "@/hooks/useMessagingQuota";
 import { MessageQuotaDialog } from "@/components/MessageQuotaDialog";
@@ -62,10 +62,8 @@ function MotorcycleIcon({ className }: { className?: string }) {
 const categories = [
   { id: 'all', label: 'all', icon: Flame, title: 'liked items', subtitle: 'items you\'ve shown interest in' },
   { id: 'property', label: 'properties', icon: Home, title: 'liked properties', subtitle: 'properties you\'ve shown interest in' },
-  { id: 'vehicle', label: 'vehicles', icon: Car, title: 'liked vehicles', subtitle: 'vehicles you\'ve shown interest in' },
   { id: 'motorcycle', label: 'motos', icon: MotorcycleIcon, title: 'liked motos', subtitle: 'motorcycles you\'ve shown interest in' },
   { id: 'bicycle', label: 'bikes', icon: Bike, title: 'liked bikes', subtitle: 'bicycles you\'ve shown interest in' },
-  { id: 'yacht', label: 'yachts', icon: Ship, title: 'liked yachts', subtitle: 'yachts you\'ve shown interest in' },
   { id: 'worker', label: 'services', icon: Briefcase, title: 'liked services', subtitle: 'services you\'ve shown interest in' },
 ];
 
@@ -248,7 +246,7 @@ const ClientLikedProperties = () => {
 
             {/* Category Tabs */}
             <Tabs value={selectedCategory} onValueChange={handleCategoryChange} className="w-full mb-6">
-              <TabsList className="grid w-full grid-cols-7 h-auto overflow-x-auto">
+              <TabsList className="grid w-full grid-cols-5 h-auto overflow-x-auto">
                 {categories.map(({ id, label, icon: Icon }) => (
                   <TabsTrigger
                     key={id}
