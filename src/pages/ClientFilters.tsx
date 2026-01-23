@@ -84,12 +84,12 @@ const listingTypeOptions: ListingTypeOption[] = [
 
 export default function ClientFilters() {
   const navigate = useNavigate();
-  
-  // Get current filter state from store
-  const storeCategories = useFilterStore((s) => s.categories);
-  const storeListingType = useFilterStore((s) => s.listingType);
+
+  // Get current filter state from store with fallback defaults
+  const storeCategories = useFilterStore((s) => s.categories) || [];
+  const storeListingType = useFilterStore((s) => s.listingType) || 'both';
   const { setCategories, setListingType, resetClientFilters } = useFilterActions();
-  
+
   // Local state for pending changes (allows cancel without applying)
   const [localCategories, setLocalCategories] = useState<QuickFilterCategory[]>(storeCategories);
   const [localListingType, setLocalListingType] = useState<QuickFilterListingType>(storeListingType);
