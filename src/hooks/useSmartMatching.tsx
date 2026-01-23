@@ -378,11 +378,6 @@ export function useSmartListingMatching(
 
         // Apply filter-based query constraints
         if (filters) {
-          console.log('[SmartMatching] 🎯 APPLYING FILTERS:', {
-            categories: filters.categories,
-            category: filters.category,
-            listingType: filters.listingType,
-          });
           logger.info('[SmartMatching] Applying filters:', {
             categories: filters.categories,
             category: filters.category,
@@ -391,18 +386,15 @@ export function useSmartListingMatching(
 
           // Category filter - support multiple categories
           if (filters.categories && filters.categories.length > 0) {
-            console.log('[SmartMatching] 🔥 FILTERING BY CATEGORIES:', filters.categories);
             logger.info('[SmartMatching] Filtering by categories:', filters.categories);
             query = query.in('category', filters.categories);
           } else if (filters.category) {
-            console.log('[SmartMatching] 🔥 FILTERING BY SINGLE CATEGORY:', filters.category);
             logger.info('[SmartMatching] Filtering by single category:', filters.category);
             query = query.eq('category', filters.category);
           }
 
           // Listing type filter
           if (filters.listingType && filters.listingType !== 'both') {
-            console.log('[SmartMatching] 💰 FILTERING BY LISTING TYPE:', filters.listingType);
             logger.info('[SmartMatching] Filtering by listing type:', filters.listingType);
             query = query.eq('listing_type', filters.listingType);
           }
@@ -446,8 +438,6 @@ export function useSmartListingMatching(
 
           // Premium only filter (owner has premium subscription)
           // This will be applied client-side after we get subscription data
-        } else {
-          console.log('[SmartMatching] ❌ NO FILTERS PROVIDED');
         }
 
         // Apply pagination
@@ -455,15 +445,6 @@ export function useSmartListingMatching(
         const end = start + pageSize - 1;
         const { data: listings, error } = await query.range(start, end);
 
-        console.log('[SmartMatching] 📊 QUERY RESULT:', {
-          count: listings?.length || 0,
-          error: error?.message,
-          page,
-          filters: filters ? {
-            categories: filters.categories,
-            listingType: filters.listingType,
-          } : null,
-        });
         logger.info('[SmartMatching] Query result:', {
           count: listings?.length || 0,
           error: error?.message,
@@ -1199,11 +1180,6 @@ export function useSmartClientMatching(
 
             return true;
           });
-          console.log('[SmartClientMatching] 📊 After filtering:', {
-            profilesRemaining: filteredProfiles.length,
-          });
-        } else {
-          console.log('[SmartClientMatching] ❌ NO FILTERS PROVIDED');
         }
 
         // Calculate match scores based on profile completeness and preferences
