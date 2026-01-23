@@ -1,6 +1,5 @@
 /** SPEED OF LIGHT: DashboardLayout is now rendered at route level */
 import { OwnerProfileDialog } from "@/components/OwnerProfileDialog";
-import { OwnerClientFilterDialog } from "@/components/OwnerClientFilterDialog";
 import { SharedProfileSection } from "@/components/SharedProfileSection";
 import { ThemeSelector } from "@/components/ThemeSelector";
 import { useState } from "react";
@@ -14,7 +13,7 @@ import { useOwnerProfile } from "@/hooks/useOwnerProfile";
 import {
   User, LogOut, Building2, Eye, MessageCircle,
   Camera, ArrowLeft, Crown, Settings as SettingsIcon,
-  Flame, Filter, Users, Palette
+  Flame, Palette
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -23,7 +22,6 @@ const fastSpring = { type: "spring" as const, stiffness: 500, damping: 30, mass:
 
 const OwnerProfileNew = () => {
   const [showEditDialog, setShowEditDialog] = useState(false);
-  const [showClientFilterDialog, setShowClientFilterDialog] = useState(false);
   const { user, signOut } = useAuth();
   const { data: stats, isLoading: statsLoading } = useOwnerStats();
   const { data: ownerProfile, isLoading: profileLoading } = useOwnerProfile();
@@ -140,38 +138,6 @@ const OwnerProfileNew = () => {
             isClient={false}
           />
 
-          {/* Client Preferences - PROMINENT PLACEMENT */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ ...fastSpring, delay: 0.1 }}
-          >
-            <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Filter className="w-5 h-5 text-primary" />
-                  <CardTitle>My Ideal Client Preferences</CardTitle>
-                </div>
-                <CardDescription>
-                  Set filters to find clients that match your rental criteria
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p className="text-sm text-muted-foreground">
-                  Filter clients by budget, lifestyle, occupation, demographics, and more to find the perfect match for your properties.
-                </p>
-                <Button
-                  onClick={() => setShowClientFilterDialog(true)}
-                  className="w-full"
-                  size="lg"
-                >
-                  <Users className="w-4 h-4 mr-2" />
-                  Configure Client Filters
-                </Button>
-              </CardContent>
-            </Card>
-          </motion.div>
-
           {/* Liked Clients */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -276,11 +242,6 @@ const OwnerProfileNew = () => {
       <OwnerProfileDialog
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
-      />
-
-      <OwnerClientFilterDialog
-        open={showClientFilterDialog}
-        onOpenChange={setShowClientFilterDialog}
       />
     </>
   );

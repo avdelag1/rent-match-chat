@@ -1,6 +1,5 @@
 /** SPEED OF LIGHT: DashboardLayout is now rendered at route level */
 import { ClientProfileDialog } from "@/components/ClientProfileDialog";
-import { ClientPreferencesDialog } from "@/components/ClientPreferencesDialog";
 import { PhotoPreview } from "@/components/PhotoPreview";
 import { ShareDialog } from "@/components/ShareDialog";
 import { SharedProfileSection } from "@/components/SharedProfileSection";
@@ -13,8 +12,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { Separator } from "@/components/ui/separator";
 import {
   LogOut, User, Camera, Sparkles, Crown,
-  Share2, ArrowLeft, Flame, MessageCircle, Filter,
-  Settings as SettingsIcon, Home, Bike, Ship, Car, Palette
+  Share2, ArrowLeft, Flame, MessageCircle,
+  Settings as SettingsIcon, Palette
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -28,7 +27,6 @@ const ClientProfileNew = () => {
   const [showPhotoPreview, setShowPhotoPreview] = useState(false);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
   const [showShareDialog, setShowShareDialog] = useState(false);
-  const [showPreferences, setShowPreferences] = useState(false);
   const { data: profile, isLoading } = useClientProfile();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -223,53 +221,6 @@ const ClientProfileNew = () => {
             isClient={true}
           />
 
-          {/* My Preferences - PROMINENT PLACEMENT */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ ...fastSpring, delay: 0.2 }}
-          >
-            <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Filter className="w-5 h-5 text-primary" />
-                  <CardTitle>What I'm Looking For</CardTitle>
-                </div>
-                <CardDescription>
-                  Set your preferences for properties and rentals
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="p-3 bg-gradient-to-br from-blue-500/10 to-blue-500/5 rounded-lg border border-blue-500/20 text-center">
-                    <Home className="w-6 h-6 text-blue-500 mx-auto mb-1" />
-                    <p className="text-xs font-medium">Properties</p>
-                  </div>
-                  <div className="p-3 bg-gradient-to-br from-red-500/10 to-red-500/5 rounded-lg border border-red-500/20 text-center">
-                    <Car className="w-6 h-6 text-red-500 mx-auto mb-1" />
-                    <p className="text-xs font-medium">Motorcycles</p>
-                  </div>
-                  <div className="p-3 bg-gradient-to-br from-green-500/10 to-green-500/5 rounded-lg border border-green-500/20 text-center">
-                    <Bike className="w-6 h-6 text-green-500 mx-auto mb-1" />
-                    <p className="text-xs font-medium">Bicycles</p>
-                  </div>
-                  <div className="p-3 bg-gradient-to-br from-cyan-500/10 to-cyan-500/5 rounded-lg border border-cyan-500/20 text-center">
-                    <Ship className="w-6 h-6 text-cyan-500 mx-auto mb-1" />
-                    <p className="text-xs font-medium">Yachts</p>
-                  </div>
-                </div>
-                <Button
-                  onClick={() => setShowPreferences(true)}
-                  className="w-full"
-                  size="lg"
-                >
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  Set My Preferences
-                </Button>
-              </CardContent>
-            </Card>
-          </motion.div>
-
           {/* Filter Colors / Theme Section */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -351,11 +302,6 @@ const ClientProfileNew = () => {
       <ClientProfileDialog
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
-      />
-
-      <ClientPreferencesDialog
-        open={showPreferences}
-        onOpenChange={setShowPreferences}
       />
 
       <PhotoPreview

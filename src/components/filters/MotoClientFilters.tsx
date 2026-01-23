@@ -642,19 +642,9 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
         </CollapsibleContent>
       </Collapsible>
 
-      <div className="flex flex-col gap-2 pt-4">
-        <div className="flex gap-2">
-          <Button onClick={handleClear} variant="outline" className="flex-1">Clear All</Button>
-          <Button onClick={handleApply} className="flex-1">Apply Filters</Button>
-        </div>
-        <Button 
-          onClick={handleSavePreferences} 
-          variant="secondary" 
-          className="w-full"
-          disabled={savePreferencesMutation.isPending}
-        >
-          <Save className="h-4 w-4 mr-2" />
-          {savePreferencesMutation.isPending ? 'Saving...' : 'Save as My Preferences'}
+      <div className="pt-4">
+        <Button onClick={handleApply} className="w-full rounded-xl bg-gradient-to-r from-primary to-primary/80 h-12 text-base font-semibold">
+          Apply
         </Button>
       </div>
     </div>
