@@ -1040,12 +1040,6 @@ export function useSmartClientMatching(
 
         // Apply client filters if provided
         if (filters) {
-          console.log('[SmartClientMatching] 🎯 APPLYING CLIENT FILTERS:', {
-            clientGender: (filters as any).clientGender,
-            clientType: (filters as any).clientType,
-            categories: (filters as any).categories,
-            profileCount: filteredProfiles.length,
-          });
           logger.info('[SmartClientMatching] Applying client filters:', {
             clientGender: (filters as any).clientGender,
             clientType: (filters as any).clientType,

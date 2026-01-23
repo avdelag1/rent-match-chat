@@ -5,6 +5,7 @@ import { useState, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useClientProfile } from "@/hooks/useClientProfile";
+import { useClientStats } from "@/hooks/useClientStats";
 import { useAuth } from "@/hooks/useAuth";
 import {
   LogOut, User, Settings, Shield, Bell, Flame,
@@ -24,6 +25,7 @@ const ClientProfile = () => {
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const { data: profile, isLoading } = useClientProfile();
+  const { data: stats } = useClientStats();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -70,7 +72,7 @@ const ClientProfile = () => {
   const menuItems = [
     { icon: User, label: 'Edit Profile', action: (_e: React.MouseEvent) => setShowEditDialog(true), color: 'text-blue-500' },
     { icon: Share2, label: 'Share Profile', action: (_e: React.MouseEvent) => setShowShareDialog(true), color: 'text-purple-500' },
-    { icon: Settings, label: 'Preferences', action: (_e: React.MouseEvent) => navigate('/client/settings'), color: 'text-gray-500' },
+    { icon: Settings, label: 'Settings', action: (_e: React.MouseEvent) => navigate('/client/settings'), color: 'text-gray-500' },
     { icon: Crown, label: 'Subscription', action: (_e: React.MouseEvent) => navigate('/subscription-packages'), color: 'text-amber-500' },
     { icon: Shield, label: 'Security', action: (_e: React.MouseEvent) => navigate('/client/security'), color: 'text-green-500' },
     { icon: Bell, label: 'Notifications', action: (_e: React.MouseEvent) => navigate('/notifications'), color: 'text-blue-500' },
@@ -162,21 +164,21 @@ const ClientProfile = () => {
             <Card className="bg-card border-border">
               <CardContent className="p-3 text-center">
                 <Flame className="w-5 h-5 text-orange-500 mx-auto mb-1" />
-                <div className="text-lg font-bold text-foreground">0</div>
+                <div className="text-lg font-bold text-foreground">{stats?.likesReceived ?? 0}</div>
                 <div className="text-xs text-muted-foreground">Likes</div>
               </CardContent>
             </Card>
             <Card className="bg-card border-border">
               <CardContent className="p-3 text-center">
                 <Sparkles className="w-5 h-5 text-amber-500 mx-auto mb-1" />
-                <div className="text-lg font-bold text-foreground">0</div>
+                <div className="text-lg font-bold text-foreground">{stats?.matchesCount ?? 0}</div>
                 <div className="text-xs text-muted-foreground">Matches</div>
               </CardContent>
             </Card>
             <Card className="bg-card border-border">
               <CardContent className="p-3 text-center">
                 <MessageCircle className="w-5 h-5 text-blue-500 mx-auto mb-1" />
-                <div className="text-lg font-bold text-foreground">0</div>
+                <div className="text-lg font-bold text-foreground">{stats?.activeChats ?? 0}</div>
                 <div className="text-xs text-muted-foreground">Chats</div>
               </CardContent>
             </Card>
