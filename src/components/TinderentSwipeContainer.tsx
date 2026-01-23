@@ -47,11 +47,11 @@ const MotorcycleIcon = ({ className }: { className?: string }) => (
 // Category configuration for dynamic empty states
 const categoryConfig: Record<string, { icon: React.ComponentType<{ className?: string }>; label: string; plural: string; color: string }> = {
   property: { icon: Home, label: 'Property', plural: 'Properties', color: 'text-primary' },
-  moto: { icon: MotorcycleIcon, label: 'Motorcycle', plural: 'Motorcycles', color: 'text-orange-500' },
-  motorcycle: { icon: MotorcycleIcon, label: 'Motorcycle', plural: 'Motorcycles', color: 'text-orange-500' },
-  bicycle: { icon: Bike, label: 'Bicycle', plural: 'Bicycles', color: 'text-green-500' },
-  services: { icon: Briefcase, label: 'Service', plural: 'Services', color: 'text-amber-500' },
-  worker: { icon: Briefcase, label: 'Worker', plural: 'Workers', color: 'text-amber-500' },
+  moto: { icon: MotorcycleIcon, label: 'Motorcycle', plural: 'Motorcycles', color: 'text-slate-500' },
+  motorcycle: { icon: MotorcycleIcon, label: 'Motorcycle', plural: 'Motorcycles', color: 'text-slate-500' },
+  bicycle: { icon: Bike, label: 'Bicycle', plural: 'Bicycles', color: 'text-emerald-500' },
+  services: { icon: Briefcase, label: 'Service', plural: 'Services', color: 'text-purple-500' },
+  worker: { icon: Briefcase, label: 'Worker', plural: 'Workers', color: 'text-purple-500' },
 };
 
 // Helper to get the active category display info from filters

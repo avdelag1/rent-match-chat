@@ -56,7 +56,7 @@ const clientTypeOptions = [
     label: 'Renting',
     description: 'Looking to rent',
     icon: <Home className="w-6 h-6" />,
-    gradient: 'from-orange-500 to-amber-600'
+    gradient: 'from-blue-500 to-indigo-600'
   },
   {
     id: 'buy' as ClientType,

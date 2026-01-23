@@ -98,8 +98,13 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
     return selected ? { minMonths: selected.minMonths, maxMonths: selected.maxMonths } : { minMonths: undefined, maxMonths: undefined };
   };
 
-  const propertyTypeOptions = ['Apartment', 'House', 'Studio', 'Villa', 'Commercial', 'Land'];
-  const amenityOptions = ['Pool', 'Parking', 'Gym', 'Security', 'Garden', 'Balcony'];
+  const propertyTypeOptions = ['Apartment', 'House', 'Studio', 'Room', 'Condo'];
+  const amenityOptions = [
+    'WiFi', 'Kitchen', 'Washer', 'Dryer', 'Air Conditioning', 'Heating',
+    'Pool', 'Parking', 'Gym', 'Security', 'Garden', 'Balcony',
+    'Elevator', 'Doorman', 'Pet Friendly', 'Furnished', 'Dishwasher',
+    'Workspace', 'TV', 'Hot Water', 'Smoke Alarm', 'Carbon Monoxide Alarm'
+  ];
   const viewTypeOptions = ['Ocean', 'City', 'Garden', 'Mountain', 'Street', 'Pool'];
   const orientationOptions = ['North', 'South', 'East', 'West', 'Northeast', 'Northwest', 'Southeast', 'Southwest'];
   const floorLevelOptions = [

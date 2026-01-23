@@ -92,7 +92,7 @@ export const categoryConfig: Record<QuickFilterCategory, CategoryConfig> = {
   motorcycle: {
     label: 'Motorcycle',
     icon: '🏍️',
-    color: 'bg-red-500',
+    color: 'bg-slate-500',
     description: 'Motorcycles, scooters, bikes'
   },
   bicycle: {

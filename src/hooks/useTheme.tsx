@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { logger } from '@/utils/prodLogger';
-type Theme = 'black-matte' | 'red-matte' | 'amber-matte' | 'white-matte';
+type Theme = 'black-matte' | 'white-matte';
 
 interface ThemeContextType {
   theme: Theme;
@@ -29,13 +29,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
           if (error) throw error;
 
           // Support both old and new theme names for backwards compatibility
-          const validThemes = ['black-matte', 'red-matte', 'amber-matte', 'white-matte'];
+          const validThemes = ['black-matte', 'white-matte'];
           const legacyThemeMap: Record<string, Theme> = {
             'default': 'black-matte',
             'dark': 'black-matte',
             'grey-matte': 'black-matte',
-            'amber': 'amber-matte',
-            'red': 'red-matte'
+            'amber': 'black-matte',
+            'amber-matte': 'black-matte',
+            'red': 'black-matte',
+            'red-matte': 'black-matte'
           };
 
           if (data?.theme_preference) {
@@ -70,8 +72,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     // Update status bar color based on theme
     const themeColors: Record<string, string> = {
       'black-matte': '#000000',
-      'red-matte': '#7f1d1d',
-      'amber-matte': '#78350f',
       'white-matte': '#f5f5f5',
     };
 

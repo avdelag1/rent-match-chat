@@ -15,10 +15,10 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 type CategoryType = 'property' | 'moto' | 'bicycle' | 'services';
 
 const categories: { id: CategoryType; name: string; icon: React.ElementType; color: string }[] = [
-  { id: 'property', name: 'Property', icon: Home, color: 'text-emerald-500' },
-  { id: 'moto', name: 'Motos', icon: CircleDot, color: 'text-orange-500' },
-  { id: 'bicycle', name: 'Bikes', icon: Bike, color: 'text-purple-500' },
-  { id: 'services', name: 'Jobs', icon: Briefcase, color: 'text-pink-500' },
+  { id: 'property', name: 'Property', icon: Home, color: 'text-blue-500' },
+  { id: 'moto', name: 'Motos', icon: CircleDot, color: 'text-slate-500' },
+  { id: 'bicycle', name: 'Bikes', icon: Bike, color: 'text-emerald-500' },
+  { id: 'services', name: 'Jobs', icon: Briefcase, color: 'text-purple-500' },
 ];
 
 export default function OwnerFiltersExplore() {
