@@ -1,16 +1,25 @@
 /**
- * CLIENT FILTERS PAGE
+ * CLIENT FILTERS PAGE - REDESIGNED
  *
- * Full-screen, mobile-first filter page for clients.
+ * Modern Airbnb/Booking-style filter system with:
+ * - Tab-based category selection
+ * - Comprehensive inline filters for each category
+ * - Minimal clicks, no page navigation
+ * - Clean, professional UI
  */
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Home, Bike, Wrench, ArrowLeft, Check
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ArrowLeft, Sparkles, Home, Bike, Wrench, RotateCcw } from 'lucide-react';
+import { PropertyClientFilters } from '@/components/filters/PropertyClientFilters';
+import { MotoClientFilters } from '@/components/filters/MotoClientFilters';
+import { BicycleClientFilters } from '@/components/filters/BicycleClientFilters';
+import { WorkerClientFilters } from '@/components/filters/WorkerClientFilters';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 // Custom motorcycle icon
 const MotorcycleIcon = ({ className }: { className?: string }) => (
@@ -23,182 +32,181 @@ const MotorcycleIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-type Category = 'property' | 'motorcycle' | 'bicycle' | 'services';
-type ListingType = 'rent' | 'sale' | 'both';
+type CategoryType = 'property' | 'moto' | 'bicycle' | 'services';
 
-const categoryOptions = [
-  {
-    id: 'property' as Category,
-    label: 'Properties',
-    description: 'Houses, apartments, rooms',
-    icon: <Home className="w-6 h-6" />,
-    gradient: 'from-blue-500 to-indigo-600'
-  },
-  {
-    id: 'motorcycle' as Category,
-    label: 'Motorcycles',
-    description: 'Bikes, scooters, ATVs',
-    icon: <MotorcycleIcon className="w-6 h-6" />,
-    gradient: 'from-slate-500 to-gray-600'
-  },
-  {
-    id: 'bicycle' as Category,
-    label: 'Bicycles',
-    description: 'Bikes, e-bikes, accessories',
-    icon: <Bike className="w-6 h-6" />,
-    gradient: 'from-emerald-500 to-teal-600'
-  },
-  {
-    id: 'services' as Category,
-    label: 'Services',
-    description: 'Workers, contractors',
-    icon: <Wrench className="w-6 h-6" />,
-    gradient: 'from-purple-500 to-pink-600'
-  },
-];
-
-const listingTypeOptions = [
-  { id: 'both' as ListingType, label: 'All', description: 'Show everything' },
-  { id: 'rent' as ListingType, label: 'Rent', description: 'Rentals only' },
-  { id: 'sale' as ListingType, label: 'Buy', description: 'For sale only' },
+const categories: { id: CategoryType; name: string; icon: React.ElementType; color: string }[] = [
+  { id: 'property', name: 'Properties', icon: Home, color: 'text-blue-500' },
+  { id: 'moto', name: 'Motos', icon: MotorcycleIcon, color: 'text-slate-500' },
+  { id: 'bicycle', name: 'Bicycles', icon: Bike, color: 'text-emerald-500' },
+  { id: 'services', name: 'Workers', icon: Wrench, color: 'text-purple-500' },
 ];
 
 export default function ClientFilters() {
   const navigate = useNavigate();
+  const [activeCategory, setActiveCategory] = useState<CategoryType>('property');
+  const [filterCounts, setFilterCounts] = useState<Record<CategoryType, number>>({
+    property: 0,
+    moto: 0,
+    bicycle: 0,
+    services: 0,
+  });
 
-  const [localCategories, setLocalCategories] = useState<Category[]>([]);
-  const [localListingType, setLocalListingType] = useState<ListingType>('both');
+  const handleApplyFilters = () => {
+    // TODO: Connect to actual filter store and navigate to results
+    navigate('/client/swipe');
+  };
 
-  const handleCategoryToggle = useCallback((categoryId: Category) => {
-    setLocalCategories(prev =>
-      prev.includes(categoryId)
-        ? prev.filter(c => c !== categoryId)
-        : [...prev, categoryId]
-    );
-  }, []);
+  const handleClearAll = () => {
+    setFilterCounts({
+      property: 0,
+      moto: 0,
+      bicycle: 0,
+      services: 0,
+    });
+  };
 
-  const handleListingTypeChange = useCallback((type: ListingType) => {
-    setLocalListingType(type);
-  }, []);
+  const handleFilterApply = (category: CategoryType, filters: any) => {
+    // Count active filters
+    const count = Object.entries(filters).filter(([key, value]) => {
+      if (Array.isArray(value)) return value.length > 0;
+      if (typeof value === 'boolean') return value;
+      if (typeof value === 'string') return value !== '' && value !== 'any';
+      if (typeof value === 'number') return value > 0;
+      return false;
+    }).length;
+    setFilterCounts(prev => ({ ...prev, [category]: count }));
+  };
 
-  const handleApply = useCallback(() => {
-    // TODO: Apply filters to store
-    navigate(-1);
-  }, [navigate]);
-
-  const handleBack = useCallback(() => {
-    navigate(-1);
-  }, [navigate]);
+  const totalActiveFilters = Object.values(filterCounts).reduce((a, b) => a + b, 0);
 
   return (
-    <div className="fixed inset-0 bg-background z-50 flex flex-col">
-      {/* Header */}
-      <header className="flex items-center justify-between px-4 h-14 border-b border-border bg-background/95 backdrop-blur-sm shrink-0">
-        <button
-          onClick={handleBack}
-          className="flex items-center justify-center w-10 h-10 rounded-xl hover:bg-muted transition-colors"
-          aria-label="Go back"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-
-        <h1 className="text-base font-semibold">Properties, Motos, Bikes & Workers</h1>
-
-        <div className="w-10" />
-      </header>
-
-      {/* Content */}
-      <main className="flex-1 overflow-y-auto pb-24">
-        <div className="p-4 space-y-8">
-          {/* Categories Section */}
-          <section>
-            <h2 className="text-sm font-semibold text-muted-foreground uppercase mb-4">
-              Categories
-            </h2>
-            <div className="grid grid-cols-1 gap-3">
-              {categoryOptions.map((category) => {
-                const isActive = localCategories.includes(category.id);
-                return (
-                  <button
-                    key={category.id}
-                    onClick={() => handleCategoryToggle(category.id)}
-                    className={cn(
-                      'relative flex items-center gap-4 p-4 rounded-2xl border-2 transition-all',
-                      isActive
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border bg-muted/30 hover:bg-muted/50'
-                    )}
-                  >
-                    <div className={cn(
-                      'flex items-center justify-center w-12 h-12 rounded-xl text-white bg-gradient-to-br',
-                      category.gradient
-                    )}>
-                      {category.icon}
-                    </div>
-
-                    <div className="flex-1 text-left">
-                      <div className="text-base font-semibold">{category.label}</div>
-                      <div className="text-sm text-muted-foreground">{category.description}</div>
-                    </div>
-
-                    {isActive && (
-                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground">
-                        <Check className="w-5 h-5" />
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-background/95">
+      {/* Page Header */}
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-xl border-b border-border/50">
+        <div className="max-w-2xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate(-1)}
+                className="h-9 w-9 rounded-full"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <div>
+                <h1 className="text-xl font-semibold">What I'm Looking For</h1>
+                <p className="text-sm text-muted-foreground">Set your preferences for properties and rentals</p>
+              </div>
             </div>
-          </section>
-
-          {/* Listing Type Section */}
-          <section>
-            <h2 className="text-sm font-semibold text-muted-foreground uppercase mb-4">
-              Listing Type
-            </h2>
-            <div className="flex gap-3">
-              {listingTypeOptions.map((option) => {
-                const isActive = localListingType === option.id;
-                return (
-                  <button
-                    key={option.id}
-                    onClick={() => handleListingTypeChange(option.id)}
-                    className={cn(
-                      'flex-1 flex flex-col items-center justify-center py-4 px-3 rounded-2xl border-2 transition-all min-h-[80px]',
-                      isActive
-                        ? 'border-primary bg-primary text-primary-foreground'
-                        : 'border-border bg-muted/30 hover:bg-muted/50'
-                    )}
-                  >
-                    <div className="text-base font-semibold">{option.label}</div>
-                    <div className={cn(
-                      'text-xs mt-1',
-                      isActive ? 'text-primary-foreground/80' : 'text-muted-foreground'
-                    )}>
-                      {option.description}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </section>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleClearAll}
+              className="text-muted-foreground hover:text-foreground gap-2"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Reset
+            </Button>
+          </div>
         </div>
-      </main>
+      </div>
 
-      {/* Footer */}
-      <footer
-        className="absolute bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border"
-        style={{ paddingBottom: 'calc(var(--safe-bottom) + 16px)' }}
-      >
-        <Button
-          onClick={handleApply}
-          className="w-full h-14 text-base font-semibold rounded-2xl"
-          size="lg"
+      {/* Category Tabs */}
+      <div className="max-w-2xl mx-auto px-4 pt-4">
+        <Tabs value={activeCategory} onValueChange={(value) => setActiveCategory(value as CategoryType)} className="w-full">
+          <TabsList className="w-full grid grid-cols-4 h-16 sm:h-14 p-1 gap-1 bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl">
+            {categories.map((cat) => {
+              const Icon = cat.icon;
+              const count = filterCounts[cat.id];
+              return (
+                <TabsTrigger
+                  key={cat.id}
+                  value={cat.id}
+                  className="relative rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg transition-all duration-300 min-h-[56px] touch-manipulation"
+                >
+                  <div className="flex flex-col items-center gap-0.5">
+                    <Icon className={`w-5 h-5 sm:w-4 sm:h-4 ${activeCategory === cat.id ? 'text-current' : cat.color}`} />
+                    <span className="text-xs sm:text-[10px] font-medium truncate max-w-full">{cat.name}</span>
+                  </div>
+                  <AnimatePresence>
+                    {count > 0 && (
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        exit={{ scale: 0 }}
+                        className="absolute -top-1 -right-1"
+                      >
+                        <Badge className="h-5 min-w-[20px] sm:h-4 sm:min-w-[16px] rounded-full px-1 text-xs sm:text-[10px] font-bold shadow-sm bg-accent text-accent-foreground">
+                          {count}
+                        </Badge>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </TabsTrigger>
+              );
+            })}
+          </TabsList>
+        </Tabs>
+      </div>
+
+      {/* Filter Content Area */}
+      <ScrollArea className="h-[calc(100vh-280px)] mt-4">
+        <div className="max-w-2xl mx-auto px-6 pb-32">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeCategory}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+            >
+              {activeCategory === 'property' && (
+                <PropertyClientFilters
+                  onApply={(filters) => handleFilterApply('property', filters)}
+                  activeCount={filterCounts.property}
+                />
+              )}
+              {activeCategory === 'moto' && (
+                <MotoClientFilters
+                  onApply={(filters) => handleFilterApply('moto', filters)}
+                  activeCount={filterCounts.moto}
+                />
+              )}
+              {activeCategory === 'bicycle' && (
+                <BicycleClientFilters
+                  onApply={(filters) => handleFilterApply('bicycle', filters)}
+                  activeCount={filterCounts.bicycle}
+                />
+              )}
+              {activeCategory === 'services' && (
+                <WorkerClientFilters
+                  onApply={(filters) => handleFilterApply('services', filters)}
+                  activeCount={filterCounts.services}
+                />
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </ScrollArea>
+
+      {/* Apply Button - Fixed at bottom */}
+      <div className="fixed bottom-24 left-0 right-0 p-4 sm:p-6 bg-gradient-to-t from-background via-background/95 to-transparent z-10">
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="max-w-2xl mx-auto"
         >
-          Apply Filters
-        </Button>
-      </footer>
+          <Button
+            onClick={handleApplyFilters}
+            className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground shadow-xl shadow-primary/20 rounded-2xl h-14 sm:h-16 text-base sm:text-lg font-semibold touch-manipulation"
+            size="lg"
+          >
+            <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 mr-2" />
+            Set My Preferences {totalActiveFilters > 0 && `(${totalActiveFilters})`}
+          </Button>
+        </motion.div>
+      </div>
     </div>
   );
 }
