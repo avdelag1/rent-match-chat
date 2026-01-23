@@ -7,7 +7,7 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Users, User, Briefcase, ArrowLeft, Check, Home, ShoppingCart
+  Users, User, Briefcase, Check, Home, ShoppingCart
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -86,13 +86,13 @@ export default function OwnerFilters() {
     <div className="fixed inset-0 bg-background z-50 flex flex-col">
       {/* Header */}
       <header className="flex items-center justify-between px-4 h-14 border-b border-border bg-background/95 backdrop-blur-sm shrink-0">
-        <button
+        <Button
+          variant="ghost"
           onClick={handleBack}
-          className="flex items-center justify-center w-10 h-10 rounded-xl hover:bg-muted transition-colors"
-          aria-label="Go back"
+          className="text-sm font-medium"
         >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
+          Back
+        </Button>
 
         <h1 className="text-base font-semibold">Client Preferences</h1>
 
