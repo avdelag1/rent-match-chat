@@ -52,6 +52,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [agreeToTerms, setAgreeToTerms] = useState(false);
+  const [showResendConfirmation, setShowResendConfirmation] = useState(false);
   const { signIn, signUp, signInWithOAuth } = useAuth();
 
   // Check if running on a native platform (iOS/Android)
@@ -84,6 +85,7 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
       setIsLogin(true);
       setIsForgotPassword(false);
       setShowPassword(false);
+      setShowResendConfirmation(false);
     }
   }, [isOpen, role]);
 
@@ -121,6 +123,43 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
           variant: "destructive",
         });
       }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendConfirmation = async () => {
+    if (!email) {
+      toast({
+        title: "Email Required",
+        description: "Please enter your email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Confirmation Email Sent",
+        description: "Please check your inbox and verify your email.",
+      });
+
+      setShowResendConfirmation(false);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to resend confirmation email.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -178,11 +217,21 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
           variant: "destructive",
         });
       } else {
-        toast({
-          title: "Error",
-          description: error.message || "Authentication failed.",
-          variant: "destructive",
-        });
+        // Check if error is related to email confirmation
+        if (error.message?.toLowerCase().includes('email not confirmed')) {
+          setShowResendConfirmation(true);
+          toast({
+            title: "Email Not Confirmed",
+            description: "Please verify your email address. Check your inbox or click 'Resend confirmation email' below.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: error.message || "Authentication failed.",
+            variant: "destructive",
+          });
+        }
       }
     } finally {
       setIsLoading(false);
@@ -376,28 +425,40 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
 
                   {/* Remember Me & Forgot Password */}
                   {isLogin && !isForgotPassword && (
-                    <div className="flex items-center justify-between">
-                      <label className="flex items-center gap-2 cursor-pointer group">
-                        <div className="relative">
-                          <input
-                            type="checkbox"
-                            checked={rememberMe}
-                            onChange={(e) => setRememberMe(e.target.checked)}
-                            className="sr-only peer"
-                          />
-                          <div className="w-4 h-4 rounded border-2 border-white/30 bg-white/5 peer-checked:bg-orange-500 peer-checked:border-transparent transition-all flex items-center justify-center">
-                            {rememberMe && <Check className="w-2.5 h-2.5 text-white" />}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <label className="flex items-center gap-2 cursor-pointer group">
+                          <div className="relative">
+                            <input
+                              type="checkbox"
+                              checked={rememberMe}
+                              onChange={(e) => setRememberMe(e.target.checked)}
+                              className="sr-only peer"
+                            />
+                            <div className="w-4 h-4 rounded border-2 border-white/30 bg-white/5 peer-checked:bg-orange-500 peer-checked:border-transparent transition-all flex items-center justify-center">
+                              {rememberMe && <Check className="w-2.5 h-2.5 text-white" />}
+                            </div>
                           </div>
-                        </div>
-                        <span className="text-sm text-white/60 group-hover:text-white/80 transition-colors">Remember me</span>
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => setIsForgotPassword(true)}
-                        className={`text-sm ${theme.accent} hover:underline font-medium`}
-                      >
-                        Forgot password?
-                      </button>
+                          <span className="text-sm text-white/60 group-hover:text-white/80 transition-colors">Remember me</span>
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => setIsForgotPassword(true)}
+                          className={`text-sm ${theme.accent} hover:underline font-medium`}
+                        >
+                          Forgot password?
+                        </button>
+                      </div>
+                      {showResendConfirmation && (
+                        <button
+                          type="button"
+                          onClick={handleResendConfirmation}
+                          disabled={isLoading}
+                          className="w-full text-sm text-orange-400 hover:text-orange-300 font-medium text-center py-1"
+                        >
+                          Resend confirmation email
+                        </button>
+                      )}
                     </div>
                   )}
 

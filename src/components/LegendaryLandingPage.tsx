@@ -55,13 +55,13 @@ function LegendaryLandingPage() {
 
   return (
     <div
-      className="min-h-screen min-h-dvh flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 relative overflow-hidden safe-area-p bg-black"
+      className="min-h-screen min-h-dvh flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 relative overflow-hidden safe-area-p bg-zinc-900"
     >
 
       {/* Main Content */}
       <div className="relative z-10 text-center space-y-4 sm:space-y-6 max-w-2xl w-full px-2 sm:px-4">
         {/* Swipable Swipess Logo - Only the logo moves */}
-        <div className="space-y-6 text-center">
+        <div className="space-y-3 text-center">
           <motion.div
             data-swipe-logo
             drag="x"
@@ -99,7 +99,7 @@ function LegendaryLandingPage() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
           >
-            Swipe right or tap to get started →
+            Swipe or tap Swipess to login or signup
           </motion.p>
         </div>
 
