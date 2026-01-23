@@ -13,7 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Sparkles, Home, Bike, Wrench, RotateCcw } from 'lucide-react';
+import { Sparkles, Home, Bike, Wrench, RotateCcw } from 'lucide-react';
 import { PropertyClientFilters } from '@/components/filters/PropertyClientFilters';
 import { MotoClientFilters } from '@/components/filters/MotoClientFilters';
 import { BicycleClientFilters } from '@/components/filters/BicycleClientFilters';
@@ -88,11 +88,10 @@ export default function ClientFilters() {
             <div className="flex items-center gap-3">
               <Button
                 variant="ghost"
-                size="icon"
                 onClick={() => navigate(-1)}
-                className="h-9 w-9 rounded-full"
+                className="text-sm font-medium"
               >
-                <ArrowLeft className="h-5 w-5" />
+                Back
               </Button>
               <div>
                 <h1 className="text-xl font-semibold">What I'm Looking For</h1>
