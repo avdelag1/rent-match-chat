@@ -162,16 +162,16 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
 
     switch (item.id) {
       case 'browse':
-        return 'text-red-400';
+        return 'text-primary';
       case 'likes':
       case 'liked':
-        return 'text-orange-400';
+        return 'text-primary';
       case 'messages':
         return 'text-blue-400';
       case 'listings':
-        return 'text-red-400';
+        return 'text-primary';
       case 'profile':
-        return 'text-red-400';
+        return 'text-primary';
       case 'hire':
       case 'services':
         return 'text-emerald-400';

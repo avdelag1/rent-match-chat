@@ -39,14 +39,14 @@ const categoryOptions = [
     label: 'Motorcycles',
     description: 'Bikes, scooters, ATVs',
     icon: <MotorcycleIcon className="w-6 h-6" />,
-    gradient: 'from-red-500 to-orange-600'
+    gradient: 'from-slate-500 to-gray-600'
   },
   {
     id: 'bicycle' as Category,
     label: 'Bicycles',
     description: 'Bikes, e-bikes, accessories',
     icon: <Bike className="w-6 h-6" />,
-    gradient: 'from-amber-500 to-yellow-600'
+    gradient: 'from-emerald-500 to-teal-600'
   },
   {
     id: 'services' as Category,

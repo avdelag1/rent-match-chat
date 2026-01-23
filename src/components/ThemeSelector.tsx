@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
 interface ThemeOption {
-  id: 'black-matte' | 'red-matte' | 'amber-matte' | 'white-matte';
+  id: 'black-matte' | 'white-matte';
   name: string;
   description: string;
   icon: string;
@@ -22,9 +22,9 @@ interface ThemeOption {
 const themeOptions: ThemeOption[] = [
   {
     id: 'black-matte',
-    name: 'Black Matte',
+    name: 'Dark Mode',
     description: 'Deep & elegant',
-    icon: '⬛',
+    icon: '🌙',
     colors: {
       primary: '#0D0D0D',
       secondary: '#1A1A1A',
@@ -32,32 +32,10 @@ const themeOptions: ThemeOption[] = [
     }
   },
   {
-    id: 'red-matte',
-    name: 'Red Matte',
-    description: 'Bold Mexican spirit',
-    icon: '🔴',
-    colors: {
-      primary: '#2D0A0A',
-      secondary: '#3D1414',
-      accent: '#FF3D3D'
-    }
-  },
-  {
-    id: 'amber-matte',
-    name: 'Amber Matte',
-    description: 'Warm & inviting',
-    icon: '🟠',
-    colors: {
-      primary: '#1A1200',
-      secondary: '#2D2000',
-      accent: '#F59E0B'
-    }
-  },
-  {
     id: 'white-matte',
-    name: 'White',
+    name: 'Light Mode',
     description: 'Clean & minimalist',
-    icon: '⬜',
+    icon: '☀️',
     colors: {
       primary: '#F8F8F8',
       secondary: '#FFFFFF',
@@ -74,7 +52,7 @@ interface ThemeSelectorProps {
 export function ThemeSelector({ compact = false, showTitle = true }: ThemeSelectorProps) {
   const { theme, setTheme } = useTheme();
 
-  const handleThemeChange = (newTheme: 'black-matte' | 'red-matte' | 'amber-matte' | 'white-matte') => {
+  const handleThemeChange = (newTheme: 'black-matte' | 'white-matte') => {
     setTheme(newTheme);
     const themeName = themeOptions.find(t => t.id === newTheme)?.name || newTheme;
     toast.success(`Theme changed to ${themeName}`, {
@@ -123,11 +101,7 @@ export function ThemeSelector({ compact = false, showTitle = true }: ThemeSelect
         <CardHeader className="border-b border-border/50">
           <CardTitle className="flex items-center gap-2 text-foreground">
             <Palette className="w-5 h-5 text-primary" />
-            Matte Theme System
-            <Badge variant="secondary" className="ml-auto text-xs">
-              <Sparkles className="w-3 h-3 mr-1" />
-              Premium
-            </Badge>
+            Appearance
           </CardTitle>
         </CardHeader>
       )}

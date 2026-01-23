@@ -56,9 +56,9 @@ interface NewClientFiltersProps {
 const categories = [
   { id: 'property' as const, label: 'Property', icon: Home, color: 'bg-blue-500' },
   { id: 'vehicle' as const, label: 'Vehicle', icon: Car, color: 'bg-green-500' },
-  { id: 'motorcycle' as const, label: 'Motorcycle', icon: Bike, color: 'bg-red-500' },
+  { id: 'motorcycle' as const, label: 'Motorcycle', icon: Bike, color: 'bg-slate-500' },
   { id: 'yacht' as const, label: 'Yacht', icon: Ship, color: 'bg-cyan-500' },
-  { id: 'bicycle' as const, label: 'Bicycle', icon: Bike, color: 'bg-yellow-500' },
+  { id: 'bicycle' as const, label: 'Bicycle', icon: Bike, color: 'bg-emerald-500' },
   { id: 'services' as const, label: 'Services', icon: Wrench, color: 'bg-purple-500' },
 ];
 
