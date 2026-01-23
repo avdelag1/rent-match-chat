@@ -4,30 +4,15 @@ import { Palette } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const FILTER_CATEGORIES = [
-  { id: 'property', label: 'Properties', defaultColor: 'emerald' },
-  { id: 'motos', label: 'Motorcycles', defaultColor: 'orange' },
-  { id: 'bikes', label: 'Bicycles', defaultColor: 'purple' },
-  { id: 'jobs', label: 'Jobs', defaultColor: 'pink' },
+  { id: 'property', label: 'Properties', defaultColor: 'black' },
+  { id: 'motos', label: 'Motorcycles', defaultColor: 'white' },
+  { id: 'bikes', label: 'Bicycles', defaultColor: 'black' },
+  { id: 'jobs', label: 'Jobs', defaultColor: 'white' },
 ];
 
 const COLOR_OPTIONS = [
-  { name: 'Red', value: 'red', class: 'bg-red-500' },
-  { name: 'Orange', value: 'orange', class: 'bg-orange-500' },
-  { name: 'Amber', value: 'amber', class: 'bg-amber-500' },
-  { name: 'Yellow', value: 'yellow', class: 'bg-yellow-500' },
-  { name: 'Lime', value: 'lime', class: 'bg-lime-500' },
-  { name: 'Green', value: 'green', class: 'bg-green-500' },
-  { name: 'Emerald', value: 'emerald', class: 'bg-emerald-500' },
-  { name: 'Teal', value: 'teal', class: 'bg-teal-500' },
-  { name: 'Cyan', value: 'cyan', class: 'bg-cyan-500' },
-  { name: 'Sky', value: 'sky', class: 'bg-sky-500' },
-  { name: 'Blue', value: 'blue', class: 'bg-blue-500' },
-  { name: 'Indigo', value: 'indigo', class: 'bg-indigo-500' },
-  { name: 'Violet', value: 'violet', class: 'bg-violet-500' },
-  { name: 'Purple', value: 'purple', class: 'bg-purple-500' },
-  { name: 'Fuchsia', value: 'fuchsia', class: 'bg-fuchsia-500' },
-  { name: 'Pink', value: 'pink', class: 'bg-pink-500' },
-  { name: 'Rose', value: 'rose', class: 'bg-rose-500' },
+  { name: 'Black', value: 'black', class: 'bg-black' },
+  { name: 'White', value: 'white', class: 'bg-white border border-border' },
 ];
 
 interface FilterColorPreferencesProps {
@@ -56,7 +41,7 @@ function CompactColorPreferences() {
           <div key={category.id} className="space-y-2">
             <Label className="text-sm font-medium">{category.label}</Label>
             <div className="flex gap-2 flex-wrap">
-              {COLOR_OPTIONS.slice(0, 8).map((color) => (
+              {COLOR_OPTIONS.map((color) => (
                 <motion.button
                   key={color.value}
                   whileHover={{ scale: 1.15 }}
