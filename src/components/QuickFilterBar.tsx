@@ -117,17 +117,15 @@ function FilterDropdown({
 
   return (
     <div ref={dropdownRef} className="relative flex-shrink-0">
-      <motion.button
+      <button
         ref={buttonRef}
-        whileTap={{ scale: 0.97 }}
         onClick={(e) => {
           e.stopPropagation();
           setIsOpen(!isOpen);
         }}
-        transition={{ type: 'spring', stiffness: 500, damping: 30, mass: 0.5 }}
         className={cn(
-          'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200',
-          'border will-change-transform',
+          'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-150',
+          'border will-change-transform active:scale-95',
           isActive
             ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white border-orange-500 shadow-lg shadow-orange-500/25'
             : 'bg-muted/50 text-muted-foreground border-white/10 hover:bg-muted hover:border-white/20'
@@ -135,46 +133,40 @@ function FilterDropdown({
       >
         {icon}
         <span>{selectedOption?.label || label}</span>
-        <ChevronDown className={cn('w-3 h-3 transition-transform', isOpen && 'rotate-180')} />
-      </motion.button>
+        <ChevronDown className={cn('w-3 h-3 transition-transform duration-150', isOpen && 'rotate-180')} />
+      </button>
 
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ type: 'spring', stiffness: 500, damping: 30, mass: 0.5 }}
-            style={{
-              position: 'fixed',
-              top: dropdownPosition.top,
-              left: dropdownPosition.left,
-              willChange: 'opacity, transform',
-            }}
-            className="z-[9999] min-w-[120px] bg-popover border border-border rounded-lg shadow-xl overflow-hidden pointer-events-auto"
-          >
-            {options.map((option) => (
-              <button
-                key={option.id}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onChange(option.id);
-                  setIsOpen(false);
-                }}
-                className={cn(
-                  'w-full flex items-center gap-2 px-3 py-2.5 text-xs text-left transition-colors',
-                  value === option.id
-                    ? 'bg-primary/10 text-primary font-medium'
-                    : 'text-foreground hover:bg-muted'
-                )}
-              >
-                {option.icon}
-                <span>{option.label}</span>
-              </button>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {isOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            top: dropdownPosition.top,
+            left: dropdownPosition.left,
+            willChange: 'opacity, transform',
+          }}
+          className="z-[9999] min-w-[120px] bg-popover border border-border rounded-lg shadow-xl overflow-hidden pointer-events-auto animate-in fade-in-0 zoom-in-95 duration-150"
+        >
+          {options.map((option) => (
+            <button
+              key={option.id}
+              onClick={(e) => {
+                e.stopPropagation();
+                onChange(option.id);
+                setIsOpen(false);
+              }}
+              className={cn(
+                'w-full flex items-center gap-2 px-3 py-2.5 text-xs text-left transition-colors duration-150',
+                value === option.id
+                  ? 'bg-primary/10 text-primary font-medium'
+                  : 'text-foreground hover:bg-muted'
+              )}
+            >
+              {option.icon}
+              <span>{option.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -228,10 +220,7 @@ function QuickFilterBarComponent({ filters, onChange, className, userRole = 'cli
   // Owner Quick Filters
   if (userRole === 'owner') {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: 'spring', stiffness: 600, damping: 25 }}
+      <div
         className={cn(
           'bg-background/80 backdrop-blur-xl border-b border-white/5 px-3 py-2',
           className
@@ -260,37 +249,27 @@ function QuickFilterBarComponent({ filters, onChange, className, userRole = 'cli
             />
 
             {/* Reset button */}
-            <AnimatePresence>
-              {hasActiveFilters && (
-                <motion.button
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleReset}
-                  className={cn(
-                    'flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium',
-                    'bg-destructive/10 text-destructive border border-destructive/20',
-                    'hover:bg-destructive/20 transition-all duration-200 flex-shrink-0'
-                  )}
-                >
-                  <RotateCcw className="w-3 h-3" />
-                </motion.button>
-              )}
-            </AnimatePresence>
+            {hasActiveFilters && (
+              <button
+                onClick={handleReset}
+                className={cn(
+                  'flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium',
+                  'bg-destructive/10 text-destructive border border-destructive/20',
+                  'hover:bg-destructive/20 transition-all duration-150 flex-shrink-0 active:scale-95 will-change-transform'
+                )}
+              >
+                <RotateCcw className="w-3 h-3" />
+              </button>
+            )}
           </div>
         </div>
-      </motion.div>
+      </div>
     );
   }
 
   // Client Quick Filters (default)
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ type: 'spring', stiffness: 600, damping: 25 }}
+    <div
       className={cn(
         'bg-background/80 backdrop-blur-xl border-b border-white/5 px-3 py-2',
         className
@@ -305,14 +284,12 @@ function QuickFilterBarComponent({ filters, onChange, className, userRole = 'cli
               const isActive = filters.categories.includes(category.id);
               const isServices = category.id === 'services';
               return (
-                <motion.button
+                <button
                   key={category.id}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
                   onClick={() => handleCategoryToggle(category.id)}
                   className={cn(
-                    'flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200',
-                    'border',
+                    'flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium transition-all duration-150',
+                    'border active:scale-95 will-change-transform',
                     isActive
                       ? isServices
                         ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-emerald-500 shadow-lg shadow-emerald-500/25'
@@ -322,7 +299,7 @@ function QuickFilterBarComponent({ filters, onChange, className, userRole = 'cli
                 >
                   {category.icon}
                   <span className="hidden sm:inline">{category.label}</span>
-                </motion.button>
+                </button>
               );
             })}
           </div>
@@ -340,28 +317,21 @@ function QuickFilterBarComponent({ filters, onChange, className, userRole = 'cli
           />
 
           {/* Reset button - only show when filters are active */}
-          <AnimatePresence>
-            {hasActiveFilters && (
-              <motion.button
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleReset}
-                className={cn(
-                  'flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium',
-                  'bg-destructive/10 text-destructive border border-destructive/20',
-                  'hover:bg-destructive/20 transition-all duration-200 flex-shrink-0'
-                )}
-              >
-                <RotateCcw className="w-3 h-3" />
-              </motion.button>
-            )}
-          </AnimatePresence>
+          {hasActiveFilters && (
+            <button
+              onClick={handleReset}
+              className={cn(
+                'flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium',
+                'bg-destructive/10 text-destructive border border-destructive/20',
+                'hover:bg-destructive/20 transition-all duration-150 flex-shrink-0 active:scale-95 will-change-transform'
+              )}
+            >
+              <RotateCcw className="w-3 h-3" />
+            </button>
+          )}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
