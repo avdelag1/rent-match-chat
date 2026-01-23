@@ -478,14 +478,10 @@ export function WorkerClientFilters({ onApply, initialFilters = {}, activeCount 
         defaultOpen={false}
       />
 
-      {/* Action Buttons */}
-      <div className="flex gap-2 pt-4">
-        <Button onClick={handleApply} className="flex-1">
-          Apply Filters
-        </Button>
-        <Button onClick={handleSave} variant="outline" className="flex gap-2">
-          <Save className="w-4 h-4" />
-          Save
+      {/* Action Button */}
+      <div className="pt-4">
+        <Button onClick={handleApply} className="w-full rounded-xl bg-gradient-to-r from-primary to-primary/80 h-12 text-base font-semibold">
+          Apply
         </Button>
       </div>
     </div>

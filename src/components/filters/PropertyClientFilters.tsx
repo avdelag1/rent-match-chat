@@ -605,24 +605,10 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
         </Collapsible>
       </Card>
 
-      {/* Action Buttons */}
-      <div className="flex flex-col gap-3 pt-4">
-        <div className="flex gap-3">
-          <Button onClick={handleClear} variant="outline" className="flex-1 rounded-xl">
-            Clear All
-          </Button>
-          <Button onClick={handleApply} className="flex-1 rounded-xl bg-gradient-to-r from-primary to-primary/80">
-            Apply
-          </Button>
-        </div>
-        <Button 
-          onClick={handleSavePreferences} 
-          variant="secondary" 
-          className="w-full rounded-xl"
-          disabled={savePreferencesMutation.isPending}
-        >
-          <Save className="h-4 w-4 mr-2" />
-          {savePreferencesMutation.isPending ? 'Saving...' : 'Save Preferences'}
+      {/* Action Button */}
+      <div className="pt-4">
+        <Button onClick={handleApply} className="w-full rounded-xl bg-gradient-to-r from-primary to-primary/80 h-12 text-base font-semibold">
+          Apply
         </Button>
       </div>
     </div>
