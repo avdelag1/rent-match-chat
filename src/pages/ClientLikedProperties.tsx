@@ -319,17 +319,6 @@ const ClientLikedProperties = () => {
                         </Badge>
                       </div>
                       <div className="absolute top-2 right-2 flex gap-1">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="bg-background/20 hover:bg-background/30 text-foreground"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handlePropertySelect(property.id);
-                          }}
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                        </Button>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button

@@ -1,12 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export default function PrivacyPolicy() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-24">
       <div className="max-w-4xl mx-auto px-4 py-8">
         <Button
           variant="ghost"
@@ -76,7 +75,7 @@ export default function PrivacyPolicy() {
               <li><strong>Object:</strong> Object to certain data processing activities</li>
             </ul>
             <p className="mt-4">
-              To exercise these rights, contact us at privacy@tinderent.com
+              To exercise these rights, contact us at privacy@swipess.com
             </p>
           </section>
 
@@ -152,8 +151,8 @@ export default function PrivacyPolicy() {
               For privacy-related questions or requests, contact us at:
             </p>
             <ul className="list-none pl-0 mb-4 space-y-2">
-              <li><strong>Email:</strong> privacy@tinderent.com</li>
-              <li><strong>Data Protection Officer:</strong> dpo@tinderent.com</li>
+              <li><strong>Email:</strong> privacy@swipess.com</li>
+              <li><strong>Data Protection Officer:</strong> dpo@swipess.com</li>
             </ul>
           </section>
 

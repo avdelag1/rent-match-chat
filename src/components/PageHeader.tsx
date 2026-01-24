@@ -1,4 +1,3 @@
-import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { ReactNode } from "react";
@@ -36,11 +35,10 @@ export function PageHeader({
         {showBack && (
           <Button
             variant="ghost"
-            size="icon"
             onClick={handleBack}
-            className="shrink-0 h-10 w-10 rounded-full hover:bg-muted"
+            className="shrink-0 hover:bg-muted"
           >
-            <ArrowLeft className="h-5 w-5" />
+            Back
           </Button>
         )}
         <div>
