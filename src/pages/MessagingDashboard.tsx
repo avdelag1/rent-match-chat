@@ -232,8 +232,23 @@ export function MessagingDashboard() {
         return;
       }
 
-      // Check if user has activations
-      if (!canSendMessage || totalActivations === 0) {
+      // Check if other user has moto/bicycle listings for free messaging
+      let hasFreeMessagingCategory = false;
+      try {
+        const { data: otherUserListings } = await supabase
+          .from('listings')
+          .select('category')
+          .eq('user_id', userId)
+          .in('category', ['moto', 'bicycle'])
+          .limit(1);
+
+        hasFreeMessagingCategory = (otherUserListings && otherUserListings.length > 0);
+      } catch (error) {
+        if (import.meta.env.DEV) logger.error('Error checking user listings:', error);
+      }
+
+      // Check if user has activations (skip check for moto/bicycle listings)
+      if (!hasFreeMessagingCategory && (!canSendMessage || totalActivations === 0)) {
         setShowActivationBanner(true);
         setShowUpgradeDialog(true);
         setSearchParams({}); // Clear URL param
@@ -244,13 +259,13 @@ export function MessagingDashboard() {
       // Create new conversation
       toast({
         title: 'Starting conversation',
-        description: 'Creating a new conversation...',
+        description: hasFreeMessagingCategory ? 'Free messaging for motorcycles & bicycles!' : 'Creating a new conversation...',
       });
 
       const result = await startConversation.mutateAsync({
         otherUserId: userId,
         initialMessage: "Hi! I'm interested in connecting.",
-        canStartNewConversation: canSendMessage,
+        canStartNewConversation: hasFreeMessagingCategory || canSendMessage,
       });
 
       if (result.conversationId) {
