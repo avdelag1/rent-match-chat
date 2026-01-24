@@ -1,23 +1,33 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function PrivacyPolicy() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-background pb-24">
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <Button
-          variant="ghost"
-          onClick={() => navigate(-1)}
-          className="mb-6"
-        >
-          Back
-        </Button>
+    <div className="h-screen flex flex-col bg-background">
+      {/* Sticky Header */}
+      <div className="flex-shrink-0 sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b px-4 py-3">
+        <div className="max-w-4xl mx-auto flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate(-1)}
+            className="rounded-full"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <h1 className="text-lg font-semibold">Privacy Policy</h1>
+        </div>
+      </div>
 
-        <div className="prose prose-invert max-w-none">
-          <h1 className="text-4xl font-bold mb-2">Privacy Policy</h1>
-          <p className="text-muted-foreground mb-8">Last Updated: November 23, 2025</p>
+      {/* Scrollable Content */}
+      <ScrollArea className="flex-1">
+        <div className="max-w-4xl mx-auto px-4 py-6 pb-24">
+          <div className="prose prose-invert max-w-none">
+            <p className="text-muted-foreground mb-8">Last Updated: November 23, 2025</p>
 
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">1. Information We Collect</h2>
@@ -168,6 +178,20 @@ export default function PrivacyPolicy() {
               personal information (we do not sell personal information).
             </p>
           </section>
+          </div>
+        </div>
+      </ScrollArea>
+
+      {/* Sticky Footer Button */}
+      <div className="flex-shrink-0 sticky bottom-0 z-10 bg-background/95 backdrop-blur-sm border-t p-4">
+        <div className="max-w-4xl mx-auto">
+          <Button
+            onClick={() => navigate(-1)}
+            className="w-full rounded-xl h-12"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Go Back
+          </Button>
         </div>
       </div>
     </div>

@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { FileText, Shield, ChevronRight } from "lucide-react";
+import { FileText, Shield, ChevronRight, BookOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Separator } from "@/components/ui/separator";
@@ -24,6 +24,13 @@ export default function LegalPage() {
       description: 'How we collect, use, and protect your data',
       color: 'text-green-500',
       action: () => navigate('/privacy-policy')
+    },
+    {
+      icon: BookOpen,
+      label: 'Acceptable Use Guidelines (AGL)',
+      description: 'Community standards and conduct guidelines',
+      color: 'text-purple-500',
+      action: () => navigate('/agl')
     },
   ];
 
