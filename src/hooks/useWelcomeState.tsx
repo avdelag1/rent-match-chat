@@ -36,14 +36,23 @@ export function useWelcomeState(userId: string | undefined) {
         }
 
         // Check server-side created_at to determine if user is truly new
+        // Use maybeSingle() to handle case where profile doesn't exist yet (async creation)
         const { data: profile, error } = await supabase
           .from('profiles')
           .select('created_at')
           .eq('id', userId)
-          .single();
+          .maybeSingle();
 
         if (error) {
           // On error, don't show welcome (fail safe)
+          logger.warn('[Welcome] Profile check error:', error);
+          setIsChecking(false);
+          setShouldShowWelcome(false);
+          return;
+        }
+
+        // Profile doesn't exist yet (async creation in progress) - don't show welcome yet
+        if (!profile) {
           setIsChecking(false);
           setShouldShowWelcome(false);
           return;
