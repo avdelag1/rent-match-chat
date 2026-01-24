@@ -68,7 +68,7 @@ function FireOrbComponent({ isActive = true, size = 12, onSettle }: FireOrbProps
     return () => timeouts.forEach(clearTimeout);
   }, [isActive, prefersReducedMotion, onSettle]);
 
-  // Reduce motion - just show static dot
+  // Reduce motion - just show static dot with enhanced glow
   if (prefersReducedMotion) {
     return (
       <div
@@ -76,8 +76,12 @@ function FireOrbComponent({ isActive = true, size = 12, onSettle }: FireOrbProps
         style={{
           width: size,
           height: size,
-          background: 'radial-gradient(circle, hsl(var(--primary)) 0%, hsl(30 100% 50%) 100%)',
-          boxShadow: '0 0 8px hsl(30 100% 50% / 0.6)',
+          background: 'radial-gradient(circle at 35% 35%, hsl(50 100% 75%) 0%, hsl(30 100% 55%) 50%, hsl(20 100% 45%) 100%)',
+          boxShadow: `
+            0 0 ${size * 0.8}px hsl(35 100% 60% / 0.9),
+            0 0 ${size * 1.5}px hsl(30 100% 55% / 0.6),
+            0 0 ${size * 2.5}px hsl(25 100% 50% / 0.4)
+          `,
         }}
       />
     );
@@ -167,22 +171,22 @@ function FireOrbComponent({ isActive = true, size = 12, onSettle }: FireOrbProps
     },
   };
 
-  // Particle trail variants
+  // Enhanced particle trail variants - visible during all phases for comet effect
   const particleVariants: Variants = {
     hidden: { opacity: 0 },
-    appear: { opacity: 0 },
+    appear: { opacity: 0.4 },
     wander: {
-      opacity: [0, 0.6, 0.4, 0.6, 0],
+      opacity: [0.4, 0.8, 0.6, 0.8, 0.5],
       transition: {
         duration: 3.5,
         ease: easeInOutSmooth,
       },
     },
     settle: {
-      opacity: [0.6, 0],
-      transition: { duration: 0.4 },
+      opacity: [0.8, 0.3],
+      transition: { duration: 0.6 },
     },
-    rest: { opacity: 0 },
+    rest: { opacity: 0.2 },
   };
 
   // Inner core variants
@@ -218,69 +222,99 @@ function FireOrbComponent({ isActive = true, size = 12, onSettle }: FireOrbProps
       initial="hidden"
       animate={phase}
     >
-      {/* Outer glow */}
+      {/* Outer glow - enhanced intensity */}
       <motion.div
         className="absolute inset-0 rounded-full pointer-events-none"
         style={{
-          width: size * 2.5,
-          height: size * 2.5,
-          left: -size * 0.75,
-          top: -size * 0.75,
-          background: 'radial-gradient(circle, hsl(30 100% 50% / 0.4) 0%, transparent 70%)',
-          filter: 'blur(4px)',
+          width: size * 4,
+          height: size * 4,
+          left: -size * 1.5,
+          top: -size * 1.5,
+          background: 'radial-gradient(circle, hsl(30 100% 60% / 0.6) 0%, hsl(25 100% 55% / 0.3) 40%, transparent 70%)',
+          filter: 'blur(8px)',
         }}
         variants={glowVariants}
       />
 
-      {/* Particle trail (3 trailing dots) */}
-      {[0, 1, 2].map((i) => (
-        <motion.div
-          key={i}
-          className="absolute rounded-full"
-          style={{
-            width: size * 0.3,
-            height: size * 0.3,
-            background: `hsl(${25 + i * 5} 100% ${60 + i * 5}%)`,
-            left: size * 0.35,
-            top: size * 0.35,
-            filter: 'blur(1px)',
-          }}
-          variants={particleVariants}
-        />
-      ))}
+      {/* Additional intense inner glow */}
+      <motion.div
+        className="absolute inset-0 rounded-full pointer-events-none"
+        style={{
+          width: size * 2,
+          height: size * 2,
+          left: -size * 0.5,
+          top: -size * 0.5,
+          background: 'radial-gradient(circle, hsl(35 100% 65% / 0.8) 0%, hsl(30 100% 60% / 0.4) 50%, transparent 70%)',
+          filter: 'blur(3px)',
+        }}
+        variants={glowVariants}
+      />
 
-      {/* Main orb */}
+      {/* Enhanced particle trail (18 particles creating a comet effect) */}
+      {Array.from({ length: 18 }).map((_, i) => {
+        const progress = i / 17; // 0 to 1
+        const angle = -30 + progress * 60; // Arc from -30° to 30°
+        const distance = size * (0.8 + progress * 2.5); // Spread out progressively
+        const particleSize = size * (0.35 - progress * 0.25); // Shrink as they trail
+        const hue = 25 + progress * 15; // Orange to yellow gradient
+        const lightness = 65 - progress * 25; // Fade from bright to dim
+        const opacity = 1 - progress * 0.7; // Fade opacity
+
+        return (
+          <motion.div
+            key={i}
+            className="absolute rounded-full"
+            style={{
+              width: particleSize,
+              height: particleSize,
+              background: `radial-gradient(circle, hsl(${hue} 100% ${lightness}%) 0%, hsl(${hue} 100% ${lightness - 10}%) 100%)`,
+              left: `calc(50% + ${Math.cos((angle * Math.PI) / 180) * distance}px)`,
+              top: `calc(50% + ${Math.sin((angle * Math.PI) / 180) * distance}px)`,
+              transform: 'translate(-50%, -50%)',
+              filter: `blur(${0.5 + progress * 1.5}px)`,
+              boxShadow: `0 0 ${particleSize * 0.8}px hsl(${hue} 100% ${lightness}% / ${opacity * 0.6})`,
+            }}
+            variants={particleVariants}
+            initial="hidden"
+            animate={phase}
+          />
+        );
+      })}
+
+      {/* Main orb - enhanced glow */}
       <motion.div
         className="absolute rounded-full"
         style={{
           width: size,
           height: size,
-          background: `radial-gradient(circle at 35% 35%, 
-            hsl(45 100% 70%) 0%, 
-            hsl(30 100% 55%) 40%, 
-            hsl(20 100% 45%) 70%, 
-            hsl(15 100% 35%) 100%
+          background: `radial-gradient(circle at 35% 35%,
+            hsl(50 100% 75%) 0%,
+            hsl(35 100% 60%) 30%,
+            hsl(25 100% 50%) 60%,
+            hsl(18 100% 40%) 100%
           )`,
           boxShadow: `
-            0 0 ${size * 0.5}px hsl(30 100% 50% / 0.8),
-            0 0 ${size}px hsl(25 100% 45% / 0.6),
-            0 0 ${size * 1.5}px hsl(20 100% 40% / 0.4),
-            inset 0 0 ${size * 0.3}px hsl(50 100% 80% / 0.5)
+            0 0 ${size * 0.8}px hsl(35 100% 60% / 1),
+            0 0 ${size * 1.2}px hsl(30 100% 55% / 0.8),
+            0 0 ${size * 2}px hsl(25 100% 50% / 0.6),
+            0 0 ${size * 3}px hsl(20 100% 45% / 0.4),
+            inset 0 0 ${size * 0.4}px hsl(55 100% 85% / 0.7)
           `,
         }}
         variants={orbVariants}
       />
 
-      {/* Inner bright core */}
+      {/* Inner bright core - enhanced */}
       <motion.div
         className="absolute rounded-full"
         style={{
-          width: size * 0.4,
-          height: size * 0.4,
-          left: size * 0.2,
-          top: size * 0.15,
-          background: 'radial-gradient(circle, hsl(50 100% 90%) 0%, hsl(40 100% 70%) 100%)',
-          filter: 'blur(0.5px)',
+          width: size * 0.5,
+          height: size * 0.5,
+          left: size * 0.15,
+          top: size * 0.1,
+          background: 'radial-gradient(circle, hsl(55 100% 95%) 0%, hsl(45 100% 80%) 50%, hsl(35 100% 70%) 100%)',
+          filter: 'blur(1px)',
+          boxShadow: `0 0 ${size * 0.3}px hsl(55 100% 90% / 0.8)`,
         }}
         variants={coreVariants}
       />
