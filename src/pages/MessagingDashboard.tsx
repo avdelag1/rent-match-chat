@@ -429,7 +429,7 @@ export function MessagingDashboard() {
                   <p className="text-sm text-[#8E8E93]">Loading...</p>
                 </div>
               ) : filteredConversations.length > 0 ? (
-                filteredConversations.map((conversation, index) => {
+                filteredConversations.map((conversation) => {
                   const isOwner = conversation.other_user?.role === 'owner';
                   const listing = conversation.listing;
 
