@@ -45,6 +45,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { LikedClientInsightsModal } from "@/components/LikedClientInsightsModal";
 
 interface LikedClient {
   id: string;
@@ -73,6 +74,8 @@ export function LikedClients() {
   const [showQuotaDialog, setShowQuotaDialog] = useState(false);
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
   const [showReportDialog, setShowReportDialog] = useState(false);
+  const [showInsightsModal, setShowInsightsModal] = useState(false);
+  const [selectedClientForView, setSelectedClientForView] = useState<LikedClient | null>(null);
 
   // Use React Query-based hook for role - prevents menu flickering
   const { data: fetchedRole } = useUserRole(user?.id);
@@ -425,6 +428,11 @@ export function LikedClients() {
     blockClientMutation.mutate(selectedClientForAction.user_id);
   };
 
+  const handleViewClient = (client: LikedClient) => {
+    setSelectedClientForView(client);
+    setShowInsightsModal(true);
+  };
+
   return (
     <div className="w-full bg-background">
       <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 max-w-7xl pb-24 sm:pb-28">
@@ -549,15 +557,15 @@ export function LikedClients() {
               className="group"
             >
               <Card className="p-6 h-full hover:shadow-lg transition-all duration-300">
-                <div className="relative mb-4">
+                <div className="relative mb-4 cursor-pointer" onClick={() => handleViewClient(client)}>
                   {client.images && client.images.length > 0 ? (
                     <img
                       src={client.images[0]}
                       alt={client.name}
-                      className="w-full h-64 object-cover rounded-lg"
+                      className="w-full h-64 object-cover rounded-lg hover:opacity-90 transition-opacity"
                     />
                   ) : (
-                    <div className="w-full h-64 bg-muted rounded-lg flex items-center justify-center">
+                    <div className="w-full h-64 bg-muted rounded-lg flex items-center justify-center hover:bg-muted/80 transition-colors">
                       <Users className="w-16 h-16 text-muted-foreground" />
                     </div>
                   )}
@@ -763,6 +771,13 @@ export function LikedClients() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Client Insights Modal */}
+      <LikedClientInsightsModal
+        open={showInsightsModal}
+        onOpenChange={setShowInsightsModal}
+        client={selectedClientForView}
+      />
     </div>
   );
 }
