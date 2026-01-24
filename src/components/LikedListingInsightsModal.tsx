@@ -2,7 +2,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Bed, Bath, Square, DollarSign, MessageCircle, Sparkles, Trash2, Ban, Flag, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { MapPin, Bed, Bath, Square, DollarSign, MessageCircle, Sparkles, Trash2, Ban, Flag, ChevronLeft, ChevronRight, X, Star } from 'lucide-react';
 import { PropertyImageGallery } from './PropertyImageGallery';
 import { useNavigate } from 'react-router-dom';
 import { useStartConversation } from '@/hooks/useConversations';
@@ -11,6 +11,9 @@ import { useState, useEffect, useCallback, memo } from 'react';
 import { logger } from '@/utils/prodLogger';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { CompactRatingDisplay } from './RatingDisplay';
+import { RatingSubmissionDialog } from './RatingSubmissionDialog';
+import { useListingRatingAggregate } from '@/hooks/useRatingSystem';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,8 +44,12 @@ function LikedListingInsightsModalComponent({ open, onOpenChange, listing }: Lik
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showBlockDialog, setShowBlockDialog] = useState(false);
   const [showReportDialog, setShowReportDialog] = useState(false);
+  const [showRatingDialog, setShowRatingDialog] = useState(false);
   const [reportReason, setReportReason] = useState('');
   const [reportDetails, setReportDetails] = useState('');
+
+  // Fetch rating aggregate for this listing
+  const { data: ratingAggregate } = useListingRatingAggregate(listing?.id);
 
   const images = listing?.images || [];
 
@@ -306,12 +313,20 @@ function LikedListingInsightsModalComponent({ open, onOpenChange, listing }: Lik
                     </>
                   )}
 
-                  {/* Photo Counter & Liked Badge */}
+                  {/* Photo Counter & Badges */}
                   <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
-                    <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-white border-0 px-3 py-1">
-                      <Sparkles className="w-3 h-3 mr-1" />
-                      Liked
-                    </Badge>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-white border-0 px-3 py-1">
+                        <Sparkles className="w-3 h-3 mr-1" />
+                        Liked
+                      </Badge>
+                      {/* Rating Badge */}
+                      <Badge className="bg-black/60 text-white border-0 px-3 py-1 backdrop-blur-sm">
+                        <Star className="w-3 h-3 mr-1 fill-yellow-400 text-yellow-400" />
+                        {ratingAggregate?.displayed_rating?.toFixed(1) || '5.0'}
+                        <span className="text-white/70 ml-1">({ratingAggregate?.total_ratings || 0})</span>
+                      </Badge>
+                    </div>
                     {images.length > 1 && (
                       <div className="bg-black/60 text-white px-3 py-1.5 rounded-full text-sm font-medium backdrop-blur-sm">
                         {currentImageIndex + 1} / {images.length}
@@ -435,6 +450,23 @@ function LikedListingInsightsModalComponent({ open, onOpenChange, listing }: Lik
                     </div>
                   </div>
                 )}
+
+                {/* Rating Section */}
+                <div className="space-y-3 pt-2">
+                  <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Rating & Reviews</h4>
+                  <div className="p-4 bg-muted/30 rounded-xl">
+                    <CompactRatingDisplay aggregate={ratingAggregate || null} showReviews={true} />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowRatingDialog(true)}
+                      className="mt-3 w-full rounded-xl"
+                    >
+                      <Star className="w-4 h-4 mr-2" />
+                      Rate this Property
+                    </Button>
+                  </div>
+                </div>
               </div>
             </ScrollArea>
 
@@ -605,6 +637,25 @@ function LikedListingInsightsModalComponent({ open, onOpenChange, listing }: Lik
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Rating Submission Dialog */}
+      {listing && (
+        <RatingSubmissionDialog
+          open={showRatingDialog}
+          onOpenChange={setShowRatingDialog}
+          targetId={listing.id}
+          targetType="listing"
+          targetName={listing.title || 'This Property'}
+          categoryId="property"
+          onSuccess={() => {
+            toast({
+              title: 'Rating submitted',
+              description: 'Thank you for your feedback!',
+            });
+            queryClient.invalidateQueries({ queryKey: ['rating-aggregate', listing.id] });
+          }}
+        />
+      )}
     </>
   );
 }

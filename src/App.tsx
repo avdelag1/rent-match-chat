@@ -35,6 +35,7 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const LegalPage = lazy(() => import("./pages/LegalPage"));
+const AGLPage = lazy(() => import("./pages/AGLPage"));
 
 // Info pages
 const AboutPage = lazy(() => import("./pages/AboutPage"));
@@ -205,6 +206,7 @@ const App = () => (
                     {/* Legal Pages - Public Access */}
                     <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                     <Route path="/terms-of-service" element={<TermsOfService />} />
+                    <Route path="/agl" element={<AGLPage />} />
                     <Route path="/legal" element={<LegalPage />} />
 
                     {/* Info Pages - Public Access */}
