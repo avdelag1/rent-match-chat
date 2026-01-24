@@ -107,9 +107,9 @@ function FireOrbComponent({ isActive = true, size = 12, onSettle }: FireOrbProps
     },
     wander: {
       opacity: 1,
-      scale: [1, 1.1, 1, 1.05, 1],
-      x: [0, 15, -20, 12, -8, 0],
-      y: [-2, -18, -30, -15, -25, -2],
+      scale: [1, 1.15, 0.95, 1.1, 1.05, 1],
+      x: [0, 60, -80, 50, -35, 0],
+      y: [-5, -70, -120, -60, -100, -5],
       transition: {
         duration: 3.5,
         ease: easeInOutSmooth,
