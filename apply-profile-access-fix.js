@@ -1,10 +1,13 @@
 #!/usr/bin/env node
 
 /**
- * Script to apply the profile browsing access fix
+ * Script to apply the comprehensive app access fix
  *
- * This script applies the migration that restores profile browsing functionality
- * by adding an RLS policy that allows authenticated users to view active profiles.
+ * This script applies the migration that fixes ALL RLS policies blocking app access:
+ * - Allows users to INSERT their profile (signup)
+ * - Allows users to UPDATE their profile (editing)
+ * - Allows users to SELECT their own profile and role
+ * - Allows users to browse other profiles (matching/swiping)
  *
  * Usage:
  *   node apply-profile-access-fix.js
@@ -35,7 +38,7 @@ if (!SUPABASE_SERVICE_KEY) {
   console.error('3. Run the following SQL:');
   console.error('');
   console.error('----------------------------------------');
-  console.error(readFileSync(join(__dirname, 'supabase/migrations/20260124_fix_profile_browsing_access.sql'), 'utf8'));
+  console.error(readFileSync(join(__dirname, 'supabase/migrations/20260124_fix_all_app_access_blockers.sql'), 'utf8'));
   console.error('----------------------------------------');
   console.error('');
   console.error('OR set the service role key and run this script again:');
@@ -44,13 +47,13 @@ if (!SUPABASE_SERVICE_KEY) {
 }
 
 async function applyMigration() {
-  console.log('🚀 Applying profile browsing access fix...');
+  console.log('🚀 Applying comprehensive app access fix...');
   console.log('');
 
   try {
     // Read migration file
     const migrationSQL = readFileSync(
-      join(__dirname, 'supabase/migrations/20260124_fix_profile_browsing_access.sql'),
+      join(__dirname, 'supabase/migrations/20260124_fix_all_app_access_blockers.sql'),
       'utf8'
     );
 
@@ -76,8 +79,13 @@ async function applyMigration() {
 
     console.log('✅ Migration applied successfully!');
     console.log('');
-    console.log('Profile browsing access has been restored.');
-    console.log('Users can now browse and swipe on profiles again.');
+    console.log('All app access blockers have been fixed:');
+    console.log('  ✓ Users can create profiles (signup works)');
+    console.log('  ✓ Users can edit profiles (profile updates work)');
+    console.log('  ✓ Users can browse profiles (matching/swiping works)');
+    console.log('  ✓ Users can view their role (dashboard routing works)');
+    console.log('');
+    console.log('Your app should now be fully accessible!');
     console.log('');
 
   } catch (error) {
