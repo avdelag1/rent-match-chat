@@ -12,7 +12,7 @@ import { useLikedProperties } from "@/hooks/useLikedProperties";
 import { useUserSubscription } from "@/hooks/useSubscription";
 import { useStartConversation, useConversationStats } from "@/hooks/useConversations";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Flame, MessageCircle, MapPin, Bed, Bath, Square, Crown, RefreshCw, Camera, ArrowLeft, Home, Bike, Briefcase, Trash2, MoreVertical } from "lucide-react";
+import { Flame, MessageCircle, MapPin, Bed, Bath, Square, Crown, ExternalLink, RefreshCw, ArrowLeft, Home, Bike, Briefcase, Trash2, MoreVertical } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { useMessagingQuota } from "@/hooks/useMessagingQuota";
 import { MessageQuotaDialog } from "@/components/MessageQuotaDialog";
@@ -284,10 +284,10 @@ const ClientLikedProperties = () => {
             ) : filteredProperties.length > 0 ? (
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {filteredProperties.map((property) => (
-                  <Card key={property.id} className="bg-card border-border hover:bg-accent/50 transition-all duration-300 overflow-hidden group shadow-sm cursor-pointer" onClick={() => handlePropertyClick(property)}>
+                  <Card key={property.id} className="bg-card border-border md:hover:bg-accent/50 transition-all duration-300 overflow-hidden shadow-sm cursor-pointer touch-manipulation" onClick={() => handlePropertyClick(property)}>
                     {/* Property Image */}
                     <div
-                      className="relative h-48 overflow-hidden group"
+                      className="relative h-48 overflow-hidden"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleImageClick(property, 0);
@@ -298,17 +298,11 @@ const ClientLikedProperties = () => {
                           <img
                             src={property.images[0]}
                             alt={property.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            className="w-full h-full object-cover md:hover:scale-105 transition-transform duration-300"
                           />
-                          {/* Image overlay with camera icon */}
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
-                            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 rounded-full p-2">
-                              <Camera className="w-5 h-5 text-foreground" />
-                            </div>
-                          </div>
                           {/* Image counter */}
                           {property.images.length > 1 && (
-                            <div className="absolute bottom-2 right-2 bg-black/60 text-white px-2 py-1 rounded text-xs">
+                            <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2.5 py-1 rounded-full text-xs font-medium backdrop-blur-sm">
                               1 / {property.images.length}
                             </div>
                           )}
