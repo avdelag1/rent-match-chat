@@ -1,5 +1,6 @@
 /** SPEED OF LIGHT: DashboardLayout is now rendered at route level */
 import { LikedPropertiesDialog } from "@/components/LikedPropertiesDialog";
+import { LikedListingInsightsModal } from "@/components/LikedListingInsightsModal";
 import { PropertyDetails } from "@/components/PropertyDetails";
 import { PropertyImageGallery } from "@/components/PropertyImageGallery";
 import { PageHeader } from "@/components/PageHeader";
@@ -87,6 +88,8 @@ const ClientLikedProperties = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>(categoryFromUrl);
   const [propertyToDelete, setPropertyToDelete] = useState<any>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showInsightsModal, setShowInsightsModal] = useState(false);
+  const [selectedProperty, setSelectedProperty] = useState<any>(null);
 
   const { data: likedProperties = [], isLoading, refetch: refreshLikedProperties, isFetching } = useLikedProperties();
   const { data: subscription } = useUserSubscription();
@@ -214,6 +217,11 @@ const ClientLikedProperties = () => {
     }
   };
 
+  const handlePropertyClick = (property: any) => {
+    setSelectedProperty(property);
+    setShowInsightsModal(true);
+  };
+
   // Get current category info for dynamic title
   const currentCategory = categories.find(c => c.id === selectedCategory) || categories[0];
 
@@ -276,11 +284,14 @@ const ClientLikedProperties = () => {
             ) : filteredProperties.length > 0 ? (
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {filteredProperties.map((property) => (
-                  <Card key={property.id} className="bg-card border-border hover:bg-accent/50 transition-all duration-300 overflow-hidden group shadow-sm">
+                  <Card key={property.id} className="bg-card border-border hover:bg-accent/50 transition-all duration-300 overflow-hidden group shadow-sm cursor-pointer" onClick={() => handlePropertyClick(property)}>
                     {/* Property Image */}
                     <div
-                      className="relative h-48 overflow-hidden cursor-pointer group"
-                      onClick={() => handleImageClick(property, 0)}
+                      className="relative h-48 overflow-hidden group"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleImageClick(property, 0);
+                      }}
                     >
                       {property.images && property.images.length > 0 ? (
                         <>
@@ -412,7 +423,10 @@ const ClientLikedProperties = () => {
                       {/* Contact Button */}
                       <div className="pt-2">
                         <Button
-                          onClick={() => handleContactOwner(property)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleContactOwner(property);
+                          }}
                           disabled={startConversation.isPending}
                           className="w-full"
                         >
@@ -525,6 +539,13 @@ const ClientLikedProperties = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Listing Insights Modal with Delete, Block, Report Actions */}
+      <LikedListingInsightsModal
+        open={showInsightsModal}
+        onOpenChange={setShowInsightsModal}
+        listing={selectedProperty}
+      />
     </>
   );
 };
