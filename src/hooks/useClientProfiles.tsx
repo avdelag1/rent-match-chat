@@ -30,62 +30,75 @@ export function useClientProfiles(excludeSwipedIds: string[] = [], options: { en
       }
 
       try {
-        // OPTIMIZED: Get client profiles with role in ONE query using JOIN
-        // CRITICAL: Only get client users (excludes admins and owners automatically)
-        // CRITICAL: Exclude own profile - user shouldn't see themselves when browsing clients
+        // HIGHLY OPTIMIZED: Use database view that combines all profile data in ONE query
+        // BEFORE: 2 queries (profiles_public JOIN + client_profiles lookup)
+        // AFTER: 1 query (pre-joined view)
         const { data: clientProfiles, error } = await supabase
-          .from('profiles_public')
-          .select(`
-            *,
-            user_roles!inner(role)
-          `)
-          .eq('user_roles.role', 'client')
-          .neq('id', user.id) // Exclude own profile - user shouldn't see themselves
+          .from('client_profiles_discovery')
+          .select('*')
+          .neq('user_id', user.id) // Exclude own profile
+          .order('created_at', { ascending: false })
           .limit(100);
 
         if (error) {
-          throw error; // Don't silently fail
-        }
+          // Fallback to old method if view doesn't exist yet (migration pending)
+          logger.warn('client_profiles_discovery view not found, using fallback query');
 
-        if (clientProfiles.length === 0) {
-          return [];
-        }
+          const { data: fallbackProfiles, error: fallbackError } = await supabase
+            .from('profiles_public')
+            .select(`
+              *,
+              user_roles!inner(role)
+            `)
+            .eq('user_roles.role', 'client')
+            .neq('id', user.id)
+            .limit(100);
 
-        // Fetch from client_profiles table to get latest photos
-        const userIds = clientProfiles.map(p => p.id);
-        const { data: detailedProfiles } = await supabase
-          .from('client_profiles')
-          .select('user_id, profile_images, name, age')
-          .in('user_id', userIds);
+          if (fallbackError) throw fallbackError;
 
-        // Create a map for quick lookup
-        const detailedMap = new Map(
-          (detailedProfiles || []).map(p => [p.user_id, p])
-        );
-
-        // Transform profiles to match interface (no bio field)
-        const transformedProfiles: ClientProfile[] = clientProfiles.map((profile, index) => {
-          const detailedProfile = detailedMap.get(profile.id);
-
-          // Prefer data from client_profiles if available (newer source)
-          return {
+          // Simple transform without second query for fallback
+          const transformed: ClientProfile[] = (fallbackProfiles || []).map((profile, index) => ({
             id: index + 1,
             user_id: profile.id,
-            name: detailedProfile?.name || profile.full_name || 'User',
-            age: detailedProfile?.age || profile.age || 25,
+            name: profile.full_name || 'User',
+            age: profile.age || 25,
             gender: '',
             interests: profile.interests || [],
             preferred_activities: profile.preferred_activities || [],
-            // PREFER profile_images from client_profiles (newer), fallback to profiles.images
-            profile_images: detailedProfile?.profile_images || profile.images || [],
+            profile_images: profile.images || [],
             location: profile.city ? { city: profile.city } : null,
             city: profile.city || undefined,
             avatar_url: profile.avatar_url || undefined,
             verified: profile.verified || false
-          };
-        });
+          }));
 
-        const filteredProfiles = transformedProfiles.filter(p => !excludeSwipedIds.includes(p.user_id));
+          return transformed.filter(p => !excludeSwipedIds.includes(p.user_id));
+        }
+
+        if (!clientProfiles || clientProfiles.length === 0) {
+          return [];
+        }
+
+        // Transform from view to interface
+        const transformedProfiles: ClientProfile[] = clientProfiles.map((profile, index) => ({
+          id: index + 1,
+          user_id: profile.user_id,
+          name: profile.name,
+          age: profile.display_age,
+          gender: '',
+          interests: profile.interests || [],
+          preferred_activities: profile.preferred_activities || [],
+          profile_images: profile.profile_images || [],
+          location: profile.city ? { city: profile.city } : null,
+          city: profile.city || undefined,
+          avatar_url: profile.avatar_url || undefined,
+          verified: profile.verified || false
+        }));
+
+        // Filter out swiped profiles
+        const filteredProfiles = transformedProfiles.filter(
+          p => !excludeSwipedIds.includes(p.user_id)
+        );
 
         return filteredProfiles;
 

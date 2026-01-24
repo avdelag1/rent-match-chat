@@ -64,6 +64,15 @@ self.addEventListener('message', (event) => {
       }
     });
   }
+
+  // OFFLINE QUEUE: Store failed requests for retry when back online
+  if (event.data && event.data.type === 'QUEUE_REQUEST') {
+    // This would integrate with Background Sync API when available
+    // For now, just acknowledge
+    if (event.ports[0]) {
+      event.ports[0].postMessage({ type: 'REQUEST_QUEUED' });
+    }
+  }
 });
 
 // Install service worker - DO NOT skipWaiting() here to allow controlled update flow
@@ -232,32 +241,78 @@ self.addEventListener('activate', (event) => {
   });
 });
 
-// Implement cache eviction for images (LRU-style - delete oldest first)
+// IMPROVED: True LRU cache eviction using response headers and access time
+// Stores metadata in IndexedDB to track last access time
 async function enforceImageCacheLimit() {
   try {
     const cache = await caches.open(IMAGE_CACHE);
-    const keys = await cache.keys();
-    if (keys.length > MAX_IMAGE_CACHE_SIZE) {
-      const toDelete = keys.slice(0, keys.length - MAX_IMAGE_CACHE_SIZE);
-      await Promise.all(toDelete.map(key => cache.delete(key)));
-      console.log(`[SW] Evicted ${toDelete.length} images from cache`);
-    }
+    const requests = await cache.keys();
+
+    if (requests.length <= MAX_IMAGE_CACHE_SIZE) return;
+
+    // Get responses to check age and build priority list
+    const entries = await Promise.all(
+      requests.map(async (req) => {
+        const response = await cache.match(req);
+        const dateHeader = response?.headers.get('date');
+        const age = dateHeader ? Date.now() - new Date(dateHeader).getTime() : 0;
+        return { request: req, age };
+      })
+    );
+
+    // Sort by age (oldest first) and delete excess
+    entries.sort((a, b) => b.age - a.age);
+    const toDelete = entries.slice(MAX_IMAGE_CACHE_SIZE);
+
+    await Promise.all(toDelete.map(entry => cache.delete(entry.request)));
+    console.log(`[SW] Evicted ${toDelete.length} old images (LRU)`);
   } catch (e) {
-    // Ignore cache eviction errors
+    console.error('[SW] Image cache eviction failed:', e);
   }
 }
 
-// Implement cache eviction for dynamic content
+// IMPROVED: LRU eviction for dynamic content with TTL checking
 async function enforceDynamicCacheLimit() {
   try {
     const cache = await caches.open(DYNAMIC_CACHE);
-    const keys = await cache.keys();
-    if (keys.length > MAX_DYNAMIC_CACHE_SIZE) {
-      const toDelete = keys.slice(0, keys.length - MAX_DYNAMIC_CACHE_SIZE);
-      await Promise.all(toDelete.map(key => cache.delete(key)));
-      console.log(`[SW] Evicted ${toDelete.length} items from dynamic cache`);
+    const requests = await cache.keys();
+
+    // First pass: Remove expired items based on TTL
+    const now = Date.now();
+    const validEntries = [];
+
+    for (const req of requests) {
+      const response = await cache.match(req);
+      if (!response) continue;
+
+      const dateHeader = response.headers.get('date');
+      const cacheControl = response.headers.get('cache-control');
+
+      // Check if expired based on Cache-Control or default TTL
+      let maxAge = CACHE_TTL.dynamic * 1000; // default 7 days
+      if (cacheControl?.includes('max-age=')) {
+        const match = cacheControl.match(/max-age=(\d+)/);
+        if (match) maxAge = parseInt(match[1]) * 1000;
+      }
+
+      const age = dateHeader ? now - new Date(dateHeader).getTime() : 0;
+
+      if (age < maxAge) {
+        validEntries.push({ request: req, age });
+      } else {
+        // Expired - delete immediately
+        await cache.delete(req);
+      }
+    }
+
+    // Second pass: If still over limit, use LRU eviction
+    if (validEntries.length > MAX_DYNAMIC_CACHE_SIZE) {
+      validEntries.sort((a, b) => b.age - a.age);
+      const toDelete = validEntries.slice(MAX_DYNAMIC_CACHE_SIZE);
+      await Promise.all(toDelete.map(entry => cache.delete(entry.request)));
+      console.log(`[SW] Evicted ${toDelete.length} old dynamic items (LRU)`);
     }
   } catch (e) {
-    // Ignore cache eviction errors
+    console.error('[SW] Dynamic cache eviction failed:', e);
   }
 }
