@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, User, Calendar, MessageCircle, Eye, CheckCircle, Users, Trash2, Ban, Flag, Camera } from 'lucide-react';
+import { MapPin, User, Calendar, MessageCircle, CheckCircle, Trash2, Ban, Flag, ChevronLeft, ChevronRight } from 'lucide-react';
 import { PropertyImageGallery } from './PropertyImageGallery';
 import { useNavigate } from 'react-router-dom';
 import { useStartConversation } from '@/hooks/useConversations';
@@ -24,7 +24,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface LikedClient {
   id: string;
@@ -58,12 +58,21 @@ function LikedClientInsightsModalComponent({ open, onOpenChange, client }: Liked
   const queryClient = useQueryClient();
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
   const [galleryOpen, setGalleryOpen] = useState(false);
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showBlockDialog, setShowBlockDialog] = useState(false);
   const [showReportDialog, setShowReportDialog] = useState(false);
   const [reportReason, setReportReason] = useState('');
   const [reportDetails, setReportDetails] = useState('');
+
+  const clientImages = client?.profile_images || client?.images || [];
+
+  // Reset image index when modal opens
+  useState(() => {
+    if (open) {
+      setCurrentImageIndex(0);
+    }
+  });
 
   // Delete mutation - Remove from liked clients
   const deleteMutation = useMutation({
@@ -211,6 +220,20 @@ function LikedClientInsightsModalComponent({ open, onOpenChange, client }: Liked
     reportMutation.mutate({ reason: reportReason, details: reportDetails });
   };
 
+  const handlePrevImage = () => {
+    setCurrentImageIndex((prev) => (prev === 0 ? clientImages.length - 1 : prev - 1));
+  };
+
+  const handleNextImage = () => {
+    setCurrentImageIndex((prev) => (prev === clientImages.length - 1 ? 0 : prev + 1));
+  };
+
+  const handleImageClick = () => {
+    if (clientImages.length > 0) {
+      setGalleryOpen(true);
+    }
+  };
+
   const handleMessage = useCallback(async () => {
     if (!client) return;
 
@@ -245,19 +268,12 @@ function LikedClientInsightsModalComponent({ open, onOpenChange, client }: Liked
     }
   }, [client, startConversation, navigate, onOpenChange]);
 
-  const handleImageClick = useCallback((index: number) => {
-    setSelectedImageIndex(index);
-    setGalleryOpen(true);
-  }, []);
-
-  const clientImages = client?.profile_images || client?.images || [];
-
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="w-[calc(100%-16px)] max-w-[500px] sm:max-w-2xl max-h-[85vh] flex flex-col p-0 overflow-hidden">
-          <DialogHeader className="px-4 sm:px-6 py-4 border-b shrink-0">
-            <DialogTitle className="text-base sm:text-lg">Client Profile</DialogTitle>
+        <DialogContent className="w-[calc(100%-16px)] max-w-[500px] sm:max-w-2xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
+          <DialogHeader className="px-4 sm:px-6 py-3 border-b shrink-0">
+            <DialogTitle className="text-base sm:text-lg font-semibold">Client Profile</DialogTitle>
           </DialogHeader>
 
           {!client ? (
@@ -269,58 +285,65 @@ function LikedClientInsightsModalComponent({ open, onOpenChange, client }: Liked
           ) : (
             <ScrollArea className="flex-1 h-full overflow-x-hidden">
               <div className="space-y-4 py-4 px-4 sm:px-6 pb-6 w-full max-w-full overflow-x-hidden">
-                {/* Profile Photos Gallery */}
+                {/* Single Large Photo Carousel */}
                 {clientImages.length > 0 && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="space-y-3"
-                  >
-                    <h4 className="font-semibold flex items-center gap-2">
-                      <Camera className="w-4 h-4 text-primary" />
-                      Client Photos ({clientImages.length})
-                    </h4>
-                    <div className="grid grid-cols-3 gap-2">
-                      {clientImages.slice(0, 6).map((image: string, index: number) => (
-                        <div
-                          key={`client-photo-${index}`}
-                          className="relative aspect-square rounded-xl overflow-hidden cursor-pointer hover:opacity-90 transition-opacity group shadow-md"
-                          onClick={() => handleImageClick(index)}
-                        >
-                          <img
-                            src={image}
-                            alt={`Client photo ${index + 1}`}
-                            className="w-full h-full object-cover"
-                            loading={index < 3 ? "eager" : "lazy"}
-                          />
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                            <Eye className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                          </div>
-                          {index === 0 && (
-                            <div className="absolute top-2 left-2 bg-primary/90 text-primary-foreground text-xs px-2 py-0.5 rounded-full font-medium">
-                              Main
-                            </div>
-                          )}
+                  <div className="space-y-2">
+                    <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-muted group">
+                      <AnimatePresence mode="wait">
+                        <motion.img
+                          key={currentImageIndex}
+                          src={clientImages[currentImageIndex]}
+                          alt={`Client photo ${currentImageIndex + 1}`}
+                          className="w-full h-full object-cover cursor-pointer"
+                          onClick={handleImageClick}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.3 }}
+                        />
+                      </AnimatePresence>
+
+                      {/* Navigation Arrows */}
+                      {clientImages.length > 1 && (
+                        <>
+                          <button
+                            onClick={handlePrevImage}
+                            className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center transition-all backdrop-blur-sm z-10"
+                          >
+                            <ChevronLeft className="w-6 h-6" />
+                          </button>
+                          <button
+                            onClick={handleNextImage}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center transition-all backdrop-blur-sm z-10"
+                          >
+                            <ChevronRight className="w-6 h-6" />
+                          </button>
+                        </>
+                      )}
+
+                      {/* Photo Counter */}
+                      <div className="absolute bottom-3 right-3 bg-black/70 text-white px-3 py-1.5 rounded-full text-sm font-medium backdrop-blur-sm">
+                        {currentImageIndex + 1} / {clientImages.length}
+                      </div>
+
+                      {/* Tap to view hint */}
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/95 px-4 py-2 rounded-full text-sm font-medium">
+                          Tap to view full size
                         </div>
-                      ))}
+                      </div>
                     </div>
-                    {clientImages.length > 6 && (
-                      <p className="text-xs text-muted-foreground text-center">
-                        +{clientImages.length - 6} more photos
-                      </p>
-                    )}
-                    <p className="text-xs text-primary text-center">Tap any photo to view full size</p>
-                  </motion.div>
+                  </div>
                 )}
 
                 {/* Basic Info */}
-                <div className="bg-gradient-to-br from-primary/15 to-secondary/15 p-4 rounded-xl border border-primary/30">
+                <div className="bg-gradient-to-br from-primary/10 to-secondary/10 p-4 rounded-xl border border-primary/20">
                   <div className="flex items-start justify-between gap-4 mb-3">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <h3 className="text-xl font-bold">{client.name}</h3>
                         {client.verified && (
-                          <Badge className="bg-green-500/20 text-green-600 border-green-500/30">
+                          <Badge className="bg-green-500/20 text-green-700 dark:text-green-400 border-green-500/30">
                             <CheckCircle className="w-3 h-3 mr-1" />
                             Verified
                           </Badge>
@@ -394,15 +417,19 @@ function LikedClientInsightsModalComponent({ open, onOpenChange, client }: Liked
                 <div>
                   <h4 className="font-semibold mb-3">Profile Details</h4>
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg">
+                    <div className={`flex items-center gap-2 p-3 rounded-lg border ${
+                      client.verified
+                        ? 'bg-green-500/10 border-green-500/30'
+                        : 'bg-muted/30 border-muted'
+                    }`}>
                       <CheckCircle className={`w-4 h-4 ${client.verified ? 'text-green-500' : 'text-muted-foreground'}`} />
                       <div>
                         <span className="text-sm font-medium">ID Verified</span>
                         <p className="text-xs text-muted-foreground">{client.verified ? 'Confirmed' : 'Pending'}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg">
-                      <Eye className={`w-4 h-4 ${clientImages.length >= 2 ? 'text-green-500' : 'text-muted-foreground'}`} />
+                    <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg border border-muted">
+                      <MapPin className="w-4 h-4 text-muted-foreground" />
                       <div>
                         <span className="text-sm font-medium">Photos</span>
                         <p className="text-xs text-muted-foreground">{clientImages.length} uploaded</p>
@@ -421,42 +448,46 @@ function LikedClientInsightsModalComponent({ open, onOpenChange, client }: Liked
             </ScrollArea>
           )}
 
-          <DialogFooter className="px-4 sm:px-6 py-4 border-t shrink-0 flex-col sm:flex-row gap-2">
+          <DialogFooter className="px-4 sm:px-6 py-3 border-t shrink-0 flex-col sm:flex-row gap-2 bg-muted/30">
             <div className="flex gap-2 w-full sm:w-auto">
               <Button
                 onClick={handleDelete}
                 variant="outline"
-                className="flex-1 sm:flex-none bg-red-50 hover:bg-red-100 border-red-200 text-red-700"
+                size="sm"
+                className="flex-1 sm:flex-none bg-red-500/10 hover:bg-red-500/20 border-red-500/30 text-red-700 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 font-medium"
                 disabled={deleteMutation.isPending}
               >
-                <Trash2 className="w-4 h-4 mr-2" />
+                <Trash2 className="w-4 h-4 mr-1.5" />
                 Delete
               </Button>
               <Button
                 onClick={handleBlock}
                 variant="outline"
-                className="flex-1 sm:flex-none bg-orange-50 hover:bg-orange-100 border-orange-200 text-orange-700"
+                size="sm"
+                className="flex-1 sm:flex-none bg-orange-500/10 hover:bg-orange-500/20 border-orange-500/30 text-orange-700 dark:text-orange-400 hover:text-orange-800 dark:hover:text-orange-300 font-medium"
                 disabled={blockMutation.isPending}
               >
-                <Ban className="w-4 h-4 mr-2" />
+                <Ban className="w-4 h-4 mr-1.5" />
                 Block
               </Button>
               <Button
                 onClick={handleReport}
                 variant="outline"
-                className="flex-1 sm:flex-none bg-yellow-50 hover:bg-yellow-100 border-yellow-200 text-yellow-700"
+                size="sm"
+                className="flex-1 sm:flex-none bg-yellow-500/10 hover:bg-yellow-500/20 border-yellow-500/30 text-yellow-700 dark:text-yellow-400 hover:text-yellow-800 dark:hover:text-yellow-300 font-medium"
                 disabled={reportMutation.isPending}
               >
-                <Flag className="w-4 h-4 mr-2" />
+                <Flag className="w-4 h-4 mr-1.5" />
                 Report
               </Button>
             </div>
             <Button
               onClick={handleMessage}
               disabled={isCreatingConversation || !client}
-              className="w-full sm:w-auto bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+              size="sm"
+              className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium shadow-lg shadow-blue-500/30"
             >
-              <MessageCircle className="w-4 h-4 mr-2" />
+              <MessageCircle className="w-4 h-4 mr-1.5" />
               {isCreatingConversation ? 'Starting...' : 'Send Message'}
             </Button>
           </DialogFooter>
@@ -469,7 +500,7 @@ function LikedClientInsightsModalComponent({ open, onOpenChange, client }: Liked
             alt={`${client?.name}'s profile photos`}
             isOpen={galleryOpen}
             onClose={() => setGalleryOpen(false)}
-            initialIndex={selectedImageIndex}
+            initialIndex={currentImageIndex}
           />
         )}
       </Dialog>
@@ -490,7 +521,7 @@ function LikedClientInsightsModalComponent({ open, onOpenChange, client }: Liked
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmDelete}
-              className="bg-red-500 hover:bg-red-600"
+              className="bg-red-600 hover:bg-red-700 text-white"
             >
               Remove
             </AlertDialogAction>
@@ -514,7 +545,7 @@ function LikedClientInsightsModalComponent({ open, onOpenChange, client }: Liked
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmBlock}
-              className="bg-orange-500 hover:bg-orange-600"
+              className="bg-orange-600 hover:bg-orange-700 text-white"
             >
               {blockMutation.isPending ? 'Blocking...' : 'Block Client'}
             </AlertDialogAction>
@@ -575,7 +606,7 @@ function LikedClientInsightsModalComponent({ open, onOpenChange, client }: Liked
             <Button
               onClick={handleSubmitReport}
               disabled={!reportReason || reportMutation.isPending}
-              className="bg-yellow-500 hover:bg-yellow-600"
+              className="bg-yellow-600 hover:bg-yellow-700 text-white"
             >
               {reportMutation.isPending ? "Submitting..." : "Submit Report"}
             </Button>
