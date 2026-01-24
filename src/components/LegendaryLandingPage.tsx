@@ -2,7 +2,7 @@ import { memo, useState, useRef } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Shield, Sparkles, Users } from 'lucide-react';
 import { AuthDialog } from './AuthDialog';
-import { SwipessLogo } from './SwipessLogo';
+import { SwipessLogoWithOrb } from './SwipessLogoWithOrb';
 
 const SWIPE_THRESHOLD = 120;
 
@@ -55,7 +55,7 @@ function LegendaryLandingPage() {
 
   return (
     <div
-      className="min-h-screen min-h-dvh flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 relative overflow-hidden safe-area-p bg-zinc-900"
+      className="min-h-screen min-h-dvh flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 relative overflow-hidden safe-area-p bg-background"
     >
 
       {/* Main Content */}
@@ -80,7 +80,7 @@ function LegendaryLandingPage() {
             whileTap={{ scale: 0.98 }}
             className="cursor-grab active:cursor-grabbing focus:outline-none touch-none select-none bg-transparent"
           >
-            <SwipessLogo size="4xl" className="drop-shadow-2xl" />
+            <SwipessLogoWithOrb size="4xl" className="drop-shadow-2xl" orbActive={true} />
           </motion.div>
 
           <motion.p

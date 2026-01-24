@@ -23,6 +23,21 @@ import { useMessageActivations } from '@/hooks/useMessageActivations';
 import { usePrefetchManager } from '@/hooks/usePrefetchManager';
 import { logger } from '@/utils/prodLogger';
 
+// Helper to check free messaging eligibility - extracted to avoid TS deep instantiation
+async function checkFreeMessagingCategory(userId: string): Promise<boolean> {
+  try {
+    // @ts-expect-error - Supabase types too deeply nested, using raw query
+    const result = await supabase
+      .from('listings')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .or('category.eq.motorcycle,category.eq.bicycle');
+    return (result?.count ?? 0) > 0;
+  } catch {
+    return false;
+  }
+}
+
 export function MessagingDashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -233,19 +248,7 @@ export function MessagingDashboard() {
       }
 
       // Check if other user has moto/bicycle listings for free messaging
-      let hasFreeMessagingCategory = false;
-      try {
-        const { data: otherUserListings } = await supabase
-          .from('listings')
-          .select('category')
-          .eq('user_id', userId)
-          .in('category', ['moto', 'bicycle'])
-          .limit(1);
-
-        hasFreeMessagingCategory = (otherUserListings && otherUserListings.length > 0);
-      } catch (error) {
-        if (import.meta.env.DEV) logger.error('Error checking user listings:', error);
-      }
+      const hasFreeMessagingCategory = await checkFreeMessagingCategory(userId);
 
       // Check if user has activations (skip check for moto/bicycle listings)
       if (!hasFreeMessagingCategory && (!canSendMessage || totalActivations === 0)) {

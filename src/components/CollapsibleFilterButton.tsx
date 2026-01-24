@@ -32,8 +32,6 @@ interface CollapsibleFilterButtonProps {
 
 const categories: { id: QuickFilterCategory; label: string; icon: React.ReactNode }[] = [
   { id: 'property', label: 'Property', icon: <Home className="w-4 h-4" /> },
-  { id: 'vehicle', label: 'Vehicle', icon: <Car className="w-4 h-4" /> },
-  { id: 'yacht', label: 'Yacht', icon: <Anchor className="w-4 h-4" /> },
   { id: 'motorcycle', label: 'Moto', icon: <MotorcycleIcon className="w-4 h-4" /> },
   { id: 'bicycle', label: 'Bicycle', icon: <Bike className="w-4 h-4" /> },
   { id: 'services', label: 'Services', icon: <Wrench className="w-4 h-4" /> },

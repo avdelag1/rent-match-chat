@@ -30,20 +30,18 @@ interface PropertyManagementProps {
 
 const getCategoryIcon = (category: string) => {
   switch (category) {
-    case 'yacht': return <Anchor className="w-3.5 h-3.5" />;
+    case 'worker': return <Home className="w-3.5 h-3.5" />;
     case 'motorcycle': return <CircleDot className="w-3.5 h-3.5" />;
     case 'bicycle': return <Bike className="w-3.5 h-3.5" />;
-    case 'vehicle': return <Car className="w-3.5 h-3.5" />;
     default: return <Home className="w-3.5 h-3.5" />;
   }
 };
 
 const getCategoryColor = (category: string) => {
   switch (category) {
-    case 'yacht': return 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30';
+    case 'worker': return 'bg-amber-500/20 text-amber-400 border-amber-500/30';
     case 'motorcycle': return 'bg-orange-500/20 text-orange-400 border-orange-500/30';
     case 'bicycle': return 'bg-purple-500/20 text-purple-400 border-purple-500/30';
-    case 'vehicle': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
     default: return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
   }
 };
@@ -112,7 +110,7 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
     setIsFormOpen(true);
   };
 
-  const handleCategorySelect = (category: 'property' | 'yacht' | 'motorcycle' | 'bicycle', mode: 'rent' | 'sale' | 'both') => {
+  const handleCategorySelect = (category: 'property' | 'motorcycle' | 'bicycle' | 'worker', mode: 'rent' | 'sale' | 'both') => {
     setEditingProperty({ category, mode });
     setShowCategoryDialog(false);
     // Form is already open from handleAddProperty
