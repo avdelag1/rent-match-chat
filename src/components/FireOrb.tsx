@@ -193,7 +193,7 @@ function FireOrbComponent({ isActive = true, size = 12, onSettle }: FireOrbProps
   const coreVariants: Variants = {
     hidden: { opacity: 0 },
     appear: { opacity: 0.9 },
-    wander: { 
+    wander: {
       opacity: [0.9, 1, 0.8, 1, 0.9],
       scale: [1, 1.1, 0.9, 1.1, 1],
       transition: {
@@ -201,8 +201,8 @@ function FireOrbComponent({ isActive = true, size = 12, onSettle }: FireOrbProps
         ease: easeInOutSmooth,
       },
     },
-    settle: { 
-      opacity: 1, 
+    settle: {
+      opacity: 1,
       scale: [1, 1.2, 1],
       transition: {
         duration: 0.4,
@@ -210,6 +210,23 @@ function FireOrbComponent({ isActive = true, size = 12, onSettle }: FireOrbProps
       },
     },
     rest: { opacity: 0.5 },
+  };
+
+  // Main orb ball variants (scale/opacity only, no x/y since wrapper handles movement)
+  const mainOrbVariants: Variants = {
+    hidden: { opacity: 0, scale: 0.3 },
+    appear: { opacity: 1, scale: 1, transition: { duration: 0.6, ease: easeOutSoft } },
+    wander: {
+      opacity: 1,
+      scale: [1, 1.15, 0.95, 1.1, 1.05, 1],
+      transition: {
+        duration: 3.5,
+        ease: easeInOutSmooth,
+        times: [0, 0.2, 0.4, 0.6, 0.8, 1],
+      },
+    },
+    settle: { opacity: 1, scale: 1, transition: { type: 'spring' as const, stiffness: 300, damping: 20 } },
+    rest: { opacity: 0.6, scale: 0.9, transition: { duration: 0.8, ease: easeInOutSmooth } },
   };
 
   return (
@@ -221,6 +238,7 @@ function FireOrbComponent({ isActive = true, size = 12, onSettle }: FireOrbProps
       }}
       initial="hidden"
       animate={phase}
+      variants={orbVariants}
     >
       {/* Outer glow - enhanced intensity */}
       <motion.div
@@ -234,6 +252,8 @@ function FireOrbComponent({ isActive = true, size = 12, onSettle }: FireOrbProps
           filter: 'blur(8px)',
         }}
         variants={glowVariants}
+        initial="hidden"
+        animate={phase}
       />
 
       {/* Additional intense inner glow */}
@@ -248,6 +268,8 @@ function FireOrbComponent({ isActive = true, size = 12, onSettle }: FireOrbProps
           filter: 'blur(3px)',
         }}
         variants={glowVariants}
+        initial="hidden"
+        animate={phase}
       />
 
       {/* Enhanced particle trail (18 particles creating a comet effect) */}
@@ -301,7 +323,9 @@ function FireOrbComponent({ isActive = true, size = 12, onSettle }: FireOrbProps
             inset 0 0 ${size * 0.4}px hsl(55 100% 85% / 0.7)
           `,
         }}
-        variants={orbVariants}
+        variants={mainOrbVariants}
+        initial="hidden"
+        animate={phase}
       />
 
       {/* Inner bright core - enhanced */}
@@ -317,6 +341,8 @@ function FireOrbComponent({ isActive = true, size = 12, onSettle }: FireOrbProps
           boxShadow: `0 0 ${size * 0.3}px hsl(55 100% 90% / 0.8)`,
         }}
         variants={coreVariants}
+        initial="hidden"
+        animate={phase}
       />
     </motion.div>
   );
