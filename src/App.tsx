@@ -34,6 +34,12 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 // Legal pages
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
+const LegalPage = lazy(() => import("./pages/LegalPage"));
+
+// Info pages
+const AboutPage = lazy(() => import("./pages/AboutPage"));
+const FAQClientPage = lazy(() => import("./pages/FAQClientPage"));
+const FAQOwnerPage = lazy(() => import("./pages/FAQOwnerPage"));
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // INSTANT NAVIGATION: ALL core routes are DIRECT IMPORTS
@@ -199,6 +205,12 @@ const App = () => (
                     {/* Legal Pages - Public Access */}
                     <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                     <Route path="/terms-of-service" element={<TermsOfService />} />
+                    <Route path="/legal" element={<LegalPage />} />
+
+                    {/* Info Pages - Public Access */}
+                    <Route path="/about" element={<AboutPage />} />
+                    <Route path="/faq/client" element={<FAQClientPage />} />
+                    <Route path="/faq/owner" element={<FAQOwnerPage />} />
 
                     {/* Public Preview Pages - Shareable Links */}
                     <Route path="/profile/:id" element={<PublicProfilePreview />} />
