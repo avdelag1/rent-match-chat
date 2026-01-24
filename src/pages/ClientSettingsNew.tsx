@@ -2,28 +2,19 @@
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Shield, Bell, FileText, Crown, HelpCircle, Info, ChevronRight } from "lucide-react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { ArrowLeft, Shield, FileText, HelpCircle, Info, ChevronRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { AccountSecurity } from "@/components/AccountSecurity";
 import { DeleteAccountSection } from "@/components/DeleteAccountSection";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Separator } from "@/components/ui/separator";
 
 const fastSpring = { type: "spring" as const, stiffness: 500, damping: 30, mass: 0.8 };
 
 const ClientSettingsNew = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const [activeSection, setActiveSection] = useState<string | null>(null);
-
-  // Handle hash fragment navigation (e.g., #subscription)
-  useEffect(() => {
-    if (location.hash === '#subscription') {
-      // Navigate to subscription packages page
-      navigate('/subscription-packages', { replace: true });
-    }
-  }, [location.hash, navigate]);
 
   const settingsItems = [
     {
@@ -34,25 +25,11 @@ const ClientSettingsNew = () => {
       section: 'security'
     },
     {
-      icon: Bell,
-      label: 'Notifications',
-      description: 'Manage notification preferences',
-      color: 'text-blue-500',
-      action: () => navigate('/notifications')
-    },
-    {
       icon: FileText,
       label: 'Contracts',
       description: 'View and manage your contracts',
       color: 'text-orange-500',
       action: () => navigate('/client/contracts')
-    },
-    {
-      icon: Crown,
-      label: 'Premium Packages',
-      description: 'Upgrade your subscription',
-      color: 'text-yellow-500',
-      action: () => navigate('/subscription-packages')
     },
     {
       icon: HelpCircle,
