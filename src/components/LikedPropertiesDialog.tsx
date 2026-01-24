@@ -11,6 +11,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { PropertyImageGallery } from './PropertyImageGallery';
+import { LikedListingInsightsModal } from './LikedListingInsightsModal';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -34,6 +35,8 @@ export function LikedPropertiesDialog({ isOpen, onClose, onPropertySelect }: Lik
     alt: '',
     initialIndex: 0
   });
+  const [selectedProperty, setSelectedProperty] = useState<any | null>(null);
+  const [showInsightsModal, setShowInsightsModal] = useState(false);
 
   const removeLikeMutation = useMutation({
     mutationFn: async (listingId: string) => {
@@ -63,11 +66,9 @@ export function LikedPropertiesDialog({ isOpen, onClose, onPropertySelect }: Lik
     removeLikeMutation.mutate(listingId);
   };
 
-  const handlePropertyClick = (listingId: string) => {
-    if (onPropertySelect) {
-      onPropertySelect(listingId);
-      onClose();
-    }
+  const handlePropertyClick = (property: any) => {
+    setSelectedProperty(property);
+    setShowInsightsModal(true);
   };
 
   const handleImageClick = (property: any, imageIndex: number = 0) => {
@@ -192,7 +193,7 @@ export function LikedPropertiesDialog({ isOpen, onClose, onPropertySelect }: Lik
                     </div>
                   </div>
 
-                  <CardContent className="p-4" onClick={() => handlePropertyClick(property.id)}>
+                  <CardContent className="p-4" onClick={() => handlePropertyClick(property)}>
                     <h3 className="font-semibold text-lg mb-1 line-clamp-1 cursor-pointer">{property.title}</h3>
                     <div className="flex items-center text-muted-foreground mb-2">
                       <MapPin className="w-4 h-4 mr-1" />
@@ -248,6 +249,13 @@ export function LikedPropertiesDialog({ isOpen, onClose, onPropertySelect }: Lik
           />
         </Dialog>
       )}
+
+      {/* Listing Insights Modal with Actions */}
+      <LikedListingInsightsModal
+        open={showInsightsModal}
+        onOpenChange={setShowInsightsModal}
+        listing={selectedProperty}
+      />
     </AnimatePresence>
   );
 }
