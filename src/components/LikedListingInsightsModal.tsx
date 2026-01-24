@@ -318,13 +318,6 @@ function LikedListingInsightsModalComponent({ open, onOpenChange, listing }: Lik
                       <div className="absolute bottom-3 right-3 bg-black/70 text-white px-3 py-1.5 rounded-full text-sm font-medium backdrop-blur-sm">
                         {currentImageIndex + 1} / {images.length}
                       </div>
-
-                      {/* Tap to view hint */}
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/95 px-4 py-2 rounded-full text-sm font-medium">
-                          Tap to view full size
-                        </div>
-                      </div>
                     </div>
                   </div>
                 )}
