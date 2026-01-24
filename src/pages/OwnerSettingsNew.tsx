@@ -2,14 +2,13 @@
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Shield, Bell, FileText, Crown, HelpCircle, BookmarkCheck, ChevronRight } from "lucide-react";
+import { ArrowLeft, Shield, Bell, FileText, Crown, HelpCircle, Info, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { AccountSecurity } from "@/components/AccountSecurity";
 import { DeleteAccountSection } from "@/components/DeleteAccountSection";
 import { useState } from "react";
 import { Separator } from "@/components/ui/separator";
-import { RoleSwitcher } from "@/components/RoleSwitcher";
 
 const fastSpring = { type: "spring" as const, stiffness: 500, damping: 30, mass: 0.8 };
 
@@ -33,25 +32,11 @@ const OwnerSettingsNew = () => {
       action: () => navigate('/notifications')
     },
     {
-      icon: BookmarkCheck,
-      label: 'Saved Searches',
-      description: 'View your saved client filters',
-      color: 'text-purple-500',
-      action: () => navigate('/owner/saved-searches')
-    },
-    {
       icon: FileText,
       label: 'Contracts',
       description: 'View and manage your contracts',
       color: 'text-orange-500',
       action: () => navigate('/owner/contracts')
-    },
-    {
-      icon: FileText,
-      label: 'Legal Documents',
-      description: 'Terms of service and privacy policy',
-      color: 'text-amber-500',
-      action: () => alert('Legal documents - Coming soon')
     },
     {
       icon: Crown,
@@ -62,10 +47,24 @@ const OwnerSettingsNew = () => {
     },
     {
       icon: HelpCircle,
-      label: 'Support',
-      description: 'Get help and contact support',
+      label: 'FAQ & Help',
+      description: 'Common questions and support',
       color: 'text-cyan-500',
-      action: () => alert('Support - Coming soon')
+      action: () => navigate('/faq/owner')
+    },
+    {
+      icon: Info,
+      label: 'About Swipess',
+      description: 'Learn about our platform',
+      color: 'text-purple-500',
+      action: () => navigate('/about')
+    },
+    {
+      icon: FileText,
+      label: 'Legal',
+      description: 'Terms of service and privacy policy',
+      color: 'text-amber-500',
+      action: () => navigate('/legal')
     },
   ];
 
@@ -135,15 +134,6 @@ const OwnerSettingsNew = () => {
           title="Settings"
           subtitle="Manage your account and preferences"
         />
-
-        {/* Role Switcher - Switch between I Need and I Offer mode */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ ...fastSpring, delay: 0.05 }}
-        >
-          <RoleSwitcher />
-        </motion.div>
 
         {/* Settings Menu */}
         <motion.div
