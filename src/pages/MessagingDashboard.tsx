@@ -535,7 +535,6 @@ export function MessagingDashboard() {
             </ScrollArea>
           </div>
         </div>
-      </div>
 
       {/* Upgrade Dialog */}
       <MessageActivationPackages
