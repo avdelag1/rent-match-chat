@@ -3,7 +3,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { MapPin, Bed, Bath, Square, Calendar, DollarSign, MessageCircle, TrendingUp, Eye, Sparkles, Home, Trash2, Ban, Flag, Camera } from 'lucide-react';
+import { MapPin, Bed, Bath, Square, DollarSign, MessageCircle, Sparkles, Trash2, Ban, Flag, ChevronLeft, ChevronRight } from 'lucide-react';
 import { PropertyImageGallery } from './PropertyImageGallery';
 import { useNavigate } from 'react-router-dom';
 import { useStartConversation } from '@/hooks/useConversations';
@@ -25,6 +25,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface LikedListingInsightsModalProps {
   open: boolean;
@@ -38,12 +39,21 @@ function LikedListingInsightsModalComponent({ open, onOpenChange, listing }: Lik
   const queryClient = useQueryClient();
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
   const [galleryOpen, setGalleryOpen] = useState(false);
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showBlockDialog, setShowBlockDialog] = useState(false);
   const [showReportDialog, setShowReportDialog] = useState(false);
   const [reportReason, setReportReason] = useState('');
   const [reportDetails, setReportDetails] = useState('');
+
+  const images = listing?.images || [];
+
+  // Reset image index when modal opens or listing changes
+  useState(() => {
+    if (open) {
+      setCurrentImageIndex(0);
+    }
+  });
 
   // Delete mutation - Remove from liked properties
   const deleteMutation = useMutation({
@@ -194,6 +204,20 @@ function LikedListingInsightsModalComponent({ open, onOpenChange, listing }: Lik
     reportMutation.mutate({ reason: reportReason, details: reportDetails });
   };
 
+  const handlePrevImage = () => {
+    setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  };
+
+  const handleNextImage = () => {
+    setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  };
+
+  const handleImageClick = () => {
+    if (images.length > 0) {
+      setGalleryOpen(true);
+    }
+  };
+
   // Memoized callback to start conversation
   const handleMessage = useCallback(async () => {
     if (!listing?.owner_id) {
@@ -240,9 +264,9 @@ function LikedListingInsightsModalComponent({ open, onOpenChange, listing }: Lik
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="w-[calc(100%-16px)] max-w-[500px] sm:max-w-2xl max-h-[85vh] flex flex-col p-0 overflow-hidden">
-          <DialogHeader className="px-4 sm:px-6 py-4 border-b shrink-0">
-            <DialogTitle className="text-base sm:text-lg">Property Details</DialogTitle>
+        <DialogContent className="w-[calc(100%-16px)] max-w-[500px] sm:max-w-2xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
+          <DialogHeader className="px-4 sm:px-6 py-3 border-b shrink-0">
+            <DialogTitle className="text-base sm:text-lg font-semibold">Property Details</DialogTitle>
           </DialogHeader>
 
           {!listing ? (
@@ -254,108 +278,120 @@ function LikedListingInsightsModalComponent({ open, onOpenChange, listing }: Lik
           ) : (
             <ScrollArea className="flex-1 h-full overflow-x-hidden">
               <div className="space-y-4 py-4 px-4 sm:px-6 pb-6 w-full max-w-full overflow-x-hidden">
-                {/* Property Images Grid */}
-                {listing.images && listing.images.length > 0 && (
-                  <div className="space-y-3">
-                    <h4 className="font-semibold text-sm flex items-center gap-2">
-                      <Camera className="w-4 h-4 text-primary" />
-                      Property Photos ({listing.images.length})
-                    </h4>
-                    <div className="grid grid-cols-3 gap-2">
-                      {listing.images.slice(0, 6).map((image: string, idx: number) => (
-                        <button
-                          key={`image-${listing.id}-${idx}`}
-                          onClick={() => {
-                            setSelectedImageIndex(idx);
-                            setGalleryOpen(true);
-                          }}
-                          className="relative aspect-square rounded-xl overflow-hidden hover:opacity-80 transition-opacity shadow-md group"
-                        >
-                          <img
-                            src={image}
-                            alt={`Property ${idx + 1}`}
-                            className="w-full h-full object-cover"
-                            loading={idx < 3 ? "eager" : "lazy"}
-                          />
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                            <Eye className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                          </div>
-                          {idx === 0 && (
-                            <div className="absolute top-2 left-2 bg-primary/90 text-primary-foreground text-xs px-2 py-0.5 rounded-full font-medium">
-                              Main
-                            </div>
-                          )}
-                        </button>
-                      ))}
+                {/* Single Large Photo Carousel */}
+                {images.length > 0 && (
+                  <div className="space-y-2">
+                    <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-muted group">
+                      <AnimatePresence mode="wait">
+                        <motion.img
+                          key={currentImageIndex}
+                          src={images[currentImageIndex]}
+                          alt={`Property photo ${currentImageIndex + 1}`}
+                          className="w-full h-full object-cover cursor-pointer"
+                          onClick={handleImageClick}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.3 }}
+                        />
+                      </AnimatePresence>
+
+                      {/* Navigation Arrows */}
+                      {images.length > 1 && (
+                        <>
+                          <button
+                            onClick={handlePrevImage}
+                            className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center transition-all backdrop-blur-sm z-10"
+                          >
+                            <ChevronLeft className="w-6 h-6" />
+                          </button>
+                          <button
+                            onClick={handleNextImage}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center transition-all backdrop-blur-sm z-10"
+                          >
+                            <ChevronRight className="w-6 h-6" />
+                          </button>
+                        </>
+                      )}
+
+                      {/* Photo Counter */}
+                      <div className="absolute bottom-3 right-3 bg-black/70 text-white px-3 py-1.5 rounded-full text-sm font-medium backdrop-blur-sm">
+                        {currentImageIndex + 1} / {images.length}
+                      </div>
+
+                      {/* Tap to view hint */}
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/95 px-4 py-2 rounded-full text-sm font-medium">
+                          Tap to view full size
+                        </div>
+                      </div>
                     </div>
-                    {listing.images.length > 6 && (
-                      <p className="text-xs text-muted-foreground text-center">
-                        +{listing.images.length - 6} more photos
-                      </p>
-                    )}
-                    <p className="text-xs text-primary text-center">Tap any photo to view full size</p>
                   </div>
                 )}
 
                 {/* Basic Info */}
-                <div>
-                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-2">
-                    <h3 className="text-lg sm:text-xl font-bold flex-1">{listing.title}</h3>
-                    <Badge className="bg-red-500/10 text-red-600 border-red-500/20 w-fit">
+                <div className="space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                    <h3 className="text-xl sm:text-2xl font-bold flex-1">{listing.title}</h3>
+                    <Badge className="bg-gradient-to-r from-red-500/20 to-orange-500/20 text-red-700 dark:text-red-400 border-red-500/30 w-fit">
                       <Sparkles className="w-3 h-3 mr-1" />
                       Liked
                     </Badge>
                   </div>
-                  <div className="flex items-center gap-2 text-muted-foreground mb-4">
-                    <MapPin className="w-4 h-4" />
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <MapPin className="w-4 h-4 flex-shrink-0" />
                     <span className="text-sm">{listing.address}</span>
                   </div>
                 </div>
 
+                {/* Price & Key Details */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl border border-primary/20">
+                  <div className="flex flex-col items-center gap-1">
+                    <DollarSign className="w-5 h-5 text-green-600" />
+                    <span className="text-lg font-bold text-green-600">
+                      ${listing.price?.toLocaleString()}
+                    </span>
+                    <span className="text-xs text-muted-foreground">per month</span>
+                  </div>
+                  {listing.beds && (
+                    <div className="flex flex-col items-center gap-1">
+                      <Bed className="w-5 h-5 text-primary" />
+                      <span className="text-lg font-bold">{listing.beds}</span>
+                      <span className="text-xs text-muted-foreground">bed{listing.beds !== 1 ? 's' : ''}</span>
+                    </div>
+                  )}
+                  {listing.baths && (
+                    <div className="flex flex-col items-center gap-1">
+                      <Bath className="w-5 h-5 text-primary" />
+                      <span className="text-lg font-bold">{listing.baths}</span>
+                      <span className="text-xs text-muted-foreground">bath{listing.baths !== 1 ? 's' : ''}</span>
+                    </div>
+                  )}
+                  {listing.square_footage && (
+                    <div className="flex flex-col items-center gap-1">
+                      <Square className="w-5 h-5 text-primary" />
+                      <span className="text-lg font-bold">{listing.square_footage}</span>
+                      <span className="text-xs text-muted-foreground">sqft</span>
+                    </div>
+                  )}
+                </div>
+
                 {/* Description */}
                 {listing.description && (
-                  <div className="p-4 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl border border-primary/20">
+                  <div className="p-4 bg-muted/30 rounded-xl">
                     <h4 className="font-semibold text-base mb-2">About This Property</h4>
                     <p className="text-sm text-foreground leading-relaxed">{listing.description}</p>
                   </div>
                 )}
 
-                {/* Price & Key Details */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="w-4 h-4 text-green-600" />
-                    <span className="font-semibold">
-                      ${listing.price?.toLocaleString()}/mo
-                    </span>
-                  </div>
-                  {listing.beds && (
-                    <div className="flex items-center gap-2">
-                      <Bed className="w-4 h-4" />
-                      <span>{listing.beds} bed{listing.beds !== 1 ? 's' : ''}</span>
-                    </div>
-                  )}
-                  {listing.baths && (
-                    <div className="flex items-center gap-2">
-                      <Bath className="w-4 h-4" />
-                      <span>{listing.baths} bath{listing.baths !== 1 ? 's' : ''}</span>
-                    </div>
-                  )}
-                  {listing.square_footage && (
-                    <div className="flex items-center gap-2">
-                      <Square className="w-4 h-4" />
-                      <span>{listing.square_footage} sqft</span>
-                    </div>
-                  )}
-                </div>
-
                 {/* Property Features */}
                 <div>
                   <h4 className="font-semibold mb-2">Property Features</h4>
                   <div className="flex flex-wrap gap-2">
-                    {listing.property_type && <Badge variant="secondary">{listing.property_type}</Badge>}
-                    {listing.furnished && <Badge variant="secondary">Furnished</Badge>}
-                    {listing.pet_friendly && <Badge variant="secondary">Pet Friendly</Badge>}
-                    <Badge variant="outline" className={listing.status === 'available' ? 'bg-green-500/10 text-green-600 border-green-500/20' : ''}>{listing.status}</Badge>
+                    {listing.property_type && <Badge variant="secondary" className="bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20">{listing.property_type}</Badge>}
+                    {listing.furnished && <Badge variant="secondary" className="bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20">Furnished</Badge>}
+                    {listing.pet_friendly && <Badge variant="secondary" className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20">Pet Friendly</Badge>}
+                    <Badge variant="outline" className={listing.status === 'available' ? 'bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20' : ''}>{listing.status}</Badge>
                   </div>
                 </div>
 
@@ -365,7 +401,7 @@ function LikedListingInsightsModalComponent({ open, onOpenChange, listing }: Lik
                     <h4 className="font-semibold mb-2">Amenities</h4>
                     <div className="flex flex-wrap gap-2">
                       {listing.amenities.map((amenity: string) => (
-                        <Badge key={`amenity-${amenity}`} variant="outline">{amenity}</Badge>
+                        <Badge key={`amenity-${amenity}`} variant="outline" className="bg-primary/5">{amenity}</Badge>
                       ))}
                     </div>
                   </div>
@@ -374,55 +410,59 @@ function LikedListingInsightsModalComponent({ open, onOpenChange, listing }: Lik
             </ScrollArea>
           )}
 
-          <DialogFooter className="px-4 sm:px-6 py-4 border-t shrink-0 flex-col sm:flex-row gap-2">
+          <DialogFooter className="px-4 sm:px-6 py-3 border-t shrink-0 flex-col sm:flex-row gap-2 bg-muted/30">
             <div className="flex gap-2 w-full sm:w-auto">
               <Button
                 onClick={handleDelete}
                 variant="outline"
-                className="flex-1 sm:flex-none bg-red-50 hover:bg-red-100 border-red-200 text-red-700"
+                size="sm"
+                className="flex-1 sm:flex-none bg-red-500/10 hover:bg-red-500/20 border-red-500/30 text-red-700 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 font-medium"
                 disabled={deleteMutation.isPending}
               >
-                <Trash2 className="w-4 h-4 mr-2" />
+                <Trash2 className="w-4 h-4 mr-1.5" />
                 Delete
               </Button>
               <Button
                 onClick={handleBlock}
                 variant="outline"
-                className="flex-1 sm:flex-none bg-orange-50 hover:bg-orange-100 border-orange-200 text-orange-700"
+                size="sm"
+                className="flex-1 sm:flex-none bg-orange-500/10 hover:bg-orange-500/20 border-orange-500/30 text-orange-700 dark:text-orange-400 hover:text-orange-800 dark:hover:text-orange-300 font-medium"
                 disabled={blockMutation.isPending}
               >
-                <Ban className="w-4 h-4 mr-2" />
+                <Ban className="w-4 h-4 mr-1.5" />
                 Block
               </Button>
               <Button
                 onClick={handleReport}
                 variant="outline"
-                className="flex-1 sm:flex-none bg-yellow-50 hover:bg-yellow-100 border-yellow-200 text-yellow-700"
+                size="sm"
+                className="flex-1 sm:flex-none bg-yellow-500/10 hover:bg-yellow-500/20 border-yellow-500/30 text-yellow-700 dark:text-yellow-400 hover:text-yellow-800 dark:hover:text-yellow-300 font-medium"
                 disabled={reportMutation.isPending}
               >
-                <Flag className="w-4 h-4 mr-2" />
+                <Flag className="w-4 h-4 mr-1.5" />
                 Report
               </Button>
             </div>
             <Button
               onClick={handleMessage}
               disabled={isCreatingConversation || !listing}
-              className="w-full sm:w-auto bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+              size="sm"
+              className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium shadow-lg shadow-blue-500/30"
             >
-              <MessageCircle className="w-4 h-4 mr-2" />
+              <MessageCircle className="w-4 h-4 mr-1.5" />
               {isCreatingConversation ? 'Starting...' : 'Message Owner'}
             </Button>
           </DialogFooter>
         </DialogContent>
 
         {/* Full Screen Image Gallery */}
-        {listing?.images && listing.images.length > 0 && (
+        {images.length > 0 && (
           <PropertyImageGallery
-            images={listing.images}
+            images={images}
             alt={listing.title}
             isOpen={galleryOpen}
             onClose={() => setGalleryOpen(false)}
-            initialIndex={selectedImageIndex}
+            initialIndex={currentImageIndex}
           />
         )}
       </Dialog>
@@ -443,7 +483,7 @@ function LikedListingInsightsModalComponent({ open, onOpenChange, listing }: Lik
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmDelete}
-              className="bg-red-500 hover:bg-red-600"
+              className="bg-red-600 hover:bg-red-700 text-white"
             >
               Remove
             </AlertDialogAction>
@@ -467,7 +507,7 @@ function LikedListingInsightsModalComponent({ open, onOpenChange, listing }: Lik
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmBlock}
-              className="bg-orange-500 hover:bg-orange-600"
+              className="bg-orange-600 hover:bg-orange-700 text-white"
             >
               {blockMutation.isPending ? 'Blocking...' : 'Block Owner'}
             </AlertDialogAction>
@@ -528,7 +568,7 @@ function LikedListingInsightsModalComponent({ open, onOpenChange, listing }: Lik
             <Button
               onClick={handleSubmitReport}
               disabled={!reportReason || reportMutation.isPending}
-              className="bg-yellow-500 hover:bg-yellow-600"
+              className="bg-yellow-600 hover:bg-yellow-700 text-white"
             >
               {reportMutation.isPending ? "Submitting..." : "Submit Report"}
             </Button>
