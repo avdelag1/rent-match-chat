@@ -49,11 +49,11 @@ function LikedListingInsightsModalComponent({ open, onOpenChange, listing }: Lik
   const images = listing?.images || [];
 
   // Reset image index when modal opens or listing changes
-  useState(() => {
+  useEffect(() => {
     if (open) {
       setCurrentImageIndex(0);
     }
-  });
+  }, [open]);
 
   // Delete mutation - Remove from liked properties
   const deleteMutation = useMutation({

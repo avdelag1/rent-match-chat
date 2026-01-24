@@ -179,7 +179,6 @@ const OwnerProfileNew = () => {
                     <div className="text-sm text-muted-foreground">See clients interested in your listings</div>
                   </div>
                 </button>
-                </button>
               </CardContent>
             </Card>
           </motion.div>
