@@ -7,7 +7,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   User, MapPin, DollarSign, Home, Bike, Ship, Car,
-  ExternalLink, MessageCircle, Bed, Bath, Square
+  ExternalLink, MessageCircle, Bed, Bath, Square, Star, Heart, TrendingUp
 } from 'lucide-react';
 import { ImageCarousel } from '@/components/ImageCarousel';
 
@@ -104,12 +104,12 @@ export function ChatPreviewSheet({
             <div className="bg-[#2C2C2E] rounded-2xl p-4">
               <div className="flex items-center gap-4 mb-4">
                 <Avatar className={`w-16 h-16 ring-2 ring-offset-2 ring-offset-[#2C2C2E] ${
-                  otherUser.role === 'owner' ? 'ring-[#FF6B35]' : 'ring-[#007AFF]'
+                  otherUser.role === 'owner' ? 'ring-[#8B5CF6]' : 'ring-[#007AFF]'
                 }`}>
                   <AvatarImage src={otherUser.avatar_url} />
                   <AvatarFallback className={`text-xl font-semibold text-white ${
                     otherUser.role === 'owner'
-                      ? 'bg-gradient-to-br from-[#FF6B35] to-[#F7931E]'
+                      ? 'bg-gradient-to-br from-[#8B5CF6] to-[#6366F1]'
                       : 'bg-gradient-to-br from-[#007AFF] to-[#5856D6]'
                   }`}>
                     {otherUser.full_name?.charAt(0) || '?'}
@@ -122,7 +122,7 @@ export function ChatPreviewSheet({
                   <div className="flex items-center gap-2">
                     <Badge className={`text-xs border-0 ${
                       otherUser.role === 'owner'
-                        ? 'bg-[#FF6B35]/20 text-[#FF6B35]'
+                        ? 'bg-[#8B5CF6]/20 text-[#8B5CF6]'
                         : 'bg-[#007AFF]/20 text-[#007AFF]'
                     }`}>
                       {otherUser.role === 'client' ? 'Explorer' : 'Provider'}
@@ -133,6 +133,41 @@ export function ChatPreviewSheet({
                     </span>
                   </div>
                 </div>
+              </div>
+
+              {/* Rating Insights - Compact */}
+              <div className="bg-[#1C1C1E] rounded-xl p-3 mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1">
+                    <Star className="w-4 h-4 text-[#FFD60A] fill-[#FFD60A]" />
+                    <span className="text-sm font-semibold text-white">4.8</span>
+                    <span className="text-[10px] text-[#8E8E93]">(24)</span>
+                  </div>
+                  <div className="h-4 w-px bg-[#38383A]" />
+                  <div className="flex items-center gap-1.5 text-[11px] text-[#8E8E93]">
+                    <Heart className="w-3 h-3 text-[#FF453A]" />
+                    <span>98% Response</span>
+                  </div>
+                  <div className="h-4 w-px bg-[#38383A]" />
+                  <div className="flex items-center gap-1.5 text-[11px] text-[#34C759]">
+                    <TrendingUp className="w-3 h-3" />
+                    <span>Verified</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Match Context - How you connected */}
+              <div className="bg-[#1C1C1E] rounded-xl p-3 mb-3">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <Heart className="w-3 h-3 text-[#FF453A]" />
+                  <span className="text-[10px] font-medium text-[#8E8E93]">HOW YOU CONNECTED</span>
+                </div>
+                <p className="text-xs text-white">
+                  {otherUser.role === 'owner'
+                    ? `You liked their listing${listing ? ` "${listing.title.substring(0, 30)}..."` : ''} and they liked your profile back`
+                    : 'They liked your profile and you matched'
+                  }
+                </p>
               </div>
 
               <Button
@@ -152,7 +187,7 @@ export function ChatPreviewSheet({
                   <div className="flex items-center gap-2 mb-1">
                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
                       listing.category === 'property'
-                        ? 'bg-[#FF6B35]/20 text-[#FF6B35]'
+                        ? 'bg-[#8B5CF6]/20 text-[#8B5CF6]'
                         : 'bg-[#007AFF]/20 text-[#007AFF]'
                     }`}>
                       {getCategoryIcon(listing.category)}
@@ -209,7 +244,7 @@ export function ChatPreviewSheet({
 
                   <Button
                     onClick={handleViewFullListing}
-                    className="w-full mt-4 bg-gradient-to-r from-[#FF6B35] to-[#F7931E] hover:from-[#FF5722] hover:to-[#E68A00] text-white border-0 rounded-xl"
+                    className="w-full mt-4 bg-gradient-to-r from-[#8B5CF6] to-[#6366F1] hover:from-[#7C3AED] hover:to-[#4F46E5] text-white border-0 rounded-xl"
                   >
                     <Home className="w-4 h-4 mr-2" />
                     View Full Listing
@@ -242,8 +277,8 @@ export function ChatPreviewSheet({
             {isClient && !listing && (
               <div className="bg-[#2C2C2E] rounded-2xl p-4">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#FF6B35]/20 flex items-center justify-center">
-                    <Home className="w-5 h-5 text-[#FF6B35]" />
+                  <div className="w-10 h-10 rounded-xl bg-[#8B5CF6]/20 flex items-center justify-center">
+                    <Home className="w-5 h-5 text-[#8B5CF6]" />
                   </div>
                   <div>
                     <h4 className="text-sm font-medium text-white">Direct Conversation</h4>

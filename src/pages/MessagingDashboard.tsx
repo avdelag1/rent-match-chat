@@ -337,8 +337,8 @@ export function MessagingDashboard() {
 
     return (
       <>
-        <div className="w-full flex flex-col pb-20">
-          <div className="w-full max-w-3xl mx-auto px-4 py-2 flex flex-col">
+        <div className="w-full flex flex-col pb-24">
+          <div className="w-full max-w-4xl mx-auto p-2 sm:p-3 flex flex-col h-[calc(100vh-6rem)]">
             {otherUser ? (
               <MessagingInterface
                 conversationId={selectedConversationId}
@@ -385,20 +385,29 @@ export function MessagingDashboard() {
         variant="conversation-limit"
       />
 
-      <div className="w-full pb-20 bg-[#000000] min-h-[calc(100vh-4rem)]">
-        <div className="w-full max-w-3xl mx-auto px-4 py-4">
-          {/* Compact Header */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => navigate(-1)}
-                className="text-white hover:bg-white/10 rounded-full h-9 w-9"
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </Button>
-              <h1 className="text-xl font-bold text-white">Messages</h1>
+      <div className="w-full pb-24 bg-[#000000]">
+        <div className="w-full max-w-4xl mx-auto p-3 sm:p-4">
+          {/* Vibrant Header */}
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => navigate(-1)}
+                  className="text-white hover:bg-white/10 rounded-full"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </Button>
+                <h1 className="text-2xl sm:text-3xl font-bold text-white">Messages</h1>
+              </div>
+              {stats && (
+                <div className="px-3 py-1.5 rounded-full bg-gradient-to-r from-[#8B5CF6]/20 to-[#6366F1]/20 border border-[#8B5CF6]/30">
+                  <p className="text-xs font-medium text-[#8B5CF6]">
+                    {stats.conversationsUsed}/{stats.isPremium ? '∞' : 5} this week
+                  </p>
+                </div>
+              )}
             </div>
             {stats && (
               <div className="px-2.5 py-1 rounded-full bg-gradient-to-r from-[#FF6B35]/20 to-[#F7931E]/20 border border-[#FF6B35]/30">
@@ -420,9 +429,8 @@ export function MessagingDashboard() {
             />
           </div>
 
-          {/* Conversations List */}
-          <div className="rounded-xl bg-[#1C1C1E] overflow-hidden">
-            <ScrollArea className="max-h-[calc(100vh-12rem)]">
+            {/* Conversations List */}
+            <ScrollArea className="h-[calc(100vh-16rem)]">
               {isLoading ? (
                 <div className="p-12 text-center">
                   <MessageCircle className="w-10 h-10 mx-auto mb-3 text-[#007AFF] animate-pulse" />
@@ -452,13 +460,13 @@ export function MessagingDashboard() {
                       <div className="flex items-center gap-3">
                         {/* Compact Avatar */}
                         <div className="relative shrink-0">
-                          <Avatar className={`w-12 h-12 ring-2 ring-offset-1 ring-offset-[#1C1C1E] ${
-                            isOwner ? 'ring-[#FF6B35]/50' : 'ring-[#007AFF]/50'
+                          <Avatar className={`w-14 h-14 ring-2 ring-offset-2 ring-offset-[#1C1C1E] ${
+                            isOwner ? 'ring-[#8B5CF6]' : 'ring-[#007AFF]'
                           }`}>
                             <AvatarImage src={conversation.other_user?.avatar_url} />
                             <AvatarFallback className={`text-base font-semibold text-white ${
                               isOwner
-                                ? 'bg-gradient-to-br from-[#FF6B35] to-[#F7931E]'
+                                ? 'bg-gradient-to-br from-[#8B5CF6] to-[#6366F1]'
                                 : 'bg-gradient-to-br from-[#007AFF] to-[#5856D6]'
                             }`}>
                               {conversation.other_user?.full_name?.charAt(0) || '?'}
@@ -487,7 +495,7 @@ export function MessagingDashboard() {
                             <Badge
                               className={`text-[10px] px-1.5 py-0 h-5 border-0 ${
                                 isOwner
-                                  ? 'bg-[#FF6B35]/20 text-[#FF6B35]'
+                                  ? 'bg-[#8B5CF6]/20 text-[#8B5CF6]'
                                   : 'bg-[#007AFF]/20 text-[#007AFF]'
                               }`}
                             >
@@ -512,9 +520,11 @@ export function MessagingDashboard() {
                   );
                 })
               ) : (
-                <div className="p-16 text-center">
-                  <MessageCircle className="w-12 h-12 mx-auto mb-3 text-[#FF6B35]/50" />
-                  <p className="text-white font-medium text-sm mb-1">
+                <div className="p-12 text-center">
+                  <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#8B5CF6]/20 to-[#6366F1]/20 flex items-center justify-center">
+                    <MessageCircle className="w-10 h-10 text-[#8B5CF6]" />
+                  </div>
+                  <p className="text-white font-medium mb-1">
                     {searchQuery ? 'No conversations found' : 'No conversations yet'}
                   </p>
                   <p className="text-xs text-[#8E8E93]">

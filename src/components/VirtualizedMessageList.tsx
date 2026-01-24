@@ -41,7 +41,7 @@ const getBubbleColors = (otherUserRole: string, isMyMessage: boolean) => {
 
   if (otherUserRole === 'owner') {
     return {
-      background: 'bg-gradient-to-br from-[#FF6B35] to-[#F7931E]',
+      background: 'bg-gradient-to-br from-[#8B5CF6] to-[#6366F1]',
       text: 'text-white',
       timestamp: 'text-white/60'
     };
