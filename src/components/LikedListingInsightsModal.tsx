@@ -1,14 +1,13 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { MapPin, Bed, Bath, Square, DollarSign, MessageCircle, Sparkles, Trash2, Ban, Flag, ChevronLeft, ChevronRight } from 'lucide-react';
+import { MapPin, Bed, Bath, Square, DollarSign, MessageCircle, Sparkles, Trash2, Ban, Flag, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { PropertyImageGallery } from './PropertyImageGallery';
 import { useNavigate } from 'react-router-dom';
 import { useStartConversation } from '@/hooks/useConversations';
 import { toast } from '@/hooks/use-toast';
-import { useState, useEffect, useMemo, useCallback, memo } from 'react';
+import { useState, useEffect, useCallback, memo } from 'react';
 import { logger } from '@/utils/prodLogger';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -25,7 +24,6 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { motion, AnimatePresence } from 'framer-motion';
 
 interface LikedListingInsightsModalProps {
   open: boolean;
@@ -261,191 +259,232 @@ function LikedListingInsightsModalComponent({ open, onOpenChange, listing }: Lik
     }
   }, [listing, startConversation, navigate, onOpenChange]);
 
+  if (!listing) return null;
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="w-[calc(100%-16px)] max-w-[500px] sm:max-w-2xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
-          <DialogHeader className="px-4 sm:px-6 py-3 border-b shrink-0">
-            <DialogTitle className="text-base sm:text-lg font-semibold">Property Details</DialogTitle>
-          </DialogHeader>
+        <DialogContent
+          className="w-full max-w-2xl h-[90vh] max-h-[90vh] p-0 overflow-hidden bg-background border-0 rounded-3xl"
+          hideCloseButton
+        >
+          <div className="flex flex-col h-full">
+            {/* Hero Image Section */}
+            <div className="relative flex-shrink-0">
+              {images.length > 0 ? (
+                <div className="relative aspect-[16/10] w-full">
+                  <img
+                    src={images[currentImageIndex]}
+                    alt={`Property photo ${currentImageIndex + 1}`}
+                    className="w-full h-full object-cover cursor-pointer"
+                    onClick={handleImageClick}
+                  />
 
-          {!listing ? (
-            <div className="p-6">
-              <Skeleton className="h-64 w-full mb-4" />
-              <Skeleton className="h-6 w-3/4 mb-2" />
-              <Skeleton className="h-4 w-1/2" />
-            </div>
-          ) : (
-            <ScrollArea className="flex-1 h-full overflow-x-hidden">
-              <div className="space-y-4 py-4 px-4 sm:px-6 pb-6 w-full max-w-full overflow-x-hidden">
-                {/* Single Large Photo Carousel */}
-                {images.length > 0 && (
-                  <div className="space-y-2">
-                    <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-muted group">
-                      <AnimatePresence mode="wait">
-                        <motion.img
-                          key={currentImageIndex}
-                          src={images[currentImageIndex]}
-                          alt={`Property photo ${currentImageIndex + 1}`}
-                          className="w-full h-full object-cover cursor-pointer"
-                          onClick={handleImageClick}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.3 }}
-                        />
-                      </AnimatePresence>
+                  {/* Close Button */}
+                  <button
+                    onClick={() => onOpenChange(false)}
+                    className="absolute top-3 right-3 w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center transition-all backdrop-blur-sm z-10"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
 
-                      {/* Navigation Arrows */}
-                      {images.length > 1 && (
-                        <>
-                          <button
-                            onClick={handlePrevImage}
-                            className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center transition-all backdrop-blur-sm z-10"
-                          >
-                            <ChevronLeft className="w-6 h-6" />
-                          </button>
-                          <button
-                            onClick={handleNextImage}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center transition-all backdrop-blur-sm z-10"
-                          >
-                            <ChevronRight className="w-6 h-6" />
-                          </button>
-                        </>
-                      )}
+                  {/* Navigation Arrows */}
+                  {images.length > 1 && (
+                    <>
+                      <button
+                        onClick={handlePrevImage}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center transition-all backdrop-blur-sm"
+                      >
+                        <ChevronLeft className="w-6 h-6" />
+                      </button>
+                      <button
+                        onClick={handleNextImage}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center transition-all backdrop-blur-sm"
+                      >
+                        <ChevronRight className="w-6 h-6" />
+                      </button>
+                    </>
+                  )}
 
-                      {/* Photo Counter */}
-                      <div className="absolute bottom-3 right-3 bg-black/70 text-white px-3 py-1.5 rounded-full text-sm font-medium backdrop-blur-sm">
-                        {currentImageIndex + 1} / {images.length}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Basic Info */}
-                <div className="space-y-3">
-                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
-                    <h3 className="text-xl sm:text-2xl font-bold flex-1">{listing.title}</h3>
-                    <Badge className="bg-gradient-to-r from-red-500/20 to-orange-500/20 text-red-700 dark:text-red-400 border-red-500/30 w-fit">
+                  {/* Photo Counter & Liked Badge */}
+                  <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
+                    <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-white border-0 px-3 py-1">
                       <Sparkles className="w-3 h-3 mr-1" />
                       Liked
                     </Badge>
+                    {images.length > 1 && (
+                      <div className="bg-black/60 text-white px-3 py-1.5 rounded-full text-sm font-medium backdrop-blur-sm">
+                        {currentImageIndex + 1} / {images.length}
+                      </div>
+                    )}
                   </div>
+
+                  {/* Thumbnail Strip */}
+                  {images.length > 1 && (
+                    <div className="absolute bottom-[-28px] left-0 right-0 flex justify-center gap-1.5 px-4 z-20">
+                      {images.slice(0, 8).map((_, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setCurrentImageIndex(idx)}
+                          className={`h-1.5 rounded-full transition-all duration-200 ${
+                            idx === currentImageIndex
+                              ? 'w-6 bg-primary'
+                              : 'w-1.5 bg-muted-foreground/40 hover:bg-muted-foreground/60'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="aspect-[16/10] w-full bg-muted flex items-center justify-center">
+                  <span className="text-muted-foreground">No images</span>
+                </div>
+              )}
+            </div>
+
+            {/* Content Section - Scrollable */}
+            <ScrollArea className="flex-1 overflow-y-auto">
+              <div className="p-4 sm:p-6 space-y-4 pt-8">
+                {/* Title & Address */}
+                <div className="space-y-2">
+                  <h2 className="text-xl sm:text-2xl font-bold leading-tight">{listing.title}</h2>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <MapPin className="w-4 h-4 flex-shrink-0" />
                     <span className="text-sm">{listing.address}</span>
                   </div>
                 </div>
 
-                {/* Price & Key Details */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl border border-primary/20">
-                  <div className="flex flex-col items-center gap-1">
-                    <DollarSign className="w-5 h-5 text-green-600" />
-                    <span className="text-lg font-bold text-green-600">
-                      ${listing.price?.toLocaleString()}
-                    </span>
-                    <span className="text-xs text-muted-foreground">per month</span>
+                {/* Quick Stats */}
+                <div className="grid grid-cols-4 gap-2">
+                  <div className="flex flex-col items-center p-3 bg-green-500/10 rounded-xl">
+                    <DollarSign className="w-5 h-5 text-green-500 mb-1" />
+                    <span className="text-lg font-bold text-green-500">${listing.price?.toLocaleString()}</span>
+                    <span className="text-[10px] text-muted-foreground uppercase">per month</span>
                   </div>
                   {listing.beds && (
-                    <div className="flex flex-col items-center gap-1">
-                      <Bed className="w-5 h-5 text-primary" />
+                    <div className="flex flex-col items-center p-3 bg-blue-500/10 rounded-xl">
+                      <Bed className="w-5 h-5 text-blue-500 mb-1" />
                       <span className="text-lg font-bold">{listing.beds}</span>
-                      <span className="text-xs text-muted-foreground">bed{listing.beds !== 1 ? 's' : ''}</span>
+                      <span className="text-[10px] text-muted-foreground uppercase">beds</span>
                     </div>
                   )}
                   {listing.baths && (
-                    <div className="flex flex-col items-center gap-1">
-                      <Bath className="w-5 h-5 text-primary" />
+                    <div className="flex flex-col items-center p-3 bg-purple-500/10 rounded-xl">
+                      <Bath className="w-5 h-5 text-purple-500 mb-1" />
                       <span className="text-lg font-bold">{listing.baths}</span>
-                      <span className="text-xs text-muted-foreground">bath{listing.baths !== 1 ? 's' : ''}</span>
+                      <span className="text-[10px] text-muted-foreground uppercase">baths</span>
                     </div>
                   )}
                   {listing.square_footage && (
-                    <div className="flex flex-col items-center gap-1">
-                      <Square className="w-5 h-5 text-primary" />
+                    <div className="flex flex-col items-center p-3 bg-orange-500/10 rounded-xl">
+                      <Square className="w-5 h-5 text-orange-500 mb-1" />
                       <span className="text-lg font-bold">{listing.square_footage}</span>
-                      <span className="text-xs text-muted-foreground">sqft</span>
+                      <span className="text-[10px] text-muted-foreground uppercase">sqft</span>
                     </div>
                   )}
                 </div>
 
                 {/* Description */}
                 {listing.description && (
-                  <div className="p-4 bg-muted/30 rounded-xl">
-                    <h4 className="font-semibold text-base mb-2">About This Property</h4>
-                    <p className="text-sm text-foreground leading-relaxed">{listing.description}</p>
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">About</h4>
+                    <p className="text-sm leading-relaxed">{listing.description}</p>
                   </div>
                 )}
 
-                {/* Property Features */}
-                <div>
-                  <h4 className="font-semibold mb-2">Property Features</h4>
+                {/* Features */}
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Features</h4>
                   <div className="flex flex-wrap gap-2">
-                    {listing.property_type && <Badge variant="secondary" className="bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20">{listing.property_type}</Badge>}
-                    {listing.furnished && <Badge variant="secondary" className="bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20">Furnished</Badge>}
-                    {listing.pet_friendly && <Badge variant="secondary" className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20">Pet Friendly</Badge>}
-                    <Badge variant="outline" className={listing.status === 'available' ? 'bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20' : ''}>{listing.status}</Badge>
+                    {listing.property_type && (
+                      <Badge variant="secondary" className="bg-blue-500/10 text-blue-600 dark:text-blue-400 border-0">
+                        {listing.property_type}
+                      </Badge>
+                    )}
+                    {listing.furnished && (
+                      <Badge variant="secondary" className="bg-purple-500/10 text-purple-600 dark:text-purple-400 border-0">
+                        Furnished
+                      </Badge>
+                    )}
+                    {listing.pet_friendly && (
+                      <Badge variant="secondary" className="bg-green-500/10 text-green-600 dark:text-green-400 border-0">
+                        Pet Friendly
+                      </Badge>
+                    )}
+                    <Badge variant="secondary" className={`border-0 ${
+                      listing.status === 'available'
+                        ? 'bg-green-500/10 text-green-600 dark:text-green-400'
+                        : 'bg-muted text-muted-foreground'
+                    }`}>
+                      {listing.status}
+                    </Badge>
                   </div>
                 </div>
 
                 {/* Amenities */}
                 {listing.amenities && listing.amenities.length > 0 && (
-                  <div>
-                    <h4 className="font-semibold mb-2">Amenities</h4>
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Amenities</h4>
                     <div className="flex flex-wrap gap-2">
                       {listing.amenities.map((amenity: string) => (
-                        <Badge key={`amenity-${amenity}`} variant="outline" className="bg-primary/5">{amenity}</Badge>
+                        <Badge key={`amenity-${amenity}`} variant="outline" className="text-xs">
+                          {amenity}
+                        </Badge>
                       ))}
                     </div>
                   </div>
                 )}
               </div>
             </ScrollArea>
-          )}
 
-          <DialogFooter className="px-4 sm:px-6 py-3 border-t shrink-0 flex-col sm:flex-row gap-2 bg-muted/30">
-            <div className="flex gap-2 w-full sm:w-auto">
+            {/* Action Buttons - Fixed at Bottom */}
+            <div className="flex-shrink-0 p-4 border-t bg-background/80 backdrop-blur-sm space-y-3">
+              {/* Primary Action */}
               <Button
-                onClick={handleDelete}
-                variant="outline"
-                size="sm"
-                className="flex-1 sm:flex-none bg-red-500/10 hover:bg-red-500/20 border-red-500/30 text-red-700 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 font-medium"
-                disabled={deleteMutation.isPending}
+                onClick={handleMessage}
+                disabled={isCreatingConversation || !listing}
+                className="w-full h-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold text-base rounded-xl shadow-lg shadow-blue-500/25"
               >
-                <Trash2 className="w-4 h-4 mr-1.5" />
-                Delete
+                <MessageCircle className="w-5 h-5 mr-2" />
+                {isCreatingConversation ? 'Starting...' : 'Message Owner'}
               </Button>
-              <Button
-                onClick={handleBlock}
-                variant="outline"
-                size="sm"
-                className="flex-1 sm:flex-none bg-orange-500/10 hover:bg-orange-500/20 border-orange-500/30 text-orange-700 dark:text-orange-400 hover:text-orange-800 dark:hover:text-orange-300 font-medium"
-                disabled={blockMutation.isPending}
-              >
-                <Ban className="w-4 h-4 mr-1.5" />
-                Block
-              </Button>
-              <Button
-                onClick={handleReport}
-                variant="outline"
-                size="sm"
-                className="flex-1 sm:flex-none bg-yellow-500/10 hover:bg-yellow-500/20 border-yellow-500/30 text-yellow-700 dark:text-yellow-400 hover:text-yellow-800 dark:hover:text-yellow-300 font-medium"
-                disabled={reportMutation.isPending}
-              >
-                <Flag className="w-4 h-4 mr-1.5" />
-                Report
-              </Button>
+
+              {/* Secondary Actions */}
+              <div className="grid grid-cols-3 gap-2">
+                <Button
+                  onClick={handleDelete}
+                  variant="outline"
+                  size="sm"
+                  className="h-10 bg-red-500/10 hover:bg-red-500/20 border-red-500/30 text-red-600 dark:text-red-400 rounded-xl"
+                  disabled={deleteMutation.isPending}
+                >
+                  <Trash2 className="w-4 h-4 mr-1.5" />
+                  Delete
+                </Button>
+                <Button
+                  onClick={handleBlock}
+                  variant="outline"
+                  size="sm"
+                  className="h-10 bg-orange-500/10 hover:bg-orange-500/20 border-orange-500/30 text-orange-600 dark:text-orange-400 rounded-xl"
+                  disabled={blockMutation.isPending}
+                >
+                  <Ban className="w-4 h-4 mr-1.5" />
+                  Block
+                </Button>
+                <Button
+                  onClick={handleReport}
+                  variant="outline"
+                  size="sm"
+                  className="h-10 bg-yellow-500/10 hover:bg-yellow-500/20 border-yellow-500/30 text-yellow-600 dark:text-yellow-400 rounded-xl"
+                  disabled={reportMutation.isPending}
+                >
+                  <Flag className="w-4 h-4 mr-1.5" />
+                  Report
+                </Button>
+              </div>
             </div>
-            <Button
-              onClick={handleMessage}
-              disabled={isCreatingConversation || !listing}
-              size="sm"
-              className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium shadow-lg shadow-blue-500/30"
-            >
-              <MessageCircle className="w-4 h-4 mr-1.5" />
-              {isCreatingConversation ? 'Starting...' : 'Message Owner'}
-            </Button>
-          </DialogFooter>
+          </div>
         </DialogContent>
 
         {/* Full Screen Image Gallery */}
@@ -462,7 +501,7 @@ function LikedListingInsightsModalComponent({ open, onOpenChange, listing }: Lik
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-2xl">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <Trash2 className="w-5 h-5 text-red-500" />
@@ -473,10 +512,10 @@ function LikedListingInsightsModalComponent({ open, onOpenChange, listing }: Lik
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmDelete}
-              className="bg-red-600 hover:bg-red-700 text-white"
+              className="bg-red-600 hover:bg-red-700 text-white rounded-xl"
             >
               Remove
             </AlertDialogAction>
@@ -486,7 +525,7 @@ function LikedListingInsightsModalComponent({ open, onOpenChange, listing }: Lik
 
       {/* Block Confirmation Dialog */}
       <AlertDialog open={showBlockDialog} onOpenChange={setShowBlockDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-2xl">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <Ban className="w-5 h-5 text-orange-500" />
@@ -497,10 +536,10 @@ function LikedListingInsightsModalComponent({ open, onOpenChange, listing }: Lik
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmBlock}
-              className="bg-orange-600 hover:bg-orange-700 text-white"
+              className="bg-orange-600 hover:bg-orange-700 text-white rounded-xl"
             >
               {blockMutation.isPending ? 'Blocking...' : 'Block Owner'}
             </AlertDialogAction>
@@ -510,17 +549,15 @@ function LikedListingInsightsModalComponent({ open, onOpenChange, listing }: Lik
 
       {/* Report Dialog */}
       <Dialog open={showReportDialog} onOpenChange={setShowReportDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Flag className="w-5 h-5 text-yellow-500" />
-              Report Property/Owner
-            </DialogTitle>
-          </DialogHeader>
+        <DialogContent className="sm:max-w-md rounded-2xl">
           <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Flag className="w-5 h-5 text-yellow-500" />
+              <h3 className="text-lg font-semibold">Report Property/Owner</h3>
+            </div>
             <div className="space-y-3">
               <Label>Reason for report</Label>
-              <RadioGroup value={reportReason} onValueChange={setReportReason}>
+              <RadioGroup value={reportReason} onValueChange={setReportReason} className="space-y-2">
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="fake_listing" id="fake_listing" />
                   <Label htmlFor="fake_listing" className="font-normal">Fake or misleading listing</Label>
@@ -550,22 +587,22 @@ function LikedListingInsightsModalComponent({ open, onOpenChange, listing }: Lik
                 placeholder="Please provide any additional information..."
                 value={reportDetails}
                 onChange={(e) => setReportDetails(e.target.value)}
-                className="min-h-[100px]"
+                className="min-h-[100px] rounded-xl"
               />
             </div>
+            <div className="flex gap-2 pt-2">
+              <Button variant="outline" onClick={() => setShowReportDialog(false)} className="flex-1 rounded-xl">
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSubmitReport}
+                disabled={!reportReason || reportMutation.isPending}
+                className="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white rounded-xl"
+              >
+                {reportMutation.isPending ? "Submitting..." : "Submit Report"}
+              </Button>
+            </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowReportDialog(false)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSubmitReport}
-              disabled={!reportReason || reportMutation.isPending}
-              className="bg-yellow-600 hover:bg-yellow-700 text-white"
-            >
-              {reportMutation.isPending ? "Submitting..." : "Submit Report"}
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>

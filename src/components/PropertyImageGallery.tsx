@@ -166,8 +166,9 @@ function PropertyImageGalleryComponent({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
-        className="max-w-[100vw] max-h-[100vh] w-full h-full p-0 bg-black/95"
+        className="max-w-[100vw] max-h-[100vh] w-full h-full p-0 bg-black/95 border-0"
         onKeyDown={handleKeyDown}
+        hideCloseButton
       >
         <div className="relative w-full h-full flex flex-col">
           {/* Header */}
