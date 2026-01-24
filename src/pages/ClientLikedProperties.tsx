@@ -12,7 +12,7 @@ import { useLikedProperties } from "@/hooks/useLikedProperties";
 import { useUserSubscription } from "@/hooks/useSubscription";
 import { useStartConversation, useConversationStats } from "@/hooks/useConversations";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Flame, MessageCircle, MapPin, Bed, Bath, Square, Crown, ExternalLink, RefreshCw, Camera, ArrowLeft, Home, Bike, Briefcase, Trash2, MoreVertical } from "lucide-react";
+import { Flame, MessageCircle, MapPin, Bed, Bath, Square, Crown, RefreshCw, Camera, ArrowLeft, Home, Bike, Briefcase, Trash2, MoreVertical } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { useMessagingQuota } from "@/hooks/useMessagingQuota";
 import { MessageQuotaDialog } from "@/components/MessageQuotaDialog";
@@ -325,17 +325,6 @@ const ClientLikedProperties = () => {
                         </Badge>
                       </div>
                       <div className="absolute top-2 right-2 flex gap-1">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="bg-background/20 hover:bg-background/30 text-foreground"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handlePropertySelect(property.id);
-                          }}
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                        </Button>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button

@@ -1,6 +1,5 @@
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, Home, Users, Shield, Zap, Heart, MessageCircle } from "lucide-react";
+import { Home, Users, Shield, Zap, Heart, MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { PageHeader } from "@/components/PageHeader";
@@ -57,20 +56,12 @@ export default function AboutPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-24">
       <div className="max-w-3xl mx-auto px-4 py-8 pb-32">
-        <Button
-          variant="ghost"
-          onClick={() => navigate(-1)}
-          className="mb-6 text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back
-        </Button>
-
         <PageHeader
           title="About Swipess"
           subtitle="Connecting property owners with the perfect tenants"
+          showBack={true}
         />
 
         {/* Mission Statement */}
