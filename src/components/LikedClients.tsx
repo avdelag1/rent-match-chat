@@ -453,7 +453,7 @@ export function LikedClients() {
           </Button>
 
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4 sm:mb-6">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-1">
               <div className="p-2 sm:p-3 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 text-white flex-shrink-0">
                 <Flame className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
@@ -462,6 +462,15 @@ export function LikedClients() {
                 <p className="text-sm sm:text-base text-muted-foreground">Manage your liked client profiles and start conversations</p>
               </div>
             </div>
+            <Button
+              onClick={() => navigate('/owner/interested-clients')}
+              variant="outline"
+              className="gap-2 whitespace-nowrap"
+            >
+              <Heart className="w-4 h-4" />
+              <span className="hidden sm:inline">Who Liked You</span>
+              <span className="sm:hidden">Who Liked Me</span>
+            </Button>
           </div>
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-6">

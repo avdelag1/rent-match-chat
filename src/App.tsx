@@ -57,6 +57,7 @@ import OwnerSettings from "./pages/OwnerSettingsNew";
 import OwnerProperties from "./pages/OwnerProperties";
 import OwnerNewListing from "./pages/OwnerNewListing";
 import OwnerLikedClients from "./pages/OwnerLikedClients";
+import OwnerInterestedClients from "./pages/OwnerInterestedClients";
 import OwnerContracts from "./pages/OwnerContracts";
 import OwnerSavedSearches from "./pages/OwnerSavedSearches";
 import OwnerSecurity from "./pages/OwnerSecurity";
@@ -172,6 +173,7 @@ const App = () => (
                       <Route path="/owner/properties" element={<OwnerProperties />} />
                       <Route path="/owner/listings/new" element={<OwnerNewListing />} />
                       <Route path="/owner/liked-clients" element={<OwnerLikedClients />} />
+                      <Route path="/owner/interested-clients" element={<OwnerInterestedClients />} />
                       <Route path="/owner/clients/property" element={<OwnerPropertyClientDiscovery />} />
                       <Route path="/owner/clients/moto" element={<OwnerMotoClientDiscovery />} />
                       <Route path="/owner/clients/bicycle" element={<OwnerBicycleClientDiscovery />} />

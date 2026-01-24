@@ -13,7 +13,7 @@ import { useOwnerProfile } from "@/hooks/useOwnerProfile";
 import {
   User, LogOut, Building2, Eye, MessageCircle,
   Camera, ArrowLeft, Crown, Settings as SettingsIcon,
-  Flame, Palette
+  Flame, Palette, Heart
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -156,6 +156,29 @@ const OwnerProfileNew = () => {
                     <div className="text-sm text-muted-foreground">View clients you've liked</div>
                   </div>
                   <div className="text-lg font-bold text-foreground">0</div>
+                </button>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Who Liked You */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ ...fastSpring, delay: 0.17 }}
+          >
+            <Card className="bg-card border-border">
+              <CardContent className="p-4">
+                <button
+                  onClick={() => navigate('/owner/interested-clients')}
+                  className="w-full flex items-center gap-3"
+                >
+                  <Heart className="w-5 h-5 text-pink-500" />
+                  <div className="flex-1 text-left">
+                    <div className="font-medium text-foreground">Who Liked You</div>
+                    <div className="text-sm text-muted-foreground">See clients interested in your listings</div>
+                  </div>
+                </button>
                 </button>
               </CardContent>
             </Card>
