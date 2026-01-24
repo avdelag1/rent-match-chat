@@ -178,6 +178,7 @@ export default function NotificationsPage() {
         .eq('read', false);
     } catch (error) {
       logger.error('Error auto-marking as read:', error);
+      // Fail silently for auto-mark as it's not critical
     }
   };
 
@@ -213,6 +214,11 @@ export default function NotificationsPage() {
       setNotifications(formattedNotifications);
     } catch (error) {
       logger.error('Error fetching notifications:', error);
+      toast({
+        title: "Error loading notifications",
+        description: "Failed to load your notifications. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }

@@ -68,11 +68,11 @@ function LikedClientInsightsModalComponent({ open, onOpenChange, client }: Liked
   const clientImages = client?.profile_images || client?.images || [];
 
   // Reset image index when modal opens
-  useState(() => {
+  useEffect(() => {
     if (open) {
       setCurrentImageIndex(0);
     }
-  });
+  }, [open]);
 
   // Delete mutation - Remove from liked clients
   const deleteMutation = useMutation({

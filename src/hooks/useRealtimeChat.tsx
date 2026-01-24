@@ -57,7 +57,7 @@ export function useRealtimeChat(conversationId: string) {
           userName: user.user_metadata?.full_name || 'User',
           isTyping: false,
           timestamp: Date.now()
-        }).catch(() => {});
+        }).catch((err) => logger.error('Typing indicator error:', err));
       }, 3000);
       return;
     }
@@ -79,9 +79,7 @@ export function useRealtimeChat(conversationId: string) {
         userName: user.user_metadata?.full_name || 'User',
         isTyping: true,
         timestamp: now
-      }).catch(() => {
-        // Silently handle typing errors - not critical
-      });
+      }).catch((err) => logger.error('Typing indicator error:', err));
     }
 
     // Set timeout to stop typing after 3 seconds of inactivity
@@ -93,9 +91,7 @@ export function useRealtimeChat(conversationId: string) {
         userName: user.user_metadata?.full_name || 'User',
         isTyping: false,
         timestamp: Date.now()
-      }).catch(() => {
-        // Silently handle typing errors - not critical
-      });
+      }).catch((err) => logger.error('Typing indicator error:', err));
     }, 3000);
   }, [conversationId, user?.id, user?.user_metadata?.full_name]);
 
