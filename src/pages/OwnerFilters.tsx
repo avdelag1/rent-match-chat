@@ -4,13 +4,15 @@
  * Full-screen, mobile-first filter page for owners.
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Users, User, Briefcase, Check, Home, ShoppingCart
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { useFilterStore } from '@/state/filterStore';
+import type { ClientGender, ClientType as FilterClientType } from '@/types/filters';
 
 type Gender = 'male' | 'female' | 'any';
 type ClientType = 'all' | 'hire' | 'rent' | 'buy';
@@ -70,13 +72,28 @@ const clientTypeOptions = [
 export default function OwnerFilters() {
   const navigate = useNavigate();
 
-  const [localGender, setLocalGender] = useState<Gender>('any');
-  const [localClientType, setLocalClientType] = useState<ClientType>('all');
+  // Get current filter state from store
+  const storeGender = useFilterStore((state) => state.clientGender);
+  const storeClientType = useFilterStore((state) => state.clientType);
+  const setClientGender = useFilterStore((state) => state.setClientGender);
+  const setClientType = useFilterStore((state) => state.setClientType);
+
+  // Local state initialized from store
+  const [localGender, setLocalGender] = useState<Gender>(storeGender);
+  const [localClientType, setLocalClientType] = useState<ClientType>(storeClientType);
+
+  // Sync local state with store on mount
+  useEffect(() => {
+    setLocalGender(storeGender);
+    setLocalClientType(storeClientType);
+  }, [storeGender, storeClientType]);
 
   const handleApply = useCallback(() => {
-    // TODO: Apply filters to store
+    // Apply filters to store
+    setClientGender(localGender as ClientGender);
+    setClientType(localClientType as FilterClientType);
     navigate(-1);
-  }, [navigate]);
+  }, [navigate, localGender, localClientType, setClientGender, setClientType]);
 
   const handleBack = useCallback(() => {
     navigate(-1);

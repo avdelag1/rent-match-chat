@@ -109,10 +109,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             processingOAuthRef.current = true;
             processedUserIdRef.current = session.user.id;
 
-            // Run OAuth setup in background (non-blocking)
-            handleOAuthUserSetupAsync(session.user).finally(() => {
-              processingOAuthRef.current = false;
-            });
+            // Run OAuth setup in background with timeout protection (non-blocking)
+            const oauthSetupTimeout = setTimeout(() => {
+              if (processingOAuthRef.current) {
+                logger.warn('[Auth] OAuth setup timeout - resetting state');
+                processingOAuthRef.current = false;
+              }
+            }, 15000); // 15 second timeout
+
+            handleOAuthUserSetupAsync(session.user)
+              .catch((error) => {
+                logger.error('[Auth] OAuth setup failed:', error);
+                toast({
+                  title: 'Profile Setup Issue',
+                  description: 'There was an issue setting up your profile. Please try refreshing the page.',
+                  variant: 'destructive',
+                });
+              })
+              .finally(() => {
+                clearTimeout(oauthSetupTimeout);
+                processingOAuthRef.current = false;
+              });
           }
         }
 
@@ -182,7 +199,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string, role: 'client' | 'owner', name?: string) => {
     try {
-      // Check existing account (with timeout)
+      // Check existing account (with timeout to prevent slow signup)
       let existingProfile = null;
       try {
         const checkPromise = checkExistingAccount(email);
@@ -191,8 +208,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         );
         const result = await Promise.race([checkPromise, timeoutPromise]);
         existingProfile = result.profile;
-      } catch (checkError) {
-        if (import.meta.env.DEV) logger.log('[Auth] Existing account check skipped:', checkError);
+      } catch (checkError: any) {
+        // Log timeout specifically so we can track if this is happening frequently
+        if (checkError?.message === 'Check timeout') {
+          logger.warn('[Auth] Existing account check timed out after 5s, proceeding with signup');
+        } else {
+          logger.warn('[Auth] Existing account check failed:', checkError?.message || checkError);
+        }
       }
 
       if (existingProfile) {
@@ -215,7 +237,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error: new Error('User already registered') };
       }
 
-      const redirectUrl = import.meta.env.VITE_APP_URL || 'https://swipess.com/';
+      // Use current origin as fallback to support all environments (dev, staging, production)
+      const redirectUrl = import.meta.env.VITE_APP_URL || window.location.origin;
 
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -311,22 +334,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (data.user) {
-        // SPEED OF LIGHT: Navigate IMMEDIATELY after successful auth
-        // Role validation happens async in background - never block the UI
-        const targetPath = role === 'client' ? '/client/dashboard' : '/owner/dashboard';
+        // Quick role check to prevent dashboard flash (max 2 seconds)
+        let actualRole: 'client' | 'owner' = role;
+
+        try {
+          const roleCheckPromise = supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', data.user.id)
+            .maybeSingle();
+
+          const timeoutPromise = new Promise<null>((resolve) =>
+            setTimeout(() => resolve(null), 2000)
+          );
+
+          const roleResult = await Promise.race([roleCheckPromise, timeoutPromise]);
+
+          if (roleResult && 'data' in roleResult && roleResult.data?.role) {
+            actualRole = roleResult.data.role as 'client' | 'owner';
+          }
+        } catch (roleCheckError) {
+          // On error, use the expected role - profile setup will correct later
+          logger.warn('[Auth] Quick role check failed, using expected role:', roleCheckError);
+        }
+
+        const targetPath = actualRole === 'client' ? '/client/dashboard' : '/owner/dashboard';
 
         toast({
           title: "Welcome back!",
           description: "Loading your dashboard...",
         });
 
-        // Navigate immediately - don't wait for role check
         navigate(targetPath, { replace: true });
 
-        // Run role validation and profile setup in background (non-blocking)
-        // Use setTimeout(0) to ensure navigation completes first
+        // Run profile setup in background (non-blocking)
         setTimeout(() => {
-          validateRoleInBackground(data.user!, role);
+          createProfileIfMissing(data.user!, actualRole);
         }, 0);
 
         return { error: null };
@@ -415,7 +458,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         access_type: 'offline',
       };
 
-      const redirectUrl = import.meta.env.VITE_APP_URL || 'https://swipess.com/';
+      // Use current origin as fallback to support all environments (dev, staging, production)
+      const redirectUrl = import.meta.env.VITE_APP_URL || window.location.origin;
 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,

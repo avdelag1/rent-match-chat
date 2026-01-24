@@ -114,10 +114,13 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     }
   }, [user, loading, navigate, location]);
 
-  // Reset navigation ref when route changes (allows future navigation)
+  // Reset navigation ref only when user comes back (not on every route change)
+  // This prevents potential redirect loops during auth state changes
   useEffect(() => {
-    didNavigateRef.current = false;
-  }, [location.pathname]);
+    if (user && didNavigateRef.current) {
+      didNavigateRef.current = false;
+    }
+  }, [user?.id]);
 
   // SPEED OF LIGHT: If we've shown content before, keep showing children
   // This prevents flicker during token refresh or re-renders

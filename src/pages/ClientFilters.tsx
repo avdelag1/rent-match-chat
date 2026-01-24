@@ -8,7 +8,7 @@
  * - Clean, professional UI
  */
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -20,6 +20,8 @@ import { BicycleClientFilters } from '@/components/filters/BicycleClientFilters'
 import { WorkerClientFilters } from '@/components/filters/WorkerClientFilters';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useFilterStore } from '@/state/filterStore';
+import type { QuickFilterCategory } from '@/types/filters';
 
 // Custom motorcycle icon
 const MotorcycleIcon = ({ className }: { className?: string }) => (
@@ -51,19 +53,28 @@ export default function ClientFilters() {
     services: 0,
   });
 
-  const handleApplyFilters = () => {
-    // TODO: Connect to actual filter store and navigate to results
-    navigate('/client/swipe');
-  };
+  // Get filter store actions
+  const setStoreCategory = useFilterStore((state) => state.setActiveCategory);
+  const resetClientFilters = useFilterStore((state) => state.resetClientFilters);
 
-  const handleClearAll = () => {
+  const handleApplyFilters = useCallback(() => {
+    // Apply the selected category to the filter store
+    setStoreCategory(activeCategory as QuickFilterCategory);
+    // Navigate to swipe page with filters applied
+    navigate('/client/swipe');
+  }, [activeCategory, setStoreCategory, navigate]);
+
+  const handleClearAll = useCallback(() => {
+    // Reset local state
     setFilterCounts({
       property: 0,
       moto: 0,
       bicycle: 0,
       services: 0,
     });
-  };
+    // Reset filter store
+    resetClientFilters();
+  }, [resetClientFilters]);
 
   const handleFilterApply = (category: CategoryType, filters: any) => {
     // Count active filters

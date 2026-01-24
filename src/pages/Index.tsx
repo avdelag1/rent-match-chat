@@ -59,17 +59,21 @@ const Index = () => {
       return data?.role;
     },
     enabled: !!user && initialized,
-    retry: 5, // More retries for new users
-    retryDelay: (attemptIndex) => Math.min(500 * 2 ** attemptIndex, 3000),
+    retry: 10, // More retries for reliability
+    retryDelay: (attemptIndex) => Math.min(500 * 2 ** attemptIndex, 5000),
     staleTime: 30000,
     gcTime: 300000,
     refetchOnWindowFocus: false,
     refetchOnMount: true,
-    // Poll for role if new user and role not found yet
+    // Poll for role until we have one (not based on user age - that can cause issues)
+    // Stop polling after 30 seconds to prevent infinite polling
     refetchInterval: (query) => {
       const role = query.state.data as string | null | undefined;
-      if (!user || !isNewUser || role) return false;
-      return 800; // Poll every 800ms for new users
+      // Stop if no user, or we have a role
+      if (!user || role) return false;
+      // Stop polling after 30 seconds (user age check)
+      if (userAgeMs > 30000) return false;
+      return 800; // Poll every 800ms while waiting for role
     },
   });
 
