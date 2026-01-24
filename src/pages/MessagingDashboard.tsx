@@ -409,38 +409,32 @@ export function MessagingDashboard() {
                 </div>
               )}
             </div>
-            <p className="text-sm text-[#8E8E93] ml-11">Stay connected with your matches</p>
+            {stats && (
+              <div className="px-2.5 py-1 rounded-full bg-gradient-to-r from-[#FF6B35]/20 to-[#F7931E]/20 border border-[#FF6B35]/30">
+                <p className="text-[11px] font-medium text-[#FF6B35]">
+                  {stats.conversationsUsed}/{stats.isPremium ? '∞' : 5}
+                </p>
+              </div>
+            )}
           </div>
 
-          {/* Conversations Section */}
-          <div className="rounded-2xl bg-[#1C1C1E] overflow-hidden">
-            {/* Section Header with Search */}
-            <div className="p-4 border-b border-[#38383A]">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#007AFF] to-[#5856D6] flex items-center justify-center">
-                  <MessageCircle className="w-4 h-4 text-white" />
-                </div>
-                <h2 className="text-lg font-semibold text-white">Conversations</h2>
-              </div>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-[#8E8E93]" />
-                <Input
-                  placeholder="Search conversations..."
-                  className="pl-10 bg-[#2C2C2E] border-[#38383A] text-white placeholder:text-[#8E8E93] rounded-xl focus:border-[#007AFF] focus:ring-0"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-            </div>
+          {/* Search Bar */}
+          <div className="relative mb-3">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-[#8E8E93]" />
+            <Input
+              placeholder="Search conversations..."
+              className="pl-9 h-10 bg-[#1C1C1E] border-[#38383A] text-white placeholder:text-[#8E8E93] rounded-xl focus:border-[#007AFF] focus:ring-1 focus:ring-[#007AFF]"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
 
             {/* Conversations List */}
             <ScrollArea className="h-[calc(100vh-16rem)]">
               {isLoading ? (
-                <div className="p-8 text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#007AFF]/20 to-[#5856D6]/20 flex items-center justify-center">
-                    <MessageCircle className="w-8 h-8 text-[#007AFF] animate-pulse" />
-                  </div>
-                  <p className="text-[#8E8E93]">Loading conversations...</p>
+                <div className="p-12 text-center">
+                  <MessageCircle className="w-10 h-10 mx-auto mb-3 text-[#007AFF] animate-pulse" />
+                  <p className="text-sm text-[#8E8E93]">Loading...</p>
                 </div>
               ) : filteredConversations.length > 0 ? (
                 filteredConversations.map((conversation, index) => {
@@ -460,17 +454,17 @@ export function MessagingDashboard() {
                   return (
                     <div
                       key={conversation.id}
-                      className="p-4 border-b border-[#38383A] cursor-pointer hover:bg-[#2C2C2E] transition-all duration-200 active:scale-[0.98]"
+                      className="p-3 border-b border-[#38383A] last:border-b-0 cursor-pointer hover:bg-[#2C2C2E]/50 transition-colors active:bg-[#2C2C2E]"
                       onClick={() => setSelectedConversationId(conversation.id)}
                     >
-                      <div className="flex items-start gap-3">
-                        {/* Avatar with colored ring */}
+                      <div className="flex items-center gap-3">
+                        {/* Compact Avatar */}
                         <div className="relative shrink-0">
                           <Avatar className={`w-14 h-14 ring-2 ring-offset-2 ring-offset-[#1C1C1E] ${
                             isOwner ? 'ring-[#8B5CF6]' : 'ring-[#007AFF]'
                           }`}>
                             <AvatarImage src={conversation.other_user?.avatar_url} />
-                            <AvatarFallback className={`text-lg font-semibold text-white ${
+                            <AvatarFallback className={`text-base font-semibold text-white ${
                               isOwner
                                 ? 'bg-gradient-to-br from-[#8B5CF6] to-[#6366F1]'
                                 : 'bg-gradient-to-br from-[#007AFF] to-[#5856D6]'
@@ -478,29 +472,28 @@ export function MessagingDashboard() {
                               {conversation.other_user?.full_name?.charAt(0) || '?'}
                             </AvatarFallback>
                           </Avatar>
-                          {/* Online indicator */}
-                          <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-[#34C759] rounded-full border-2 border-[#1C1C1E]" />
+                          <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-[#34C759] rounded-full border-2 border-[#1C1C1E]" />
                         </div>
 
                         {/* Content */}
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between mb-0.5">
-                            <h3 className="font-semibold text-white truncate text-[15px]">
+                          <div className="flex items-baseline justify-between mb-1">
+                            <h3 className="font-semibold text-white truncate text-sm">
                               {conversation.other_user?.full_name || 'Unknown User'}
                             </h3>
-                            <span className="text-xs text-[#8E8E93] ml-2 shrink-0">
+                            <span className="text-[11px] text-[#8E8E93] ml-2 shrink-0">
                               {conversation.last_message_at
                                 ? formatDistanceToNow(new Date(conversation.last_message_at), { addSuffix: false })
                                 : ''
                               }
                             </span>
                           </div>
-                          <p className="text-sm text-[#8E8E93] truncate mb-2">
+                          <p className="text-xs text-[#8E8E93] truncate mb-1.5">
                             {conversation.last_message?.message_text || 'Start a conversation...'}
                           </p>
-                          <div className="flex items-center gap-2 flex-wrap">
+                          <div className="flex items-center gap-1.5">
                             <Badge
-                              className={`text-[10px] px-2 py-0.5 border-0 ${
+                              className={`text-[10px] px-1.5 py-0 h-5 border-0 ${
                                 isOwner
                                   ? 'bg-[#8B5CF6]/20 text-[#8B5CF6]'
                                   : 'bg-[#007AFF]/20 text-[#007AFF]'
@@ -508,27 +501,18 @@ export function MessagingDashboard() {
                             >
                               {isOwner ? 'Provider' : 'Explorer'}
                             </Badge>
-                            {/* Show listing info if available */}
                             {listing && userRole === 'client' && (
-                              <Badge className="text-[10px] px-2 py-0.5 border-0 bg-[#34C759]/20 text-[#34C759] flex items-center gap-1">
-                                {getCategoryIcon(listing.category)}
-                                <span className="truncate max-w-[100px]">{listing.title}</span>
-                              </Badge>
+                              <>
+                                {listing.price && (
+                                  <span className="text-xs font-semibold text-[#34C759]">
+                                    ${listing.price.toLocaleString()}
+                                  </span>
+                                )}
+                                <Badge className="text-[10px] px-1.5 py-0 h-5 border-0 bg-[#34C759]/20 text-[#34C759] flex items-center gap-1">
+                                  {getCategoryIcon(listing.category)}
+                                </Badge>
+                              </>
                             )}
-                          </div>
-                        </div>
-
-                        {/* Right side with price or chevron */}
-                        <div className="flex flex-col items-end gap-1 shrink-0">
-                          {listing && userRole === 'client' && listing.price && (
-                            <span className="text-sm font-semibold text-[#34C759]">
-                              ${listing.price.toLocaleString()}
-                            </span>
-                          )}
-                          <div className="text-[#48484A]">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
                           </div>
                         </div>
                       </div>
@@ -543,8 +527,8 @@ export function MessagingDashboard() {
                   <p className="text-white font-medium mb-1">
                     {searchQuery ? 'No conversations found' : 'No conversations yet'}
                   </p>
-                  <p className="text-sm text-[#8E8E93]">
-                    {searchQuery ? 'Try a different search term' : 'Start matching to begin conversations!'}
+                  <p className="text-xs text-[#8E8E93]">
+                    {searchQuery ? 'Try a different search' : 'Start matching to chat!'}
                   </p>
                 </div>
               )}
