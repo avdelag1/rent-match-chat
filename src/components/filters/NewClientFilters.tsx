@@ -53,13 +53,11 @@ interface NewClientFiltersProps {
   currentFilters?: ClientFilters;
 }
 
-const categories = [
-  { id: 'property' as const, label: 'Property', icon: Home, color: 'bg-blue-500' },
-  { id: 'vehicle' as const, label: 'Vehicle', icon: Car, color: 'bg-green-500' },
-  { id: 'motorcycle' as const, label: 'Motorcycle', icon: Bike, color: 'bg-slate-500' },
-  { id: 'yacht' as const, label: 'Yacht', icon: Ship, color: 'bg-cyan-500' },
-  { id: 'bicycle' as const, label: 'Bicycle', icon: Bike, color: 'bg-emerald-500' },
-  { id: 'services' as const, label: 'Services', icon: Wrench, color: 'bg-purple-500' },
+const categories: { id: QuickFilterCategory; label: string; icon: typeof Home; color: string }[] = [
+  { id: 'property', label: 'Property', icon: Home, color: 'bg-blue-500' },
+  { id: 'motorcycle', label: 'Motorcycle', icon: Bike, color: 'bg-slate-500' },
+  { id: 'bicycle', label: 'Bicycle', icon: Bike, color: 'bg-emerald-500' },
+  { id: 'services', label: 'Services', icon: Wrench, color: 'bg-purple-500' },
 ];
 
 export function NewClientFilters({ open, onClose, onApply, currentFilters = {} }: NewClientFiltersProps) {
@@ -282,53 +280,12 @@ export function NewClientFilters({ open, onClose, onApply, currentFilters = {} }
                 </>
               )}
 
-              {filters.category === 'vehicle' && (
+              {filters.category === 'motorcycle' && (
                 <>
                   <Separator />
                   <div className="space-y-4">
-                    <label className="text-sm font-medium">Vehicle Details</label>
-
-                    {/* Seats */}
-                    <div className="space-y-2">
-                      <span className="text-xs text-muted-foreground">Seats</span>
-                      <div className="flex gap-2">
-                        {[0, 2, 4, 5, 7, 8].map((num) => (
-                          <button
-                            key={num}
-                            onClick={() => setFilters({ ...filters, seats: num })}
-                            className={cn(
-                              "flex-1 py-3 rounded-lg border-2 font-medium text-sm transition-all",
-                              filters.seats === num
-                                ? "border-primary bg-primary text-primary-foreground"
-                                : "border-border hover:border-primary/50"
-                            )}
-                          >
-                            {num === 8 ? '8+' : num === 0 ? 'Any' : num}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Transmission */}
-                    <div className="space-y-2">
-                      <span className="text-xs text-muted-foreground">Transmission</span>
-                      <div className="grid grid-cols-3 gap-2">
-                        {(['any', 'automatic', 'manual'] as const).map((type) => (
-                          <button
-                            key={type}
-                            onClick={() => setFilters({ ...filters, transmission: type })}
-                            className={cn(
-                              "py-3 rounded-lg border-2 font-medium text-sm capitalize transition-all",
-                              filters.transmission === type
-                                ? "border-primary bg-primary text-primary-foreground"
-                                : "border-border hover:border-primary/50"
-                            )}
-                          >
-                            {type}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+                    <label className="text-sm font-medium">Motorcycle Details</label>
+                    <p className="text-sm text-muted-foreground">Motorcycle-specific filters coming soon</p>
                   </div>
                 </>
               )}

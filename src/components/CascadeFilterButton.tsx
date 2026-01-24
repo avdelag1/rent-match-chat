@@ -42,10 +42,8 @@ function MotorcycleIcon({ className }: { className?: string }) {
 
 const categories: { id: QuickFilterCategory; label: string; icon: React.ReactNode }[] = [
   { id: 'property', label: 'properties', icon: <Home className="w-4 h-4" /> },
-  { id: 'vehicle', label: 'cars', icon: <Car className="w-4 h-4" /> },
   { id: 'motorcycle', label: 'motos', icon: <MotorcycleIcon className="w-4 h-4" /> },
   { id: 'bicycle', label: 'bikes', icon: <Bike className="w-4 h-4" /> },
-  { id: 'yacht', label: 'yachts', icon: <Ship className="w-4 h-4" /> },
   { id: 'services', label: 'services', icon: <Wrench className="w-4 h-4" /> },
 ];
 
