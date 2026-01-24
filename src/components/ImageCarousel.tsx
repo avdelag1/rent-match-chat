@@ -11,14 +11,13 @@ interface ImageCarouselProps {
   showThumbnails?: boolean;
 }
 
-// LRU Cache implementation for image caching
-const MAX_CACHE_SIZE = 100;
-const globalImageCache = new Map<string, { loaded: boolean; decoded: boolean; lastAccessed: number }>();
+// LRU Cache implementation for image caching - INSTANT RESPONSE
+const MAX_CACHE_SIZE = 150;
+const globalImageCache = new Map<string, { loaded: boolean; decoded: boolean; lastAccessed: number; element?: HTMLImageElement }>();
 
 // Add LRU eviction when cache is full
 function evictLRUIfNeeded() {
   if (globalImageCache.size >= MAX_CACHE_SIZE) {
-    // Find least recently used entry
     let oldestKey: string | null = null;
     let oldestTime = Infinity;
 
@@ -43,56 +42,99 @@ function updateCacheAccess(url: string) {
   }
 }
 
-// Preload queue to avoid competing preloads
-const preloadQueue: Set<string> = new Set();
+// High-priority preload for immediate adjacent images
+const preloadingUrls = new Set<string>();
 
-function preloadImage(url: string): void {
-  if (preloadQueue.has(url) || globalImageCache.has(url)) return;
-  preloadQueue.add(url);
+function preloadImageImmediate(url: string): void {
+  if (preloadingUrls.has(url) || globalImageCache.get(url)?.decoded) return;
+  preloadingUrls.add(url);
 
-  // Use requestIdleCallback for non-blocking preload
+  const img = new Image();
+  img.decoding = 'async';
+  (img as any).fetchPriority = 'high';
+
+  img.onload = () => {
+    preloadingUrls.delete(url);
+    evictLRUIfNeeded();
+
+    // Decode immediately for instant display
+    if ('decode' in img) {
+      img.decode().then(() => {
+        globalImageCache.set(url, {
+          loaded: true,
+          decoded: true,
+          lastAccessed: Date.now(),
+          element: img
+        });
+      }).catch(() => {
+        globalImageCache.set(url, { loaded: true, decoded: true, lastAccessed: Date.now() });
+      });
+    } else {
+      globalImageCache.set(url, { loaded: true, decoded: true, lastAccessed: Date.now() });
+    }
+  };
+
+  img.onerror = () => {
+    preloadingUrls.delete(url);
+  };
+
+  img.src = url;
+}
+
+// Background preload for non-adjacent images
+function preloadImageBackground(url: string): void {
+  if (preloadingUrls.has(url) || globalImageCache.has(url)) return;
+  preloadingUrls.add(url);
+
   const preload = () => {
     const img = new Image();
     img.decoding = 'async';
     img.onload = () => {
-      preloadQueue.delete(url);
+      preloadingUrls.delete(url);
       evictLRUIfNeeded();
       globalImageCache.set(url, { loaded: true, decoded: false, lastAccessed: Date.now() });
-      // Decode in idle time for instant display later
       if ('decode' in img) {
         img.decode().then(() => {
           const cached = globalImageCache.get(url);
           if (cached) {
             cached.decoded = true;
+            cached.element = img;
             cached.lastAccessed = Date.now();
           }
         }).catch(() => {});
       }
     };
     img.onerror = () => {
-      preloadQueue.delete(url);
+      preloadingUrls.delete(url);
     };
     img.src = url;
   };
 
   if ('requestIdleCallback' in window) {
-    requestIdleCallback(preload, { timeout: 2000 });
+    requestIdleCallback(preload, { timeout: 1000 });
   } else {
-    setTimeout(preload, 100);
+    setTimeout(preload, 50);
   }
 }
 
-// Async image decode with fallback
-async function decodeImage(src: string): Promise<boolean> {
+// INSTANT decode - returns immediately if cached, otherwise decodes fast
+async function decodeImageFastFast(src: string): Promise<boolean> {
+  const cached = globalImageCache.get(src);
+  if (cached?.decoded) {
+    updateCacheAccess(src);
+    return true;
+  }
+
   return new Promise((resolve) => {
     const img = new Image();
+    (img as any).fetchPriority = 'high';
+    img.decoding = 'sync'; // Synchronous for faster response
     img.src = src;
+
     img.onload = () => {
-      if ('decode' in img) {
-        img.decode().then(() => resolve(true)).catch(() => resolve(true));
-      } else {
-        resolve(true);
-      }
+      evictLRUIfNeeded();
+      globalImageCache.set(src, { loaded: true, decoded: true, lastAccessed: Date.now(), element: img });
+      resolve(true);
     };
     img.onerror = () => resolve(false);
   });
@@ -147,23 +189,24 @@ const ImageCarouselComponent = ({
     // Check if already cached and decoded
     const cached = globalImageCache.get(currentImageSrc);
     if (cached?.decoded && displayedSrc !== currentImageSrc) {
-      // Instant switch for cached+decoded images
+      // INSTANT switch for cached+decoded images - no delay
       updateCacheAccess(currentImageSrc);
       setPreviousSrc(displayedSrc);
       setDisplayedSrc(currentImageSrc);
       setShowImage(true);
       setIsTransitioning(true);
-      setTimeout(() => {
+      // Clear previous immediately for cached images
+      requestAnimationFrame(() => {
         setIsTransitioning(false);
         setPreviousSrc(null);
-      }, 100);
+      });
       return;
     }
 
     // If first load (no displayedSrc yet), show immediately and decode
     if (!displayedSrc) {
       setDisplayedSrc(currentImageSrc);
-      decodeImage(currentImageSrc).then((success) => {
+      decodeImageFast(currentImageSrc).then((success) => {
         if (success) {
           evictLRUIfNeeded();
           globalImageCache.set(currentImageSrc, { loaded: true, decoded: true, lastAccessed: Date.now() });
@@ -179,7 +222,7 @@ const ImageCarouselComponent = ({
       setPreviousSrc(displayedSrc);
       setIsTransitioning(true);
 
-      decodeImage(currentImageSrc).then((success) => {
+      decodeImageFast(currentImageSrc).then((success) => {
         decodingRef.current = false;
         if (success) {
           evictLRUIfNeeded();
@@ -193,29 +236,33 @@ const ImageCarouselComponent = ({
           setDisplayedSrc(currentImageSrc);
           setShowImage(true);
         }
-        // Brief transition then clear previous
+        // FAST transition then clear previous
         setTimeout(() => {
           setIsTransitioning(false);
           setPreviousSrc(null);
-        }, 150);
+        }, 80);
       });
     }
   }, [currentImageSrc, displayedSrc]);
 
-  // Preload adjacent images when current index changes
+  // INSTANT: Preload adjacent images immediately when index changes
   useEffect(() => {
     if (!images || images.length === 0) return;
 
-    // Preload next and previous images
-    const indicesToPreload = [
-      (currentIndex + 1) % images.length,
-      (currentIndex - 1 + images.length) % images.length,
-    ];
+    // HIGH PRIORITY: Next and previous images - preload immediately
+    const nextIdx = (currentIndex + 1) % images.length;
+    const prevIdx = (currentIndex - 1 + images.length) % images.length;
 
-    indicesToPreload.forEach(idx => {
-      if (images[idx]) {
-        preloadImage(images[idx]);
-      }
+    if (images[nextIdx]) preloadImageImmediate(images[nextIdx]);
+    if (images[prevIdx]) preloadImageImmediate(images[prevIdx]);
+
+    // BACKGROUND: Preload 2 ahead and 2 behind
+    const bgIndices = [
+      (currentIndex + 2) % images.length,
+      (currentIndex - 2 + images.length) % images.length,
+    ];
+    bgIndices.forEach(idx => {
+      if (images[idx]) preloadImageBackground(images[idx]);
     });
   }, [currentIndex, images]);
 
@@ -228,17 +275,19 @@ const ImageCarouselComponent = ({
     setCurrentIndex((prev) => (prev === (images?.length || 1) - 1 ? 0 : prev + 1));
   }, [images?.length]);
 
-  const handleImageClick = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+  // INSTANT TAP RESPONSE - no delay
+  const handleImageClick = useCallback((event: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
-    const clickX = event.clientX - rect.left;
+    const clientX = 'touches' in event
+      ? event.touches[0]?.clientX ?? event.changedTouches[0]?.clientX ?? 0
+      : (event as React.MouseEvent).clientX;
+    const clickX = clientX - rect.left;
     const imageWidth = rect.width;
 
-    // If clicked on left 30% of image, go previous
-    if (clickX < imageWidth * 0.3) {
+    // Left 35% = previous, Right 35% = next (larger tap zones)
+    if (clickX < imageWidth * 0.35) {
       goToPrevious();
-    }
-    // If clicked on right 30% of image, go next
-    else if (clickX > imageWidth * 0.7) {
+    } else if (clickX > imageWidth * 0.65) {
       goToNext();
     }
   }, [goToPrevious, goToNext]);
@@ -267,13 +316,19 @@ const ImageCarouselComponent = ({
 
   return (
     <div className={cn("relative w-full h-full", className)} ref={containerRef}>
-      {/* Main Image Container - Fixed aspect ratio prevents layout shift */}
+      {/* Main Image Container - GPU accelerated for instant response */}
       <div
         className={cn(
-          "relative w-full overflow-hidden rounded-lg cursor-pointer group",
+          "relative w-full overflow-hidden rounded-lg cursor-pointer group touch-manipulation",
           aspectRatioClass
         )}
         onClick={handleImageClick}
+        onTouchEnd={handleImageClick}
+        style={{
+          transform: 'translateZ(0)',
+          backfaceVisibility: 'hidden',
+          WebkitTapHighlightColor: 'transparent',
+        }}
       >
         {/* LAYER 1: Neutral blur placeholder - always visible as base
             Uses a light neutral gradient instead of dark/black */}
@@ -316,22 +371,23 @@ const ImageCarouselComponent = ({
           />
         )}
 
-        {/* LAYER 4: Current image - fades in after decode (or instant if cached) */}
+        {/* LAYER 4: Current image - INSTANT display for cached images */}
         {displayedSrc && (
           <img
             src={displayedSrc}
             alt={`${alt} ${currentIndex + 1}`}
-            // PERF FIX: Skip transition when started with cached image
             className={`absolute inset-0 w-full h-full object-cover ${
-              startedCachedRef.current ? '' : 'transition-opacity duration-150'
+              startedCachedRef.current ? '' : 'transition-opacity duration-100'
             }`}
             loading="eager"
-            decoding="async"
+            decoding="sync"
             fetchPriority="high"
             style={{
               zIndex: 4,
-              // Show immediately if started cached, otherwise fade in
               opacity: showImage && !(isTransitioning && previousSrc) ? 1 : 0,
+              transform: 'translateZ(0)',
+              willChange: 'opacity',
+              backfaceVisibility: 'hidden',
             }}
             onLoad={() => {
               if (!showImage) {
@@ -349,17 +405,17 @@ const ImageCarouselComponent = ({
           />
         )}
 
-        {/* Click Areas - Visual hints on hover (desktop only) */}
+        {/* Click Areas - Visual hints on hover (desktop only) - matches 35% tap zones */}
         {images.length > 1 && (
           <>
             <div
-              className="absolute left-0 top-0 w-[30%] h-full bg-gradient-to-r from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-start pl-4 pointer-events-none"
+              className="absolute left-0 top-0 w-[35%] h-full bg-gradient-to-r from-black/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex items-center justify-start pl-4 pointer-events-none"
               style={{ zIndex: 10 }}
             >
               <ChevronLeft className="w-8 h-8 text-white drop-shadow-lg" />
             </div>
             <div
-              className="absolute right-0 top-0 w-[30%] h-full bg-gradient-to-l from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-end pr-4 pointer-events-none"
+              className="absolute right-0 top-0 w-[35%] h-full bg-gradient-to-l from-black/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex items-center justify-end pr-4 pointer-events-none"
               style={{ zIndex: 10 }}
             >
               <ChevronRight className="w-8 h-8 text-white drop-shadow-lg" />

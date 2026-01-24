@@ -2,7 +2,7 @@
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Shield, Bell, FileText, Crown, HelpCircle, Info, ChevronRight } from "lucide-react";
+import { ArrowLeft, Shield, FileText, HelpCircle, Info, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { AccountSecurity } from "@/components/AccountSecurity";
@@ -25,25 +25,11 @@ const OwnerSettingsNew = () => {
       section: 'security'
     },
     {
-      icon: Bell,
-      label: 'Notifications',
-      description: 'Manage notification preferences',
-      color: 'text-blue-500',
-      action: () => navigate('/notifications')
-    },
-    {
       icon: FileText,
       label: 'Contracts',
       description: 'View and manage your contracts',
       color: 'text-orange-500',
       action: () => navigate('/owner/contracts')
-    },
-    {
-      icon: Crown,
-      label: 'Premium Packages',
-      description: 'Upgrade your subscription',
-      color: 'text-yellow-500',
-      action: () => navigate('/subscription-packages')
     },
     {
       icon: HelpCircle,

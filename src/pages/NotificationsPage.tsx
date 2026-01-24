@@ -1,24 +1,26 @@
 /** SPEED OF LIGHT: DashboardLayout is now rendered at route level */
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { PageHeader } from '@/components/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Bell, MessageSquare, Flame, Star, Sparkles, Trash2,
-  CheckCheck, Filter, MoreHorizontal, Archive, Eye,
-  Home, Ship, Bike, Car
+  CheckCheck, MoreHorizontal, Heart, Home, Ship, Bike, Car,
+  ExternalLink, X, Clock, MapPin
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useLikedProperties } from '@/hooks/useLikedProperties';
 import { formatDistanceToNow } from '@/utils/timeFormatter';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from '@/hooks/use-toast';
 import { logger } from '@/utils/prodLogger';
-import { VirtualizedNotificationList } from '@/components/VirtualizedNotificationList';
-import { usePrefetchManager } from '@/hooks/usePrefetchManager';
+import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -74,54 +76,40 @@ const NotificationIcon = ({ type, className = "w-5 h-5" }: { type: string; class
   }
 };
 
-const NotificationIconBg = ({ type }: { type: string }) => {
-  const bgGradients: Record<string, string> = {
-    'new_message': 'bg-gradient-to-br from-blue-500/20 to-cyan-500/10',
-    'message': 'bg-gradient-to-br from-blue-500/20 to-cyan-500/10',
-    'new_like': 'bg-gradient-to-br from-orange-500/20 to-amber-500/10',
-    'like': 'bg-gradient-to-br from-orange-500/20 to-amber-500/10',
-    'new_match': 'bg-gradient-to-br from-amber-500/20 to-yellow-500/10',
-    'match': 'bg-gradient-to-br from-amber-500/20 to-yellow-500/10',
-    'super_like': 'bg-gradient-to-br from-yellow-500/20 to-orange-500/10',
-    'property': 'bg-gradient-to-br from-emerald-500/20 to-teal-500/10',
-    'yacht': 'bg-gradient-to-br from-cyan-500/20 to-blue-500/10',
-    'bicycle': 'bg-gradient-to-br from-orange-500/20 to-red-500/10',
-    'vehicle': 'bg-gradient-to-br from-purple-500/20 to-pink-500/10',
-  };
-
-  return (
-    <div className={`p-3 rounded-2xl shadow-lg ${bgGradients[type] || 'bg-gradient-to-br from-muted to-muted-foreground/20'}`}>
-      <NotificationIcon type={type} className="w-6 h-6" />
-    </div>
-  );
+const bgGradients: Record<string, string> = {
+  'new_message': 'from-blue-500/20 to-cyan-500/10',
+  'message': 'from-blue-500/20 to-cyan-500/10',
+  'new_like': 'from-orange-500/20 to-amber-500/10',
+  'like': 'from-orange-500/20 to-amber-500/10',
+  'new_match': 'from-amber-500/20 to-yellow-500/10',
+  'match': 'from-amber-500/20 to-yellow-500/10',
+  'super_like': 'from-yellow-500/20 to-orange-500/10',
+  'property': 'from-emerald-500/20 to-teal-500/10',
+  'yacht': 'from-cyan-500/20 to-blue-500/10',
+  'bicycle': 'from-orange-500/20 to-red-500/10',
+  'vehicle': 'from-purple-500/20 to-pink-500/10',
 };
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeFilter, setActiveFilter] = useState('all');
+  const [activeTab, setActiveTab] = useState('activity');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [notificationToDelete, setNotificationToDelete] = useState<string | null>(null);
   const [deletingAll, setDeletingAll] = useState(false);
+  const [removingLikeId, setRemovingLikeId] = useState<string | null>(null);
   const { user } = useAuth();
   const { data: userRole } = useUserRole(user?.id);
-  const { prefetchNextNotificationsPage } = usePrefetchManager();
-
-  // PERFORMANCE FIX: Prefetch is now triggered from INSIDE VirtualizedNotificationList
-  // via onEndReached prop - this is more reliable than outer scroll detection
-  const handleEndReached = useCallback(() => {
-    if (!user?.id || notifications.length < 50) return;
-    prefetchNextNotificationsPage(user.id, notifications.length);
-  }, [user?.id, notifications.length, prefetchNextNotificationsPage]);
+  const { data: likedProperties, isLoading: likedLoading } = useLikedProperties();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (!user?.id) return;
 
     fetchNotifications();
-    // Auto-mark all notifications as read when visiting this page
     markAllAsReadSilently();
 
-    // Subscribe to real-time notifications
     const channel = supabase
       .channel('notifications-page')
       .on(
@@ -167,7 +155,6 @@ export default function NotificationsPage() {
     };
   }, [user?.id]);
 
-  // Mark all as read without toast (silent version for auto-marking)
   const markAllAsReadSilently = async () => {
     if (!user?.id) return;
     try {
@@ -178,7 +165,6 @@ export default function NotificationsPage() {
         .eq('read', false);
     } catch (error) {
       logger.error('Error auto-marking as read:', error);
-      // Fail silently for auto-mark as it's not critical
     }
   };
 
@@ -224,42 +210,6 @@ export default function NotificationsPage() {
     }
   };
 
-  const markAsRead = async (notificationId: string) => {
-    try {
-      await supabase
-        .from('notifications')
-        .update({ read: true } as any)
-        .eq('id', notificationId);
-
-      setNotifications(prev => 
-        prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
-      );
-    } catch (error) {
-      logger.error('Error marking as read:', error);
-    }
-  };
-
-  const markAllAsRead = async () => {
-    if (!user?.id) return;
-
-    try {
-      await supabase
-        .from('notifications')
-        .update({ read: true } as any)
-        .eq('user_id', user.id)
-        .eq('read', false);
-
-      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-      
-      toast({
-        title: 'All notifications marked as read',
-        description: 'Your notifications have been updated.',
-      });
-    } catch (error) {
-      logger.error('Error marking all as read:', error);
-    }
-  };
-
   const deleteNotification = async (notificationId: string) => {
     try {
       const { error } = await supabase
@@ -270,7 +220,7 @@ export default function NotificationsPage() {
       if (error) throw error;
 
       setNotifications(prev => prev.filter(n => n.id !== notificationId));
-      
+
       toast({
         title: 'Notification deleted',
         description: 'The notification has been removed.',
@@ -298,7 +248,7 @@ export default function NotificationsPage() {
       if (error) throw error;
 
       setNotifications([]);
-      
+
       toast({
         title: 'All notifications deleted',
         description: 'Your notifications have been cleared.',
@@ -316,9 +266,36 @@ export default function NotificationsPage() {
     }
   };
 
-  const confirmDelete = (notificationId: string) => {
-    setNotificationToDelete(notificationId);
-    setDeleteDialogOpen(true);
+  const removeLike = async (listingId: string) => {
+    if (!user?.id) return;
+    setRemovingLikeId(listingId);
+
+    try {
+      const { error } = await supabase
+        .from('likes')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('target_id', listingId);
+
+      if (error) throw error;
+
+      // Invalidate liked properties cache
+      queryClient.invalidateQueries({ queryKey: ['liked-properties'] });
+
+      toast({
+        title: 'Removed from likes',
+        description: 'Property removed from your liked list.',
+      });
+    } catch (error) {
+      logger.error('Error removing like:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to remove like.',
+        variant: 'destructive',
+      });
+    } finally {
+      setRemovingLikeId(null);
+    }
   };
 
   const handleConfirmDelete = () => {
@@ -331,40 +308,30 @@ export default function NotificationsPage() {
     setDeleteDialogOpen(false);
   };
 
-  const filteredNotifications = notifications.filter(n => {
-    if (activeFilter === 'all') return true;
-    if (activeFilter === 'unread') return !n.read;
-    if (activeFilter === 'messages') return n.type === 'new_message' || n.type === 'message';
-    if (activeFilter === 'likes') return n.type === 'new_like' || n.type === 'like' || n.type === 'super_like';
-    if (activeFilter === 'matches') return n.type === 'new_match' || n.type === 'match';
-    return true;
-  });
-
   const unreadCount = notifications.filter(n => !n.read).length;
+  const likedCount = likedProperties?.length || 0;
+
+  // Category icons for liked properties
+  const getCategoryIcon = (category?: string) => {
+    switch (category) {
+      case 'yacht': return <Ship className="w-3.5 h-3.5" />;
+      case 'bicycle': return <Bike className="w-3.5 h-3.5" />;
+      case 'vehicle': return <Car className="w-3.5 h-3.5" />;
+      default: return <Home className="w-3.5 h-3.5" />;
+    }
+  };
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 pb-20 sm:pb-24 overflow-y-auto">
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 pb-20 sm:pb-24">
         <div className="px-3 py-4 sm:p-6 lg:p-8">
           <div className="max-w-2xl mx-auto space-y-4 sm:space-y-6">
             {/* Header */}
-            <PageHeader 
+            <PageHeader
               title="Notifications"
-              subtitle={unreadCount > 0 ? `${unreadCount} unread notification${unreadCount > 1 ? 's' : ''}` : 'All caught up!'}
+              subtitle="Your activity and saved items"
               actions={
                 <div className="flex items-center gap-2">
-                  {unreadCount > 0 && (
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={markAllAsRead}
-                      className="gap-2"
-                    >
-                      <CheckCheck className="w-4 h-4" />
-                      <span className="hidden sm:inline">Mark all read</span>
-                    </Button>
-                  )}
-                  
                   {notifications.length > 0 && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -373,7 +340,7 @@ export default function NotificationsPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem 
+                        <DropdownMenuItem
                           onClick={() => {
                             setNotificationToDelete(null);
                             setDeleteDialogOpen(true);
@@ -381,7 +348,7 @@ export default function NotificationsPage() {
                           className="text-destructive focus:text-destructive"
                         >
                           <Trash2 className="w-4 h-4 mr-2" />
-                          Delete all notifications
+                          Clear all activity
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -390,95 +357,282 @@ export default function NotificationsPage() {
               }
             />
 
-          {/* Filter Tabs */}
-          <Tabs value={activeFilter} onValueChange={setActiveFilter} className="w-full">
-            <TabsList className="flex w-full bg-card/80 backdrop-blur-sm border border-border/40 rounded-xl p-1 h-auto gap-1">
-              <TabsTrigger
-                value="all"
-                className="flex-1 min-w-0 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/90 data-[state=active]:to-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-lg py-2.5 px-2 sm:px-3 text-xs sm:text-sm font-medium transition-all"
-              >
-                <span>All</span>
-              </TabsTrigger>
-              <TabsTrigger
-                value="unread"
-                className="flex-1 min-w-0 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/90 data-[state=active]:to-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-lg py-2.5 px-2 sm:px-3 text-xs sm:text-sm font-medium transition-all gap-1"
-              >
-                <span>Unread</span>
-                {unreadCount > 0 && (
-                  <Badge variant="secondary" className="h-4 sm:h-5 px-1 sm:px-1.5 text-[10px] sm:text-xs bg-background/50">
-                    {unreadCount}
-                  </Badge>
-                )}
-              </TabsTrigger>
-              <TabsTrigger
-                value="messages"
-                className="flex-1 min-w-0 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/90 data-[state=active]:to-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-lg py-2.5 px-2 sm:px-3 text-xs sm:text-sm font-medium transition-all"
-              >
-                <span className="hidden sm:inline">Msgs</span>
-                <MessageSquare className="w-4 h-4 sm:hidden" />
-              </TabsTrigger>
-              <TabsTrigger
-                value="likes"
-                className="flex-1 min-w-0 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/90 data-[state=active]:to-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-lg py-2.5 px-2 sm:px-3 text-xs sm:text-sm font-medium transition-all"
-              >
-                <span className="hidden sm:inline">Flames</span>
-                <Flame className="w-4 h-4 sm:hidden" />
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value={activeFilter} className="mt-4 sm:mt-6">
-              {isLoading ? (
-                <div className="space-y-4">
-                  {[1, 2, 3, 4].map(i => (
-                    <Card key={i} className="animate-pulse bg-gradient-to-br from-card/80 to-card/40 border-border/40 shadow-md">
-                      <CardContent className="p-4">
-                        <div className="flex items-start gap-4">
-                          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-muted to-muted-foreground/20" />
-                          <div className="flex-1 space-y-2">
-                            <div className="h-4 w-1/3 bg-gradient-to-r from-muted to-muted-foreground/20 rounded-lg" />
-                            <div className="h-3 w-2/3 bg-gradient-to-r from-muted to-muted-foreground/20 rounded-lg" />
-                            <div className="h-3 w-1/4 bg-gradient-to-r from-muted to-muted-foreground/20 rounded-lg" />
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              ) : filteredNotifications.length === 0 ? (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="flex flex-col items-center justify-center py-12 sm:py-16 text-center px-4"
+            {/* Main Tabs */}
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-2 bg-card/80 backdrop-blur-sm border border-border/40 rounded-xl p-1 h-auto">
+                <TabsTrigger
+                  value="activity"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/90 data-[state=active]:to-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-lg py-3 px-4 text-sm font-medium transition-all flex items-center gap-2"
                 >
-                  <div className="relative mb-6">
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-purple-500/20 to-primary/20 rounded-full blur-2xl scale-150 animate-pulse" />
-                    <div className="relative p-6 sm:p-8 rounded-full bg-gradient-to-br from-primary/10 via-purple-500/5 to-primary/10 border-2 border-primary/20 shadow-2xl shadow-primary/10">
-                      <Bell className="w-12 h-12 sm:w-14 sm:h-14 text-primary" />
-                    </div>
+                  <Bell className="w-4 h-4" />
+                  Activity
+                  {unreadCount > 0 && (
+                    <Badge variant="secondary" className="h-5 px-1.5 text-xs bg-background/50">
+                      {unreadCount}
+                    </Badge>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger
+                  value="liked"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/90 data-[state=active]:to-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-lg py-3 px-4 text-sm font-medium transition-all flex items-center gap-2"
+                >
+                  <Heart className="w-4 h-4" />
+                  Liked
+                  {likedCount > 0 && (
+                    <Badge variant="secondary" className="h-5 px-1.5 text-xs bg-background/50">
+                      {likedCount}
+                    </Badge>
+                  )}
+                </TabsTrigger>
+              </TabsList>
+
+              {/* Activity Tab */}
+              <TabsContent value="activity" className="mt-4 sm:mt-6">
+                {isLoading ? (
+                  <div className="space-y-3">
+                    {[1, 2, 3, 4].map(i => (
+                      <Card key={i} className="animate-pulse bg-gradient-to-br from-card/80 to-card/40 border-border/40">
+                        <CardContent className="p-4">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-muted" />
+                            <div className="flex-1 space-y-2">
+                              <div className="h-4 w-1/3 bg-muted rounded" />
+                              <div className="h-3 w-2/3 bg-muted rounded" />
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
                   </div>
-                  <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary via-purple-500 to-primary bg-clip-text text-transparent mb-3">
-                    {activeFilter === 'all' ? 'No notifications yet' : `No ${activeFilter} notifications`}
-                  </h3>
-                  <p className="text-sm sm:text-base text-muted-foreground max-w-md">
-                    {activeFilter === 'all'
-                      ? "New activity will appear here"
-                      : `No ${activeFilter} notifications at the moment`
-                    }
-                  </p>
-                </motion.div>
-              ) : (
-                // PERFORMANCE FIX: Removed outer scroll wrapper - prefetch now handled
-                // inside VirtualizedNotificationList via onEndReached prop
-                <VirtualizedNotificationList
-                  notifications={filteredNotifications}
-                  onMarkAsRead={markAsRead}
-                  onDelete={confirmDelete}
-                  onEndReached={handleEndReached}
-                />
-              )}
-            </TabsContent>
-          </Tabs>
+                ) : notifications.length === 0 ? (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex flex-col items-center justify-center py-16 text-center px-4"
+                  >
+                    <div className="relative mb-6">
+                      <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-purple-500/20 to-primary/20 rounded-full blur-2xl scale-150 animate-pulse" />
+                      <div className="relative p-6 rounded-full bg-gradient-to-br from-primary/10 via-purple-500/5 to-primary/10 border-2 border-primary/20">
+                        <Bell className="w-12 h-12 text-primary" />
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-bold bg-gradient-to-r from-primary via-purple-500 to-primary bg-clip-text text-transparent mb-2">
+                      No activity yet
+                    </h3>
+                    <p className="text-sm text-muted-foreground max-w-xs">
+                      Your matches, likes, and messages will appear here
+                    </p>
+                  </motion.div>
+                ) : (
+                  <div className="space-y-2">
+                    <AnimatePresence mode="popLayout">
+                      {notifications.map((notification, index) => (
+                        <motion.div
+                          key={notification.id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, x: -100 }}
+                          transition={{ delay: index * 0.02 }}
+                        >
+                          <Card className={`bg-gradient-to-br ${bgGradients[notification.type] || 'from-card/80 to-card/40'} border-border/40 hover:border-border/60 transition-all group`}>
+                            <CardContent className="p-4">
+                              <div className="flex items-start gap-3">
+                                <div className="p-2.5 rounded-xl bg-background/50 shadow-sm">
+                                  <NotificationIcon type={notification.type} className="w-5 h-5" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-start justify-between gap-2">
+                                    <div className="flex-1 min-w-0">
+                                      <p className="font-semibold text-foreground text-sm">
+                                        {notification.title}
+                                      </p>
+                                      <p className="text-sm text-muted-foreground line-clamp-2 mt-0.5">
+                                        {notification.message}
+                                      </p>
+                                      <div className="flex items-center gap-2 mt-2">
+                                        <Clock className="w-3 h-3 text-muted-foreground" />
+                                        <span className="text-xs text-muted-foreground">
+                                          {formatDistanceToNow(notification.created_at)}
+                                        </span>
+                                      </div>
+                                    </div>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                                      onClick={() => deleteNotification(notification.id)}
+                                    >
+                                      <X className="w-4 h-4" />
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                )}
+              </TabsContent>
+
+              {/* Liked Properties Tab */}
+              <TabsContent value="liked" className="mt-4 sm:mt-6">
+                {likedLoading ? (
+                  <div className="grid grid-cols-1 gap-3">
+                    {[1, 2, 3].map(i => (
+                      <Card key={i} className="animate-pulse bg-card/80 border-border/40">
+                        <CardContent className="p-0">
+                          <div className="flex">
+                            <div className="w-28 h-28 bg-muted rounded-l-lg" />
+                            <div className="flex-1 p-3 space-y-2">
+                              <div className="h-4 w-2/3 bg-muted rounded" />
+                              <div className="h-3 w-1/2 bg-muted rounded" />
+                              <div className="h-3 w-1/4 bg-muted rounded" />
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : !likedProperties || likedProperties.length === 0 ? (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex flex-col items-center justify-center py-16 text-center px-4"
+                  >
+                    <div className="relative mb-6">
+                      <div className="absolute inset-0 bg-gradient-to-r from-red-500/20 via-pink-500/20 to-red-500/20 rounded-full blur-2xl scale-150 animate-pulse" />
+                      <div className="relative p-6 rounded-full bg-gradient-to-br from-red-500/10 via-pink-500/5 to-red-500/10 border-2 border-red-500/20">
+                        <Heart className="w-12 h-12 text-red-500" />
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-bold bg-gradient-to-r from-red-500 via-pink-500 to-red-500 bg-clip-text text-transparent mb-2">
+                      No liked properties yet
+                    </h3>
+                    <p className="text-sm text-muted-foreground max-w-xs mb-4">
+                      Start swiping to save properties you like
+                    </p>
+                    <Button
+                      onClick={() => navigate(userRole === 'owner' ? '/owner/dashboard' : '/client/dashboard')}
+                      className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600"
+                    >
+                      <Flame className="w-4 h-4 mr-2" />
+                      Start Swiping
+                    </Button>
+                  </motion.div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-sm text-muted-foreground">
+                        {likedCount} saved {likedCount === 1 ? 'item' : 'items'}
+                      </p>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => navigate(userRole === 'owner' ? '/owner/liked-clients' : '/client/liked-properties')}
+                        className="text-primary hover:text-primary/80"
+                      >
+                        View All
+                        <ExternalLink className="w-3.5 h-3.5 ml-1.5" />
+                      </Button>
+                    </div>
+                    <AnimatePresence mode="popLayout">
+                      {likedProperties.map((property, index) => (
+                        <motion.div
+                          key={property.id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, x: -100 }}
+                          transition={{ delay: index * 0.03 }}
+                        >
+                          <Card className="bg-card/80 border-border/40 hover:border-border/60 transition-all overflow-hidden group">
+                            <CardContent className="p-0">
+                              <div className="flex">
+                                {/* Property Image */}
+                                <div
+                                  className="w-28 h-28 sm:w-32 sm:h-32 flex-shrink-0 relative overflow-hidden cursor-pointer"
+                                  onClick={() => navigate(`/listing/${property.id}`)}
+                                >
+                                  {property.images?.[0] ? (
+                                    <img
+                                      src={property.images[0]}
+                                      alt={property.title}
+                                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                      loading="lazy"
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full bg-muted flex items-center justify-center">
+                                      <Home className="w-8 h-8 text-muted-foreground" />
+                                    </div>
+                                  )}
+                                  {/* Image count badge */}
+                                  {property.images && property.images.length > 1 && (
+                                    <div className="absolute bottom-1.5 right-1.5 bg-black/60 text-white text-xs px-1.5 py-0.5 rounded">
+                                      +{property.images.length - 1}
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Property Info */}
+                                <div className="flex-1 p-3 flex flex-col justify-between min-w-0">
+                                  <div>
+                                    <div className="flex items-start justify-between gap-2">
+                                      <div className="flex-1 min-w-0">
+                                        <h3
+                                          className="font-semibold text-foreground text-sm line-clamp-1 cursor-pointer hover:text-primary transition-colors"
+                                          onClick={() => navigate(`/listing/${property.id}`)}
+                                        >
+                                          {property.title}
+                                        </h3>
+                                        {property.location && (
+                                          <div className="flex items-center gap-1 mt-1 text-muted-foreground">
+                                            <MapPin className="w-3 h-3" />
+                                            <span className="text-xs line-clamp-1">{property.location}</span>
+                                          </div>
+                                        )}
+                                      </div>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-7 w-7 opacity-60 hover:opacity-100 text-muted-foreground hover:text-destructive flex-shrink-0"
+                                        onClick={() => removeLike(property.id)}
+                                        disabled={removingLikeId === property.id}
+                                      >
+                                        {removingLikeId === property.id ? (
+                                          <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                                        ) : (
+                                          <X className="w-4 h-4" />
+                                        )}
+                                      </Button>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex items-center justify-between mt-2">
+                                    <div className="flex items-center gap-2">
+                                      <Badge variant="secondary" className="text-xs py-0.5 px-2 bg-background/50 flex items-center gap-1">
+                                        {getCategoryIcon(property.category)}
+                                        {property.category || 'Property'}
+                                      </Badge>
+                                    </div>
+                                    {property.price && (
+                                      <span className="text-sm font-bold text-primary">
+                                        ${property.price.toLocaleString()}
+                                        <span className="text-xs font-normal text-muted-foreground">/mo</span>
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </div>
@@ -488,18 +642,18 @@ export default function NotificationsPage() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {notificationToDelete ? 'Delete notification?' : 'Delete all notifications?'}
+              {notificationToDelete ? 'Delete notification?' : 'Clear all activity?'}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {notificationToDelete 
+              {notificationToDelete
                 ? 'This notification will be permanently deleted.'
-                : 'All your notifications will be permanently deleted. This action cannot be undone.'
+                : 'All your activity notifications will be permanently deleted. This action cannot be undone.'
               }
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={handleConfirmDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
