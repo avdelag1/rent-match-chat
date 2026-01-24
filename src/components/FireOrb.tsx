@@ -29,8 +29,8 @@ const easeInOutSmooth = [0.4, 0, 0.2, 1] as const;
 
 function FireOrbComponent({ isActive = true, size = 12, onSettle }: FireOrbProps) {
   const prefersReducedMotion = useReducedMotion();
-  const [phase, setPhase] = useState<'hidden' | 'appear' | 'wander' | 'settle' | 'rest'>('hidden');
-  
+  const [phase, setPhase] = useState<'hidden' | 'appear' | 'wander' | 'settle' | 'rest'>('appear');
+
   // Animation phase timing
   useEffect(() => {
     if (!isActive || prefersReducedMotion) {
@@ -40,27 +40,25 @@ function FireOrbComponent({ isActive = true, size = 12, onSettle }: FireOrbProps
 
     // Start animation cycle
     const timeouts: NodeJS.Timeout[] = [];
-    
+
     const runCycle = () => {
-      setPhase('hidden');
-      
-      // Appear: 0 -> 600ms
-      timeouts.push(setTimeout(() => setPhase('appear'), 100));
-      
+      // Start from appear state, not hidden
+      setPhase('appear');
+
       // Wander: 600ms -> 4100ms (3.5s wander)
-      timeouts.push(setTimeout(() => setPhase('wander'), 700));
-      
+      timeouts.push(setTimeout(() => setPhase('wander'), 600));
+
       // Settle: 4100ms -> 4900ms (800ms settle)
       timeouts.push(setTimeout(() => {
         setPhase('settle');
         onSettle?.();
-      }, 4200));
-      
+      }, 4100));
+
       // Rest: 4900ms -> 7400ms (2.5s rest)
-      timeouts.push(setTimeout(() => setPhase('rest'), 5300));
-      
+      timeouts.push(setTimeout(() => setPhase('rest'), 4900));
+
       // Restart cycle
-      timeouts.push(setTimeout(runCycle, 9000));
+      timeouts.push(setTimeout(runCycle, 7400));
     };
 
     runCycle();
@@ -236,7 +234,7 @@ function FireOrbComponent({ isActive = true, size = 12, onSettle }: FireOrbProps
         width: size,
         height: size,
       }}
-      initial="hidden"
+      initial="appear"
       animate={phase}
       variants={orbVariants}
     >
@@ -252,7 +250,7 @@ function FireOrbComponent({ isActive = true, size = 12, onSettle }: FireOrbProps
           filter: 'blur(8px)',
         }}
         variants={glowVariants}
-        initial="hidden"
+        initial="appear"
         animate={phase}
       />
 
@@ -268,7 +266,7 @@ function FireOrbComponent({ isActive = true, size = 12, onSettle }: FireOrbProps
           filter: 'blur(3px)',
         }}
         variants={glowVariants}
-        initial="hidden"
+        initial="appear"
         animate={phase}
       />
 
@@ -297,7 +295,7 @@ function FireOrbComponent({ isActive = true, size = 12, onSettle }: FireOrbProps
               boxShadow: `0 0 ${particleSize * 0.8}px hsl(${hue} 100% ${lightness}% / ${opacity * 0.6})`,
             }}
             variants={particleVariants}
-            initial="hidden"
+            initial="appear"
             animate={phase}
           />
         );
@@ -324,7 +322,7 @@ function FireOrbComponent({ isActive = true, size = 12, onSettle }: FireOrbProps
           `,
         }}
         variants={mainOrbVariants}
-        initial="hidden"
+        initial="appear"
         animate={phase}
       />
 
@@ -341,7 +339,7 @@ function FireOrbComponent({ isActive = true, size = 12, onSettle }: FireOrbProps
           boxShadow: `0 0 ${size * 0.3}px hsl(55 100% 90% / 0.8)`,
         }}
         variants={coreVariants}
-        initial="hidden"
+        initial="appear"
         animate={phase}
       />
     </motion.div>
