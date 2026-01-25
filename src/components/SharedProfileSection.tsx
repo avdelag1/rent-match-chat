@@ -1,16 +1,12 @@
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Share2, Link2, Check, Copy } from 'lucide-react';
+import { Share2, Check, Copy, Gift } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import {
   copyToClipboard,
   shareViaNavigator,
-  shareViaWhatsApp,
-  shareViaFacebook,
-  shareViaTwitter,
-  shareViaSMS,
   generateShareUrl,
 } from '@/hooks/useSharing';
 import { useAuth } from '@/hooks/useAuth';
@@ -46,7 +42,7 @@ export function SharedProfileSection({
     }
   };
 
-  const handleNativeShare = async () => {
+  const handleShare = async () => {
     if (navigator.share) {
       await shareViaNavigator({
         title: profileName,
@@ -54,25 +50,8 @@ export function SharedProfileSection({
         url: shareUrl,
       });
     } else {
-      // Fallback to copy if native share not available
       handleCopyLink();
     }
-  };
-
-  const handleWhatsAppShare = () => {
-    shareViaWhatsApp(shareUrl, shareText);
-  };
-
-  const handleFacebookShare = () => {
-    shareViaFacebook(shareUrl);
-  };
-
-  const handleTwitterShare = () => {
-    shareViaTwitter(shareUrl, shareText);
-  };
-
-  const handleSMSShare = () => {
-    shareViaSMS(shareUrl, shareText);
   };
 
   return (
@@ -81,20 +60,21 @@ export function SharedProfileSection({
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: 'spring', stiffness: 500, damping: 30 }}
     >
-      <Card className="bg-card border-border overflow-hidden">
-        <CardContent className="p-4 space-y-4">
-          {/* Header */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-              <Share2 className="w-5 h-5 text-primary" />
+      <Card className="bg-card border-border">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between gap-3">
+            {/* Left side - Icon and text */}
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center flex-shrink-0">
+                <Gift className="w-5 h-5 text-primary" />
+              </div>
+              <div className="min-w-0">
+                <h3 className="font-semibold text-foreground text-sm">Share & Earn</h3>
+                <p className="text-xs text-muted-foreground truncate">
+                  Get free messages for referrals
+                </p>
+              </div>
             </div>
-            <div>
-              <h3 className="font-semibold text-foreground">Share & Earn</h3>
-              <p className="text-sm text-muted-foreground">
-                Get free messages for each referral
-              </p>
-            </div>
-          </div>
 
           {/* Copy Link Section */}
           <div className="flex gap-2">
@@ -135,8 +115,8 @@ export function SharedProfileSection({
           <div className="grid grid-cols-3 gap-2">
             {navigator.share && (
               <Button
-                onClick={handleNativeShare}
-                variant="default"
+                onClick={handleCopyLink}
+                variant="outline"
                 size="sm"
                 className="w-full h-9 px-2 text-xs sm:text-sm"
               >
