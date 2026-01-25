@@ -1,18 +1,23 @@
 /** SPEED OF LIGHT: DashboardLayout is now rendered at route level */
-import { PageTransition } from '@/components/PageTransition';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useContracts, useActiveDeals } from "@/hooks/useContracts";
-import { FileText, Clock, CheckCircle, AlertTriangle, Eye } from "lucide-react";
+import { FileText, Clock, CheckCircle, AlertTriangle, Eye, FileEdit, Plus } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useState } from "react";
 import { ContractSigningDialog } from "@/components/ContractSigningDialog";
+import { ContractTemplateSelector } from "@/components/ContractTemplateSelector";
+import { ContractDocumentDialog } from "@/components/ContractDocumentDialog";
+import { ContractTemplate } from "@/data/contractTemplates";
 
 const ClientContracts = () => {
   const { data: contracts, isLoading: contractsLoading } = useContracts();
   const { data: activeDeals, isLoading: dealsLoading } = useActiveDeals();
   const [selectedContract, setSelectedContract] = useState<string | null>(null);
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<ContractTemplate | null>(null);
+  const [showDocumentEditor, setShowDocumentEditor] = useState(false);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -35,6 +40,18 @@ const ClientContracts = () => {
     }
   };
 
+  const handleSelectTemplate = (template: ContractTemplate) => {
+    setSelectedTemplate(template);
+    setShowTemplateSelector(false);
+    setShowDocumentEditor(true);
+  };
+
+  const handleBackToTemplates = () => {
+    setShowDocumentEditor(false);
+    setSelectedTemplate(null);
+    setShowTemplateSelector(true);
+  };
+
   if (contractsLoading || dealsLoading) {
     return (
       <div className="w-full overflow-x-hidden p-4 sm:p-6 lg:p-8 pb-24 sm:pb-8 flex items-center justify-center">
@@ -55,10 +72,45 @@ const ClientContracts = () => {
             <p className="text-white/80 text-sm sm:text-base">Manage your rental agreements and contracts</p>
           </div>
 
+          {/* Create Document Section */}
+          <div className="mb-6 sm:mb-8">
+            <Card className="bg-gray-800/50 backdrop-blur-sm border-gray-700/50">
+              <CardContent className="p-4 sm:p-6">
+                <h3 className="text-white font-semibold mb-4">Create Documents</h3>
+                <Button
+                  onClick={() => setShowTemplateSelector(true)}
+                  className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto h-auto py-4"
+                >
+                  <div className="flex items-center gap-3">
+                    <FileEdit className="w-5 h-5" />
+                    <div className="text-left">
+                      <div className="font-semibold">Use Template</div>
+                      <div className="text-xs opacity-80">Promise to purchase, rental application, letter of intent</div>
+                    </div>
+                  </div>
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Template Categories Info */}
+          <div className="mb-6">
+            <Card className="bg-gradient-to-r from-green-900/50 to-blue-900/50 backdrop-blur-sm border-green-700/50">
+              <CardContent className="p-4">
+                <p className="text-white/90 text-sm text-center mb-3">Available document templates:</p>
+                <div className="flex flex-wrap gap-2 justify-center">
+                  <Badge className="bg-amber-500/20 text-amber-300">Promise to Purchase</Badge>
+                  <Badge className="bg-green-500/20 text-green-300">Rental Application</Badge>
+                  <Badge className="bg-blue-500/20 text-blue-300">Letter of Intent</Badge>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
           {/* Active Deals Section */}
           {activeDeals && activeDeals.length > 0 && (
             <div className="mb-6 sm:mb-8">
-              <h2 className="text-lg sm:text-xl font-semibold text-white mb-4">Active Deals</h2>
+              <h2 className="text-lg sm:text-xl font-semibold text-white mb-4">Pending Signatures</h2>
               <div className="grid gap-3 sm:gap-4">
                 {activeDeals.map((deal) => (
                   <Card key={deal.id} className="bg-gray-800/50 backdrop-blur-sm border-gray-700/50">
@@ -86,7 +138,7 @@ const ClientContracts = () => {
                               className="bg-green-600 hover:bg-green-700 text-xs sm:text-sm"
                               size="sm"
                             >
-                              Sign
+                              Sign Now
                             </Button>
                           )}
                         </div>
@@ -107,9 +159,19 @@ const ClientContracts = () => {
                 <CardContent className="p-6 sm:p-8 text-center">
                   <FileText className="w-10 h-10 sm:w-12 sm:h-12 text-gray-500 mx-auto mb-4" />
                   <h3 className="text-base sm:text-lg font-semibold text-white mb-2">No Contracts Yet</h3>
-                  <p className="text-gray-400 text-sm sm:text-base">
+                  <p className="text-gray-400 text-sm sm:text-base mb-4">
                     When property owners send you contracts, they will appear here.
                   </p>
+                  <p className="text-gray-500 text-xs sm:text-sm">
+                    You can also create your own documents using our templates.
+                  </p>
+                  <Button
+                    onClick={() => setShowTemplateSelector(true)}
+                    className="mt-4 bg-blue-600 hover:bg-blue-700"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Document
+                  </Button>
                 </CardContent>
               </Card>
             ) : (
@@ -164,6 +226,22 @@ const ClientContracts = () => {
           contractId={selectedContract}
           open={!!selectedContract}
           onOpenChange={() => setSelectedContract(null)}
+        />
+      )}
+
+      <ContractTemplateSelector
+        open={showTemplateSelector}
+        onOpenChange={setShowTemplateSelector}
+        onSelectTemplate={handleSelectTemplate}
+        userRole="client"
+      />
+
+      {selectedTemplate && (
+        <ContractDocumentDialog
+          open={showDocumentEditor}
+          onOpenChange={setShowDocumentEditor}
+          template={selectedTemplate}
+          onBack={handleBackToTemplates}
         />
       )}
     </>

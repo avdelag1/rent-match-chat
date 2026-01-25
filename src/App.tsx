@@ -56,6 +56,7 @@ import ClientSavedSearches from "./pages/ClientSavedSearches";
 import ClientSecurity from "./pages/ClientSecurity";
 import ClientWorkerDiscovery from "./pages/ClientWorkerDiscovery";
 import ClientContracts from "./pages/ClientContracts";
+import ClientLawyerServices from "./pages/ClientLawyerServices";
 
 // Owner routes - ALL direct imports for instant navigation
 import EnhancedOwnerDashboard from "./components/EnhancedOwnerDashboard";
@@ -73,6 +74,7 @@ import OwnerMotoClientDiscovery from "./pages/OwnerMotoClientDiscovery";
 import OwnerBicycleClientDiscovery from "./pages/OwnerBicycleClientDiscovery";
 import OwnerViewClientProfile from "./pages/OwnerViewClientProfile";
 import OwnerFiltersExplore from "./pages/OwnerFiltersExplore";
+import OwnerLawyerServices from "./pages/OwnerLawyerServices";
 
 // Filter pages - direct imports for instant navigation
 import ClientFilters from "./pages/ClientFilters";
@@ -170,6 +172,7 @@ const App = () => (
                       <Route path="/client/security" element={<ClientSecurity />} />
                       <Route path="/client/services" element={<ClientWorkerDiscovery />} />
                       <Route path="/client/contracts" element={<ClientContracts />} />
+                      <Route path="/client/legal-services" element={<ClientLawyerServices />} />
                       <Route path="/client/camera" element={<ClientSelfieCamera />} />
                       <Route path="/client/filters" element={<ClientFilters />} />
 
@@ -189,6 +192,7 @@ const App = () => (
                       <Route path="/owner/saved-searches" element={<OwnerSavedSearches />} />
                       <Route path="/owner/security" element={<OwnerSecurity />} />
                       <Route path="/owner/contracts" element={<OwnerContracts />} />
+                      <Route path="/owner/legal-services" element={<OwnerLawyerServices />} />
                       <Route path="/owner/camera" element={<OwnerProfileCamera />} />
                       <Route path="/owner/camera/listing" element={<OwnerListingCamera />} />
                       <Route path="/owner/filters" element={<OwnerFilters />} />
