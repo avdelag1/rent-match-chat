@@ -9,6 +9,8 @@ export interface OwnerStats {
   totalViews: number;
   totalLikes: number;
   responseRate: number;
+  likedClientsCount: number;  // Clients the owner has liked
+  interestedClientsCount: number;  // Clients who liked owner's listings
 }
 
 export function useOwnerStats() {
@@ -24,7 +26,9 @@ export function useOwnerStats() {
         propertiesResult,
         matchesResult,
         conversationsResult,
-        listingsResult
+        listingsResult,
+        likedClientsResult,
+        interestedClientsResult
       ] = await Promise.all([
         supabase
           .from('listings')
@@ -43,15 +47,39 @@ export function useOwnerStats() {
         supabase
           .from('listings')
           .select('view_count, likes')
+          .eq('owner_id', user.id),
+        // Count clients the owner has liked
+        supabase
+          .from('owner_likes')
+          .select('*', { count: 'exact', head: true })
+          .eq('owner_id', user.id),
+        // Count clients who liked the owner's listings (get listing IDs first)
+        supabase
+          .from('listings')
+          .select('id')
           .eq('owner_id', user.id)
       ]);
 
       const activeProperties = propertiesResult.count || 0;
       const totalMatches = matchesResult.count || 0;
       const activeConversations = conversationsResult.count || 0;
-      
+
       const totalViews = listingsResult.data?.reduce((sum, listing) => sum + (listing.view_count || 0), 0) || 0;
       const totalLikes = listingsResult.data?.reduce((sum, listing) => sum + (listing.likes || 0), 0) || 0;
+
+      const likedClientsCount = likedClientsResult.count || 0;
+
+      // Count interested clients (who liked owner's listings)
+      let interestedClientsCount = 0;
+      if (interestedClientsResult.data && interestedClientsResult.data.length > 0) {
+        const listingIds = interestedClientsResult.data.map(l => l.id);
+        const { count } = await supabase
+          .from('likes')
+          .select('*', { count: 'exact', head: true })
+          .in('target_id', listingIds)
+          .eq('direction', 'right');
+        interestedClientsCount = count || 0;
+      }
 
       // Calculate response rate
       const responseRate = totalMatches > 0 ? Math.round(activeConversations * 100 / totalMatches) : 0;
@@ -62,7 +90,9 @@ export function useOwnerStats() {
         activeMatches: activeConversations,
         totalViews,
         totalLikes,
-        responseRate
+        responseRate,
+        likedClientsCount,
+        interestedClientsCount
       };
     },
     enabled: !!user,

@@ -373,8 +373,8 @@ function LikedClientInsightsModalComponent({ open, onOpenChange, client }: Liked
             </div>
 
             {/* Content Section - Scrollable */}
-            <ScrollArea className="flex-1 overflow-y-auto">
-              <div className="p-4 sm:p-6 space-y-4 pt-8">
+            <ScrollArea className="flex-1 min-h-0">
+              <div className="p-4 sm:p-6 space-y-4 pt-8 pb-6">
                 {/* Name & Basic Info */}
                 <div className="space-y-2">
                   <h2 className="text-xl sm:text-2xl font-bold leading-tight flex items-center gap-2">
