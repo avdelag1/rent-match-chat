@@ -70,10 +70,9 @@ interface LikedClient {
   interests?: string[];
   monthly_income?: string;
   verified?: boolean;
-  has_criminal_record?: boolean;
-  criminal_record_type?: string;
-  background_check_status?: string;
-  background_check_date?: string;
+  property_types?: string[];
+  moto_types?: string[];
+  bicycle_types?: string[];
 }
 
 export function LikedClients() {
@@ -119,6 +118,18 @@ export function LikedClients() {
     placeholderData: (prev) => prev,
     queryFn: async () => {
       if (!user?.id) return [];
+
+      // CRITICAL FIX: Get owner's listing categories to filter clients appropriately
+      const { data: ownerListings } = await supabase
+        .from('listings')
+        .select('category')
+        .eq('owner_id', user.id)
+        .eq('status', 'active');
+
+      // Extract unique categories from owner's listings
+      const ownerCategories = new Set(
+        (ownerListings || []).map(listing => listing.category).filter(Boolean)
+      );
 
       // Get likes where the owner liked clients from owner_likes table
       const { data: ownerLikes, error: likesError } = await supabase
@@ -178,8 +189,30 @@ export function LikedClients() {
 
       if (!profiles || profiles.length === 0) return [];
 
+      // CRITICAL FIX: Filter clients to only show those interested in owner's listing categories
+      // This prevents showing clients interested in vehicles/yachts when owner only has properties
+      const filteredProfiles = profiles.filter(profile => {
+        // If owner has no active listings, show all liked clients
+        if (ownerCategories.size === 0) return true;
+
+        // Check if client's interests/preferences match any of owner's listing categories
+        // Map category names: property, motorcycle, bicycle, yacht, vehicle, worker
+        const hasMatchingInterest =
+          (ownerCategories.has('property') && profile.property_types?.length > 0) ||
+          (ownerCategories.has('motorcycle') && profile.moto_types?.length > 0) ||
+          (ownerCategories.has('bicycle') && profile.bicycle_types?.length > 0) ||
+          (ownerCategories.has('yacht') && profile.interests?.some((i: string) =>
+            i.toLowerCase().includes('yacht') || i.toLowerCase().includes('boat'))) ||
+          (ownerCategories.has('vehicle') && profile.interests?.some((i: string) =>
+            i.toLowerCase().includes('car') || i.toLowerCase().includes('vehicle'))) ||
+          (ownerCategories.has('worker') && profile.interests?.some((i: string) =>
+            i.toLowerCase().includes('service') || i.toLowerCase().includes('worker')));
+
+        return hasMatchingInterest;
+      });
+
       // Return the client profiles with like data
-      const likedClientsList = profiles.map(profile => {
+      const likedClientsList = filteredProfiles.map(profile => {
         const like = ownerLikes.find(l => l.client_id === profile.id);
         return {
           id: profile.id,
@@ -197,10 +230,9 @@ export function LikedClients() {
           interests: profile.interests,
           monthly_income: profile.monthly_income,
           verified: profile.verified,
-          has_criminal_record: profile.has_criminal_record || false,
-          criminal_record_type: profile.criminal_record_type,
-          background_check_status: profile.background_check_status || 'not_checked',
-          background_check_date: profile.background_check_date
+          property_types: profile.property_types,
+          moto_types: profile.moto_types,
+          bicycle_types: profile.bicycle_types
         };
       }) as LikedClient[];
 
@@ -423,13 +455,32 @@ export function LikedClients() {
 
     if (!matchesSearch) return false;
 
-    // Category filter
+    // Category filter - IMPROVED: Use specific type fields instead of interests
     if (selectedCategory === 'all') return true;
 
-    // Check if client's interests include the selected category
-    if (client.interests && Array.isArray(client.interests)) {
-      return client.interests.some(interest =>
-        interest.toLowerCase().includes(selectedCategory.toLowerCase())
+    // Match based on client's preference fields for each category
+    if (selectedCategory === 'property') {
+      return client.property_types && client.property_types.length > 0;
+    }
+    if (selectedCategory === 'motorcycle') {
+      return client.moto_types && client.moto_types.length > 0;
+    }
+    if (selectedCategory === 'bicycle') {
+      return client.bicycle_types && client.bicycle_types.length > 0;
+    }
+    if (selectedCategory === 'vehicle') {
+      return client.interests?.some(interest =>
+        interest.toLowerCase().includes('car') || interest.toLowerCase().includes('vehicle')
+      );
+    }
+    if (selectedCategory === 'yacht') {
+      return client.interests?.some(interest =>
+        interest.toLowerCase().includes('yacht') || interest.toLowerCase().includes('boat')
+      );
+    }
+    if (selectedCategory === 'worker') {
+      return client.interests?.some(interest =>
+        interest.toLowerCase().includes('service') || interest.toLowerCase().includes('worker')
       );
     }
 
