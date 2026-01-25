@@ -31,7 +31,7 @@ function SwipessLogoWithOrbComponent({
     xl: 'text-7xl sm:text-8xl md:text-9xl',
     '2xl': 'text-7xl sm:text-8xl md:text-9xl lg:text-[10rem]',
     '3xl': 'text-[4.5rem] sm:text-8xl md:text-9xl lg:text-[10rem]',
-    '4xl': 'text-[5rem] sm:text-[6rem] md:text-[8rem] lg:text-[11rem]',
+    '4xl': 'text-[3.5rem] sm:text-[5rem] md:text-[7rem] lg:text-[9rem]',
   };
 
   // Orb sizes for each logo size - tuned for visual balance
@@ -42,7 +42,7 @@ function SwipessLogoWithOrbComponent({
     xl: 18,
     '2xl': 22,
     '3xl': 26,
-    '4xl': 32,
+    '4xl': 28,
   };
 
   useEffect(() => {
