@@ -11,7 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useOwnerStats } from "@/hooks/useOwnerStats";
 import { useOwnerProfile } from "@/hooks/useOwnerProfile";
 import {
-  User, LogOut, Building2, Eye, MessageCircle,
+  LogOut, Building2,
   Camera, ArrowLeft, Crown, Settings as SettingsIcon,
   Flame, Palette, Heart, Scale, FileText
 } from "lucide-react";
@@ -99,36 +99,6 @@ const OwnerProfileNew = () => {
               </h1>
               <p className="text-sm text-muted-foreground">{user?.email}</p>
             </div>
-          </motion.div>
-
-          {/* Business Stats */}
-          <motion.div
-            className="grid grid-cols-3 gap-3"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ ...fastSpring, delay: 0.05 }}
-          >
-            <Card className="bg-card border-border">
-              <CardContent className="p-3 text-center">
-                <Building2 className="w-5 h-5 text-primary mx-auto mb-1" />
-                <div className="text-lg font-bold text-foreground">{stats?.activeProperties || 0}</div>
-                <div className="text-xs text-muted-foreground">Listings</div>
-              </CardContent>
-            </Card>
-            <Card className="bg-card border-border">
-              <CardContent className="p-3 text-center">
-                <Eye className="w-5 h-5 text-blue-500 mx-auto mb-1" />
-                <div className="text-lg font-bold text-foreground">{stats?.totalInquiries || 0}</div>
-                <div className="text-xs text-muted-foreground">Views</div>
-              </CardContent>
-            </Card>
-            <Card className="bg-card border-border">
-              <CardContent className="p-3 text-center">
-                <MessageCircle className="w-5 h-5 text-green-500 mx-auto mb-1" />
-                <div className="text-lg font-bold text-foreground">{stats?.activeMatches || 0}</div>
-                <div className="text-xs text-muted-foreground">Inquiries</div>
-              </CardContent>
-            </Card>
           </motion.div>
 
           {/* Share Profile Section - Earn Free Messages */}
