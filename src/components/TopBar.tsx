@@ -14,11 +14,11 @@ import { ModeSwitcher } from './ModeSwitcher';
 const MessageActivationText = () => (
   <>
     {/* Full text on medium screens and up */}
-    <span className="hidden sm:inline font-bold text-xs sm:text-sm tracking-tight bg-gradient-to-r from-red-500 via-orange-500 to-amber-500 bg-clip-text text-transparent whitespace-nowrap">
+    <span className="hidden sm:inline font-bold text-xs sm:text-sm tracking-tight bg-gradient-to-r from-red-400 via-orange-400 to-amber-400 bg-clip-text text-transparent whitespace-nowrap drop-shadow-[0_0_10px_rgba(251,146,60,0.4)]">
       Message Activation
     </span>
     {/* Icon only on extra small screens */}
-    <Zap className="sm:hidden h-5 w-5 text-orange-500" />
+    <Zap className="sm:hidden h-5 w-5 text-orange-400 drop-shadow-[0_0_8px_rgba(251,146,60,0.5)]" />
   </>
 );
 
@@ -141,8 +141,8 @@ function TopBarComponent({
                 className={cn(
                   "h-5 w-5 sm:h-6 sm:w-6 transition-all duration-300",
                   notificationCount > 0
-                    ? "text-orange-500 group-hover:text-orange-400"
-                    : "text-foreground/80 group-hover:text-foreground"
+                    ? "text-orange-400 group-hover:text-orange-300 drop-shadow-[0_0_8px_rgba(251,146,60,0.5)]"
+                    : "text-orange-400/90 group-hover:text-orange-300 drop-shadow-[0_0_6px_rgba(251,146,60,0.3)]"
                 )}
               />
               {/* Animated ring effect when there are notifications */}

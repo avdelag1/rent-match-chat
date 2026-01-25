@@ -881,17 +881,17 @@ body {
     font-style: italic;
     letter-spacing: -0.02em;
     background: linear-gradient(180deg,
-      #f43f5e 0%,
-      #fb7185 20%,
-      #f97316 50%,
+      #fda4af 0%,
+      #fb923c 20%,
+      #fbbf24 50%,
       #fb923c 75%,
-      #fbbf24 100%
+      #fda4af 100%
     );
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     display: inline-block;
-    filter: drop-shadow(0 2px 4px rgba(249, 115, 22, 0.3));
+    filter: drop-shadow(0 2px 8px rgba(251, 146, 60, 0.6)) drop-shadow(0 0 12px rgba(251, 191, 36, 0.4));
     /* Extra padding to prevent italic descenders (like 'p') from being clipped */
     padding: 0.15em 0.2em 0.25em 0.1em;
     overflow: visible;

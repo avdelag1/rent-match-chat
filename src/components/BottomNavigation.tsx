@@ -162,27 +162,27 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
 
   // Get icon color class only (for the Icon component)
   const getIconColorClass = (item: NavItem, active: boolean) => {
-    if (!active) return 'text-gray-500';
+    if (!active) return 'text-gray-400 drop-shadow-[0_0_4px_rgba(156,163,175,0.3)]';
 
     switch (item.id) {
       case 'browse':
-        return 'text-primary';
+        return 'text-primary drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]';
       case 'likes':
       case 'liked':
-        return 'text-primary';
+        return 'text-orange-400 drop-shadow-[0_0_8px_rgba(251,146,60,0.5)]';
       case 'messages':
-        return 'text-blue-400';
+        return 'text-blue-400 drop-shadow-[0_0_8px_rgba(96,165,250,0.5)]';
       case 'listings':
-        return 'text-primary';
+        return 'text-primary drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]';
       case 'profile':
-        return 'text-primary';
+        return 'text-primary drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]';
       case 'hire':
       case 'services':
-        return 'text-emerald-400';
+        return 'text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]';
       case 'filter':
-        return 'text-purple-400';
+        return 'text-purple-400 drop-shadow-[0_0_8px_rgba(192,132,252,0.5)]';
       default:
-        return 'text-red-400';
+        return 'text-red-400 drop-shadow-[0_0_8px_rgba(248,113,113,0.5)]';
     }
   };
 

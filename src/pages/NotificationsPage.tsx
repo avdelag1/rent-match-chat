@@ -60,32 +60,32 @@ const NotificationIcon = ({ type, role = 'neutral', className = "w-5 h-5" }: { t
     case 'new_message':
     case 'message':
       return role === 'client'
-        ? <MessageSquare className={`${className} text-blue-500`} />
-        : <MessageSquare className={`${className} text-amber-500`} />;
+        ? <MessageSquare className={`${className} text-blue-400 drop-shadow-[0_0_8px_rgba(96,165,250,0.6)]`} />
+        : <MessageSquare className={`${className} text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]`} />;
     case 'new_like':
     case 'like':
       return role === 'client'
-        ? <Flame className={`${className} text-cyan-500`} />
-        : <Flame className={`${className} text-orange-500`} />;
+        ? <Flame className={`${className} text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.6)]`} />
+        : <Flame className={`${className} text-orange-400 drop-shadow-[0_0_8px_rgba(251,146,60,0.6)]`} />;
     case 'new_match':
     case 'match':
       return role === 'client'
-        ? <Sparkles className={`${className} text-purple-500`} />
-        : <Sparkles className={`${className} text-amber-500`} />;
+        ? <Sparkles className={`${className} text-purple-400 drop-shadow-[0_0_8px_rgba(192,132,252,0.6)]`} />
+        : <Sparkles className={`${className} text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]`} />;
     case 'super_like':
       return role === 'client'
-        ? <Star className={`${className} text-purple-500`} />
-        : <Star className={`${className} text-yellow-500`} />;
+        ? <Star className={`${className} text-purple-400 drop-shadow-[0_0_8px_rgba(192,132,252,0.6)]`} />
+        : <Star className={`${className} text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.6)]`} />;
     case 'property':
-      return <Home className={`${className} text-emerald-500`} />;
+      return <Home className={`${className} text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.6)]`} />;
     case 'yacht':
-      return <Ship className={`${className} text-cyan-500`} />;
+      return <Ship className={`${className} text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.6)]`} />;
     case 'bicycle':
-      return <Bike className={`${className} text-orange-500`} />;
+      return <Bike className={`${className} text-orange-400 drop-shadow-[0_0_8px_rgba(251,146,60,0.6)]`} />;
     case 'vehicle':
-      return <Car className={`${className} text-purple-500`} />;
+      return <Car className={`${className} text-purple-400 drop-shadow-[0_0_8px_rgba(192,132,252,0.6)]`} />;
     default:
-      return <Bell className={`${className} text-muted-foreground`} />;
+      return <Bell className={`${className} text-orange-400/80 drop-shadow-[0_0_6px_rgba(251,146,60,0.4)]`} />;
   }
 };
 
@@ -108,30 +108,30 @@ const getBgGradient = (type: string, role: 'client' | 'owner' | 'neutral' = 'neu
     case 'new_message':
     case 'message':
       return role === 'client'
-        ? 'from-blue-500/20 to-cyan-500/10'
-        : 'from-amber-500/20 to-yellow-500/10';
+        ? 'from-blue-500/30 to-cyan-500/20'
+        : 'from-amber-500/30 to-yellow-500/20';
     case 'new_like':
     case 'like':
       return role === 'client'
-        ? 'from-cyan-500/20 to-blue-500/10'
-        : 'from-orange-500/20 to-amber-500/10';
+        ? 'from-cyan-500/30 to-blue-500/20'
+        : 'from-orange-500/30 to-amber-500/20';
     case 'new_match':
     case 'match':
       return role === 'client'
-        ? 'from-purple-500/20 to-pink-500/10'
-        : 'from-amber-500/20 to-yellow-500/10';
+        ? 'from-purple-500/30 to-pink-500/20'
+        : 'from-amber-500/30 to-yellow-500/20';
     case 'super_like':
       return role === 'client'
-        ? 'from-purple-500/20 to-pink-500/10'
-        : 'from-yellow-500/20 to-orange-500/10';
+        ? 'from-purple-500/30 to-pink-500/20'
+        : 'from-yellow-500/30 to-orange-500/20';
     case 'property':
-      return 'from-emerald-500/20 to-teal-500/10';
+      return 'from-emerald-500/30 to-teal-500/20';
     case 'yacht':
-      return 'from-cyan-500/20 to-blue-500/10';
+      return 'from-cyan-500/30 to-blue-500/20';
     case 'bicycle':
-      return 'from-orange-500/20 to-red-500/10';
+      return 'from-orange-500/30 to-red-500/20';
     case 'vehicle':
-      return 'from-purple-500/20 to-pink-500/10';
+      return 'from-purple-500/30 to-pink-500/20';
     default:
       return 'from-card/80 to-card/40';
   }
@@ -458,12 +458,12 @@ export default function NotificationsPage() {
                     className="flex flex-col items-center justify-center py-16 text-center px-4"
                   >
                     <div className="relative mb-6">
-                      <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-purple-500/20 to-primary/20 rounded-full blur-2xl scale-150 animate-pulse" />
-                      <div className="relative p-6 rounded-full bg-gradient-to-br from-primary/10 via-purple-500/5 to-primary/10 border-2 border-primary/20">
-                        <Bell className="w-12 h-12 text-primary" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-orange-500/30 via-purple-500/30 to-orange-500/30 rounded-full blur-2xl scale-150 animate-pulse" />
+                      <div className="relative p-6 rounded-full bg-gradient-to-br from-orange-500/20 via-purple-500/10 to-orange-500/20 border-2 border-orange-500/30 shadow-[0_0_20px_rgba(251,146,60,0.3)]">
+                        <Bell className="w-12 h-12 text-orange-400 drop-shadow-[0_0_12px_rgba(251,146,60,0.6)]" />
                       </div>
                     </div>
-                    <h3 className="text-xl font-bold bg-gradient-to-r from-primary via-purple-500 to-primary bg-clip-text text-transparent mb-2">
+                    <h3 className="text-xl font-bold bg-gradient-to-r from-orange-400 via-purple-400 to-orange-400 bg-clip-text text-transparent mb-2 drop-shadow-[0_0_10px_rgba(251,146,60,0.3)]">
                       No activity yet
                     </h3>
                     <p className="text-sm text-muted-foreground max-w-xs">
@@ -552,12 +552,12 @@ export default function NotificationsPage() {
                     className="flex flex-col items-center justify-center py-16 text-center px-4"
                   >
                     <div className="relative mb-6">
-                      <div className="absolute inset-0 bg-gradient-to-r from-red-500/20 via-pink-500/20 to-red-500/20 rounded-full blur-2xl scale-150 animate-pulse" />
-                      <div className="relative p-6 rounded-full bg-gradient-to-br from-red-500/10 via-pink-500/5 to-red-500/10 border-2 border-red-500/20">
-                        <Heart className="w-12 h-12 text-red-500" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-red-500/30 via-pink-500/30 to-red-500/30 rounded-full blur-2xl scale-150 animate-pulse" />
+                      <div className="relative p-6 rounded-full bg-gradient-to-br from-red-500/20 via-pink-500/10 to-red-500/20 border-2 border-red-500/30 shadow-[0_0_20px_rgba(239,68,68,0.3)]">
+                        <Heart className="w-12 h-12 text-red-400 drop-shadow-[0_0_12px_rgba(239,68,68,0.6)]" />
                       </div>
                     </div>
-                    <h3 className="text-xl font-bold bg-gradient-to-r from-red-500 via-pink-500 to-red-500 bg-clip-text text-transparent mb-2">
+                    <h3 className="text-xl font-bold bg-gradient-to-r from-red-400 via-pink-400 to-red-400 bg-clip-text text-transparent mb-2 drop-shadow-[0_0_10px_rgba(239,68,68,0.3)]">
                       No liked properties yet
                     </h3>
                     <p className="text-sm text-muted-foreground max-w-xs mb-4">
@@ -565,7 +565,7 @@ export default function NotificationsPage() {
                     </p>
                     <Button
                       onClick={() => navigate(userRole === 'owner' ? '/owner/dashboard' : '/client/dashboard')}
-                      className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600"
+                      className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 shadow-[0_0_15px_rgba(239,68,68,0.4)]"
                     >
                       <Flame className="w-4 h-4 mr-2" />
                       Start Swiping

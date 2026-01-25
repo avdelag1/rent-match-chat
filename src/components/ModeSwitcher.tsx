@@ -194,20 +194,20 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
             <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
           ) : activeMode === 'client' ? (
             <>
-              <Search className="h-3.5 w-3.5 text-primary" />
-              <span className="font-semibold text-primary">Client</span>
+              <Search className="h-3.5 w-3.5 text-primary drop-shadow-[0_0_6px_rgba(239,68,68,0.4)]" />
+              <span className="font-semibold text-primary drop-shadow-[0_0_8px_rgba(239,68,68,0.3)]">Client</span>
             </>
           ) : (
             <>
-              <Briefcase className="h-3.5 w-3.5 text-emerald-500" />
-              <span className="font-semibold text-emerald-500">Owner</span>
+              <Briefcase className="h-3.5 w-3.5 text-emerald-400 drop-shadow-[0_0_6px_rgba(52,211,153,0.4)]" />
+              <span className="font-semibold text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.3)]">Owner</span>
             </>
           )}
         </motion.div>
       </AnimatePresence>
 
       {/* Switch icon */}
-      <ArrowLeftRight className="h-3 w-3 text-muted-foreground opacity-60" />
+      <ArrowLeftRight className="h-3 w-3 text-muted-foreground/90 drop-shadow-[0_0_4px_rgba(255,255,255,0.2)]" />
     </motion.button>
   );
 }

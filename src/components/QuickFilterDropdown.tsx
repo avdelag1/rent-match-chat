@@ -77,11 +77,11 @@ const clientTypeOptions: { id: OwnerClientType; label: string; icon: React.React
 const QuickFilterText = () => (
   <>
     {/* Abbreviated on very small screens */}
-    <span className="sm:hidden font-semibold text-xs tracking-tight whitespace-nowrap bg-gradient-to-r from-pink-500 via-rose-500 to-pink-400 bg-clip-text text-transparent">
+    <span className="sm:hidden font-semibold text-xs tracking-tight whitespace-nowrap bg-gradient-to-r from-pink-400 via-rose-400 to-pink-300 bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(236,72,153,0.4)]">
       Filter
     </span>
     {/* Full text on larger screens */}
-    <span className="hidden sm:inline font-semibold text-sm tracking-tight whitespace-nowrap bg-gradient-to-r from-pink-500 via-rose-500 to-pink-400 bg-clip-text text-transparent">
+    <span className="hidden sm:inline font-semibold text-sm tracking-tight whitespace-nowrap bg-gradient-to-r from-pink-400 via-rose-400 to-pink-300 bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(236,72,153,0.4)]">
       Quick Filter
     </span>
   </>
