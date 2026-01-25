@@ -314,14 +314,21 @@ const ClientSwipeContainerComponent = ({
         profileId: profile.user_id,
         viewType: 'profile',
         action: direction === 'left' ? 'pass' : 'like'
-      }).catch(() => {}),
+      }).catch((err) => {
+        logger.error('[ClientSwipeContainer] Failed to record profile view:', err);
+      }),
 
-      // Save swipe to DB with match detection
+      // Save swipe to DB with match detection - CRITICAL: Must succeed for likes to save
       swipeMutation.mutateAsync({
         targetId: profile.user_id,
         direction,
         targetType: 'profile'
-      }).catch(() => {}),
+      }).catch((err) => {
+        logger.error('[ClientSwipeContainer] CRITICAL: Failed to save swipe to database:', err);
+        sonnerToast.error('Failed to save your swipe', {
+          description: 'Please check your connection and try again'
+        });
+      }),
 
       // Record for undo - pass category so deck can be properly restored
       Promise.resolve(recordSwipe(profile.user_id, 'profile', direction === 'right' ? 'like' : 'pass', category))

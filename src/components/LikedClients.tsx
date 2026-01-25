@@ -117,7 +117,12 @@ export function LikedClients() {
     // INSTANT NAVIGATION: Keep previous data during refetch to prevent UI blanking
     placeholderData: (prev) => prev,
     queryFn: async () => {
-      if (!user?.id) return [];
+      if (!user?.id) {
+        logger.warn('[LikedClients] No user ID, returning empty array');
+        return [];
+      }
+
+      logger.info('[LikedClients] Fetching liked clients for owner:', user.id);
 
       // CRITICAL FIX: Get owner's listing categories to filter clients appropriately
       const { data: ownerListings } = await supabase
@@ -139,10 +144,21 @@ export function LikedClients() {
         .order('created_at', { ascending: false });
 
       if (likesError) {
-        logger.error('[LikedClients] Error fetching owner likes:', likesError);
+        logger.error('[LikedClients] Error fetching owner likes:', {
+          error: likesError,
+          errorCode: likesError.code,
+          errorMessage: likesError.message,
+          ownerId: user.id
+        });
         throw likesError;
       }
-      if (!ownerLikes || ownerLikes.length === 0) return [];
+
+      logger.info('[LikedClients] Found owner likes:', { count: ownerLikes?.length || 0 });
+
+      if (!ownerLikes || ownerLikes.length === 0) {
+        logger.info('[LikedClients] No owner likes found, returning empty array');
+        return [];
+      }
 
       const targetIds = ownerLikes.map(like => like.client_id);
 
@@ -244,10 +260,10 @@ export function LikedClients() {
       return deduplicatedClients;
     },
     enabled: !!user?.id,
-    staleTime: Infinity, // Never mark as stale - rely on optimistic updates
+    staleTime: 60 * 1000, // FIX: Changed from Infinity to 60 seconds - allow refetching when invalidated
     gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
     refetchOnWindowFocus: false, // Don't refetch when user returns to tab
-    refetchOnMount: false, // Don't refetch when component mounts
+    refetchOnMount: true, // FIX: Changed to true - refetch when component mounts to get latest data
     refetchOnReconnect: false, // Don't refetch when internet reconnects
     // NO refetchInterval - rely purely on optimistic updates and manual invalidations
   });
