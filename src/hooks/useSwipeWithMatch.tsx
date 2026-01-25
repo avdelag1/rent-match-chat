@@ -29,6 +29,12 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
         throw new Error('User not authenticated. Please refresh the page.');
       }
 
+      // CRITICAL: Prevent self-likes
+      if (targetType === 'profile' && targetId === user.id) {
+        logger.error('[useSwipeWithMatch] Attempted self-like, blocking:', { userId: user.id, targetId });
+        throw new Error('You cannot like your own profile');
+      }
+
       let like: any;
 
       if (targetType === 'profile') {
