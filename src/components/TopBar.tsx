@@ -75,11 +75,8 @@ function TopBarComponent({
     <header
       className={cn(
         'app-header',
-        // Transparent on immersive routes (swipe dashboard) - gradient overlay provides contrast
-        // Solid background only on non-immersive routes for readability
-        transparent 
-          ? 'bg-transparent border-transparent backdrop-blur-none' 
-          : 'bg-background/80 backdrop-blur-md border-b border-white/5',
+        // Always transparent - gradient overlays provide contrast
+        'bg-transparent border-transparent backdrop-blur-none',
         className
       )}
     >

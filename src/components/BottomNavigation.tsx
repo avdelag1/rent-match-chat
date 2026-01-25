@@ -22,6 +22,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Home, SlidersHorizontal, Flame, MessageCircle, User, Plus, List, Building2, Heart, Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUnreadMessageCount } from '@/hooks/useUnreadMessageCount';
+import { useScrollDirection } from '@/hooks/useScrollDirection';
 import { springConfigs } from '@/utils/springConfigs';
 import { prefetchRoute } from '@/utils/routePrefetcher';
 
@@ -56,6 +57,9 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
   const navigate = useNavigate();
   const location = useLocation();
   const { unreadCount } = useUnreadMessageCount();
+  
+  // Hide on scroll down, show on scroll up
+  const { isVisible } = useScrollDirection({ threshold: 15, showAtTop: true });
 
   // Client/Renter Navigation Items - with Filter between Browse and Flames
   const clientNavItems: NavItem[] = [
@@ -208,7 +212,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
 
 
   return (
-    <nav className="app-bottom-bar pointer-events-none px-1">
+    <nav className={cn("app-bottom-bar pointer-events-none px-1", !isVisible && "nav-hidden")}>
       <div
         // TINDER-STYLE: No background frame - buttons float on gradient overlay
         // The swipe card's GradientMaskBottom provides the visual contrast

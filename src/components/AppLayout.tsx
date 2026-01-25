@@ -7,6 +7,7 @@ import { useOfflineDetection } from '@/hooks/useOfflineDetection';
 import { useErrorReporting } from '@/hooks/useErrorReporting';
 import { useViewTransitions } from '@/hooks/useViewTransitions';
 import { useResponsiveContext } from '@/contexts/ResponsiveContext';
+import { GradientMaskTop, GradientMaskBottom } from '@/components/ui/GradientMasks';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -180,6 +181,11 @@ export function AppLayout({ children }: AppLayoutProps) {
   return (
     <div className="min-h-screen min-h-dvh w-full bg-background overflow-x-hidden">
       <SkipToMainContent />
+      
+      {/* PERSISTENT GRADIENT OVERLAYS - Curved screen effect across all pages */}
+      <GradientMaskTop intensity={0.9} zIndex={9998} />
+      <GradientMaskBottom intensity={0.85} zIndex={9997} />
+      
       <main
         id="main-content"
         tabIndex={-1}
