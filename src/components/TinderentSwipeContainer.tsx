@@ -292,9 +292,10 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     };
 
     // Check if filters actually changed (optimized comparison)
+    // FIX: category is a string, not an array - use direct comparison
     const filtersChanged =
       !arraysEqual(prevFiltersRef.current?.categories, filters?.categories) ||
-      !arraysEqual(prevFiltersRef.current?.category, filters?.category) ||
+      prevFiltersRef.current?.category !== filters?.category ||
       prevFiltersRef.current?.listingType !== filters?.listingType ||
       !objectsEqual(prevFiltersRef.current?.priceRange, filters?.priceRange);
 
@@ -998,7 +999,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
       <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex flex-col px-3">
         <div className="relative flex-1 w-full">
           <div
-            className="absolute inset-0 rounded-3xl overflow-hidden"
+            className="absolute inset-0 overflow-hidden"
             style={{
               transform: 'translateZ(0)',
               contain: 'paint',
@@ -1073,7 +1074,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     const categoryLabel = String(categoryInfo?.plural || 'Listings');
     const categoryColor = String(categoryInfo?.color || 'text-primary');
     return (
-      <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center px-4">
+      <div className="relative w-full h-full flex-1 flex items-center justify-center px-4">
         {/* UNIFIED animation - all elements animate together, no staggered pop-in */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
@@ -1117,7 +1118,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     // FIX: Ensure categoryLabel is always a string, never an object
     const categoryLabel = String(categoryInfo?.plural || 'listings');
     return (
-      <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center">
+      <div className="relative w-full h-full flex-1 flex items-center justify-center">
         <Card className="text-center bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20 p-8">
           <div className="text-6xl mb-4">:(</div>
           <h3 className="text-xl font-bold mb-2">Oops! Something went wrong</h3>
@@ -1140,7 +1141,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     const categoryLabel = String(categoryInfo?.plural || 'Listings');
     const categoryColor = String(categoryInfo?.color || 'text-primary');
     return (
-      <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center px-4">
+      <div className="relative w-full h-full flex-1 flex items-center justify-center px-4">
         {/* UNIFIED animation - all elements animate together, no staggered pop-in */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
@@ -1174,10 +1175,10 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     );
   }
 
-  // Main swipe view - edge-to-edge cards
+  // Main swipe view - FULL-BLEED edge-to-edge cards (no max-width constraint)
   return (
     <div
-      className="relative w-full h-full flex-1 flex flex-col max-w-lg mx-auto"
+      className="relative w-full h-full flex-1 flex flex-col"
       onMouseEnter={handleDeckHover}
     >
       <div className="relative flex-1 w-full">

@@ -54,10 +54,10 @@ export const COMPONENT_IMPORTS = {
 export const ROUTE_PRELOADS = [
   // High priority - preload immediately after main app loads
   () => import('../pages/ClientDashboard'),
-  () => import('../pages/OwnerProfile'),
+  () => import('../pages/OwnerProfileNew'),
 
   // Medium priority - preload during idle
-  () => import('../pages/ClientProfile'),
+  () => import('../pages/ClientProfileNew'),
   () => import('../components/EnhancedOwnerDashboard'),
   () => import('../pages/MessagingDashboard'),
 ] as const;
@@ -69,7 +69,7 @@ export const ROUTE_PRELOADS = [
 export const HOVER_PRELOADS = {
   '/client/dashboard': () => import('../pages/ClientDashboard'),
   '/owner/dashboard': () => import('../components/EnhancedOwnerDashboard'),
-  '/client/profile': () => import('../pages/ClientProfile'),
+  '/client/profile': () => import('../pages/ClientProfileNew'),
   '/messages': () => import('../pages/MessagingDashboard'),
 } as const;
 
