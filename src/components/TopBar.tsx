@@ -4,6 +4,7 @@ import { Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useUnreadNotifications } from '@/hooks/useUnreadNotifications';
+import { useNavigate } from 'react-router-dom';
 import { SwipessLogo } from './SwipessLogo';
 import { QuickFilterDropdown, QuickFilters } from './QuickFilterDropdown';
 import { ModeSwitcher } from './ModeSwitcher';
@@ -44,12 +45,21 @@ function TopBarComponent({
   userRole,
 }: TopBarProps) {
   const { unreadCount: notificationCount } = useUnreadNotifications();
+  const navigate = useNavigate();
 
   const defaultFilters: QuickFilters = {
     categories: [],
     listingType: 'both',
     clientGender: 'any',
     clientType: 'all',
+  };
+
+  const handleLogoClick = () => {
+    if (userRole === 'owner') {
+      navigate('/owner/dashboard');
+    } else {
+      navigate('/client/dashboard');
+    }
   };
 
   return (
@@ -60,9 +70,10 @@ function TopBarComponent({
         {/* Left side: Logo + Mode Switch + Filters */}
         <div className="flex items-center gap-3">
           <motion.div
-            className="flex items-center gap-0.5 select-none"
+            className="flex items-center gap-0.5 select-none cursor-pointer"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
+            onClick={handleLogoClick}
           >
             <SwipessLogo size="xs" />
           </motion.div>
