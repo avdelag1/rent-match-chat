@@ -323,7 +323,7 @@ function PropertyInsightsDialogComponent({ open, onOpenChange, listing }: Proper
 
             {/* Description - FIRST - Most Important */}
             {(listing.description || listing.description_full) && (
-              <div className="p-4 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl border border-primary/20">
+              <div className="p-4 bg-gradient-to-br from-red-500/5 via-orange-500/5 to-amber-500/5 rounded-xl border border-red-500/20">
                 <h4 className="font-semibold text-base mb-3 flex items-center gap-2">
                   <span className="text-lg">📝</span> About This {propertyInsights?.isVehicle ? 'Listing' : 'Property'}
                 </h4>
@@ -621,12 +621,12 @@ function PropertyInsightsDialogComponent({ open, onOpenChange, listing }: Proper
                   </div>
                   <div className="text-lg font-bold text-blue-600 dark:text-blue-400">{propertyInsights?.avgResponseTime || '1-2 hrs'}</div>
                 </div>
-                <div className="p-3 bg-gradient-to-br from-purple-500/10 to-pink-500/5 rounded-lg border border-purple-500/20">
+                <div className="p-3 bg-gradient-to-br from-red-500/10 to-orange-500/5 rounded-lg border border-red-500/20">
                   <div className="flex items-center gap-2 mb-1">
-                    <ThumbsUp className="w-4 h-4 text-purple-600" />
+                    <ThumbsUp className="w-4 h-4 text-red-600" />
                     <span className="text-xs text-muted-foreground">Verified</span>
                   </div>
-                  <div className="text-lg font-bold text-purple-600 dark:text-purple-400">Yes</div>
+                  <div className="text-lg font-bold text-red-600 dark:text-red-400">Yes</div>
                 </div>
                 <div className="p-3 bg-gradient-to-br from-yellow-500/10 to-amber-500/5 rounded-lg border border-yellow-500/20">
                   <div className="flex items-center gap-2 mb-1">
@@ -653,9 +653,9 @@ function PropertyInsightsDialogComponent({ open, onOpenChange, listing }: Proper
                       <div className="text-xs text-muted-foreground">per sqft</div>
                     </div>
                   )}
-                  <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/5 p-3 rounded-lg text-center border border-purple-500/20">
-                    <Star className="w-5 h-5 mx-auto text-purple-600 dark:text-purple-400 mb-1" />
-                    <div className="text-xl font-bold text-purple-600 dark:text-purple-400">{propertyInsights.qualityScore}%</div>
+                  <div className="bg-gradient-to-br from-red-500/10 to-orange-500/5 p-3 rounded-lg text-center border border-red-500/20">
+                    <Star className="w-5 h-5 mx-auto text-red-600 dark:text-red-400 mb-1" />
+                    <div className="text-xl font-bold text-red-600 dark:text-red-400">{propertyInsights.qualityScore}%</div>
                     <div className="text-xs text-muted-foreground">Quality Score</div>
                   </div>
                   <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/5 p-3 rounded-lg text-center border border-blue-500/20">
@@ -683,14 +683,14 @@ function PropertyInsightsDialogComponent({ open, onOpenChange, listing }: Proper
                   propertyInsights.valueRating === 'excellent' ? 'bg-green-500/10 border-green-500/30' :
                   propertyInsights.valueRating === 'good' ? 'bg-blue-500/10 border-blue-500/30' :
                   propertyInsights.valueRating === 'fair' ? 'bg-yellow-500/10 border-yellow-500/30' :
-                  'bg-purple-500/10 border-purple-500/30'
+                  'bg-red-500/10 border-red-500/30'
                 }`}>
                   <div className="flex items-center gap-3 mb-2">
                     <Badge className={`${
                       propertyInsights.valueRating === 'excellent' ? 'bg-green-500/20 text-green-700 dark:text-green-400' :
                       propertyInsights.valueRating === 'good' ? 'bg-blue-500/20 text-blue-700 dark:text-blue-400' :
                       propertyInsights.valueRating === 'fair' ? 'bg-yellow-500/20 text-yellow-700 dark:text-yellow-400' :
-                      'bg-purple-500/20 text-purple-700 dark:text-purple-400'
+                      'bg-red-500/20 text-red-700 dark:text-red-400'
                     }`}>
                       {propertyInsights.valueRating === 'excellent' ? '🌟 Excellent Value' :
                        propertyInsights.valueRating === 'good' ? '👍 Good Value' :

@@ -45,7 +45,7 @@ export function SwipeInsights({ userRole, isOpen, onClose }: SwipeInsightsProps)
         <div className="sticky top-0 bg-gradient-to-br from-gray-900/95 to-black/95 backdrop-blur-xl border-b border-white/10 p-6 rounded-t-3xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-purple-500/20 flex items-center justify-center ring-2 ring-primary/30">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-red-500/20 to-orange-500/20 flex items-center justify-center ring-2 ring-red-500/30">
                 <BarChart3 className="w-6 h-6 text-primary" />
               </div>
               <div>
