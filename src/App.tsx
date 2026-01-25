@@ -19,6 +19,9 @@ import NotFound from "./pages/NotFound";
 // SPEED OF LIGHT: Persistent layout wrapper - mounted ONCE, never remounts
 import { PersistentDashboardLayout } from "@/components/PersistentDashboardLayout";
 
+// AMBIENT DEPTH: Global parallax background - mounted ONCE at root
+import { DepthParallaxBackground } from "@/components/DepthParallaxBackground";
+
 // Import UI components directly (not lazy) to avoid useContext issues with ThemeProvider
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -135,6 +138,8 @@ const App = () => (
             <PWAProvider>
             <ResponsiveProvider>
             <NotificationWrapper>
+              {/* Global ambient parallax background - mounted once, persists across screens */}
+              <DepthParallaxBackground />
               <AppLayout>
                 <TooltipProvider>
                   <Sonner />

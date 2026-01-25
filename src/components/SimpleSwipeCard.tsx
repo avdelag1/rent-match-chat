@@ -22,6 +22,7 @@ import { VerifiedBadge } from '@/components/ui/TrustSignals';
 import { CompactRatingDisplay } from '@/components/RatingDisplay';
 import { useListingRatingAggregate } from '@/hooks/useRatingSystem';
 import { GradientMaskTop, GradientMaskBottom } from '@/components/ui/GradientMasks';
+import { useParallaxStore } from '@/state/parallaxStore';
 
 // Exposed interface for parent to trigger swipe animations
 export interface SimpleSwipeCardRef {
@@ -203,12 +204,29 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
   const categoryId = listing.category === 'vehicle' || listing.vehicle_type ? 'vehicle' : 'property';
   const { data: ratingAggregate, isLoading: isRatingLoading } = useListingRatingAggregate(listing.id, categoryId);
 
+  // Parallax store for ambient background effect
+  const updateParallaxDrag = useParallaxStore((s) => s.updateDrag);
+  const endParallaxDrag = useParallaxStore((s) => s.endDrag);
+
+  // Subscribe motion value to parallax store for ambient background effect
+  useEffect(() => {
+    const unsubscribe = x.on('change', (latestX) => {
+      if (isDragging.current && isTop) {
+        updateParallaxDrag(latestX, 0, x.getVelocity());
+      }
+    });
+    return unsubscribe;
+  }, [x, isTop, updateParallaxDrag]);
+
   const handleDragStart = useCallback(() => {
     isDragging.current = true;
     triggerHaptic('light');
   }, []);
 
   const handleDragEnd = useCallback((_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    // End parallax effect when drag ends
+    endParallaxDrag();
+    
     if (hasExited.current) return;
 
     const offset = info.offset.x;
@@ -252,7 +270,7 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
     setTimeout(() => {
       isDragging.current = false;
     }, 100);
-  }, [listing.id, onSwipe, x]);
+  }, [listing.id, onSwipe, x, endParallaxDrag]);
 
   const handleCardTap = useCallback(() => {
     if (!isDragging.current && onTap) {
