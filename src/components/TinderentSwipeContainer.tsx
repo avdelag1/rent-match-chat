@@ -26,7 +26,8 @@ import { shallow } from 'zustand/shallow';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { RotateCcw, RefreshCw, Home, Search, Bike, Briefcase } from 'lucide-react';
+import { RotateCcw, RefreshCw, Home, Bike, Briefcase } from 'lucide-react';
+import { RadarSearchEffect, RadarSearchIcon } from '@/components/ui/RadarSearchEffect';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -1070,9 +1071,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   // Check if currentIndex > 0 (user has swiped at least once) regardless of deck state
   if (currentIndex > 0 && currentIndex >= deckQueue.length) {
     const categoryInfo = getActiveCategoryInfo(filters);
-    const CategoryIcon = categoryInfo?.icon || Home;
     const categoryLabel = String(categoryInfo?.plural || 'Listings');
-    const categoryColor = String(categoryInfo?.color || 'text-primary');
     return (
       <div className="relative w-full h-full flex-1 flex items-center justify-center px-4">
         {/* UNIFIED animation - all elements animate together, no staggered pop-in */}
@@ -1082,11 +1081,13 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
           transition={{ duration: 0.2, ease: "easeOut" }}
           className="text-center space-y-6 p-8"
         >
-          <div className="w-24 h-24 mx-auto bg-gradient-to-br from-green-500/20 to-emerald-500/10 rounded-full flex items-center justify-center">
-            <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
-              <CategoryIcon className={`w-12 h-12 ${categoryColor}`} />
-            </motion.div>
-          </div>
+          {/* RADAR SEARCH EFFECT - Premium futuristic refresh animation */}
+          <RadarSearchEffect
+            size={100}
+            color="hsl(var(--primary))"
+            isActive={isRefreshing}
+          />
+
           <div className="space-y-2">
             <h3 className="text-xl font-semibold text-foreground">All Caught Up!</h3>
             <p className="text-muted-foreground text-sm max-w-xs mx-auto">
@@ -1100,8 +1101,12 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
                 disabled={isRefreshing}
                 className="gap-2 rounded-full px-8 py-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg text-base"
               >
-                <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
-                {isRefreshing ? `Finding ${categoryLabel}...` : 'Discover More'}
+                {isRefreshing ? (
+                  <RadarSearchIcon size={20} isActive={true} />
+                ) : (
+                  <RefreshCw className="w-5 h-5" />
+                )}
+                {isRefreshing ? `Scanning for ${categoryLabel}...` : 'Discover More'}
               </Button>
             </motion.div>
             <p className="text-xs text-muted-foreground">New {categoryLabel.toLowerCase()} are added daily</p>
@@ -1135,11 +1140,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   // Empty state - dynamic based on category (no cards fetched yet)
   if (deckQueue.length === 0) {
     const categoryInfo = getActiveCategoryInfo(filters);
-    // FIX: Ensure values are always defined and properly typed - fallback to defaults
-    const CategoryIcon = categoryInfo?.icon || Home;
-    // FIX: Ensure categoryLabel and categoryColor are always strings, never objects
     const categoryLabel = String(categoryInfo?.plural || 'Listings');
-    const categoryColor = String(categoryInfo?.color || 'text-primary');
     return (
       <div className="relative w-full h-full flex-1 flex items-center justify-center px-4">
         {/* UNIFIED animation - all elements animate together, no staggered pop-in */}
@@ -1149,11 +1150,13 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
           transition={{ duration: 0.2, ease: "easeOut" }}
           className="text-center space-y-6 p-8"
         >
-          <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}>
-            <div className="w-24 h-24 mx-auto bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
-              <CategoryIcon className={`w-12 h-12 ${categoryColor}`} />
-            </div>
-          </motion.div>
+          {/* RADAR SEARCH EFFECT - Calm futuristic scanning animation */}
+          <RadarSearchEffect
+            size={100}
+            color="hsl(var(--primary))"
+            isActive={isRefreshing}
+          />
+
           <div className="space-y-2">
             <h3 className="text-xl font-semibold text-foreground">No {categoryLabel} Found</h3>
             <p className="text-muted-foreground text-sm max-w-xs mx-auto">
@@ -1166,8 +1169,12 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
               disabled={isRefreshing}
               className="gap-2 rounded-full px-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg"
             >
-              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-              {isRefreshing ? 'Loading...' : `Refresh ${categoryLabel}`}
+              {isRefreshing ? (
+                <RadarSearchIcon size={18} isActive={true} />
+              ) : (
+                <RefreshCw className="w-4 h-4" />
+              )}
+              {isRefreshing ? 'Scanning...' : `Refresh ${categoryLabel}`}
             </Button>
           </motion.div>
         </motion.div>

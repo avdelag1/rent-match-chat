@@ -17,7 +17,8 @@ import { useSwipeDismissal } from '@/hooks/useSwipeDismissal';
 import { shallow } from 'zustand/shallow';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { RefreshCw, Users, Search } from 'lucide-react';
+import { RefreshCw, Users } from 'lucide-react';
+import { RadarSearchEffect, RadarSearchIcon } from '@/components/ui/RadarSearchEffect';
 import { toast as sonnerToast } from 'sonner';
 import { useStartConversation } from '@/hooks/useConversations';
 import { useNavigate } from 'react-router-dom';
@@ -567,37 +568,41 @@ const ClientSwipeContainerComponent = ({
     return (
       <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center px-4">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
           className="text-center space-y-6 p-8"
         >
-          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 400, damping: 20, delay: 0.1 }}>
-            <div className="w-24 h-24 mx-auto bg-gradient-to-br from-green-500/20 to-emerald-500/10 rounded-full flex items-center justify-center">
-              <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
-                <Search className="w-12 h-12 text-green-500" />
-              </motion.div>
-            </div>
-          </motion.div>
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="space-y-2">
+          {/* RADAR SEARCH EFFECT - Premium futuristic scanning animation */}
+          <RadarSearchEffect
+            size={100}
+            color="hsl(var(--primary))"
+            isActive={isRefreshing}
+          />
+
+          <div className="space-y-2">
             <h3 className="text-xl font-semibold text-foreground">All Caught Up!</h3>
             <p className="text-muted-foreground text-sm max-w-xs mx-auto">
               You've seen all available clients. Check back later or refresh for new profiles.
             </p>
-          </motion.div>
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="flex flex-col gap-3">
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          </div>
+          <div className="flex flex-col gap-3">
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Button
                 onClick={handleRefresh}
                 disabled={isRefreshing}
                 className="gap-2 rounded-full px-8 py-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg text-base"
               >
-                <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
-                {String(isRefreshing ? 'Finding Clients...' : 'Discover More')}
+                {isRefreshing ? (
+                  <RadarSearchIcon size={20} isActive={true} />
+                ) : (
+                  <RefreshCw className="w-5 h-5" />
+                )}
+                {String(isRefreshing ? 'Scanning for Clients...' : 'Discover More')}
               </Button>
             </motion.div>
             <p className="text-xs text-muted-foreground">New clients are joining daily</p>
-          </motion.div>
+          </div>
         </motion.div>
       </div>
     );
@@ -629,30 +634,36 @@ const ClientSwipeContainerComponent = ({
     return (
       <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center px-4">
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
+          initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
           className="text-center space-y-6 p-8"
         >
-          <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
-            <div className="w-24 h-24 mx-auto bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
-              <Users className="w-12 h-12 text-primary" />
-            </div>
-          </motion.div>
+          {/* RADAR SEARCH EFFECT - Calm futuristic scanning animation */}
+          <RadarSearchEffect
+            size={100}
+            color="hsl(var(--primary))"
+            isActive={isRefreshing}
+          />
+
           <div className="space-y-2">
             <h3 className="text-xl font-semibold text-foreground">No Clients Found</h3>
             <p className="text-muted-foreground text-sm max-w-xs mx-auto">
               Try adjusting your filters or refresh to discover new clients
             </p>
           </div>
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
             <Button
               onClick={handleRefresh}
               disabled={isRefreshing}
               className="gap-2 rounded-full px-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg"
             >
-              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-              {isRefreshing ? 'Loading...' : 'Refresh Clients'}
+              {isRefreshing ? (
+                <RadarSearchIcon size={18} isActive={true} />
+              ) : (
+                <RefreshCw className="w-4 h-4" />
+              )}
+              {isRefreshing ? 'Scanning...' : 'Refresh Clients'}
             </Button>
           </motion.div>
         </motion.div>

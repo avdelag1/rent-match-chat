@@ -16,6 +16,7 @@ import { MapPin, DollarSign, Briefcase } from 'lucide-react';
 import { triggerHaptic } from '@/utils/haptics';
 import { SwipeActionButtonBar } from './SwipeActionButtonBar';
 import { useMagnifier } from '@/hooks/useMagnifier';
+import { GradientMaskTop, GradientMaskBottom } from '@/components/ui/GradientMasks';
 
 // LOWERED thresholds for faster, more responsive swipe
 const SWIPE_THRESHOLD = 80; // Reduced from 120 - card triggers sooner
@@ -86,7 +87,14 @@ const PlaceholderImage = memo(({ name }: { name?: string | null }) => {
 // Image cache to prevent reloading and blinking
 const imageCache = new Map<string, boolean>();
 
-// Simple image component - optimized for instant display without blinking
+/**
+ * FULL-SCREEN CARD IMAGE
+ *
+ * CRITICAL: Image MUST cover 100% of viewport (edge-to-edge, top-to-bottom)
+ * - Uses position: absolute + inset: 0
+ * - object-fit: cover ensures no letterboxing
+ * - Sits at the LOWEST z-layer (z-index: 1)
+ */
 const CardImage = memo(({ src, alt, name }: { src: string; alt: string; name?: string | null }) => {
   const [loaded, setLoaded] = useState(() => imageCache.has(src));
   const [error, setError] = useState(false);
@@ -110,6 +118,8 @@ const CardImage = memo(({ src, alt, name }: { src: string; alt: string; name?: s
         touchAction: 'none',
         WebkitUserSelect: 'none',
         userSelect: 'none',
+        // LOWEST z-layer - image sits behind everything
+        zIndex: 1,
       }}
     >
       {/* Skeleton - only show if image not in cache, smooth 150ms crossfade */}
@@ -122,12 +132,15 @@ const CardImage = memo(({ src, alt, name }: { src: string; alt: string; name?: s
         }}
       />
 
-      {/* Image - smooth 150ms crossfade for uncached images */}
+      {/* Image - FULL VIEWPORT coverage */}
       <img
         src={src}
         alt={alt}
-        className="absolute inset-0 w-full h-full object-cover"
+        className="absolute inset-0 w-full h-full"
         style={{
+          // CRITICAL: object-fit: cover ensures no letterboxing/padding
+          objectFit: 'cover',
+          objectPosition: 'center',
           opacity: loaded ? 1 : 0,
           transition: wasInCache ? 'none' : 'opacity 150ms ease-out',
           WebkitUserDrag: 'none',
@@ -393,7 +406,7 @@ function SimpleOwnerSwipeCardComponent({
 
   return (
     <div className="absolute inset-0 flex flex-col">
-      {/* Draggable Card */}
+      {/* Draggable Card - FULL-SCREEN with edge-to-edge photo */}
       <motion.div
         drag={!isMagnifierActive() ? "x" : false}
         dragConstraints={{ left: 0, right: 0 }}
@@ -419,12 +432,12 @@ function SimpleOwnerSwipeCardComponent({
           WebkitTapHighlightColor: 'transparent',
           WebkitTouchCallout: 'none',
         } as any}
-        className="flex-1 cursor-grab active:cursor-grabbing select-none touch-none rounded-3xl overflow-hidden shadow-lg relative"
+        className="flex-1 cursor-grab active:cursor-grabbing select-none touch-none overflow-hidden relative"
       >
-        {/* Image area with magnifier support */}
-        <div 
+        {/* Image area - FULL VIEWPORT with magnifier support */}
+        <div
           ref={containerRef}
-          className="absolute inset-0 w-full h-full"
+          className="absolute inset-0 w-full h-full overflow-hidden"
           onClick={handleImageTap}
           {...pointerHandlers}
           style={{
@@ -433,24 +446,26 @@ function SimpleOwnerSwipeCardComponent({
             userSelect: 'none',
           }}
         >
+          {/* PHOTO - LOWEST LAYER (z-index: 1) - 100% viewport coverage */}
           <CardImage src={currentImage} alt={profile.name || 'Client'} name={profile.name} />
 
-          {/* Magnifier is handled by the useMagnifier hook directly on the image */}
-          
-          {/* Image dots */}
+          {/* TOP GRADIENT MASK - Creates visual contrast for header UI */}
+          <GradientMaskTop intensity={1} zIndex={15} heightPercent={28} />
+
+          {/* Image dots - Float INSIDE the top gradient */}
           {imageCount > 1 && (
-            <div className="absolute top-3 left-4 right-4 z-20 flex gap-1">
+            <div className="absolute top-3 left-4 right-4 z-25 flex gap-1" style={{ marginTop: 'env(safe-area-inset-top, 0px)' }}>
               {images.map((_, idx) => (
-                <div 
+                <div
                   key={idx}
-                  className={`flex-1 h-1 rounded-full ${idx === currentImageIndex ? 'bg-white' : 'bg-white/40'}`}
+                  className={`flex-1 h-1 rounded-full transition-all duration-200 ${idx === currentImageIndex ? 'bg-white shadow-sm' : 'bg-white/40'}`}
                 />
               ))}
             </div>
           )}
-          
-          {/* Bottom gradient fade - tall and dark for Tinder-style look */}
-          <div className="absolute bottom-0 left-0 right-0 h-[60%] bg-gradient-to-t from-black via-black/70 via-40% to-transparent pointer-events-none z-10" />
+
+          {/* BOTTOM GRADIENT MASK - Creates visual contrast for buttons & info */}
+          <GradientMaskBottom intensity={1} zIndex={18} heightPercent={55} />
         </div>
         
         {/* YES! overlay */}
