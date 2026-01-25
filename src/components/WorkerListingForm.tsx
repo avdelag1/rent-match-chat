@@ -9,7 +9,9 @@ import { Briefcase, DollarSign, Clock, MapPin, Globe, Award, Calendar, FileText 
 
 export const SERVICE_CATEGORIES = [
   { value: 'nanny', label: 'Nanny / Childcare', icon: '👶' },
+  { value: 'baby_sitting', label: 'Baby Sitting', icon: '👶' },
   { value: 'chef', label: 'Private Chef', icon: '👨‍🍳' },
+  { value: 'home_cook', label: 'Home Cook / Meal Prep', icon: '🍲' },
   { value: 'cleaning', label: 'Cleaning Service', icon: '🧹' },
   { value: 'massage', label: 'Massage Therapist', icon: '💆' },
   { value: 'english_teacher', label: 'English Teacher', icon: '📚' },
@@ -25,6 +27,7 @@ export const SERVICE_CATEGORIES = [
   { value: 'tour_guide', label: 'Tour Guide', icon: '🗺️' },
   { value: 'photographer', label: 'Photographer', icon: '📷' },
   { value: 'pet_care', label: 'Pet Care / Dog Walker', icon: '🐕' },
+  { value: 'pet_sitting', label: 'Pet Sitting', icon: '🐾' },
   { value: 'music_teacher', label: 'Music Teacher', icon: '🎵' },
   { value: 'beauty', label: 'Beauty / Hair Stylist', icon: '💇' },
   { value: 'other', label: 'Other Service', icon: '✨' },
@@ -98,7 +101,9 @@ export const EXPERIENCE_LEVELS = [
 // Service-specific skill options
 export const COMMON_SKILLS = {
   nanny: ['CPR Certified', 'First Aid', 'Newborn Care', 'Special Needs', 'Bilingual', 'Homework Help', 'Potty Training', 'Meal Prep'],
+  baby_sitting: ['CPR Certified', 'First Aid', 'Infant Care', 'Toddler Care', 'Bedtime Routine', 'Light Housekeeping', 'Flexible Hours', 'References Available'],
   chef: ['Italian Cuisine', 'Mexican Cuisine', 'Vegan/Vegetarian', 'Pastry', 'Meal Prep', 'Catering', 'Food Safety Certified', 'Wine Pairing'],
+  home_cook: ['Meal Prep', 'Dietary Restrictions', 'Gluten-Free', 'Keto/Low-Carb', 'Vegan/Vegetarian', 'Family Style Meals', 'Food Safety', 'Portion Control'],
   cleaning: ['Deep Cleaning', 'Eco-Friendly Products', 'Organization', 'Laundry', 'Window Cleaning', 'Carpet Cleaning', 'Move-in/Move-out'],
   massage: ['Swedish Massage', 'Deep Tissue', 'Sports Massage', 'Prenatal', 'Hot Stone', 'Aromatherapy', 'Thai Massage', 'Reflexology'],
   english_teacher: ['TEFL Certified', 'TESOL', 'Business English', 'Conversational', 'Test Prep', 'Kids Teaching', 'Online Teaching'],
@@ -114,6 +119,7 @@ export const COMMON_SKILLS = {
   tour_guide: ['Historical Tours', 'Food Tours', 'Adventure Tours', 'Cultural Tours', 'Photography Tours', 'Bilingual', 'Licensed', 'Transportation'],
   photographer: ['Portrait', 'Wedding', 'Event', 'Real Estate', 'Product', 'Food Photography', 'Drone', 'Video Editing'],
   pet_care: ['Dog Walking', 'Pet Sitting', 'Grooming', 'Training', 'Overnight Care', 'Multiple Pets', 'Medication Admin', 'Special Needs'],
+  pet_sitting: ['Overnight Care', 'Daily Visits', 'Multiple Pets', 'Medication Admin', 'Exercise & Play', 'Feeding', 'House Sitting', 'Pet First Aid'],
   music_teacher: ['Piano', 'Guitar', 'Vocals', 'Drums', 'Music Theory', 'Kids Teaching', 'Online Lessons', 'Performance Training'],
   beauty: ['Hair Cutting', 'Hair Coloring', 'Makeup', 'Nails', 'Skincare', 'Waxing', 'Bridal', 'Mobile Service'],
   other: ['Custom Skills'],
