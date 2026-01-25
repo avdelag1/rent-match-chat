@@ -162,8 +162,8 @@ const ClientProfileNew = () => {
                 >
                   <Flame className="w-5 h-5 text-orange-500" />
                   <div className="flex-1 text-left">
-                    <div className="font-medium text-foreground">Liked Properties</div>
-                    <div className="text-sm text-muted-foreground">View properties you've liked</div>
+                    <div className="font-medium text-foreground">Your Likes</div>
+                    <div className="text-sm text-muted-foreground">Properties you've liked</div>
                   </div>
                 </button>
               </CardContent>
@@ -176,7 +176,7 @@ const ClientProfileNew = () => {
                 >
                   <Heart className="w-5 h-5 text-pink-500" />
                   <div className="flex-1 text-left">
-                    <div className="font-medium text-foreground">Who Liked You</div>
+                    <div className="font-medium text-foreground">Owners Who Liked You</div>
                     <div className="text-sm text-muted-foreground">See owners interested in you</div>
                   </div>
                 </button>
