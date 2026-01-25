@@ -102,8 +102,8 @@ export default function OwnerFilters() {
 
   return (
     <div className="fixed inset-0 bg-background z-50 flex flex-col">
-      {/* Header */}
-      <header className="flex items-center justify-between px-4 h-14 border-b border-border bg-background/95 backdrop-blur-sm shrink-0">
+      {/* Header - with safe area padding for status bar */}
+      <header className="flex items-center justify-between px-4 h-14 pt-safe border-b border-border bg-background/95 backdrop-blur-sm shrink-0" style={{ paddingTop: 'max(env(safe-area-inset-top), 0.5rem)' }}>
         <Button
           variant="ghost"
           onClick={handleBack}
@@ -117,8 +117,8 @@ export default function OwnerFilters() {
         <div className="w-10" />
       </header>
 
-      {/* Content */}
-      <main className="flex-1 overflow-y-auto pb-24">
+      {/* Content - extra padding bottom to account for footer button */}
+      <main className="flex-1 overflow-y-auto pb-40">
         <div className="p-4 space-y-8">
           {/* Gender Section */}
           <section>
@@ -202,11 +202,11 @@ export default function OwnerFilters() {
         </div>
       </main>
 
-      {/* Footer - positioned above bottom navigation */}
-      <footer className="absolute bottom-20 left-0 right-0 p-4 bg-gradient-to-t from-background via-background/95 to-transparent">
+      {/* Footer - positioned above bottom navigation with proper gradient overlay */}
+      <footer className="absolute bottom-20 left-0 right-0 p-4 pt-8 bg-gradient-to-t from-background via-background to-background/50 pointer-events-none">
         <Button
           onClick={handleApply}
-          className="w-full h-14 text-base font-semibold rounded-2xl bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-xl shadow-primary/20"
+          className="w-full h-14 text-base font-semibold rounded-2xl bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-xl shadow-primary/20 pointer-events-auto"
           size="lg"
         >
           Apply Filters
