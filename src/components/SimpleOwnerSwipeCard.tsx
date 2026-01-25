@@ -362,18 +362,18 @@ function SimpleOwnerSwipeCardComponent({
     });
   }, [profile?.user_id, onSwipe, x]);
 
-  // Format budget - moved before conditional render to avoid hook order issues
-  const budgetText = profile?.budget_min && profile?.budget_max
-    ? `$${profile.budget_min.toLocaleString()} - $${profile.budget_max.toLocaleString()}`
-    : profile?.budget_max
-      ? `Up to $${profile.budget_max.toLocaleString()}`
-      : null;
-
   // FIX: Early return if profile is null/undefined to prevent errors
   // All hooks must be called above this point to maintain hook order
   if (!profile || !profile.user_id) {
     return null;
   }
+
+  // Format budget - moved AFTER null check to prevent errors
+  const budgetText = profile.budget_min && profile.budget_max
+    ? `$${profile.budget_min.toLocaleString()} - $${profile.budget_max.toLocaleString()}`
+    : profile.budget_max
+      ? `Up to $${profile.budget_max.toLocaleString()}`
+      : null;
 
   // Render based on position - all hooks called above regardless of render path
   if (!isTop) {

@@ -35,6 +35,8 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
         // Owner swiping on a client profile
         if (direction === 'right') {
           // Save like to owner_likes table
+          logger.info('[useSwipeWithMatch] Saving owner like for client:', { ownerId: user.id, clientId: targetId });
+
           const { data: ownerLike, error: ownerLikeError } = await supabase
             .from('owner_likes')
             .upsert({
@@ -49,9 +51,17 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
             .single();
 
           if (ownerLikeError) {
-            logger.error('Error saving owner like:', ownerLikeError);
+            logger.error('[useSwipeWithMatch] CRITICAL: Failed to save owner like:', {
+              error: ownerLikeError,
+              ownerId: user.id,
+              clientId: targetId,
+              errorCode: ownerLikeError.code,
+              errorMessage: ownerLikeError.message
+            });
             throw ownerLikeError;
           }
+
+          logger.info('[useSwipeWithMatch] Successfully saved owner like:', ownerLike);
           like = ownerLike;
         } else {
           // For left swipes (dislikes), we use the likes table with direction='left'
@@ -119,9 +129,14 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
       const isDislike = variables.direction === 'left';
 
       if (isLike && variables.targetType === 'profile') {
-        // Owner swiping right on client - DON'T invalidate cache, let it persist
-        // Only invalidate matches to detect new matches
-        queryClient.invalidateQueries({ queryKey: ['matches'] }).catch(() => {});
+        // Owner swiping right on client - invalidate liked-clients query to refresh UI
+        const invalidations = [
+          queryClient.invalidateQueries({ queryKey: ['matches'] }),
+          queryClient.invalidateQueries({ queryKey: ['liked-clients'] }), // FIX: Invalidate to refresh liked clients list
+          queryClient.invalidateQueries({ queryKey: ['owner-stats'] }), // FIX: Update stats
+        ];
+        Promise.all(invalidations).catch(() => {});
+        logger.info('[useSwipeWithMatch] Invalidated liked-clients query after owner like');
       } else if (isLike && variables.targetType === 'listing') {
         // Client liking listing - DON'T invalidate cache, let optimistic update persist
         // Only invalidate matches to detect new matches
