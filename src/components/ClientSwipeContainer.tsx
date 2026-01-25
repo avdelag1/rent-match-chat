@@ -113,10 +113,18 @@ const ClientSwipeContainerComponent = ({
     // Skip on initial mount
     if (!prevFiltersRef.current && !filters) return;
 
-    // Check if filters actually changed (deep comparison of relevant fields)
+    // PERFORMANCE: Use efficient array comparison instead of JSON.stringify
+    const arraysEqual = (a?: any[], b?: any[]) => {
+      if (!a && !b) return true;
+      if (!a || !b) return false;
+      if (a.length !== b.length) return false;
+      return a.every((val, i) => val === b[i]);
+    };
+
+    // Check if filters actually changed (optimized comparison)
     const filtersChanged =
-      JSON.stringify(prevFiltersRef.current?.categories) !== JSON.stringify(filters?.categories) ||
-      JSON.stringify(prevFiltersRef.current?.category) !== JSON.stringify(filters?.category) ||
+      !arraysEqual(prevFiltersRef.current?.categories, filters?.categories) ||
+      !arraysEqual(prevFiltersRef.current?.category, filters?.category) ||
       prevFiltersRef.current?.clientGender !== filters?.clientGender ||
       prevFiltersRef.current?.clientType !== filters?.clientType ||
       prevFiltersRef.current?.listingType !== filters?.listingType;

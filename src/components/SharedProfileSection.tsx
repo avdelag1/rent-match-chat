@@ -8,6 +8,10 @@ import {
   copyToClipboard,
   shareViaNavigator,
   generateShareUrl,
+  shareViaWhatsApp,
+  shareViaFacebook,
+  shareViaTwitter,
+  shareViaSMS,
 } from '@/hooks/useSharing';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -52,6 +56,22 @@ export function SharedProfileSection({
     } else {
       handleCopyLink();
     }
+  };
+
+  const handleWhatsAppShare = () => {
+    shareViaWhatsApp(shareUrl, shareText);
+  };
+
+  const handleFacebookShare = () => {
+    shareViaFacebook(shareUrl);
+  };
+
+  const handleTwitterShare = () => {
+    shareViaTwitter(shareUrl, shareText);
+  };
+
+  const handleSMSShare = () => {
+    shareViaSMS(shareUrl, shareText);
   };
 
   return (

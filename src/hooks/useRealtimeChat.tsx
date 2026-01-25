@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useQueryClient } from '@tanstack/react-query';
 import { logger } from '@/utils/prodLogger';
+import { useProfileCache } from '@/hooks/useProfileCache';
 
 interface TypingUser {
   userId: string;
@@ -21,6 +22,7 @@ interface UserPresence {
 export function useRealtimeChat(conversationId: string) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { getProfile } = useProfileCache();
   const [isTyping, setIsTyping] = useState(false);
   const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<UserPresence[]>([]);
@@ -140,23 +142,19 @@ export function useRealtimeChat(conversationId: string) {
         async (payload) => {
           const newMessage = payload.new;
 
-          // Get sender details
-          const { data: senderProfile, error: profileError } = await supabase
-            .from('profiles')
-            .select('id, full_name, avatar_url')
-            .eq('id', newMessage.sender_id)
-            .maybeSingle();
-
-          if (profileError) {
-            logger.error('Error fetching sender profile in realtime:', profileError);
-          }
+          // PERFORMANCE: Get sender details from cache (prevents N+1 queries)
+          const senderProfile = await getProfile(newMessage.sender_id);
 
           const completeMessage = {
             ...newMessage,
-            sender: senderProfile || { 
-              id: newMessage.sender_id, 
-              full_name: 'Unknown', 
-              avatar_url: null 
+            sender: senderProfile ? {
+              id: senderProfile.id,
+              full_name: senderProfile.full_name,
+              avatar_url: senderProfile.avatar_url
+            } : {
+              id: newMessage.sender_id,
+              full_name: 'Unknown',
+              avatar_url: null
             }
           };
           
