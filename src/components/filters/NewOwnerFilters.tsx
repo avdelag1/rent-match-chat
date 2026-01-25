@@ -91,7 +91,7 @@ export function NewOwnerFilters({ open, onClose, onApply, currentFilters = {} }:
                   <SlidersHorizontal className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold">Filter Clients</h2>
+                  <h2 className="text-lg font-semibold">Quick Filter</h2>
                   {activeFilterCount > 0 && (
                     <p className="text-xs text-muted-foreground">
                       {activeFilterCount} active

@@ -145,8 +145,8 @@ const OwnerProfileNew = () => {
                 >
                   <Heart className="w-5 h-5 text-pink-500" />
                   <div className="flex-1 text-left">
-                    <div className="font-medium text-foreground">Clients Who Liked You</div>
-                    <div className="text-sm text-muted-foreground">See clients interested in your listings</div>
+                    <div className="font-medium text-foreground">Who Liked You</div>
+                    <div className="text-sm text-muted-foreground">See who's interested in your listings</div>
                   </div>
                   <div className="text-lg font-bold text-foreground">{stats?.interestedClientsCount ?? 0}</div>
                 </button>
