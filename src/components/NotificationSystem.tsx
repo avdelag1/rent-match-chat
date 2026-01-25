@@ -198,8 +198,10 @@ export function NotificationSystem() {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(messagesChannel);
-      supabase.removeChannel(likesChannel);
+      // FIX: Use .unsubscribe() instead of .removeChannel() for proper cleanup
+      // .unsubscribe() properly stops event listening and prevents memory leaks
+      messagesChannel.unsubscribe();
+      likesChannel.unsubscribe();
     };
   }, [user?.id, queryClient]);
 

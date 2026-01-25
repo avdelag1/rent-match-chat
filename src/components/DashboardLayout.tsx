@@ -28,7 +28,8 @@ const OwnerSettingsDialog = lazy(() => import('@/components/OwnerSettingsDialog'
 const OwnerProfileDialog = lazy(() => import('@/components/OwnerProfileDialog').then(m => ({ default: m.OwnerProfileDialog })))
 const OwnerClientSwipeDialog = lazy(() => import('@/components/OwnerClientSwipeDialog'))
 const SupportDialog = lazy(() => import('@/components/SupportDialog').then(m => ({ default: m.SupportDialog })))
-const NotificationSystem = lazy(() => import('@/components/NotificationSystem').then(m => ({ default: m.NotificationSystem })))
+// REMOVED: NotificationSystem was causing duplicate subscriptions with useNotifications in App.tsx
+// Global notification handling is now done exclusively by NotificationWrapper in App.tsx
 const NotificationsDialog = lazy(() => import('@/components/NotificationsDialog').then(m => ({ default: m.NotificationsDialog })))
 const OnboardingFlow = lazy(() => import('@/components/OnboardingFlow').then(m => ({ default: m.OnboardingFlow })))
 const CategorySelectionDialog = lazy(() => import('@/components/CategorySelectionDialog').then(m => ({ default: m.CategorySelectionDialog })))
@@ -462,10 +463,10 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           - Zero battery impact */}
       <LiveHDBackground theme="default" showOrbs={true} intensity={0.7} />
 
-      {/* PERF FIX: NotificationSystem has its own Suspense boundary to never suspend dashboard paint */}
-      <Suspense fallback={null}>
-        <NotificationSystem />
-      </Suspense>
+      {/* REMOVED: NotificationSystem was causing duplicate realtime subscriptions.
+          Global notification handling is now done exclusively by NotificationWrapper (useNotifications)
+          in App.tsx. This prevents race conditions and UI flickers from multiple handlers
+          firing on the same conversation_messages INSERT event. */}
 
       {/* Top Bar - Fixed with safe-area-top. Hidden on camera routes for fullscreen UX */}
       {!isCameraRoute && (

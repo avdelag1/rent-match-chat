@@ -57,7 +57,9 @@ export function useMarkMessagesAsRead(conversationId: string, isActive: boolean)
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      // FIX: Use .unsubscribe() instead of .removeChannel() for proper cleanup
+      // .unsubscribe() properly stops event listening and prevents memory leaks
+      channel.unsubscribe();
     };
   }, [conversationId, user?.id, isActive]);
 }
