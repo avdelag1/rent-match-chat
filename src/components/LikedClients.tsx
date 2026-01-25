@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ClientProfileCard } from "@/components/ClientProfileCard";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Flame, MessageCircle, Users, Search, MapPin, RefreshCw, Home, Car, Ship, Bike, Flag, Ban, MoreVertical, Trash2, Eye, ArrowLeft, Heart } from "lucide-react";
+import { Flame, MessageCircle, Users, Search, MapPin, RefreshCw, Home, Car, Ship, Bike, Flag, Ban, MoreVertical, Trash2, Eye, ArrowLeft, Heart, Shield, ShieldAlert, ShieldCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
@@ -46,6 +46,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { LikedClientInsightsModal } from "@/components/LikedClientInsightsModal";
+import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface LikedClient {
   id: string;
@@ -63,6 +70,10 @@ interface LikedClient {
   interests?: string[];
   monthly_income?: string;
   verified?: boolean;
+  has_criminal_record?: boolean;
+  criminal_record_type?: string;
+  background_check_status?: string;
+  background_check_date?: string;
 }
 
 export function LikedClients() {
@@ -76,6 +87,7 @@ export function LikedClients() {
   const [showReportDialog, setShowReportDialog] = useState(false);
   const [showInsightsModal, setShowInsightsModal] = useState(false);
   const [selectedClientForView, setSelectedClientForView] = useState<LikedClient | null>(null);
+  const [filterSafeOnly, setFilterSafeOnly] = useState(true); // Filter out clients with criminal records by default
 
   // Use React Query-based hook for role - prevents menu flickering
   const { data: fetchedRole } = useUserRole(user?.id);
@@ -184,7 +196,11 @@ export function LikedClients() {
           nationality: profile.nationality,
           interests: profile.interests,
           monthly_income: profile.monthly_income,
-          verified: profile.verified
+          verified: profile.verified,
+          has_criminal_record: profile.has_criminal_record || false,
+          criminal_record_type: profile.criminal_record_type,
+          background_check_status: profile.background_check_status || 'not_checked',
+          background_check_date: profile.background_check_date
         };
       }) as LikedClient[];
 
@@ -368,8 +384,38 @@ export function LikedClients() {
     }
   };
 
-  // Filter by search term and category
+  // Filter by search term, category, and safety
   const filteredClients = likedClients.filter(client => {
+    // Safety filter - exclude clients with criminal records or failed background checks
+    if (filterSafeOnly) {
+      // Exclude clients with criminal records
+      if (client.has_criminal_record === true) {
+        return false;
+      }
+
+      // Exclude clients with failed background checks
+      if (client.background_check_status === 'failed') {
+        return false;
+      }
+
+      // Exclude clients with specific problematic criminal record types
+      const problematicTypes = [
+        'vehicle_theft',
+        'yacht_theft',
+        'property_damage',
+        'fraud',
+        'violence',
+        'theft',
+        'steal'
+      ];
+      if (client.criminal_record_type &&
+          problematicTypes.some(type =>
+            client.criminal_record_type?.toLowerCase().includes(type)
+          )) {
+        return false;
+      }
+    }
+
     // Search filter
     const matchesSearch = client.name?.toLowerCase()?.includes(searchTerm.toLowerCase()) ||
       (client.bio && client.bio.toLowerCase().includes(searchTerm.toLowerCase())) ||
@@ -488,6 +534,32 @@ export function LikedClients() {
                 <Users className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span className="font-medium">{filteredClients.length} clients</span>
               </div>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant={filterSafeOnly ? "default" : "outline"}
+                      onClick={() => setFilterSafeOnly(!filterSafeOnly)}
+                      className="gap-2"
+                    >
+                      {filterSafeOnly ? (
+                        <ShieldCheck className="w-4 h-4" />
+                      ) : (
+                        <ShieldAlert className="w-4 h-4" />
+                      )}
+                      <span className="hidden sm:inline">{filterSafeOnly ? 'Safe Only' : 'Show All'}</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs max-w-xs">
+                      {filterSafeOnly
+                        ? "Showing only clients with clean backgrounds (no criminal records, theft, fraud, etc.)"
+                        : "Showing all liked clients including those with background issues"}
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
               <Button
                 size="sm"
                 variant="outline"
@@ -649,6 +721,35 @@ export function LikedClients() {
                     {client.occupation && (
                       <p className="text-sm text-muted-foreground">{client.occupation}</p>
                     )}
+
+                    {/* Background Check Status Badge */}
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {client.background_check_status === 'passed' && (
+                        <Badge className="bg-green-500/10 text-green-600 border-green-500/20 gap-1">
+                          <ShieldCheck className="w-3 h-3" />
+                          Background Verified
+                        </Badge>
+                      )}
+                      {client.background_check_status === 'failed' && (
+                        <Badge className="bg-red-500/10 text-red-600 border-red-500/20 gap-1">
+                          <ShieldAlert className="w-3 h-3" />
+                          Background Check Failed
+                        </Badge>
+                      )}
+                      {client.background_check_status === 'pending' && (
+                        <Badge className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20 gap-1">
+                          <Shield className="w-3 h-3" />
+                          Check Pending
+                        </Badge>
+                      )}
+                      {client.has_criminal_record && (
+                        <Badge className="bg-red-500/10 text-red-600 border-red-500/20 gap-1">
+                          <ShieldAlert className="w-3 h-3" />
+                          Criminal Record
+                          {client.criminal_record_type && `: ${client.criminal_record_type}`}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                   
                   {client.bio && (
