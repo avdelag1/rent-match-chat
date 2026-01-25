@@ -173,7 +173,7 @@ export function SimpleFilterButton({
         )}
       >
         <SlidersHorizontal className="h-4 w-4" />
-        <span>Filters</span>
+        <span>Quick Filter</span>
         {activeFilterCount > 0 && (
           <Badge className="h-5 w-5 p-0 flex items-center justify-center bg-primary text-primary-foreground">
             {activeFilterCount}

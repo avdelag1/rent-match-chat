@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   Dialog,
   DialogContent,
@@ -10,163 +9,132 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { MessageCircle, Send, Loader2, Sparkles, Bike, CircleDot } from 'lucide-react';
-import { useDirectMessageListing } from '@/hooks/useDirectMessageListing';
+import { MessageCircle, Zap, Bike } from 'lucide-react';
+import { logger } from '@/utils/logger';
+import { DEFAULT_DIRECT_MESSAGE } from '@/utils/directMessaging';
+
+// Custom motorcycle icon matching the one used elsewhere
+const MotorcycleIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="5" cy="17" r="3" />
+    <circle cx="19" cy="17" r="3" />
+    <path d="M9 17h6" />
+    <path d="M19 17l-2-5h-4l-3-4H6l1 4" />
+    <path d="M14 7h3l2 5" />
+  </svg>
+);
 
 interface DirectMessageDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  listing: {
-    id: string;
-    title: string;
-    category: string;
-    price?: number;
-    images?: string[];
-    user_id: string;
-  };
-  ownerName?: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onConfirm: (message: string) => void;
+  recipientName?: string;
+  isLoading?: boolean;
+  category?: string;
 }
 
+/**
+ * DirectMessageDialog - A simplified messaging dialog for motorcycle and bicycle listings
+ *
+ * This dialog is shown instead of MessageConfirmationDialog for categories that
+ * support direct messaging (motorcycle, bicycle). It has no quota warnings or
+ * activation requirements - users can message freely.
+ */
 export function DirectMessageDialog({
-  isOpen,
-  onClose,
-  listing,
-  ownerName = 'the owner'
+  open,
+  onOpenChange,
+  onConfirm,
+  recipientName = 'the owner',
+  isLoading = false,
+  category = 'motorcycle',
 }: DirectMessageDialogProps) {
-  const navigate = useNavigate();
-  const { sendDirectMessage, isLoading, isFreeMessagingCategory } = useDirectMessageListing();
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState(DEFAULT_DIRECT_MESSAGE);
 
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case 'motorcycle':
-        return <CircleDot className="w-4 h-4" />;
-      case 'bicycle':
-        return <Bike className="w-4 h-4" />;
-      default:
-        return null;
+  const isBicycle = category?.toLowerCase() === 'bicycle';
+  const CategoryIcon = isBicycle ? Bike : MotorcycleIcon;
+  const categoryLabel = isBicycle ? 'Bicycle' : 'Motorcycle';
+  const categoryColor = isBicycle ? 'text-emerald-500' : 'text-slate-500';
+  const categoryBgColor = isBicycle ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-slate-500/10 border-slate-500/20';
+
+  const handleConfirm = () => {
+    if (!message.trim()) {
+      logger.warn('[DirectMessageDialog] Empty message, not sending');
+      return;
     }
+
+    logger.info('[DirectMessageDialog] User confirmed direct message send');
+    onConfirm(message);
   };
 
-  const getCategoryLabel = (category: string) => {
-    switch (category) {
-      case 'motorcycle':
-        return 'Motorcycle';
-      case 'bicycle':
-        return 'Bicycle';
-      default:
-        return category;
-    }
+  const handleCancel = () => {
+    logger.info('[DirectMessageDialog] User cancelled direct message');
+    onOpenChange(false);
   };
-
-  const defaultMessage = `Hi! I'm interested in your ${getCategoryLabel(listing.category).toLowerCase()}: "${listing.title}". Is it still available?`;
-
-  const handleSend = async () => {
-    try {
-      const result = await sendDirectMessage({
-        listingId: listing.id,
-        ownerId: listing.user_id,
-        listingTitle: listing.title,
-        listingCategory: listing.category,
-        initialMessage: message || defaultMessage
-      });
-
-      onClose();
-
-      // Navigate to the conversation
-      navigate(`/messaging?conversationId=${result.conversationId}`);
-    } catch (error) {
-      // Error is handled by the hook's onError
-    }
-  };
-
-  if (!isFreeMessagingCategory(listing.category)) {
-    return null;
-  }
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="bg-gray-900 border-gray-800 max-w-md">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-white">
-            <MessageCircle className="w-5 h-5 text-primary" />
-            Message {ownerName}
+          <DialogTitle className="flex items-center gap-2 text-xl">
+            <MessageCircle className="w-5 h-5 text-cyan-500" />
+            Send Message
           </DialogTitle>
-          <DialogDescription className="text-gray-400">
-            Send a direct message about this listing
+          <DialogDescription className="text-base pt-2">
+            <div className={`flex items-start gap-2 p-3 rounded-lg ${categoryBgColor} border`}>
+              <div className="flex items-center gap-2 flex-shrink-0 mt-0.5">
+                <Zap className="w-4 h-4 text-yellow-500" />
+                <CategoryIcon className={`w-5 h-5 ${categoryColor}`} />
+              </div>
+              <div className="flex flex-col gap-1">
+                <span className={`font-semibold ${categoryColor}`}>
+                  Free Direct Messaging
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  {categoryLabel} listings support free messaging - no limits, no activation required!
+                </span>
+              </div>
+            </div>
           </DialogDescription>
         </DialogHeader>
 
-        {/* Listing Preview */}
-        <div className="bg-gray-800/50 rounded-lg p-3 flex items-center gap-3">
-          {listing.images && listing.images[0] && (
-            <img
-              src={listing.images[0]}
-              alt={listing.title}
-              className="w-16 h-16 rounded-lg object-cover"
-            />
-          )}
-          <div className="flex-1 min-w-0">
-            <h4 className="font-semibold text-white text-sm truncate">{listing.title}</h4>
-            <div className="flex items-center gap-2 mt-1">
-              <Badge className="bg-primary/20 text-primary border-0 text-xs flex items-center gap-1">
-                {getCategoryIcon(listing.category)}
-                {getCategoryLabel(listing.category)}
-              </Badge>
-              {listing.price && (
-                <span className="text-sm font-semibold text-green-400">
-                  ${listing.price.toLocaleString()}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Free Messaging Badge */}
-        <div className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-emerald-500/10 to-green-500/10 border border-emerald-500/30 rounded-lg">
-          <Sparkles className="w-4 h-4 text-emerald-400" />
-          <span className="text-sm text-emerald-400 font-medium">
-            Free messaging for Motos & Bicycles!
-          </span>
-        </div>
-
-        {/* Message Input */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-300">Your message</label>
+        <div className="flex flex-col gap-2 py-4">
+          <label htmlFor="direct-message" className="text-sm font-medium">
+            Your message to {recipientName}
+          </label>
           <Textarea
-            placeholder={defaultMessage}
+            id="direct-message"
+            placeholder="Type your message here..."
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500 min-h-[100px] resize-none"
+            className="min-h-[120px] resize-none"
+            disabled={isLoading}
           />
-          <p className="text-xs text-gray-500">
-            Leave empty to send the default message
+          <p className="text-xs text-muted-foreground">
+            {message.length}/500 characters
           </p>
         </div>
 
-        <DialogFooter className="gap-2 sm:gap-0">
+        <DialogFooter className="gap-2">
           <Button
-            variant="ghost"
-            onClick={onClose}
+            variant="outline"
+            onClick={handleCancel}
             disabled={isLoading}
-            className="text-gray-400 hover:text-white"
           >
             Cancel
           </Button>
           <Button
-            onClick={handleSend}
-            disabled={isLoading}
-            className="bg-primary hover:bg-primary/90"
+            onClick={handleConfirm}
+            disabled={isLoading || !message.trim()}
+            className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600"
           >
             {isLoading ? (
               <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-white border-t-transparent" />
                 Sending...
               </>
             ) : (
               <>
-                <Send className="w-4 h-4 mr-2" />
+                <MessageCircle className="w-4 h-4 mr-2" />
                 Send Message
               </>
             )}

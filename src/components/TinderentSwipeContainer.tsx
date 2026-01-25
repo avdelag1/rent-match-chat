@@ -32,6 +32,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { logger } from '@/utils/prodLogger';
 import { MessageConfirmationDialog } from './MessageConfirmationDialog';
+import { DirectMessageDialog } from './DirectMessageDialog';
+import { isDirectMessagingListing } from '@/utils/directMessaging';
 import { useQueryClient } from '@tanstack/react-query';
 
 // Custom motorcycle icon
@@ -201,6 +203,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isRefreshMode, setIsRefreshMode] = useState(false);
   const [messageDialogOpen, setMessageDialogOpen] = useState(false);
+  const [directMessageDialogOpen, setDirectMessageDialogOpen] = useState(false);
   const [selectedListing, setSelectedListing] = useState<any | null>(null);
 
   // PERF: Get userId from auth to pass to query (avoids getUser() inside queryFn)
@@ -854,6 +857,20 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
       return;
     }
 
+    // Check if this is a direct messaging category (motorcycle/bicycle)
+    // These categories allow free messaging without subscription or quota checks
+    const isDirectMessaging = isDirectMessagingListing(listing);
+
+    if (isDirectMessaging) {
+      // Direct messaging for motorcycles and bicycles - no subscription required
+      logger.info('[TinderentSwipeContainer] Direct messaging category detected, opening direct message dialog');
+      setSelectedListing(listing);
+      setDirectMessageDialogOpen(true);
+      triggerHaptic('light');
+      return;
+    }
+
+    // Standard flow for properties and other categories - requires subscription
     if (needsUpgrade) {
       startNavigation();
       navigate('/client/settings#subscription');
@@ -904,6 +921,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
           description: 'Opening chat...'
         });
         setMessageDialogOpen(false);
+        setDirectMessageDialogOpen(false);
         await new Promise(resolve => setTimeout(resolve, 300));
         navigate(`/messages?conversationId=${result.conversationId}`);
       }
@@ -1214,6 +1232,16 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
         onConfirm={handleSendMessage}
         recipientName={selectedListing ? `the owner of ${selectedListing.title}` : 'the owner'}
         isLoading={isCreatingConversation}
+      />
+
+      {/* Direct Message Dialog - For motorcycle/bicycle listings (free messaging) */}
+      <DirectMessageDialog
+        open={directMessageDialogOpen}
+        onOpenChange={setDirectMessageDialogOpen}
+        onConfirm={handleSendMessage}
+        recipientName={selectedListing ? `the owner of ${selectedListing.title}` : 'the owner'}
+        isLoading={isCreatingConversation}
+        category={selectedListing?.category}
       />
     </div>
   );

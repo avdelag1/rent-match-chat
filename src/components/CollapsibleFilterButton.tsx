@@ -174,7 +174,7 @@ function CollapsibleFilterButtonComponent({ filters, onChange, userRole, classNa
             >
               {/* Header */}
               <div className="flex items-center justify-between p-4 border-b border-border">
-                <h2 className="text-lg font-semibold">Filters</h2>
+                <h2 className="text-lg font-semibold">Quick Filter</h2>
                 <div className="flex items-center gap-2">
                   {activeFilterCount > 0 && (
                     <motion.button

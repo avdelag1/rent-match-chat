@@ -140,7 +140,7 @@ function CascadeFilterButtonComponent({ filters, onChange, userRole = 'client' }
         )}
       >
         <Filter className="w-4 h-4" />
-        <span>filters</span>
+        <span>Quick Filter</span>
         {activeCount > 0 && (
           <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-white/20 text-xs font-bold">
             {activeCount}
@@ -162,7 +162,7 @@ function CascadeFilterButtonComponent({ filters, onChange, userRole = 'client' }
           >
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30">
-              <span className="text-sm font-semibold text-foreground">filters</span>
+              <span className="text-sm font-semibold text-foreground">Quick Filter</span>
               <div className="flex items-center gap-2">
                 {hasActiveFilters && (
                   <motion.button
