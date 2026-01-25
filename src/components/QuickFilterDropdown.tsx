@@ -75,7 +75,7 @@ const clientTypeOptions: { id: OwnerClientType; label: string; icon: React.React
 
 // Pink/Mexican color "Quick Filter" text
 const QuickFilterText = () => (
-  <span className="font-semibold text-xs tracking-tight whitespace-nowrap bg-gradient-to-r from-pink-500 via-rose-500 to-pink-400 bg-clip-text text-transparent">
+  <span className="font-semibold text-sm tracking-tight whitespace-nowrap bg-gradient-to-r from-pink-500 via-rose-500 to-pink-400 bg-clip-text text-transparent">
     Quick Filter
   </span>
 );
@@ -357,10 +357,8 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
         whileTap={{ scale: 0.98 }}
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          'relative flex items-center gap-2 px-4 h-10 rounded-xl transition-all duration-200 touch-manipulation',
-          activeFilterCount > 0
-            ? 'bg-gradient-to-r from-orange-500/20 to-pink-500/20 shadow-lg shadow-orange-500/10'
-            : 'bg-muted/50 hover:bg-muted'
+          'relative flex items-center gap-2 px-5 h-11 rounded-xl transition-all duration-200 touch-manipulation',
+          'bg-white/5 hover:bg-white/10'
         )}
       >
         <QuickFilterText />
@@ -371,7 +369,7 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0 }}
-              className="bg-gradient-to-br from-orange-500 to-pink-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
+              className="bg-gradient-to-br from-orange-500 to-pink-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center"
             >
               {activeFilterCount}
             </motion.span>

@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, MessageCircle, Search, Plus, Home, Bike, Ship, Car } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useActiveMode } from '@/hooks/useActiveMode';
 import { useConversations, useConversationStats, useStartConversation } from '@/hooks/useConversations';
 import { useMarkMessagesAsRead } from '@/hooks/useMarkMessagesAsRead';
 import { MessagingInterface } from '@/components/MessagingInterface';
@@ -52,6 +53,9 @@ export function MessagingDashboard() {
   // Use React Query-based hook for role - prevents menu flickering
   const { data: fetchedRole, isLoading: roleLoading } = useUserRole(user?.id);
   const userRole = fetchedRole || 'client';
+
+  // Get active mode to filter conversations
+  const { activeMode } = useActiveMode();
 
   const { data: conversations = [], isLoading, refetch, ensureConversationInCache, fetchSingleConversation } = useConversations();
   // State to store a directly fetched conversation (when not in cache)
@@ -116,12 +120,22 @@ export function MessagingDashboard() {
   // Mark messages as read when viewing conversation
   useMarkMessagesAsRead(selectedConversationId || '', !!selectedConversationId);
 
-  const filteredConversations = useMemo(() =>
-    conversations.filter(conv =>
-      conv.other_user?.full_name?.toLowerCase()?.includes(searchQuery.toLowerCase())
-    ),
-    [conversations, searchQuery]
-  );
+  const filteredConversations = useMemo(() => {
+    // Filter conversations based on active mode and search query
+    return conversations.filter(conv => {
+      // Search filter
+      const matchesSearch = conv.other_user?.full_name?.toLowerCase()?.includes(searchQuery.toLowerCase());
+
+      // Mode filter
+      // Client mode: only show conversations where current user is the client (talking to owners)
+      // Owner mode: only show conversations where current user is the owner (talking to clients)
+      const matchesMode = activeMode === 'client'
+        ? conv.client_id === user?.id
+        : conv.owner_id === user?.id;
+
+      return matchesSearch && matchesMode;
+    });
+  }, [conversations, searchQuery, activeMode, user?.id]);
 
   const selectedConversation = conversations.find(conv => conv.id === selectedConversationId);
 
