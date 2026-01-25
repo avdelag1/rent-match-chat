@@ -74,6 +74,20 @@ const createEmptyDeckState = (): DeckState => ({
   lastSwipedId: null,
 });
 
+// CACHE INVALIDATION: Clear stale localStorage on app load to prevent FK errors
+// This runs once on module load and clears any stale mock data
+const CACHE_VERSION = 'v3'; // Bump this to force clear old caches
+const CACHE_KEY = 'swipe-deck-store';
+const CACHE_VERSION_KEY = 'swipe-deck-version';
+if (typeof window !== 'undefined') {
+  const storedVersion = localStorage.getItem(CACHE_VERSION_KEY);
+  if (storedVersion !== CACHE_VERSION) {
+    localStorage.removeItem(CACHE_KEY);
+    localStorage.setItem(CACHE_VERSION_KEY, CACHE_VERSION);
+    console.log('[SwipeDeckStore] Cleared stale cache - version mismatch');
+  }
+}
+
 // Custom storage handler to serialize/deserialize Sets
 const customStorage = {
   getItem: (name: string) => {

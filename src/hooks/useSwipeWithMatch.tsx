@@ -64,6 +64,41 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
 
           logger.info('[useSwipeWithMatch] Successfully saved owner like:', ownerLike);
           like = ownerLike;
+
+          // IMPORTANT: Send notification to the liked client
+          // Get owner's profile info for the notification
+          const { data: ownerProfile } = await supabase
+            .from('profiles')
+            .select('full_name, avatar_url')
+            .eq('id', user.id)
+            .maybeSingle();
+
+          const ownerName = ownerProfile?.full_name || 'Someone';
+
+          // Create in-app notification for the client
+          supabase.from('notifications').insert([{
+            id: crypto.randomUUID(),
+            user_id: targetId,
+            type: 'like',
+            message: `🔥 ${ownerName} liked your profile!`,
+            read: false
+          }]).then(
+            () => logger.info('[useSwipeWithMatch] Notification saved for client:', targetId),
+            (err) => logger.error('[useSwipeWithMatch] Failed to save notification:', err)
+          );
+
+          // Trigger push notification (fire-and-forget)
+          supabase.functions.invoke('send-push-notification', {
+            body: {
+              user_id: targetId,
+              title: '🔥 New Flame!',
+              body: `${ownerName} liked your profile!`,
+              data: { type: 'like', liker_id: user.id }
+            }
+          }).then(
+            () => logger.info('[useSwipeWithMatch] Push notification sent to client:', targetId),
+            (err) => logger.error('[useSwipeWithMatch] Push notification failed:', err)
+          );
         } else {
           // For left swipes (dislikes), we use the likes table with direction='left'
           const { data: dislike, error: dislikeError } = await supabase
@@ -105,6 +140,42 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
           throw likeError;
         }
         like = clientLike;
+
+        // IMPORTANT: Notify listing owner when client likes their listing
+        if (direction === 'right') {
+          // Get listing owner and client info for notification
+          const [listingResult, clientResult] = await Promise.all([
+            supabase.from('listings').select('owner_id, title').eq('id', targetId).maybeSingle(),
+            supabase.from('profiles').select('full_name').eq('id', user.id).maybeSingle()
+          ]);
+
+          if (listingResult.data?.owner_id) {
+            const clientName = clientResult.data?.full_name || 'Someone';
+            const listingTitle = listingResult.data.title || 'your listing';
+
+            // Create in-app notification for the owner
+            supabase.from('notifications').insert([{
+              id: crypto.randomUUID(),
+              user_id: listingResult.data.owner_id,
+              type: 'like',
+              message: `🔥 ${clientName} liked ${listingTitle}!`,
+              read: false
+            }]).then(
+              () => logger.info('[useSwipeWithMatch] Notification sent to owner:', listingResult.data.owner_id),
+              (err) => logger.error('[useSwipeWithMatch] Failed to notify owner:', err)
+            );
+
+            // Trigger push notification (fire-and-forget)
+            supabase.functions.invoke('send-push-notification', {
+              body: {
+                user_id: listingResult.data.owner_id,
+                title: '🔥 New Flame!',
+                body: `${clientName} liked ${listingTitle}!`,
+                data: { type: 'like', liker_id: user.id, listing_id: targetId }
+              }
+            }).catch(err => logger.error('[useSwipeWithMatch] Push to owner failed:', err));
+          }
+        }
       }
 
       // OPTIMISTIC: Return immediately after saving swipe
