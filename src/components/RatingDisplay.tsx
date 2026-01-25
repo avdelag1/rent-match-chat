@@ -115,7 +115,7 @@ export const CompactRatingDisplay = memo<CompactRatingDisplayPropsWithLoading>(
               ({total_ratings})
             </span>
           </div>
-          <TrustBadge trustLevel={trust_level} />
+          {trust_level !== 'new' && <TrustBadge trustLevel={trust_level} />}
         </div>
 
         {/* Sample Reviews (if available and showReviews is true) */}
