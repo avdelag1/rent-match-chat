@@ -17,6 +17,11 @@ interface Notification {
   actionUrl?: string;
   relatedUserId?: string;
   conversationId?: string;
+  metadata?: {
+    role?: 'client' | 'owner';
+    targetType?: 'listing' | 'profile';
+    [key: string]: any;
+  };
 }
 
 interface DBNotification {
@@ -120,18 +125,23 @@ export function useNotificationSystem() {
             .maybeSingle();
 
           if (swiperProfile) {
+            const swiperRole = swiperRoleData?.role as 'client' | 'owner' | undefined;
             const notification: Notification = {
               id: `swipe-${swipe.id}`,
               type: swipe.swipe_type === 'super_like' ? 'super_like' : 'like',
               title: swiperProfile.full_name || 'Someone',
-              message: swipe.swipe_type === 'super_like' 
-                ? 'gave you a Super Like! ⭐' 
+              message: swipe.swipe_type === 'super_like'
+                ? 'gave you a Super Like! ⭐'
                 : 'liked your profile! 🔥',
               avatar: swiperProfile.avatar_url,
               timestamp: new Date(),
               read: false,
               relatedUserId: swipe.user_id,
-              actionUrl: swiperRoleData?.role === 'client' ? '/owner/liked-clients' : '/client/liked-properties'
+              actionUrl: swiperRole === 'client' ? '/owner/liked-clients' : '/client/liked-properties',
+              metadata: {
+                role: swiperRole,
+                targetType: swiperRole === 'client' ? 'listing' : 'profile'
+              }
             };
 
             // OPTIMIZATION: Add to pending queue instead of immediate state update
@@ -167,14 +177,21 @@ export function useNotificationSystem() {
           if (conversation && 
               (conversation.client_id === user.id || conversation.owner_id === user.id)) {
             
-            // Get sender info
+            // Get sender info and role
             const { data: senderProfile } = await supabase
               .from('profiles')
               .select('full_name, avatar_url')
               .eq('id', message.sender_id)
               .maybeSingle();
 
+            const { data: senderRoleData } = await supabase
+              .from('user_roles')
+              .select('role')
+              .eq('user_id', message.sender_id)
+              .maybeSingle();
+
             if (senderProfile) {
+              const senderRole = senderRoleData?.role as 'client' | 'owner' | undefined;
               const notification: Notification = {
                 id: `message-${message.id}`,
                 type: 'message',
@@ -185,7 +202,10 @@ export function useNotificationSystem() {
                 read: false,
                 relatedUserId: message.sender_id,
                 conversationId: message.conversation_id,
-                actionUrl: '/messages'
+                actionUrl: '/messages',
+                metadata: {
+                  role: senderRole
+                }
               };
 
               // OPTIMIZATION: Add to pending queue instead of immediate state update

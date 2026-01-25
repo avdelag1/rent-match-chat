@@ -16,35 +16,50 @@ interface NotificationsDialogProps {
   onClose: () => void;
 }
 
-const NotificationIconBg = ({ type }: { type: string }) => {
-  const configs: Record<string, { bg: string; icon: React.ReactNode }> = {
-    'message': {
-      bg: 'bg-blue-500/10',
-      icon: <MessageSquare className="w-5 h-5 text-blue-500" />
-    },
-    'like': {
-      bg: 'bg-orange-500/10',
-      icon: <Flame className="w-5 h-5 text-orange-500" />
-    },
-    'match': {
-      bg: 'bg-amber-500/10',
-      icon: <Sparkles className="w-5 h-5 text-amber-500" />
-    },
-    'super_like': {
-      bg: 'bg-yellow-500/10',
-      icon: <Star className="w-5 h-5 text-yellow-500" />
-    },
-    'premium_purchase': {
-      bg: 'bg-purple-500/10',
-      icon: <Crown className="w-5 h-5 text-purple-500" />
-    },
-    'activation_purchase': {
-      bg: 'bg-green-500/10',
-      icon: <MessageCircle className="w-5 h-5 text-green-500" />
-    },
+// Helper function to get notification role from metadata
+const getNotificationRole = (notification: any): 'client' | 'owner' | 'neutral' => {
+  if (notification.metadata?.role) {
+    return notification.metadata.role;
+  }
+  if (notification.metadata?.targetType === 'listing') {
+    return 'client'; // Client liked a listing
+  }
+  if (notification.metadata?.targetType === 'profile') {
+    return 'owner'; // Owner liked a profile
+  }
+  return 'neutral';
+};
+
+const NotificationIconBg = ({ type, role = 'neutral' }: { type: string; role?: 'client' | 'owner' | 'neutral' }) => {
+  // Client uses cooler tones (blue, cyan, purple), Owner uses warmer tones (orange, red, amber)
+  const getConfig = (): { bg: string; icon: React.ReactNode } => {
+    switch (type) {
+      case 'message':
+        return role === 'client'
+          ? { bg: 'bg-blue-500/10', icon: <MessageSquare className="w-5 h-5 text-blue-500" /> }
+          : { bg: 'bg-amber-500/10', icon: <MessageSquare className="w-5 h-5 text-amber-500" /> };
+      case 'like':
+        return role === 'client'
+          ? { bg: 'bg-cyan-500/10', icon: <Flame className="w-5 h-5 text-cyan-500" /> }
+          : { bg: 'bg-orange-500/10', icon: <Flame className="w-5 h-5 text-orange-500" /> };
+      case 'match':
+        return role === 'client'
+          ? { bg: 'bg-purple-500/10', icon: <Sparkles className="w-5 h-5 text-purple-500" /> }
+          : { bg: 'bg-amber-500/10', icon: <Sparkles className="w-5 h-5 text-amber-500" /> };
+      case 'super_like':
+        return role === 'client'
+          ? { bg: 'bg-purple-500/10', icon: <Star className="w-5 h-5 text-purple-500" /> }
+          : { bg: 'bg-yellow-500/10', icon: <Star className="w-5 h-5 text-yellow-500" /> };
+      case 'premium_purchase':
+        return { bg: 'bg-purple-500/10', icon: <Crown className="w-5 h-5 text-purple-500" /> };
+      case 'activation_purchase':
+        return { bg: 'bg-green-500/10', icon: <MessageCircle className="w-5 h-5 text-green-500" /> };
+      default:
+        return { bg: 'bg-muted', icon: <Bell className="w-5 h-5 text-muted-foreground" /> };
+    }
   };
 
-  const config = configs[type] || { bg: 'bg-muted', icon: <Bell className="w-5 h-5 text-muted-foreground" /> };
+  const config = getConfig();
 
   return (
     <div className={`p-2.5 rounded-xl ${config.bg}`}>
@@ -163,46 +178,48 @@ export function NotificationsDialog({ isOpen, onClose }: NotificationsDialogProp
                 ) : (
                   <AnimatePresence mode="popLayout">
                     <div className="space-y-2">
-                      {filteredNotifications.map((notification, index) => (
-                        <motion.div
-                          key={notification.id}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, x: -50 }}
-                          transition={{ delay: index * 0.03 }}
-                        >
-                          <Card 
-                            className={`
-                              group cursor-pointer transition-all duration-200 border overflow-hidden
-                              hover:shadow-md hover:-translate-y-0.5
-                              ${!notification.read 
-                                ? 'bg-gradient-to-r from-primary/5 via-card to-card border-primary/20' 
-                                : 'hover:bg-accent/30 border-border/50'
-                              }
-                            `}
-                            onClick={() => {
-                              handleNotificationClick(notification);
-                              onClose();
-                            }}
+                      {filteredNotifications.map((notification, index) => {
+                        const role = getNotificationRole(notification);
+                        return (
+                          <motion.div
+                            key={notification.id}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, x: -50 }}
+                            transition={{ delay: index * 0.03 }}
                           >
-                            <CardContent className="p-3 sm:p-4">
-                              <div className="flex items-start gap-3">
-                                <div className="flex-shrink-0">
-                                  {notification.avatar ? (
-                                    <div className="relative">
-                                      <img 
-                                        src={notification.avatar} 
-                                        alt={notification.title}
-                                        className="w-10 h-10 rounded-xl object-cover"
-                                      />
-                                      <div className="absolute -bottom-1 -right-1 scale-75">
-                                        <NotificationIconBg type={notification.type} />
+                            <Card
+                              className={`
+                                group cursor-pointer transition-all duration-200 border overflow-hidden
+                                hover:shadow-md hover:-translate-y-0.5
+                                ${!notification.read
+                                  ? 'bg-gradient-to-r from-primary/5 via-card to-card border-primary/20'
+                                  : 'hover:bg-accent/30 border-border/50'
+                                }
+                              `}
+                              onClick={() => {
+                                handleNotificationClick(notification);
+                                onClose();
+                              }}
+                            >
+                              <CardContent className="p-3 sm:p-4">
+                                <div className="flex items-start gap-3">
+                                  <div className="flex-shrink-0">
+                                    {notification.avatar ? (
+                                      <div className="relative">
+                                        <img
+                                          src={notification.avatar}
+                                          alt={notification.title}
+                                          className="w-10 h-10 rounded-xl object-cover"
+                                        />
+                                        <div className="absolute -bottom-1 -right-1 scale-75">
+                                          <NotificationIconBg type={notification.type} role={role} />
+                                        </div>
                                       </div>
-                                    </div>
-                                  ) : (
-                                    <NotificationIconBg type={notification.type} />
-                                  )}
-                                </div>
+                                    ) : (
+                                      <NotificationIconBg type={notification.type} role={role} />
+                                    )}
+                                  </div>
                                 
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-start justify-between gap-2 mb-0.5">
@@ -246,7 +263,8 @@ export function NotificationsDialog({ isOpen, onClose }: NotificationsDialogProp
                             </CardContent>
                           </Card>
                         </motion.div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </AnimatePresence>
                 )}

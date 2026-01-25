@@ -17,6 +17,11 @@ interface Notification {
   timestamp: Date;
   read: boolean;
   actionUrl?: string;
+  metadata?: {
+    role?: 'client' | 'owner';
+    targetType?: 'listing' | 'profile';
+    [key: string]: any;
+  };
 }
 
 interface NotificationBarProps {
@@ -46,16 +51,41 @@ export function NotificationBar({ notifications, onDismiss, onMarkAllRead, onNot
     }
   }, [hasUnread, isExpanded]);
 
-  const getNotificationIcon = (type: string) => {
+  // Determine role from notification metadata or infer from context
+  const getNotificationRole = (notification: Notification): 'client' | 'owner' | 'neutral' => {
+    // Check metadata first
+    if (notification.metadata?.role) {
+      return notification.metadata.role;
+    }
+    // Infer from targetType
+    if (notification.metadata?.targetType === 'listing') {
+      return 'client'; // Client liked a listing
+    }
+    if (notification.metadata?.targetType === 'profile') {
+      return 'owner'; // Owner liked a profile
+    }
+    return 'neutral';
+  };
+
+  const getNotificationIcon = (type: string, role: 'client' | 'owner' | 'neutral' = 'neutral') => {
+    // Client uses cooler tones (blue, cyan, purple), Owner uses warmer tones (orange, red, amber)
     switch (type) {
       case 'like':
-        return <Flame className="w-4 h-4 text-orange-500" />;
+        return role === 'client'
+          ? <Flame className="w-4 h-4 text-cyan-500" />
+          : <Flame className="w-4 h-4 text-orange-500" />;
       case 'message':
-        return <MessageCircle className="w-4 h-4 text-blue-500" />;
+        return role === 'client'
+          ? <MessageCircle className="w-4 h-4 text-blue-500" />
+          : <MessageCircle className="w-4 h-4 text-amber-500" />;
       case 'super_like':
-        return <Star className="w-4 h-4 text-yellow-500" />;
+        return role === 'client'
+          ? <Star className="w-4 h-4 text-purple-500" />
+          : <Star className="w-4 h-4 text-yellow-500" />;
       case 'match':
-        return <Flame className="w-4 h-4 text-orange-500 fill-current" />;
+        return role === 'client'
+          ? <Flame className="w-4 h-4 text-cyan-500 fill-current" />
+          : <Flame className="w-4 h-4 text-orange-500 fill-current" />;
       case 'new_user':
         return <User className="w-4 h-4 text-green-500" />;
       default:
@@ -63,16 +93,24 @@ export function NotificationBar({ notifications, onDismiss, onMarkAllRead, onNot
     }
   };
 
-  const getNotificationColor = (type: string) => {
+  const getNotificationColor = (type: string, role: 'client' | 'owner' | 'neutral' = 'neutral') => {
     switch (type) {
       case 'like':
-        return 'border-orange-500/30 bg-gradient-to-r from-orange-500/15 to-red-500/10';
+        return role === 'client'
+          ? 'border-cyan-500/30 bg-gradient-to-r from-cyan-500/15 to-blue-500/10'
+          : 'border-orange-500/30 bg-gradient-to-r from-orange-500/15 to-red-500/10';
       case 'message':
-        return 'border-blue-500/30 bg-gradient-to-r from-blue-500/15 to-cyan-500/10';
+        return role === 'client'
+          ? 'border-blue-500/30 bg-gradient-to-r from-blue-500/15 to-cyan-500/10'
+          : 'border-amber-500/30 bg-gradient-to-r from-amber-500/15 to-yellow-500/10';
       case 'super_like':
-        return 'border-yellow-500/30 bg-gradient-to-r from-yellow-500/15 to-amber-500/10';
+        return role === 'client'
+          ? 'border-purple-500/30 bg-gradient-to-r from-purple-500/15 to-pink-500/10'
+          : 'border-yellow-500/30 bg-gradient-to-r from-yellow-500/15 to-amber-500/10';
       case 'match':
-        return 'border-pink-500/30 bg-gradient-to-r from-pink-500/15 to-purple-500/10';
+        return role === 'client'
+          ? 'border-cyan-500/30 bg-gradient-to-r from-cyan-500/15 to-purple-500/10'
+          : 'border-pink-500/30 bg-gradient-to-r from-pink-500/15 to-purple-500/10';
       case 'new_user':
         return 'border-green-500/30 bg-gradient-to-r from-green-500/15 to-emerald-500/10';
       default:
@@ -160,36 +198,38 @@ export function NotificationBar({ notifications, onDismiss, onMarkAllRead, onNot
                   className="overflow-hidden"
                 >
                   <div className="max-h-80 overflow-y-auto">
-                    {unreadNotifications.slice(0, 5).map((notification, index) => (
-                      <motion.div
-                        key={notification.id}
-                        initial={{ x: -20, opacity: 0 }}
-                        animate={{ x: 0, opacity: 1 }}
-                        transition={{ delay: index * 0.05 }}
-                        className={`p-4 border-b border-white/5 cursor-pointer hover:bg-white/5 transition-all duration-200 backdrop-blur-sm ${getNotificationColor(notification.type)}`}
-                        onClick={() => onNotificationClick(notification)}
-                      >
-                        <div className="flex items-start gap-3">
-                          {notification.avatar ? (
-                            <Avatar className="w-12 h-12 border-2 border-white/20 ring-2 ring-primary/20">
-                              <AvatarImage src={notification.avatar} />
-                              <AvatarFallback className="bg-gradient-to-br from-primary/30 to-purple-500/30 text-white font-bold">
-                                {notification.title.charAt(0)}
-                              </AvatarFallback>
-                            </Avatar>
-                          ) : (
-                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-white/10 to-white/5 flex items-center justify-center border border-white/20 shadow-lg">
-                              {getNotificationIcon(notification.type)}
-                            </div>
-                          )}
+                    {unreadNotifications.slice(0, 5).map((notification, index) => {
+                      const role = getNotificationRole(notification);
+                      return (
+                        <motion.div
+                          key={notification.id}
+                          initial={{ x: -20, opacity: 0 }}
+                          animate={{ x: 0, opacity: 1 }}
+                          transition={{ delay: index * 0.05 }}
+                          className={`p-4 border-b border-white/5 cursor-pointer hover:bg-white/5 transition-all duration-200 backdrop-blur-sm ${getNotificationColor(notification.type, role)}`}
+                          onClick={() => onNotificationClick(notification)}
+                        >
+                          <div className="flex items-start gap-3">
+                            {notification.avatar ? (
+                              <Avatar className="w-12 h-12 border-2 border-white/20 ring-2 ring-primary/20">
+                                <AvatarImage src={notification.avatar} />
+                                <AvatarFallback className="bg-gradient-to-br from-primary/30 to-purple-500/30 text-white font-bold">
+                                  {notification.title.charAt(0)}
+                                </AvatarFallback>
+                              </Avatar>
+                            ) : (
+                              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-white/10 to-white/5 flex items-center justify-center border border-white/20 shadow-lg">
+                                {getNotificationIcon(notification.type, role)}
+                              </div>
+                            )}
 
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <p className="font-semibold text-sm text-white truncate">
-                                {notification.title}
-                              </p>
-                              {getNotificationIcon(notification.type)}
-                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <p className="font-semibold text-sm text-white truncate">
+                                  {notification.title}
+                                </p>
+                                {getNotificationIcon(notification.type, role)}
+                              </div>
                             <p className="text-sm text-gray-300 mt-1 line-clamp-2">
                               {notification.message}
                             </p>
@@ -215,7 +255,8 @@ export function NotificationBar({ notifications, onDismiss, onMarkAllRead, onNot
                           </Button>
                         </div>
                       </motion.div>
-                    ))}
+                    );
+                    })}
                     
                     {unreadNotifications.length > 5 && (
                       <div className="p-4 text-center border-t border-white/5">
