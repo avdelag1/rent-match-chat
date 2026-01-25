@@ -975,7 +975,7 @@ export function useSmartClientMatching(
           has_pets,
           smoking,
           party_friendly,
-          preferred_listing_types,
+          preferred_listing_type,
           property_types,
           moto_types,
           bicycle_types,
@@ -1052,11 +1052,11 @@ export function useSmartClientMatching(
             }
 
             // Quick filter: clientType (what the client is looking for: hire/rent/buy)
-            if ((filters as any).clientType && (filters as any).clientType !== 'all' && profile.preferred_listing_types) {
+            if ((filters as any).clientType && (filters as any).clientType !== 'all' && profile.preferred_listing_type) {
               const clientType = (filters as any).clientType;
               // Map clientType to listing type: 'hire' -> 'hire', 'rent' -> 'rent', 'buy' -> 'sale'
               const lookingFor = clientType === 'buy' ? 'sale' : clientType;
-              if (!profile.preferred_listing_types.includes(lookingFor)) {
+              if (profile.preferred_listing_type !== lookingFor) {
                 return false;
               }
             }
