@@ -479,6 +479,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
 
       {/* Top Bar - Fixed with safe-area-top. Hidden on camera routes for fullscreen UX */}
       {/* On immersive dashboard routes, TopBar becomes transparent for full-bleed cards */}
+      {/* On non-immersive routes, TopBar hides on scroll down and reappears on scroll up */}
       {!isCameraRoute && (
         <TopBar
           onNotificationsClick={handleNotificationsClick}
@@ -488,6 +489,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           onFiltersChange={handleQuickFilterChange}
           userRole={userRole === 'admin' ? 'client' : userRole}
           transparent={isImmersiveDashboard}
+          hideOnScroll={!isImmersiveDashboard}
         />
       )}
 
