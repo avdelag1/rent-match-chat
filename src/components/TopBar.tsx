@@ -58,9 +58,11 @@ function TopBarComponent({
   hideOnScroll = false,
 }: TopBarProps) {
   // Scroll-aware hide/show behavior
+  // IMPORTANT: Target the dashboard scroll container, not window (content scrolls inside the container)
   const { isVisible } = useScrollDirection({ 
     threshold: 15, 
     showAtTop: true,
+    targetSelector: '#dashboard-scroll-container',
   });
   const { unreadCount: notificationCount } = useUnreadNotifications();
   const navigate = useNavigate();
