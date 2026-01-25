@@ -24,10 +24,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
-// Lazy load non-critical overlay components to reduce initial bundle size
-const PWAInstallBanner = lazy(() => import("@/components/PWAInstallBanner").then(m => ({ default: m.PWAInstallBanner })));
-const PerformanceMonitor = lazy(() => import("@/components/PerformanceMonitor").then(m => ({ default: m.PerformanceMonitor })));
-
 // Lazy load pages that are not immediately needed
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 
@@ -141,7 +137,6 @@ const App = () => (
             <NotificationWrapper>
               <AppLayout>
                 <TooltipProvider>
-                  <Toaster />
                   <Sonner />
                 </TooltipProvider>
                 <Suspense fallback={<SuspenseFallback />}>
@@ -229,11 +224,6 @@ const App = () => (
                   </Routes>
                 </Suspense>
               </AppLayout>
-              {/* Lazy-loaded overlay components - loaded after initial render */}
-              <Suspense fallback={null}>
-                <PWAInstallBanner />
-                <PerformanceMonitor />
-              </Suspense>
             </NotificationWrapper>
             </ResponsiveProvider>
             </PWAProvider>

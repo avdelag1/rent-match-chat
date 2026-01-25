@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import { logger } from '@/utils/prodLogger';
 
@@ -17,10 +17,8 @@ export function NotificationSystem() {
       Notification.requestPermission()
         .then(permission => {
           if (permission === 'granted') {
-            toast({
-              title: "🔔 Notifications Enabled",
-              description: "You'll now receive real-time message notifications!",
-              duration: 3000,
+            toast.success("🔔 Notifications Enabled", {
+              description: "You'll now receive real-time message notifications!"
             });
           }
         })
@@ -70,10 +68,8 @@ export function NotificationSystem() {
 
                 // Show toast notification
                 const messageText = newMessage.message_text || '';
-                toast({
-                  title: `💬 New Message`,
-                  description: `${senderName}: ${messageText.slice(0, 60)}${messageText.length > 60 ? '...' : ''}`,
-                  duration: 3000,
+                toast.info(`💬 New Message`, {
+                  description: `${senderName}: ${messageText.slice(0, 60)}${messageText.length > 60 ? '...' : ''}`
                 });
 
                 // Save to notifications table (non-blocking, errors are non-critical)
@@ -157,10 +153,8 @@ export function NotificationSystem() {
               const likerName = likerProfile?.full_name || 'Someone';
 
               // Show toast notification
-              toast({
-                title: `🔥 New Flame`,
-                description: `${likerName} liked your ${newLike.direction === 'client_to_listing' ? 'property' : 'profile'}!`,
-                duration: 3000,
+              toast.success(`🔥 New Flame`, {
+                description: `${likerName} liked your ${newLike.direction === 'client_to_listing' ? 'property' : 'profile'}!`
               });
 
               // Save to notifications table (non-blocking, errors are non-critical)

@@ -13,7 +13,7 @@ const OwnerNewListing = () => {
     const categoryParam = searchParams.get('category');
     const modeParam = searchParams.get('mode');
     
-    const category = categoryParam && ['property', 'yacht', 'motorcycle', 'bicycle', 'vehicle', 'worker'].includes(categoryParam)
+    const category = categoryParam && ['property', 'motorcycle', 'bicycle', 'worker'].includes(categoryParam)
       ? categoryParam
       : 'property';
     
