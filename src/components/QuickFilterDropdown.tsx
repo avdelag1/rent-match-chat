@@ -73,15 +73,15 @@ const clientTypeOptions: { id: OwnerClientType; label: string; icon: React.React
   { id: 'buy', label: 'Buying', icon: <Briefcase className="w-4 h-4" />, color: 'from-green-500 to-emerald-500' },
 ];
 
-// Pink/Mexican color "Quick Filter" text - responsive sizing
+// BRIGHTER Pink/Mexican color "Quick Filter" text - responsive sizing
 const QuickFilterText = () => (
   <>
     {/* Abbreviated on very small screens */}
-    <span className="sm:hidden font-semibold text-xs tracking-tight whitespace-nowrap bg-gradient-to-r from-pink-500 via-rose-500 to-pink-400 bg-clip-text text-transparent">
+    <span className="sm:hidden font-semibold text-xs tracking-tight whitespace-nowrap bg-gradient-to-r from-pink-400 via-rose-400 to-pink-300 bg-clip-text text-transparent drop-shadow-sm">
       Filter
     </span>
     {/* Full text on larger screens */}
-    <span className="hidden sm:inline font-semibold text-sm tracking-tight whitespace-nowrap bg-gradient-to-r from-pink-500 via-rose-500 to-pink-400 bg-clip-text text-transparent">
+    <span className="hidden sm:inline font-semibold text-sm tracking-tight whitespace-nowrap bg-gradient-to-r from-pink-400 via-rose-400 to-pink-300 bg-clip-text text-transparent drop-shadow-sm">
       Quick Filter
     </span>
   </>

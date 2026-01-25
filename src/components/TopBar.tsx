@@ -9,16 +9,16 @@ import { SwipessLogo } from './SwipessLogo';
 import { QuickFilterDropdown, QuickFilters } from './QuickFilterDropdown';
 import { ModeSwitcher } from './ModeSwitcher';
 
-// Colorful gradient text for "Message Activation" button - Red/Orange theme
+// Colorful gradient text for "Message Activation" button - BRIGHTER Red/Orange theme
 // Shows full text on md+ screens, abbreviated on smaller screens
 const MessageActivationText = () => (
   <>
     {/* Full text on medium screens and up */}
-    <span className="hidden sm:inline font-bold text-xs sm:text-sm tracking-tight bg-gradient-to-r from-red-500 via-orange-500 to-amber-500 bg-clip-text text-transparent whitespace-nowrap">
+    <span className="hidden sm:inline font-bold text-xs sm:text-sm tracking-tight bg-gradient-to-r from-orange-400 via-amber-400 to-yellow-400 bg-clip-text text-transparent whitespace-nowrap drop-shadow-sm">
       Message Activation
     </span>
     {/* Icon only on extra small screens */}
-    <Zap className="sm:hidden h-5 w-5 text-orange-500" />
+    <Zap className="sm:hidden h-5 w-5 text-amber-400 drop-shadow-sm" />
   </>
 );
 
@@ -136,13 +136,13 @@ function TopBarComponent({
               whileTap={{ scale: 0.95 }}
               transition={{ type: 'spring', stiffness: 400, damping: 17 }}
             >
-              {/* Bell icon with gradient on hover */}
+              {/* Bell icon - BRIGHTER */}
               <Bell
                 className={cn(
-                  "h-5 w-5 sm:h-6 sm:w-6 transition-all duration-300",
+                  "h-5 w-5 sm:h-6 sm:w-6 transition-all duration-300 drop-shadow-sm",
                   notificationCount > 0
-                    ? "text-orange-500 group-hover:text-orange-400"
-                    : "text-foreground/80 group-hover:text-foreground"
+                    ? "text-amber-400 group-hover:text-amber-300"
+                    : "text-white/90 group-hover:text-white"
                 )}
               />
               {/* Animated ring effect when there are notifications */}
