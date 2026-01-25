@@ -45,22 +45,47 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
 
           // CRITICAL FIX: Use proper conflict handling for partial unique indexes
           // We have two partial unique indexes on owner_likes:
-          // 1. (owner_id, client_id) WHERE listing_id IS NULL
-          // 2. (owner_id, client_id, listing_id) WHERE listing_id IS NOT NULL
-          // For profile likes (listing_id = NULL), we use the first index
-          const { data: ownerLike, error: ownerLikeError } = await supabase
+          // 1. owner_likes_profile_only_unique (owner_id, client_id) WHERE listing_id IS NULL
+          // 2. owner_likes_listing_specific_unique (owner_id, client_id, listing_id) WHERE listing_id IS NOT NULL
+          // For profile likes, we must handle the partial index by checking for existing record first
+
+          // First, check if like already exists
+          const { data: existingLike } = await supabase
             .from('owner_likes')
-            .upsert({
-              owner_id: user.id,
-              client_id: targetId,
-              listing_id: null, // Explicit null for general profile likes
-              is_super_like: false
-            }, {
-              onConflict: 'owner_id,client_id',
-              ignoreDuplicates: false
-            })
-            .select()
-            .single();
+            .select('id')
+            .eq('owner_id', user.id)
+            .eq('client_id', targetId)
+            .is('listing_id', null)
+            .maybeSingle();
+
+          let ownerLike;
+          let ownerLikeError;
+
+          if (existingLike) {
+            // Update existing like (just update the timestamp)
+            const result = await supabase
+              .from('owner_likes')
+              .update({ created_at: new Date().toISOString() })
+              .eq('id', existingLike.id)
+              .select()
+              .single();
+            ownerLike = result.data;
+            ownerLikeError = result.error;
+          } else {
+            // Insert new like
+            const result = await supabase
+              .from('owner_likes')
+              .insert({
+                owner_id: user.id,
+                client_id: targetId,
+                listing_id: null, // Explicit null for general profile likes
+                is_super_like: false
+              })
+              .select()
+              .single();
+            ownerLike = result.data;
+            ownerLikeError = result.error;
+          }
 
           if (ownerLikeError) {
             logger.error('[useSwipeWithMatch] CRITICAL: Failed to save owner like:', {
