@@ -30,74 +30,42 @@ export function useClientProfiles(excludeSwipedIds: string[] = [], options: { en
       }
 
       try {
-        // Query client profiles from client_profiles table
-        const { data: clientProfiles, error } = await supabase
-          .from('client_profiles')
+        // CRITICAL: Query profiles_public directly to ensure all profiles exist in auth system
+        // The client_profiles table may have orphan records that cause FK violations in owner_likes
+        const { data: profiles, error } = await supabase
+          .from('profiles_public')
           .select('*')
-          .neq('user_id', user.id) // Exclude own profile
+          .neq('id', user.id)
           .order('created_at', { ascending: false })
           .limit(100);
 
         if (error) {
           logger.error('Error fetching client profiles:', error);
-          
-          // Fallback to profiles_public view
-          const { data: fallbackProfiles, error: fallbackError } = await supabase
-            .from('profiles_public')
-            .select('*')
-            .neq('id', user.id)
-            .limit(100);
-
-          if (fallbackError) {
-            logger.error('Fallback query also failed:', fallbackError);
-            return [];
-          }
-
-          // Simple transform for fallback
-          const transformed: ClientProfile[] = (fallbackProfiles || []).map((profile: any, index: number) => ({
-            id: index + 1,
-            user_id: profile.id,
-            name: profile.full_name || 'User',
-            age: profile.age || 25,
-            gender: '',
-            interests: profile.interests || [],
-            preferred_activities: profile.preferred_activities || [],
-            profile_images: profile.images || [],
-            location: profile.city ? { city: profile.city } : null,
-            city: profile.city || undefined,
-            avatar_url: profile.avatar_url || undefined,
-            verified: profile.verified || false
-          }));
-
-          return transformed.filter(p => !excludeSwipedIds.includes(p.user_id));
-        }
-
-        if (!clientProfiles || clientProfiles.length === 0) {
           return [];
         }
 
-        // Transform from client_profiles to interface
-        const transformedProfiles: ClientProfile[] = clientProfiles.map((profile: any, index: number) => ({
+        if (!profiles || profiles.length === 0) {
+          return [];
+        }
+
+        // Transform profiles to ClientProfile interface
+        const transformed: ClientProfile[] = profiles.map((profile: any, index: number) => ({
           id: index + 1,
-          user_id: profile.user_id || '',
-          name: profile.name || 'User',
+          user_id: profile.id,
+          name: profile.full_name || 'User',
           age: profile.age || 25,
           gender: profile.gender || '',
           interests: profile.interests || [],
           preferred_activities: profile.preferred_activities || [],
-          profile_images: profile.profile_images || [],
+          profile_images: profile.images || [],
           location: profile.city ? { city: profile.city } : null,
           city: profile.city || undefined,
-          avatar_url: profile.profile_images?.[0] || undefined,
-          verified: false
+          avatar_url: profile.avatar_url || profile.images?.[0] || undefined,
+          verified: profile.verified || false
         }));
 
         // Filter out swiped profiles
-        const filteredProfiles = transformedProfiles.filter(
-          p => !excludeSwipedIds.includes(p.user_id)
-        );
-
-        return filteredProfiles;
+        return transformed.filter(p => !excludeSwipedIds.includes(p.user_id));
 
       } catch (error) {
         logger.error('Error fetching client profiles:', error);
