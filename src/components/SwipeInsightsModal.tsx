@@ -236,10 +236,10 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3 }}
-                    className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-primary/30 via-purple-500/20 to-pink-500/15 p-3 sm:p-5 border border-primary/30 backdrop-blur-sm shadow-lg"
+                    className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-red-500/20 via-orange-500/15 to-amber-500/10 p-3 sm:p-5 border border-red-500/30 backdrop-blur-sm shadow-lg"
                   >
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-primary/30 to-transparent rounded-full blur-3xl" />
-                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-500/20 to-transparent rounded-full blur-2xl" />
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-orange-500/25 to-transparent rounded-full blur-3xl" />
+                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-red-500/20 to-transparent rounded-full blur-2xl" />
                     <div className="relative">
                       <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
                         {/* Small Avatar */}
@@ -286,7 +286,7 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="p-4 bg-gradient-to-br from-primary/15 to-purple-500/15 rounded-xl border border-primary/30 backdrop-blur-sm shadow-lg"
+                    className="p-4 bg-gradient-to-br from-red-500/15 to-orange-500/10 rounded-xl border border-red-500/30 backdrop-blur-sm shadow-lg"
                   >
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-semibold flex items-center gap-2">
@@ -465,9 +465,9 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                         </span>
                       </div>
                       {insights.readinessScore >= 70 && (
-                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-500/15 rounded-full border border-purple-500/30">
-                          <Star className="w-3.5 h-3.5 text-purple-500" />
-                          <span className="text-xs font-medium text-purple-600 dark:text-purple-400">Top Renter</span>
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/15 rounded-full border border-red-500/30">
+                          <Star className="w-3.5 h-3.5 text-red-500" />
+                          <span className="text-xs font-medium text-red-600 dark:text-red-400">Top Renter</span>
                         </div>
                       )}
                     </div>
@@ -496,7 +496,7 @@ export function SwipeInsightsModal({ open, onOpenChange, listing, profile }: Swi
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.4 }}
-                    className="p-4 bg-gradient-to-r from-primary/15 to-purple-500/15 rounded-xl border border-primary/30 shadow-lg backdrop-blur-sm"
+                    className="p-4 bg-gradient-to-r from-red-500/15 via-orange-500/10 to-amber-500/5 rounded-xl border border-red-500/30 shadow-lg backdrop-blur-sm"
                   >
                     <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
                       <Sparkles className="w-4 h-4 text-primary animate-pulse" />

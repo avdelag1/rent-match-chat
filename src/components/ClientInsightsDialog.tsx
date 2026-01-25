@@ -299,7 +299,7 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.1 }}
-              className="bg-gradient-to-br from-primary/15 to-secondary/15 p-3 sm:p-5 rounded-xl border border-primary/30 shadow-lg backdrop-blur-sm"
+              className="bg-gradient-to-br from-red-500/15 via-orange-500/10 to-amber-500/5 p-3 sm:p-5 rounded-xl border border-red-500/30 shadow-lg backdrop-blur-sm"
             >
               <div className="flex items-start justify-between gap-4 mb-3">
                 <div className="flex-1">
@@ -359,7 +359,7 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
               </div>
 
               {/* Recommendation Stars */}
-              <div className="flex items-center gap-2 pt-2 border-t border-primary/10">
+              <div className="flex items-center gap-2 pt-2 border-t border-red-500/10">
                 <span className="text-xs font-medium text-muted-foreground">Rating:</span>
                 <div className="flex gap-0.5">
                   {[...Array(5)].map((_, i) => (
@@ -390,10 +390,10 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
-                  className="bg-gradient-to-br from-primary/15 to-primary/5 p-2 sm:p-4 rounded-lg text-center border border-primary/30 shadow-md hover:shadow-lg transition-all backdrop-blur-sm hover:scale-105"
+                  className="bg-gradient-to-br from-red-500/15 to-orange-500/5 p-2 sm:p-4 rounded-lg text-center border border-red-500/30 shadow-md hover:shadow-lg transition-all backdrop-blur-sm hover:scale-105"
                 >
-                  <Eye className="w-5 h-5 sm:w-6 sm:h-6 mx-auto text-primary mb-1 sm:mb-2 drop-shadow-md" />
-                  <div className="text-lg sm:text-2xl font-bold text-primary">{clientStats.profileViews}</div>
+                  <Eye className="w-5 h-5 sm:w-6 sm:h-6 mx-auto text-red-500 mb-1 sm:mb-2 drop-shadow-md" />
+                  <div className="text-lg sm:text-2xl font-bold text-red-500">{clientStats.profileViews}</div>
                   <div className="text-[10px] sm:text-xs text-muted-foreground font-medium">Profile Views</div>
                 </motion.div>
 
@@ -401,10 +401,10 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.15 }}
-                  className="bg-gradient-to-br from-secondary/15 to-secondary/5 p-2 sm:p-4 rounded-lg text-center border border-secondary/30 shadow-md hover:shadow-lg transition-all backdrop-blur-sm hover:scale-105"
+                  className="bg-gradient-to-br from-orange-500/15 to-amber-500/5 p-2 sm:p-4 rounded-lg text-center border border-orange-500/30 shadow-md hover:shadow-lg transition-all backdrop-blur-sm hover:scale-105"
                 >
-                  <ThumbsUp className="w-5 h-5 sm:w-6 sm:h-6 mx-auto text-secondary mb-1 sm:mb-2 drop-shadow-md" />
-                  <div className="text-lg sm:text-2xl font-bold text-secondary">{clientStats.ownerLikes}</div>
+                  <ThumbsUp className="w-5 h-5 sm:w-6 sm:h-6 mx-auto text-orange-500 mb-1 sm:mb-2 drop-shadow-md" />
+                  <div className="text-lg sm:text-2xl font-bold text-orange-500">{clientStats.ownerLikes}</div>
                   <div className="text-[10px] sm:text-xs text-muted-foreground font-medium">Owner Likes</div>
                 </motion.div>
 
@@ -742,7 +742,7 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
                 <Award className="w-5 h-5 text-primary" />
                 Profile Highlights
               </h4>
-              <div className="bg-gradient-to-br from-primary/10 to-purple-500/10 p-4 rounded-lg border border-primary/20 space-y-3">
+              <div className="bg-gradient-to-br from-red-500/10 via-orange-500/10 to-amber-500/5 p-4 rounded-lg border border-red-500/20 space-y-3">
                 {recommendationScore >= 4 && (
                   <div className="flex items-start gap-2">
                     <Star className="w-5 h-5 text-yellow-400 shrink-0 mt-0.5" />
@@ -753,7 +753,7 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
                 )}
                 {(profile.interests?.length || 0) > 5 && (
                   <div className="flex items-start gap-2">
-                    <Target className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
+                    <Target className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
                     <p className="text-sm">
                       <span className="font-semibold">Clear Requirements:</span> Well-defined needs make matching easier
                     </p>
@@ -769,7 +769,7 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
                 )}
                 {renterInsights?.isDigitalNomad && (
                   <div className="flex items-start gap-2">
-                    <Zap className="w-5 h-5 text-cyan-500 shrink-0 mt-0.5" />
+                    <Zap className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
                     <p className="text-sm">
                       <span className="font-semibold">Digital Nomad:</span> Flexible and independent lifestyle
                     </p>
@@ -777,7 +777,7 @@ export function ClientInsightsDialog({ open, onOpenChange, profile }: ClientInsi
                 )}
                 {profile.age && profile.age >= 25 && profile.age <= 45 && (
                   <div className="flex items-start gap-2">
-                    <Briefcase className="w-5 h-5 text-purple-500 shrink-0 mt-0.5" />
+                    <Briefcase className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
                     <p className="text-sm">
                       <span className="font-semibold">Working Professional:</span> Prime rental age group
                     </p>
