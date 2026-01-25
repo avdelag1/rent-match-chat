@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { SwipessLogo } from './SwipessLogo';
 import { QuickFilterDropdown, QuickFilters } from './QuickFilterDropdown';
 import { ModeSwitcher } from './ModeSwitcher';
+import { useScrollDirection } from '@/hooks/useScrollDirection';
 
 // Colorful gradient text for "Message Activation" button - BRIGHTER Red/Orange theme
 // Shows full text on md+ screens, abbreviated on smaller screens
@@ -41,6 +42,8 @@ interface TopBarProps {
   userRole?: 'client' | 'owner';
   // Immersive mode - transparent header for full-bleed swipe cards
   transparent?: boolean;
+  // Scroll-aware hiding - set to true to enable hide on scroll
+  hideOnScroll?: boolean;
 }
 
 function TopBarComponent({
@@ -52,7 +55,13 @@ function TopBarComponent({
   onFiltersChange,
   userRole,
   transparent = false,
+  hideOnScroll = false,
 }: TopBarProps) {
+  // Scroll-aware hide/show behavior
+  const { isVisible } = useScrollDirection({ 
+    threshold: 15, 
+    showAtTop: true,
+  });
   const { unreadCount: notificationCount } = useUnreadNotifications();
   const navigate = useNavigate();
 
@@ -71,12 +80,17 @@ function TopBarComponent({
     }
   };
 
+  // Determine if header should be hidden
+  const shouldHide = hideOnScroll && !isVisible;
+
   return (
     <header
       className={cn(
         'app-header',
         // Always transparent - gradient overlays provide contrast
         'bg-transparent border-transparent backdrop-blur-none',
+        // Scroll-aware hiding
+        shouldHide && 'header-hidden',
         className
       )}
     >
