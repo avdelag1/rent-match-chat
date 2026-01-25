@@ -127,19 +127,19 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
           style={{ willChange: 'left, right' }}
         />
 
-        {/* Client option */}
+        {/* Client option - BRIGHTER text */}
         <div className={cn(
           'relative z-10 flex items-center gap-1.5 px-2 py-0.5 rounded-full transition-colors duration-200',
-          activeMode === 'client' ? 'text-primary' : 'text-muted-foreground'
+          activeMode === 'client' ? 'text-white drop-shadow-sm' : 'text-white/60'
         )}>
           <Search className="h-3.5 w-3.5" />
           <span className="font-medium">Client</span>
         </div>
 
-        {/* Owner option */}
+        {/* Owner option - BRIGHTER text */}
         <div className={cn(
           'relative z-10 flex items-center gap-1.5 px-2 py-0.5 rounded-full transition-colors duration-200',
-          activeMode === 'owner' ? 'text-emerald-500' : 'text-muted-foreground'
+          activeMode === 'owner' ? 'text-emerald-400 drop-shadow-sm' : 'text-white/60'
         )}>
           <Briefcase className="h-3.5 w-3.5" />
           <span className="font-medium">Owner</span>

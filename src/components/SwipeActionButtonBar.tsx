@@ -52,15 +52,15 @@ const springConfig = {
  * Large touch-first buttons with generous hit areas.
  * Size hierarchy creates clear visual prominence.
  */
-const LARGE_SIZE = 72;  // Primary actions (Like/Dislike) - slightly smaller but more refined
-const SMALL_SIZE = 52;  // Secondary actions - larger for better touch targets
+const LARGE_SIZE = 64;  // Primary actions (Like/Dislike) - touch targets
+const SMALL_SIZE = 48;  // Secondary actions
 
-// Icon sizes - proportional and readable
-const LARGE_ICON_SIZE = 32;  // Primary icons - clear and bold
-const SMALL_ICON_SIZE = 22;  // Secondary icons - crisp and visible
+// Icon sizes - BIGGER for floating icon style
+const LARGE_ICON_SIZE = 40;  // Primary icons - bold and visible
+const SMALL_ICON_SIZE = 28;  // Secondary icons - clear
 
-// Gap between buttons - breathing room for premium feel
-const BUTTON_GAP = 12;
+// Gap between buttons - tighter grouping
+const BUTTON_GAP = 6;
 
 // Tap animation - subtle premium press
 const TAP_SCALE = 0.88;
