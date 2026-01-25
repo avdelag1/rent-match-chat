@@ -58,8 +58,12 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
   const location = useLocation();
   const { unreadCount } = useUnreadMessageCount();
   
-  // Hide on scroll down, show on scroll up
-  const { isVisible } = useScrollDirection({ threshold: 15, showAtTop: true });
+  // Hide on scroll down, show on scroll up - targets the dashboard scroll container
+  const { isVisible } = useScrollDirection({ 
+    threshold: 15, 
+    showAtTop: true,
+    targetSelector: '#dashboard-scroll-container'
+  });
 
   // Client/Renter Navigation Items - with Filter between Browse and Flames
   const clientNavItems: NavItem[] = [

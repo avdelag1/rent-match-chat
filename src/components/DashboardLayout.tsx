@@ -494,6 +494,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       {/* Main Content - Scrollable area with safe area spacing for fixed header/footer */}
       {/* On camera route or immersive dashboard: content extends behind TopBar for full-bleed experience */}
       <main
+        id="dashboard-scroll-container"
         className="absolute inset-0 overflow-y-auto overflow-x-hidden scroll-area-momentum"
         style={{
           paddingTop: (isCameraRoute || isImmersiveDashboard) 
