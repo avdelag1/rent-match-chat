@@ -75,6 +75,7 @@ export function SharedProfileSection({
                 </p>
               </div>
             </div>
+          </div>
 
           {/* Copy Link Section */}
           <div className="flex gap-2">
