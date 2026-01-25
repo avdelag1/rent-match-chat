@@ -517,7 +517,7 @@ const ClientSwipeContainerComponent = ({
   // Loading skeleton - initial load only
   if (showLoadingSkeleton) {
     return (
-      <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex flex-col px-3">
+      <div className="relative w-full h-full flex-1 flex flex-col">
         <div className="relative flex-1 w-full">
           <div className="absolute inset-0 rounded-3xl overflow-hidden bg-muted/30 animate-pulse">
             <div className="absolute inset-0 bg-gradient-to-br from-muted/50 via-muted/30 to-muted/50">
@@ -566,7 +566,7 @@ const ClientSwipeContainerComponent = ({
   // "All Caught Up" - finished swiping through all cards
   if (isDeckFinished) {
     return (
-      <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center px-4">
+      <div className="relative w-full h-full flex-1 flex items-center justify-center px-4">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -611,7 +611,7 @@ const ClientSwipeContainerComponent = ({
   // Error state - ONLY show if we have NO cards at all (not when deck is exhausted)
   if (showInitialError) {
     return (
-      <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center">
+      <div className="relative w-full h-full flex-1 flex items-center justify-center">
         <div className="text-center bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20 rounded-xl p-8">
           <div className="text-6xl mb-4">😞</div>
           <h3 className="text-xl font-bold mb-2">Error</h3>
@@ -632,7 +632,7 @@ const ClientSwipeContainerComponent = ({
   // Empty state (no cards fetched yet)
   if (showEmptyState || !topCard) {
     return (
-      <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center px-4">
+      <div className="relative w-full h-full flex-1 flex items-center justify-center px-4">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -673,8 +673,8 @@ const ClientSwipeContainerComponent = ({
 
   // Main swipe view - edge-to-edge cards
   return (
-    <div className="relative w-full h-full flex-1 flex flex-col max-w-lg mx-auto min-h-[60vh]">
-      <div className="relative flex-1 w-full min-h-[50vh]">
+    <div className="relative w-full h-full flex-1 flex flex-col">
+      <div className="relative flex-1 w-full">
         {/* Single card - no background placeholder layer */}
 
         {/* Current card on top - fully interactive */}

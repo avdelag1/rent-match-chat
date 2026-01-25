@@ -330,7 +330,7 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
     // Render a simple static preview for non-top cards
     return (
       <div
-        className="absolute inset-0 rounded-3xl overflow-hidden shadow-lg"
+        className="absolute inset-0 overflow-hidden shadow-lg"
         style={{
           transform: 'scale(0.95)',
           opacity: 0.7,
