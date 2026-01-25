@@ -91,14 +91,11 @@ export const CompactRatingDisplay = memo<CompactRatingDisplayPropsWithLoading>(
     }
 
     if (!aggregate) {
-      // No ratings yet - show default 5.0 with "New" badge
+      // No ratings yet - show default 5.0 (no "New" badge)
       return (
-        <div className={cn('flex items-center gap-2 text-sm', className)}>
-          <div className="flex items-center gap-1">
-            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-            <span className="font-semibold">5.0</span>
-          </div>
-          <TrustBadge trustLevel="new" />
+        <div className={cn('flex items-center gap-1 text-sm', className)}>
+          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+          <span className="font-semibold">5.0</span>
         </div>
       );
     }

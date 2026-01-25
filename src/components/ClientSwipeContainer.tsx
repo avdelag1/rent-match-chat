@@ -673,8 +673,8 @@ const ClientSwipeContainerComponent = ({
 
   // Main swipe view - edge-to-edge cards
   return (
-    <div className="relative w-full h-full flex-1 flex flex-col max-w-lg mx-auto">
-      <div className="relative flex-1 w-full">
+    <div className="relative w-full h-full flex-1 flex flex-col max-w-lg mx-auto min-h-[60vh]">
+      <div className="relative flex-1 w-full min-h-[50vh]">
         {/* Single card - no background placeholder layer */}
 
         {/* Current card on top - fully interactive */}

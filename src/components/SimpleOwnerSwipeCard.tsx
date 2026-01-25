@@ -452,9 +452,9 @@ function SimpleOwnerSwipeCardComponent({
           {/* TOP GRADIENT MASK - Creates visual contrast for header UI */}
           <GradientMaskTop intensity={1} zIndex={15} heightPercent={28} />
 
-          {/* Image dots - Float INSIDE the top gradient */}
+          {/* Image dots - Positioned below header area */}
           {imageCount > 1 && (
-            <div className="absolute top-3 left-4 right-4 z-25 flex gap-1" style={{ marginTop: 'env(safe-area-inset-top, 0px)' }}>
+            <div className="absolute top-16 left-4 right-4 z-25 flex gap-1" style={{ marginTop: 'env(safe-area-inset-top, 0px)' }}>
               {images.map((_, idx) => (
                 <div
                   key={idx}
