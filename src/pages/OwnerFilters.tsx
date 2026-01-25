@@ -202,14 +202,11 @@ export default function OwnerFilters() {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer
-        className="absolute bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border"
-        style={{ paddingBottom: 'calc(var(--safe-bottom) + 16px)' }}
-      >
+      {/* Footer - positioned above bottom navigation */}
+      <footer className="absolute bottom-20 left-0 right-0 p-4 bg-gradient-to-t from-background via-background/95 to-transparent">
         <Button
           onClick={handleApply}
-          className="w-full h-14 text-base font-semibold rounded-2xl"
+          className="w-full h-14 text-base font-semibold rounded-2xl bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-xl shadow-primary/20"
           size="lg"
         >
           Apply Filters
