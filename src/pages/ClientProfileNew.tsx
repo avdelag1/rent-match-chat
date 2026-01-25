@@ -14,7 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import {
   LogOut, User, Camera, Sparkles, Crown,
   Share2, ArrowLeft, Flame, MessageCircle,
-  Settings as SettingsIcon, Palette, Scale, FileText
+  Settings as SettingsIcon, Palette, Scale, FileText, Heart
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";

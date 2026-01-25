@@ -21,9 +21,6 @@ export function PWAInstallBanner() {
   const [isStandalone, setIsStandalone] = useState(false);
   const location = useLocation();
 
-  // Hide banner on landing page
-  const isLandingPage = location.pathname === '/';
-
   useEffect(() => {
     // Check if already in standalone mode (installed)
     const standalone = window.matchMedia('(display-mode: standalone)').matches
@@ -119,9 +116,6 @@ export function PWAInstallBanner() {
     localStorage.setItem(DISMISS_KEY, Date.now().toString());
   }, []);
 
-  // Don't show on landing page
-  if (isLandingPage) return null;
-
   return (
     <AnimatePresence>
       {showBanner && (
@@ -133,68 +127,94 @@ export function PWAInstallBanner() {
           className="fixed bottom-6 inset-x-0 z-[9999] flex justify-center px-4 pointer-events-none"
         >
           {showInstallInstructions ? (
-            // Install Instructions Card - works for iOS, Android, tablets
-            <div className="relative overflow-hidden rounded-2xl border border-white/20 bg-gradient-to-br from-gray-900/95 via-gray-800/95 to-gray-900/95 p-4 shadow-2xl backdrop-blur-xl max-w-xs pointer-events-auto">
+            // Install Instructions Card - Enhanced design
+            <div className="relative overflow-hidden rounded-3xl border border-orange-500/30 bg-gradient-to-br from-gray-900/98 via-gray-800/98 to-black/98 p-5 shadow-2xl backdrop-blur-xl max-w-sm pointer-events-auto">
+              {/* Decorative gradient overlay */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-500/20 to-transparent rounded-full blur-3xl" />
+
               <button
                 onClick={handleDismiss}
-                className="absolute right-2 top-2 rounded-full p-1.5 text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+                className="absolute right-3 top-3 rounded-full p-2 text-white/60 transition-colors hover:bg-white/10 hover:text-white z-10"
                 aria-label="Dismiss"
               >
                 <X className="h-4 w-4" />
               </button>
 
-              <div className="pr-6 space-y-3">
-                <h3 className="font-semibold text-white text-sm">Install <span className="swipess-text">Swipess</span></h3>
-                <div className="space-y-2 text-xs text-white/70">
+              <div className="pr-8 space-y-4 relative z-10">
+                <h3 className="font-bold text-white text-base">Install <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-600">Swipess</span></h3>
+                <div className="space-y-3 text-sm text-white/80">
                   {isIOS ? (
                     <>
-                      <div className="flex items-center gap-2">
-                        <Share className="h-3.5 w-3.5 text-blue-400 flex-shrink-0" />
-                        <span>Tap <strong className="text-white">Share</strong> button below</span>
+                      <div className="flex items-start gap-3 p-3 bg-white/5 rounded-xl border border-white/10">
+                        <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                          <Share className="h-4 w-4 text-blue-400" />
+                        </div>
+                        <div>
+                          <div className="font-semibold text-white text-sm mb-1">Step 1</div>
+                          <span className="text-white/70 text-xs">Tap the <strong className="text-white">Share</strong> button at the bottom of Safari</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Plus className="h-3.5 w-3.5 text-orange-400 flex-shrink-0" />
-                        <span>Select <strong className="text-white">"Add to Home Screen"</strong></span>
+                      <div className="flex items-start gap-3 p-3 bg-white/5 rounded-xl border border-white/10">
+                        <div className="w-8 h-8 rounded-full bg-orange-500/20 flex items-center justify-center flex-shrink-0">
+                          <Plus className="h-4 w-4 text-orange-400" />
+                        </div>
+                        <div>
+                          <div className="font-semibold text-white text-sm mb-1">Step 2</div>
+                          <span className="text-white/70 text-xs">Select <strong className="text-white">"Add to Home Screen"</strong></span>
+                        </div>
                       </div>
                     </>
                   ) : (
                     <>
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg flex-shrink-0">⋮</span>
-                        <span>Tap browser menu <strong className="text-white">(3 dots)</strong></span>
+                      <div className="flex items-start gap-3 p-3 bg-white/5 rounded-xl border border-white/10">
+                        <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                          <span className="text-xl text-blue-400">⋮</span>
+                        </div>
+                        <div>
+                          <div className="font-semibold text-white text-sm mb-1">Step 1</div>
+                          <span className="text-white/70 text-xs">Tap the browser menu <strong className="text-white">(3 dots)</strong> at the top</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Plus className="h-3.5 w-3.5 text-orange-400 flex-shrink-0" />
-                        <span>Select <strong className="text-white">"Add to Home Screen"</strong> or <strong className="text-white">"Install App"</strong></span>
+                      <div className="flex items-start gap-3 p-3 bg-white/5 rounded-xl border border-white/10">
+                        <div className="w-8 h-8 rounded-full bg-orange-500/20 flex items-center justify-center flex-shrink-0">
+                          <Plus className="h-4 w-4 text-orange-400" />
+                        </div>
+                        <div>
+                          <div className="font-semibold text-white text-sm mb-1">Step 2</div>
+                          <span className="text-white/70 text-xs">Select <strong className="text-white">"Add to Home Screen"</strong> or <strong className="text-white">"Install App"</strong></span>
+                        </div>
                       </div>
                     </>
                   )}
                 </div>
-                <div className="flex items-center gap-3 pt-1">
+                <div className="flex items-center gap-2 pt-2">
                   <button
                     onClick={() => setShowInstallInstructions(false)}
-                    className="text-xs text-white/50 hover:text-white/80 transition-colors"
+                    className="flex-1 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white/80 hover:bg-white/10 hover:text-white transition-all text-sm font-medium"
                   >
                     Back
                   </button>
                   <button
                     onClick={handleDismiss}
-                    className="text-xs text-orange-400 hover:text-orange-300 transition-colors"
+                    className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-400 hover:to-orange-500 transition-all text-sm font-semibold shadow-lg shadow-orange-500/30"
                   >
-                    Got it
+                    Got it!
                   </button>
                 </div>
               </div>
             </div>
           ) : (
-            // Main banner - Compact pill with flame icon and share
+            // Main banner - Enhanced authentic design
             <div className="flex items-center gap-2 pointer-events-auto">
               <button
                 onClick={handleInstall}
-                className="group flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-full bg-gradient-to-r from-gray-900/95 via-gray-800/95 to-gray-900/95 shadow-lg shadow-orange-500/30 border border-orange-500/30 backdrop-blur-xl hover:shadow-xl hover:shadow-orange-500/50 hover:border-orange-500/50 hover:scale-105 transition-all duration-300"
+                className="group flex items-center gap-3 pl-2 pr-5 py-2 rounded-2xl bg-gradient-to-br from-gray-900/98 via-gray-800/98 to-black/98 shadow-2xl shadow-orange-500/40 border border-orange-500/40 backdrop-blur-xl hover:shadow-orange-500/60 hover:border-orange-500/60 hover:scale-[1.02] transition-all duration-300 relative overflow-hidden"
               >
+                {/* Animated gradient background */}
+                <div className="absolute inset-0 bg-gradient-to-r from-orange-500/0 via-orange-500/5 to-orange-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
                 {/* S Logo App Icon */}
-                <div className="relative w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center shadow-lg">
+                <div className="relative w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center shadow-xl ring-2 ring-orange-500/30 group-hover:ring-orange-500/50 transition-all duration-300">
                   {/* App icon with S logo */}
                   <motion.svg
                     viewBox="0 0 64 64"
@@ -255,10 +275,15 @@ export function PWAInstallBanner() {
                   </motion.svg>
                 </div>
 
-                {/* Text */}
-                <span className="text-white font-semibold text-sm whitespace-nowrap">
-                  {isStandalone ? 'Share App' : 'Download App'}
-                </span>
+                {/* Text with enhanced styling */}
+                <div className="flex flex-col items-start relative z-10">
+                  <span className="text-white font-bold text-base whitespace-nowrap tracking-tight">
+                    {isStandalone ? 'Share Swipess' : 'Get the App'}
+                  </span>
+                  <span className="text-orange-400 font-medium text-xs whitespace-nowrap">
+                    {isStandalone ? 'Invite your friends' : 'Install now - it\'s free!'}
+                  </span>
+                </div>
 
                 {/* Close button */}
                 <div
@@ -266,19 +291,20 @@ export function PWAInstallBanner() {
                     e.stopPropagation();
                     handleDismiss();
                   }}
-                  className="ml-1 rounded-full p-1 text-white/60 hover:text-white hover:bg-white/10 transition-all"
+                  className="ml-2 rounded-full p-1.5 text-white/50 hover:text-white hover:bg-white/10 transition-all relative z-10"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <X className="w-4 h-4" />
                 </div>
               </button>
 
-              {/* Separate Share button */}
+              {/* Separate Share button - enhanced design */}
               <button
                 onClick={handleShare}
-                className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-gray-900/95 to-gray-800/95 shadow-lg border border-white/20 backdrop-blur-xl hover:border-orange-500/50 hover:scale-105 transition-all duration-300"
+                className="flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-orange-500/90 to-orange-600/90 shadow-2xl shadow-orange-500/50 border border-orange-400/50 backdrop-blur-xl hover:from-orange-400/90 hover:to-orange-500/90 hover:scale-105 transition-all duration-300 relative overflow-hidden group"
                 aria-label="Share app"
               >
-                <Share2 className="w-4 h-4 text-orange-400" />
+                <div className="absolute inset-0 bg-gradient-to-t from-white/0 via-white/10 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <Share2 className="w-5 h-5 text-white relative z-10 group-hover:scale-110 transition-transform duration-300" />
               </button>
             </div>
           )}
