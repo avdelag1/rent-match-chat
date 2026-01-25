@@ -7,11 +7,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MapPin, Bed, Bath, Square, Flame, MessageCircle, X, Camera } from 'lucide-react';
+import { MapPin, Bed, Bath, Square, Flame, MessageCircle, X, Camera, Zap } from 'lucide-react';
 import { useSwipe } from '@/hooks/useSwipe';
 import { useHasPremiumFeature } from '@/hooks/useSubscription';
 import { Listing } from '@/hooks/useListings';
 import { PropertyImageGallery } from './PropertyImageGallery';
+import { isDirectMessagingListing } from '@/utils/directMessaging';
 
 interface PropertyDetailsProps {
   listingId: string | null;
@@ -22,7 +23,7 @@ interface PropertyDetailsProps {
 
 export function PropertyDetails({ listingId, isOpen, onClose, onMessageClick }: PropertyDetailsProps) {
   const swipeMutation = useSwipe();
-  const hasMessaging = useHasPremiumFeature('messaging');
+  const hasPremiumMessaging = useHasPremiumFeature('messaging');
   const [galleryState, setGalleryState] = useState<{
     isOpen: boolean;
     images: string[];
@@ -249,15 +250,23 @@ export function PropertyDetails({ listingId, isOpen, onClose, onMessageClick }: 
                   Pass
                 </Button>
                 
-                <Button
-                  variant="outline"
-                  className="flex-1 gap-2 h-12"
-                  onClick={hasMessaging ? onMessageClick : () => {}}
-                  disabled={!hasMessaging}
-                >
-                  <MessageCircle className="w-5 h-5" />
-                  {hasMessaging ? 'Message' : 'Premium Only'}
-                </Button>
+                {/* Check if direct messaging is available for this listing category */}
+                {(() => {
+                  const isDirectMessaging = isDirectMessagingListing(listing);
+                  const canMessage = hasPremiumMessaging || isDirectMessaging;
+                  return (
+                    <Button
+                      variant="outline"
+                      className="flex-1 gap-2 h-12"
+                      onClick={canMessage ? onMessageClick : () => {}}
+                      disabled={!canMessage}
+                    >
+                      {isDirectMessaging && <Zap className="w-4 h-4 text-yellow-500" />}
+                      <MessageCircle className="w-5 h-5" />
+                      {isDirectMessaging ? 'Free Message' : (hasPremiumMessaging ? 'Message' : 'Premium Only')}
+                    </Button>
+                  );
+                })()}
                 
                 <Button
                   className="flex-1 gap-2 h-12 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white"
