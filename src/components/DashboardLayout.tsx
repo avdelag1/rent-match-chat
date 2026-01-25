@@ -451,6 +451,15 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   // Camera routes are now INSIDE layout to prevent dashboard remount on navigate back
   const isCameraRoute = location.pathname.includes('/camera');
 
+  // IMMERSIVE MODE: Detect swipe dashboard routes for full-bleed card experience
+  // On these routes, TopBar becomes transparent and content extends behind it
+  const isImmersiveDashboard = useMemo(() => {
+    const path = location.pathname;
+    return path === '/client/dashboard' || 
+           path === '/owner/dashboard' ||
+           path.includes('discovery');
+  }, [location.pathname]);
+
   // Calculate responsive layout values
   const topBarHeight = responsive.isMobile ? 52 : 56;
   const bottomNavHeight = responsive.isMobile ? 68 : 72;
@@ -469,6 +478,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           firing on the same conversation_messages INSERT event. */}
 
       {/* Top Bar - Fixed with safe-area-top. Hidden on camera routes for fullscreen UX */}
+      {/* On immersive dashboard routes, TopBar becomes transparent for full-bleed cards */}
       {!isCameraRoute && (
         <TopBar
           onNotificationsClick={handleNotificationsClick}
@@ -477,15 +487,18 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           filters={quickFilters}
           onFiltersChange={handleQuickFilterChange}
           userRole={userRole === 'admin' ? 'client' : userRole}
+          transparent={isImmersiveDashboard}
         />
       )}
 
       {/* Main Content - Scrollable area with safe area spacing for fixed header/footer */}
-      {/* When on camera route, use full screen (no padding for TopBar/BottomNav) */}
+      {/* On camera route or immersive dashboard: content extends behind TopBar for full-bleed experience */}
       <main
         className="absolute inset-0 overflow-y-auto overflow-x-hidden scroll-area-momentum"
         style={{
-          paddingTop: isCameraRoute ? 'var(--safe-top)' : `calc(${topBarHeight}px + var(--safe-top))`,
+          paddingTop: (isCameraRoute || isImmersiveDashboard) 
+            ? 'var(--safe-top)' 
+            : `calc(${topBarHeight}px + var(--safe-top))`,
           paddingBottom: isCameraRoute ? 'var(--safe-bottom)' : `calc(${bottomNavHeight}px + var(--safe-bottom))`,
           paddingLeft: 'max(var(--safe-left), 0px)',
           paddingRight: 'max(var(--safe-right), 0px)',

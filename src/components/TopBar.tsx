@@ -39,6 +39,8 @@ interface TopBarProps {
   filters?: QuickFilters;
   onFiltersChange?: (filters: QuickFilters) => void;
   userRole?: 'client' | 'owner';
+  // Immersive mode - transparent header for full-bleed swipe cards
+  transparent?: boolean;
 }
 
 function TopBarComponent({
@@ -49,6 +51,7 @@ function TopBarComponent({
   filters,
   onFiltersChange,
   userRole,
+  transparent = false,
 }: TopBarProps) {
   const { unreadCount: notificationCount } = useUnreadNotifications();
   const navigate = useNavigate();
@@ -70,7 +73,13 @@ function TopBarComponent({
 
   return (
     <header
-      className={cn('app-header bg-background/95 border-b border-white/5 shadow-sm', className)}
+      className={cn(
+        'app-header',
+        transparent 
+          ? 'bg-transparent border-transparent' 
+          : 'bg-background/95 border-b border-white/5 shadow-sm',
+        className
+      )}
     >
       <div className="flex items-center justify-between h-12 max-w-screen-xl mx-auto gap-1 sm:gap-2">
         {/* Left side: Logo + Mode Switch + Filters */}

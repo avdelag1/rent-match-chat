@@ -358,7 +358,7 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
           WebkitTapHighlightColor: 'transparent',
           WebkitTouchCallout: 'none',
         } as any}
-        className="flex-1 cursor-grab active:cursor-grabbing select-none touch-none rounded-3xl overflow-hidden shadow-lg relative"
+        className="flex-1 cursor-grab active:cursor-grabbing select-none touch-none overflow-hidden relative"
       >
         {/* Image area with full-image zoom support */}
         <div
@@ -374,8 +374,18 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
         >
           <CardImage src={currentImage} alt={listing.title || 'Listing'} />
 
+          {/* TOP GRADIENT - Header protection for floating TopBar */}
+          <div 
+            className="absolute top-0 left-0 right-0 pointer-events-none z-15"
+            style={{
+              height: 'calc(20% + env(safe-area-inset-top, 0px))',
+              background: 'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.25) 50%, transparent 100%)',
+              transform: 'translateZ(0)',
+            }}
+          />
+
           {/* Rating Display - Top Left Corner */}
-          <div className="absolute top-3 left-4 z-20 bg-black/60 backdrop-blur-md rounded-lg px-3 py-2">
+          <div className="absolute top-3 left-4 z-20 bg-black/60 backdrop-blur-md rounded-lg px-3 py-2" style={{ marginTop: 'env(safe-area-inset-top, 0px)' }}>
             <CompactRatingDisplay
               aggregate={ratingAggregate}
               isLoading={isRatingLoading}
@@ -386,7 +396,7 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
 
           {/* Image dots */}
           {imageCount > 1 && (
-            <div className="absolute top-3 right-4 z-20 flex gap-1 max-w-[40%]">
+            <div className="absolute top-3 right-4 z-20 flex gap-1 max-w-[40%]" style={{ marginTop: 'env(safe-area-inset-top, 0px)' }}>
               {images.map((_, idx) => (
                 <div
                   key={idx}
