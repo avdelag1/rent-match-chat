@@ -1,6 +1,6 @@
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,19 +8,24 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ImageCarousel } from '@/components/ImageCarousel';
+import { DirectMessageDialog } from '@/components/DirectMessageDialog';
 import {
   Home, MapPin, Bed, Bath, Square, DollarSign, Lock, LogIn, UserPlus,
   Sparkles, Anchor, Bike, Car, CircleDot, Eye, Flame, MessageSquare,
-  Calendar, CheckCircle, Users
+  Calendar, CheckCircle, Users, MessageCircle, Send
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { STORAGE } from '@/constants/app';
+
+// Categories that support free direct messaging
+const FREE_MESSAGING_CATEGORIES = ['motorcycle', 'bicycle'];
 
 export default function PublicListingPreview() {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [showDirectMessageDialog, setShowDirectMessageDialog] = useState(false);
 
   // Capture referral code from URL if present
   useEffect(() => {
@@ -147,6 +152,8 @@ export default function PublicListingPreview() {
   const category = listing.category || 'property';
   const mode = listing.mode || 'rent';
   const hasImages = listing.images && listing.images.length > 0;
+  const isFreeMessagingCategory = FREE_MESSAGING_CATEGORIES.includes(category);
+  const canDirectMessage = user && isFreeMessagingCategory && user.id !== listing.user_id;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
@@ -404,40 +411,62 @@ export default function PublicListingPreview() {
             </CardContent>
           </Card>
 
-          {/* Blurred Contact Section */}
-          <Card className="relative overflow-hidden bg-gray-800/50 border-gray-700/50">
-            <CardContent className="p-6">
-              {/* Blurred content */}
-              <div className="filter blur-sm pointer-events-none select-none space-y-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-full bg-gray-600" />
-                  <div className="space-y-2 flex-1">
-                    <div className="h-5 w-32 bg-gray-600 rounded" />
-                    <div className="h-3 w-48 bg-gray-600 rounded" />
+          {/* Contact Section - Direct Message for Moto/Bicycle, Blurred for others */}
+          {canDirectMessage ? (
+            <Card className="bg-gradient-to-r from-emerald-500/10 to-green-500/10 border-emerald-500/30">
+              <CardContent className="p-6 space-y-4">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-emerald-400" />
+                  <span className="text-emerald-400 font-semibold">Free Direct Messaging</span>
+                </div>
+                <p className="text-gray-300 text-sm">
+                  Good news! Motorcycles and Bicycles have free messaging. Contact the owner directly without any activation fees.
+                </p>
+                <Button
+                  size="lg"
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
+                  onClick={() => setShowDirectMessageDialog(true)}
+                >
+                  <MessageCircle className="w-5 h-5 mr-2" />
+                  Message Owner - FREE
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="relative overflow-hidden bg-gray-800/50 border-gray-700/50">
+              <CardContent className="p-6">
+                {/* Blurred content */}
+                <div className="filter blur-sm pointer-events-none select-none space-y-4">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-full bg-gray-600" />
+                    <div className="space-y-2 flex-1">
+                      <div className="h-5 w-32 bg-gray-600 rounded" />
+                      <div className="h-3 w-48 bg-gray-600 rounded" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="h-10 bg-gray-600 rounded-lg" />
+                    <div className="h-10 bg-gray-600 rounded-lg" />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="h-10 bg-gray-600 rounded-lg" />
-                  <div className="h-10 bg-gray-600 rounded-lg" />
-                </div>
-              </div>
 
-              {/* Overlay with CTA */}
-              <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/80 to-gray-900/60 flex items-center justify-center">
-                <div className="text-center p-6">
-                  <div className="p-3 rounded-full bg-primary/20 w-fit mx-auto mb-4">
-                    <Lock className="w-6 h-6 text-primary" />
+                {/* Overlay with CTA */}
+                <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/80 to-gray-900/60 flex items-center justify-center">
+                  <div className="text-center p-6">
+                    <div className="p-3 rounded-full bg-primary/20 w-fit mx-auto mb-4">
+                      <Lock className="w-6 h-6 text-primary" />
+                    </div>
+                    <h3 className="text-lg font-bold text-white mb-2">
+                      Contact the Owner
+                    </h3>
+                    <p className="text-sm text-gray-400 mb-4 max-w-xs">
+                      Create an account to message the owner, schedule viewings, and get more details about this listing.
+                    </p>
                   </div>
-                  <h3 className="text-lg font-bold text-white mb-2">
-                    Contact the Owner
-                  </h3>
-                  <p className="text-sm text-gray-400 mb-4 max-w-xs">
-                    Create an account to message the owner, schedule viewings, and get more details about this listing.
-                  </p>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
 
           {/* CTA Section */}
           <Card className="bg-gradient-to-r from-primary/20 to-primary/10 border-primary/30">
@@ -451,26 +480,51 @@ export default function PublicListingPreview() {
                 Interested in this {getCategoryLabel(category)}?
               </h3>
               <p className="text-gray-300 text-sm max-w-md mx-auto">
-                Join Zwipes to contact the owner, schedule viewings, and find your perfect match.
+                {canDirectMessage
+                  ? 'Send a message directly to the owner - free for Motos & Bicycles!'
+                  : 'Join Zwipes to contact the owner, schedule viewings, and find your perfect match.'}
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Button
-                  size="lg"
-                  className="bg-primary hover:bg-primary/90 text-white font-semibold"
-                  onClick={() => navigate('/')}
-                >
-                  <UserPlus className="w-4 h-4 mr-2" />
-                  Create Free Account
-                </Button>
-                {user && (
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="border-primary/50 text-primary hover:bg-primary/10"
-                    onClick={() => navigate('/client/dashboard')}
-                  >
-                    Go to Dashboard
-                  </Button>
+                {canDirectMessage ? (
+                  <>
+                    <Button
+                      size="lg"
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
+                      onClick={() => setShowDirectMessageDialog(true)}
+                    >
+                      <Send className="w-4 h-4 mr-2" />
+                      Send Direct Message
+                    </Button>
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="border-primary/50 text-primary hover:bg-primary/10"
+                      onClick={() => navigate('/client/dashboard')}
+                    >
+                      Go to Dashboard
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button
+                      size="lg"
+                      className="bg-primary hover:bg-primary/90 text-white font-semibold"
+                      onClick={() => navigate('/')}
+                    >
+                      <UserPlus className="w-4 h-4 mr-2" />
+                      Create Free Account
+                    </Button>
+                    {user && (
+                      <Button
+                        size="lg"
+                        variant="outline"
+                        className="border-primary/50 text-primary hover:bg-primary/10"
+                        onClick={() => navigate('/client/dashboard')}
+                      >
+                        Go to Dashboard
+                      </Button>
+                    )}
+                  </>
                 )}
               </div>
             </CardContent>
@@ -482,6 +536,22 @@ export default function PublicListingPreview() {
           </div>
         </motion.div>
       </div>
+
+      {/* Direct Message Dialog for Moto/Bicycle */}
+      {listing && canDirectMessage && (
+        <DirectMessageDialog
+          isOpen={showDirectMessageDialog}
+          onClose={() => setShowDirectMessageDialog(false)}
+          listing={{
+            id: listing.id,
+            title: listing.title || 'Untitled Listing',
+            category: category,
+            price: listing.price,
+            images: listing.images,
+            user_id: listing.user_id
+          }}
+        />
+      )}
     </div>
   );
 }
