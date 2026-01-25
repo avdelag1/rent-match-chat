@@ -91,19 +91,36 @@ body {
   backface-visibility: hidden;
 }
 
-/* App Header - Fixed top bar with safe-area-top */
+/* App Header - Fixed top bar with safe-area-top - Responsive padding */
 .app-header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 10000;
-  padding-top: calc(var(--safe-top) + 8px);
-  padding-bottom: 8px;
-  padding-left: max(var(--safe-left), 16px);
-  padding-right: max(var(--safe-right), 16px);
+  padding-top: calc(var(--safe-top) + 6px);
+  padding-bottom: 6px;
+  padding-left: max(var(--safe-left), 8px);
+  padding-right: max(var(--safe-right), 8px);
   background: hsl(var(--background));
   border-bottom: 1px solid hsl(var(--border));
+}
+
+/* Responsive header padding for larger screens */
+@media (min-width: 640px) {
+  .app-header {
+    padding-top: calc(var(--safe-top) + 8px);
+    padding-bottom: 8px;
+    padding-left: max(var(--safe-left), 12px);
+    padding-right: max(var(--safe-right), 12px);
+  }
+}
+
+@media (min-width: 768px) {
+  .app-header {
+    padding-left: max(var(--safe-left), 16px);
+    padding-right: max(var(--safe-right), 16px);
+  }
 }
 
 /* App Content - Main scrollable area between header and bottom bar */
