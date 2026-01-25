@@ -19,6 +19,7 @@ import { useMagnifier } from '@/hooks/useMagnifier';
 import { GradientMaskTop, GradientMaskBottom } from '@/components/ui/GradientMasks';
 import { CompactRatingDisplay } from '@/components/RatingDisplay';
 import { useUserRatingAggregate } from '@/hooks/useRatingSystem';
+import { useParallaxStore } from '@/state/parallaxStore';
 
 // LOWERED thresholds for faster, more responsive swipe
 const SWIPE_THRESHOLD = 80; // Reduced from 120 - card triggers sooner
@@ -263,6 +264,20 @@ function SimpleOwnerSwipeCardComponent({
     }
   }, [profile?.user_id, x]);
 
+  // Parallax store for ambient background effect
+  const updateParallaxDrag = useParallaxStore((s) => s.updateDrag);
+  const endParallaxDrag = useParallaxStore((s) => s.endDrag);
+
+  // Subscribe motion value to parallax store for ambient background effect
+  useEffect(() => {
+    const unsubscribe = x.on('change', (latestX) => {
+      if (isDragging.current && isTop) {
+        updateParallaxDrag(latestX, 0, x.getVelocity());
+      }
+    });
+    return unsubscribe;
+  }, [x, isTop, updateParallaxDrag]);
+
   const handleDragStart = useCallback(() => {
     isDragging.current = true;
     triggerHaptic('light');
@@ -276,6 +291,9 @@ function SimpleOwnerSwipeCardComponent({
   });
 
   const handleDragEnd = useCallback((_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    // End parallax effect when drag ends
+    endParallaxDrag();
+    
     if (hasExited.current) return;
 
     const offset = info.offset.x;
@@ -319,7 +337,7 @@ function SimpleOwnerSwipeCardComponent({
     setTimeout(() => {
       isDragging.current = false;
     }, 100);
-  }, [profile?.user_id, onSwipe, x]);
+  }, [profile?.user_id, onSwipe, x, endParallaxDrag]);
 
   const handleCardTap = useCallback(() => {
     if (!isDragging.current && onTap) {
