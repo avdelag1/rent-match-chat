@@ -1,3 +1,13 @@
+/**
+ * @deprecated This hook is DEPRECATED and references the old 'reviews' table that was dropped
+ * in favor of the comprehensive rating system. Use @/hooks/useRatingSystem.tsx instead.
+ *
+ * The 'reviews' table was replaced with 'ratings', 'rating_categories', and 'rating_aggregates'
+ * in migration 20260124_comprehensive_rating_system.sql
+ *
+ * This file is kept for reference only and will not function with the current database schema.
+ */
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';

@@ -20,6 +20,7 @@ import { ChatPreviewSheet } from '@/components/ChatPreviewSheet';
 import { logger } from '@/utils/prodLogger';
 import { VirtualizedMessageList } from '@/components/VirtualizedMessageList';
 import { usePrefetchManager } from '@/hooks/usePrefetchManager';
+import { RatingSubmissionDialog } from '@/components/RatingSubmissionDialog';
 
 interface MessagingInterfaceProps {
   conversationId: string;
@@ -116,6 +117,7 @@ export const MessagingInterface = memo(({ conversationId, otherUser, listing, cu
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [showActivationBanner, setShowActivationBanner] = useState(false);
   const [showPreviewSheet, setShowPreviewSheet] = useState(false);
+  const [showRatingDialog, setShowRatingDialog] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
   const { data: messages = [], isLoading } = useConversationMessages(conversationId);
@@ -326,15 +328,26 @@ export const MessagingInterface = memo(({ conversationId, otherUser, listing, cu
             <ChevronRight className="w-4 h-4 text-[#48484A] shrink-0" />
           </button>
 
-          {/* Quick Action Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setShowPreviewSheet(true)}
-            className="shrink-0 w-9 h-9 rounded-full bg-[#2C2C2E] hover:bg-[#3A3A3C] text-[#8E8E93]"
-          >
-            <Info className="w-4 h-4" />
-          </Button>
+          {/* Quick Action Buttons */}
+          <div className="flex gap-1 shrink-0">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowRatingDialog(true)}
+              className="w-9 h-9 rounded-full bg-[#2C2C2E] hover:bg-[#3A3A3C] text-[#FFD60A]"
+              title="Rate user"
+            >
+              <Star className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowPreviewSheet(true)}
+              className="w-9 h-9 rounded-full bg-[#2C2C2E] hover:bg-[#3A3A3C] text-[#8E8E93]"
+            >
+              <Info className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
 
         {/* Match Context + Listing Info Bar - Compact */}
@@ -511,6 +524,20 @@ export const MessagingInterface = memo(({ conversationId, otherUser, listing, cu
         otherUser={otherUser}
         listing={listing}
         currentUserRole={currentUserRole}
+      />
+
+      {/* Rating Submission Dialog */}
+      <RatingSubmissionDialog
+        open={showRatingDialog}
+        onOpenChange={setShowRatingDialog}
+        targetId={listing?.id || otherUser.id}
+        targetType={listing?.id ? 'listing' : 'user'}
+        targetName={listing?.title || otherUser.full_name}
+        categoryId={listing?.id ? (listing.category === 'vehicle' ? 'vehicle' : 'property') : 'client'}
+        onSuccess={() => {
+          setShowRatingDialog(false);
+          // Optionally refresh rating data
+        }}
       />
       </Card>
     </>

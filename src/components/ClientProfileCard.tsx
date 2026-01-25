@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Flame, X, MessageCircle, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ClientProfile } from '@/hooks/useClientProfiles';
+import { CompactRatingDisplay } from '@/components/RatingDisplay';
+import { useUserRatingAggregate } from '@/hooks/useRatingSystem';
 
 // Tag categories for color coding
 const PROPERTY_TAGS = [
@@ -64,6 +66,9 @@ const ClientProfileCardComponent = ({
 
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-200, 200], [-15, 15]);
+
+  // Fetch rating aggregate for this client profile
+  const { data: ratingAggregate, isLoading: isRatingLoading } = useUserRatingAggregate(profile.id, 'client');
 
   const images = profile.profile_images || [];
   const hasMultipleImages = images.length > 1;
@@ -241,9 +246,19 @@ const ClientProfileCardComponent = ({
           />
         </div>
         
+        {/* Rating Display - Top Left Corner */}
+        <div className="absolute top-6 left-4 z-30 bg-black/60 backdrop-blur-md rounded-lg px-3 py-2">
+          <CompactRatingDisplay
+            aggregate={ratingAggregate}
+            isLoading={isRatingLoading}
+            showReviews={false}
+            className="text-white"
+          />
+        </div>
+
         {/* Story-Style Image Dots */}
         {hasMultipleImages && (
-          <div className="absolute top-6 left-0 right-0 z-30 flex justify-center gap-1.5 px-4">
+          <div className="absolute top-6 right-4 z-30 flex gap-1.5 max-w-[40%]">
             {images.map((_, idx) => (
               <div
                 key={`image-${idx}`}

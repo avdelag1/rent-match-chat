@@ -1,3 +1,10 @@
+/**
+ * @deprecated This component is DEPRECATED and uses the old review system.
+ * Use @/components/RatingSubmissionDialog.tsx instead.
+ *
+ * This file is kept for reference only and will not function with the current database schema.
+ */
+
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';

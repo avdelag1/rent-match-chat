@@ -19,6 +19,8 @@ import { MatchedListing } from '@/hooks/useSmartMatching';
 import { useMagnifier } from '@/hooks/useMagnifier';
 import { PropertyCardInfo, VehicleCardInfo, ServiceCardInfo } from '@/components/ui/CardInfoHierarchy';
 import { VerifiedBadge } from '@/components/ui/TrustSignals';
+import { CompactRatingDisplay } from '@/components/RatingDisplay';
+import { useListingRatingAggregate } from '@/hooks/useRatingSystem';
 
 // Exposed interface for parent to trigger swipe animations
 export interface SimpleSwipeCardRef {
@@ -183,6 +185,10 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
     holdDelay: 300, // Fast activation for instant feel
     enabled: isTop,
   });
+
+  // Fetch rating aggregate for this listing
+  const categoryId = listing.category === 'vehicle' || listing.vehicle_type ? 'vehicle' : 'property';
+  const { data: ratingAggregate, isLoading: isRatingLoading } = useListingRatingAggregate(listing.id, categoryId);
 
   const handleDragStart = useCallback(() => {
     isDragging.current = true;
@@ -368,11 +374,21 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
         >
           <CardImage src={currentImage} alt={listing.title || 'Listing'} />
 
+          {/* Rating Display - Top Left Corner */}
+          <div className="absolute top-3 left-4 z-20 bg-black/60 backdrop-blur-md rounded-lg px-3 py-2">
+            <CompactRatingDisplay
+              aggregate={ratingAggregate}
+              isLoading={isRatingLoading}
+              showReviews={false}
+              className="text-white"
+            />
+          </div>
+
           {/* Image dots */}
           {imageCount > 1 && (
-            <div className="absolute top-3 left-4 right-4 z-20 flex gap-1">
+            <div className="absolute top-3 right-4 z-20 flex gap-1 max-w-[40%]">
               {images.map((_, idx) => (
-                <div 
+                <div
                   key={idx}
                   className={`flex-1 h-1 rounded-full ${idx === currentImageIndex ? 'bg-white' : 'bg-white/40'}`}
                 />
