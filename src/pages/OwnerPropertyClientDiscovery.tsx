@@ -297,7 +297,7 @@ export default function OwnerPropertyClientDiscovery() {
             <SheetTrigger asChild>
               <Button size="lg" className="rounded-full shadow-lg">
                 <Filter className="h-5 w-5 mr-2" />
-                Filters
+                Quick Filters
                 {activeFilterCount > 0 && (
                   <Badge variant="secondary" className="ml-2">{activeFilterCount}</Badge>
                 )}
