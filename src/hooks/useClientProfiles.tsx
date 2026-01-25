@@ -30,34 +30,31 @@ export function useClientProfiles(excludeSwipedIds: string[] = [], options: { en
       }
 
       try {
-        // HIGHLY OPTIMIZED: Use database view that combines all profile data in ONE query
-        // BEFORE: 2 queries (profiles_public JOIN + client_profiles lookup)
-        // AFTER: 1 query (pre-joined view)
+        // Query client profiles from client_profiles table
         const { data: clientProfiles, error } = await supabase
-          .from('client_profiles_discovery')
+          .from('client_profiles')
           .select('*')
           .neq('user_id', user.id) // Exclude own profile
           .order('created_at', { ascending: false })
           .limit(100);
 
         if (error) {
-          // Fallback to old method if view doesn't exist yet (migration pending)
-          logger.warn('client_profiles_discovery view not found, using fallback query');
-
+          logger.error('Error fetching client profiles:', error);
+          
+          // Fallback to profiles_public view
           const { data: fallbackProfiles, error: fallbackError } = await supabase
             .from('profiles_public')
-            .select(`
-              *,
-              user_roles!inner(role)
-            `)
-            .eq('user_roles.role', 'client')
+            .select('*')
             .neq('id', user.id)
             .limit(100);
 
-          if (fallbackError) throw fallbackError;
+          if (fallbackError) {
+            logger.error('Fallback query also failed:', fallbackError);
+            return [];
+          }
 
-          // Simple transform without second query for fallback
-          const transformed: ClientProfile[] = (fallbackProfiles || []).map((profile, index) => ({
+          // Simple transform for fallback
+          const transformed: ClientProfile[] = (fallbackProfiles || []).map((profile: any, index: number) => ({
             id: index + 1,
             user_id: profile.id,
             name: profile.full_name || 'User',
@@ -79,20 +76,20 @@ export function useClientProfiles(excludeSwipedIds: string[] = [], options: { en
           return [];
         }
 
-        // Transform from view to interface
-        const transformedProfiles: ClientProfile[] = clientProfiles.map((profile, index) => ({
+        // Transform from client_profiles to interface
+        const transformedProfiles: ClientProfile[] = clientProfiles.map((profile: any, index: number) => ({
           id: index + 1,
-          user_id: profile.user_id,
-          name: profile.name,
-          age: profile.display_age,
-          gender: '',
+          user_id: profile.user_id || '',
+          name: profile.name || 'User',
+          age: profile.age || 25,
+          gender: profile.gender || '',
           interests: profile.interests || [],
           preferred_activities: profile.preferred_activities || [],
           profile_images: profile.profile_images || [],
           location: profile.city ? { city: profile.city } : null,
           city: profile.city || undefined,
-          avatar_url: profile.avatar_url || undefined,
-          verified: profile.verified || false
+          avatar_url: profile.profile_images?.[0] || undefined,
+          verified: false
         }));
 
         // Filter out swiped profiles
