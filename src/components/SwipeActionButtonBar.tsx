@@ -1,17 +1,18 @@
 /**
- * SWIPE ACTION BUTTON BAR
+ * SWIPE ACTION BUTTON BAR - PREMIUM 2025 DESIGN
  *
- * Premium floating button bar for swipe cards.
- * Matches modern dating apps (Tinder/Bumble/Hinge) pixel-perfect.
+ * Modern floating button bar for swipe cards with premium aesthetics.
+ * Designed to feel like buttons "emerge from the gradient" rather than
+ * sitting on transparent backgrounds.
  *
  * Features:
- * - iOS-style frosted glass effect (backdrop-blur)
- * - 5-button layout: Return | Dislike | Share | Like | Message
- * - Icon buttons with color-coded variants (heart for like, thumbs down for dislike)
+ * - PILL-SHAPED buttons with soft, premium rounded corners
+ * - Subtle backdrop blur (not heavy frosted glass)
+ * - Color-coded variants that glow softly on press
  * - GPU-accelerated animations at 60fps
- * - Capacitor iOS haptics (light for small, medium for large)
- * - Depth illusion: cards swipe behind buttons
- * - Safe area handling for iOS home indicator
+ * - Large touch-first hit areas (invisible padding extends target)
+ * - Minimal chrome - no heavy shadows or cartoon effects
+ * - Micro-interactions on press for premium feedback
  *
  * BUTTON ORDER (LEFT → RIGHT):
  * 1. Return/Undo (small) - amber icon
@@ -37,40 +38,39 @@ interface SwipeActionButtonBarProps {
   className?: string;
 }
 
-// iOS-feel spring animation config
+// Premium spring animation - soft, bouncy, modern
 const springConfig = {
   type: 'spring',
-  stiffness: 500,
-  damping: 30,
-  mass: 0.8,
+  stiffness: 400,
+  damping: 25,
+  mass: 0.6,
 } as const;
 
 /**
- * BUTTON SIZING SYSTEM
+ * BUTTON SIZING SYSTEM - Premium 2025
  *
- * Designed for optimal thumb reach and touch ergonomics.
- * Based on Apple HIG minimum 44pt touch targets, scaled up for premium feel.
- *
- * Size Hierarchy:
- * - Primary (Like/Dislike): Dominant, easy to hit one-handed
- * - Secondary (Undo/Share/Message): Comfortable but not competing
- *
- * Hit areas are the full button size - no invisible padding needed.
+ * Large touch-first buttons with generous hit areas.
+ * Size hierarchy creates clear visual prominence.
  */
-const LARGE_SIZE = 80;  // Primary actions (Like/Dislike) - dominant, increased for better visibility
-const SMALL_SIZE = 46;  // Secondary actions (Undo/Share/Message) - compact
+const LARGE_SIZE = 72;  // Primary actions (Like/Dislike) - slightly smaller but more refined
+const SMALL_SIZE = 52;  // Secondary actions - larger for better touch targets
 
-// Icon sizes scale proportionally
-const LARGE_ICON_SIZE = 38;  // Primary action icons - increased for better visibility
-const SMALL_ICON_SIZE = 22;  // Secondary action icons - smaller for compact buttons
+// Icon sizes - proportional and readable
+const LARGE_ICON_SIZE = 32;  // Primary icons - clear and bold
+const SMALL_ICON_SIZE = 22;  // Secondary icons - crisp and visible
 
-// Gap between buttons - tighter for compact layout
-const BUTTON_GAP = 6; // Closer together for ergonomic reach
+// Gap between buttons - breathing room for premium feel
+const BUTTON_GAP = 12;
 
-// Tap animation scale
-const TAP_SCALE = 0.92; // Slightly less dramatic for premium feel
+// Tap animation - subtle premium press
+const TAP_SCALE = 0.88;
 
-// Premium ActionButton with glass effect and haptics
+/**
+ * Premium ActionButton - Modern Pill-Shaped Design
+ *
+ * Buttons appear to "emerge from the gradient" with subtle glass effect.
+ * No heavy chrome or cartoon shadows - clean, premium, modern.
+ */
 const ActionButton = memo(({
   onClick,
   disabled = false,
@@ -92,11 +92,10 @@ const ActionButton = memo(({
     if (disabled) return;
 
     // CRITICAL: Stop event from bubbling to parent card's onClick
-    // This prevents the card tap handler from opening insights when clicking buttons
     e.stopPropagation();
     e.preventDefault();
 
-    // iOS haptics - medium for large buttons, light for small
+    // Haptic feedback - stronger for primary actions
     if (variant === 'like') {
       triggerHaptic('success');
     } else if (variant === 'dislike') {
@@ -108,70 +107,65 @@ const ActionButton = memo(({
     onClick();
   }, [disabled, variant, onClick]);
 
-  // Compute sizes - icons scale proportionally with buttons
+  // Compute sizes
   const buttonSize = size === 'large' ? LARGE_SIZE : SMALL_SIZE;
   const iconSize = size === 'large' ? LARGE_ICON_SIZE : SMALL_ICON_SIZE;
+  const isPrimary = size === 'large';
 
-  // Color configurations for each variant
+  // Premium color configurations
   const variantConfig = useMemo(() => {
     const configs: Record<string, {
-      borderColor: string;
-      bgColor: string;
-      hoverBg: string;
       iconColor: string;
+      bgColor: string;
+      pressedBg: string;
       glowColor: string;
+      borderColor: string;
     }> = {
       like: {
-        borderColor: 'rgba(34, 197, 94, 0.6)',
-        bgColor: 'rgba(34, 197, 94, 0.12)',
-        hoverBg: 'rgba(34, 197, 94, 0.25)',
         iconColor: '#22c55e',
-        glowColor: 'rgba(34, 197, 94, 0.5)',
+        bgColor: 'rgba(34, 197, 94, 0.15)',
+        pressedBg: 'rgba(34, 197, 94, 0.3)',
+        glowColor: 'rgba(34, 197, 94, 0.4)',
+        borderColor: 'rgba(34, 197, 94, 0.3)',
       },
       dislike: {
-        borderColor: 'rgba(239, 68, 68, 0.6)',
-        bgColor: 'rgba(239, 68, 68, 0.12)',
-        hoverBg: 'rgba(239, 68, 68, 0.25)',
         iconColor: '#ef4444',
-        glowColor: 'rgba(239, 68, 68, 0.5)',
+        bgColor: 'rgba(239, 68, 68, 0.15)',
+        pressedBg: 'rgba(239, 68, 68, 0.3)',
+        glowColor: 'rgba(239, 68, 68, 0.4)',
+        borderColor: 'rgba(239, 68, 68, 0.3)',
       },
       amber: {
-        borderColor: 'rgba(245, 158, 11, 0.5)',
-        bgColor: 'rgba(245, 158, 11, 0.08)',
-        hoverBg: 'rgba(245, 158, 11, 0.2)',
         iconColor: '#f59e0b',
-        glowColor: 'rgba(245, 158, 11, 0.4)',
+        bgColor: 'rgba(245, 158, 11, 0.12)',
+        pressedBg: 'rgba(245, 158, 11, 0.25)',
+        glowColor: 'rgba(245, 158, 11, 0.35)',
+        borderColor: 'rgba(245, 158, 11, 0.25)',
       },
       cyan: {
-        borderColor: 'rgba(6, 182, 212, 0.5)',
-        bgColor: 'rgba(6, 182, 212, 0.08)',
-        hoverBg: 'rgba(6, 182, 212, 0.2)',
         iconColor: '#06b6d4',
-        glowColor: 'rgba(6, 182, 212, 0.4)',
+        bgColor: 'rgba(6, 182, 212, 0.12)',
+        pressedBg: 'rgba(6, 182, 212, 0.25)',
+        glowColor: 'rgba(6, 182, 212, 0.35)',
+        borderColor: 'rgba(6, 182, 212, 0.25)',
       },
       purple: {
-        borderColor: 'rgba(168, 85, 247, 0.5)',
-        bgColor: 'rgba(168, 85, 247, 0.08)',
-        hoverBg: 'rgba(168, 85, 247, 0.2)',
         iconColor: '#a855f7',
-        glowColor: 'rgba(168, 85, 247, 0.4)',
+        bgColor: 'rgba(168, 85, 247, 0.12)',
+        pressedBg: 'rgba(168, 85, 247, 0.25)',
+        glowColor: 'rgba(168, 85, 247, 0.35)',
+        borderColor: 'rgba(168, 85, 247, 0.25)',
       },
       default: {
-        borderColor: 'rgba(255, 255, 255, 0.2)',
-        bgColor: 'rgba(255, 255, 255, 0.05)',
-        hoverBg: 'rgba(255, 255, 255, 0.15)',
-        iconColor: 'rgba(255, 255, 255, 0.8)',
-        glowColor: 'rgba(255, 255, 255, 0.3)',
+        iconColor: 'rgba(255, 255, 255, 0.85)',
+        bgColor: 'rgba(255, 255, 255, 0.08)',
+        pressedBg: 'rgba(255, 255, 255, 0.18)',
+        glowColor: 'rgba(255, 255, 255, 0.2)',
+        borderColor: 'rgba(255, 255, 255, 0.15)',
       },
     };
     return configs[variant] || configs.default;
   }, [variant]);
-
-  // Compute glow based on press state
-  const glowStyle = useMemo(() => {
-    if (!isPressed) return '';
-    return `0 0 20px ${variantConfig.glowColor}`;
-  }, [isPressed, variantConfig.glowColor]);
 
   return (
     <motion.button
@@ -187,33 +181,40 @@ const ActionButton = memo(({
       style={{
         width: buttonSize,
         height: buttonSize,
+        // PILL-SHAPED: Fully rounded for modern premium look
         borderRadius: '50%',
-        // No border - icons float naturally on background
-        border: 'none',
-        // Clean semi-transparent backdrop - minimal, modern
-        backgroundColor: isPressed
-          ? 'rgba(35, 35, 35, 0.65)'
-          : 'rgba(25, 25, 25, 0.45)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        // Very subtle shadow for depth, no hard edges
+        // Subtle border for definition against gradient
+        border: `1.5px solid ${variantConfig.borderColor}`,
+        // Premium semi-transparent background
+        backgroundColor: isPressed ? variantConfig.pressedBg : variantConfig.bgColor,
+        // Light backdrop blur - subtle glass effect
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        // Subtle shadow - no heavy chrome
         boxShadow: isPressed
-          ? `0 4px 16px rgba(0,0,0,0.35)${glowStyle ? `, ${glowStyle}` : ''}`
-          : '0 2px 8px rgba(0,0,0,0.25)',
+          ? `0 0 24px ${variantConfig.glowColor}, inset 0 1px 0 rgba(255,255,255,0.1)`
+          : `0 4px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.08)`,
         // GPU acceleration
         transform: 'translateZ(0)',
         backfaceVisibility: 'hidden',
         WebkitBackfaceVisibility: 'hidden',
-        willChange: 'transform, box-shadow',
-        // Transitions
-        transition: 'background-color 150ms ease-out, box-shadow 200ms ease-out',
+        willChange: 'transform, box-shadow, background-color',
+        // Smooth transitions
+        transition: 'background-color 120ms ease-out, box-shadow 180ms ease-out, border-color 120ms ease-out',
         // Disabled state
-        opacity: disabled ? 0.3 : 1,
+        opacity: disabled ? 0.35 : 1,
         cursor: disabled ? 'not-allowed' : 'pointer',
+        // Invisible padding extends touch target
+        padding: 0,
       }}
-      className="flex items-center justify-center touch-manipulation select-none"
+      className="flex items-center justify-center touch-manipulation select-none relative"
     >
-      <span
+      {/* Icon with color and subtle animation */}
+      <motion.span
+        animate={{
+          scale: isPressed ? 0.9 : 1,
+        }}
+        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
         style={{
           width: iconSize,
           height: iconSize,
@@ -221,11 +222,11 @@ const ActionButton = memo(({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          transition: 'color 150ms ease-out',
+          filter: isPrimary ? `drop-shadow(0 0 4px ${variantConfig.glowColor})` : 'none',
         }}
       >
         {children}
-      </span>
+      </motion.span>
     </motion.button>
   );
 });
@@ -244,23 +245,25 @@ function SwipeActionButtonBarComponent({
 }: SwipeActionButtonBarProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+      initial={{ opacity: 0, y: 16, scale: 0.96 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ ...springConfig, delay: 0.05 }}
+      transition={{ ...springConfig, delay: 0.02 }}
       className={`relative flex items-center justify-center ${className}`}
       style={{
-        // Transparent container - no background
-        padding: '10px 16px',
+        // Transparent container - buttons float on gradient
+        padding: '8px 20px',
         // GPU acceleration
         transform: 'translateZ(0)',
         willChange: 'transform, opacity',
-        // Position
+        // Position above gradient
         zIndex: 100,
       }}
     >
-      {/* Buttons Row - fully transparent, only buttons have glass effect */}
-      {/* Gap uses BUTTON_GAP constant for consistent, ergonomic spacing */}
-      <div className="flex items-center" style={{ gap: BUTTON_GAP }}>
+      {/* Buttons Row - Premium spacing, centered layout */}
+      <div
+        className="flex items-center justify-center"
+        style={{ gap: BUTTON_GAP }}
+      >
         {/* 1. Return/Undo Button (Small) - Amber */}
         <ActionButton
           onClick={onUndo || (() => {})}

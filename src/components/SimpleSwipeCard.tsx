@@ -21,6 +21,7 @@ import { PropertyCardInfo, VehicleCardInfo, ServiceCardInfo } from '@/components
 import { VerifiedBadge } from '@/components/ui/TrustSignals';
 import { CompactRatingDisplay } from '@/components/RatingDisplay';
 import { useListingRatingAggregate } from '@/hooks/useRatingSystem';
+import { GradientMaskTop, GradientMaskBottom } from '@/components/ui/GradientMasks';
 
 // Exposed interface for parent to trigger swipe animations
 export interface SimpleSwipeCardRef {
@@ -55,7 +56,14 @@ const SPRING_CONFIGS = {
 // Active spring config - change this to switch feels
 const ACTIVE_SPRING = SPRING_CONFIGS.NATIVE;
 
-// Simple image component with no complex state - optimized for instant display
+/**
+ * FULL-SCREEN CARD IMAGE
+ *
+ * CRITICAL: Image MUST cover 100% of viewport (edge-to-edge, top-to-bottom)
+ * - Uses position: absolute + inset: 0
+ * - object-fit: cover ensures no letterboxing
+ * - Sits at the LOWEST z-layer (z-index: 1)
+ */
 const CardImage = memo(({ src, alt }: { src: string; alt: string }) => {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
@@ -72,6 +80,8 @@ const CardImage = memo(({ src, alt }: { src: string; alt: string }) => {
         touchAction: 'none',
         WebkitUserSelect: 'none',
         userSelect: 'none',
+        // LOWEST z-layer - image sits behind everything
+        zIndex: 1,
       }}
     >
       {/* Skeleton - GPU-accelerated with smooth 150ms crossfade */}
@@ -84,12 +94,15 @@ const CardImage = memo(({ src, alt }: { src: string; alt: string }) => {
         }}
       />
 
-      {/* Image - smooth 150ms crossfade to prevent flash */}
+      {/* Image - FULL VIEWPORT coverage */}
       <img
         src={error ? FALLBACK_PLACEHOLDER : optimizedSrc}
         alt={alt}
-        className="absolute inset-0 w-full h-full object-cover"
+        className="absolute inset-0 w-full h-full"
         style={{
+          // CRITICAL: object-fit: cover ensures no letterboxing/padding
+          objectFit: 'cover',
+          objectPosition: 'center',
           opacity: loaded ? 1 : 0,
           transition: 'opacity 150ms ease-out',
           // CSS performance optimizations
@@ -332,7 +345,7 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
 
   return (
     <div className="absolute inset-0 flex flex-col">
-      {/* Draggable Card - EXACTLY like the landing page logo */}
+      {/* Draggable Card - FULL-SCREEN with edge-to-edge photo */}
       <motion.div
         drag={!isMagnifierActive() ? "x" : false}
         dragConstraints={{ left: 0, right: 0 }}
@@ -360,7 +373,7 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
         } as any}
         className="flex-1 cursor-grab active:cursor-grabbing select-none touch-none overflow-hidden relative"
       >
-        {/* Image area with full-image zoom support */}
+        {/* Image area - FULL VIEWPORT with magnifier support */}
         <div
           ref={containerRef}
           className="absolute inset-0 w-full h-full overflow-hidden"
@@ -372,20 +385,17 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
             userSelect: 'none',
           }}
         >
+          {/* PHOTO - LOWEST LAYER (z-index: 1) - 100% viewport coverage */}
           <CardImage src={currentImage} alt={listing.title || 'Listing'} />
 
-          {/* TOP GRADIENT - Header protection for floating TopBar */}
-          <div 
-            className="absolute top-0 left-0 right-0 pointer-events-none z-15"
-            style={{
-              height: 'calc(20% + env(safe-area-inset-top, 0px))',
-              background: 'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.25) 50%, transparent 100%)',
-              transform: 'translateZ(0)',
-            }}
-          />
+          {/* TOP GRADIENT MASK - Creates visual contrast for header UI */}
+          <GradientMaskTop intensity={1} zIndex={15} heightPercent={28} />
 
-          {/* Rating Display - Top Left Corner */}
-          <div className="absolute top-3 left-4 z-20 bg-black/60 backdrop-blur-md rounded-lg px-3 py-2" style={{ marginTop: 'env(safe-area-inset-top, 0px)' }}>
+          {/* Rating Display - Floats INSIDE the top gradient */}
+          <div
+            className="absolute top-3 left-4 z-25 bg-black/40 backdrop-blur-sm rounded-full px-3 py-1.5"
+            style={{ marginTop: 'env(safe-area-inset-top, 0px)' }}
+          >
             <CompactRatingDisplay
               aggregate={ratingAggregate}
               isLoading={isRatingLoading}
@@ -394,20 +404,20 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
             />
           </div>
 
-          {/* Image dots */}
+          {/* Image dots - Float INSIDE the top gradient */}
           {imageCount > 1 && (
-            <div className="absolute top-3 right-4 z-20 flex gap-1 max-w-[40%]" style={{ marginTop: 'env(safe-area-inset-top, 0px)' }}>
+            <div className="absolute top-3 right-4 z-25 flex gap-1 max-w-[40%]" style={{ marginTop: 'env(safe-area-inset-top, 0px)' }}>
               {images.map((_, idx) => (
                 <div
                   key={idx}
-                  className={`flex-1 h-1 rounded-full ${idx === currentImageIndex ? 'bg-white' : 'bg-white/40'}`}
+                  className={`flex-1 h-1 rounded-full transition-all duration-200 ${idx === currentImageIndex ? 'bg-white shadow-sm' : 'bg-white/40'}`}
                 />
               ))}
             </div>
           )}
-          
-          {/* Bottom gradient fade - tall and dark for Tinder-style look */}
-          <div className="absolute bottom-0 left-0 right-0 h-[60%] bg-gradient-to-t from-black via-black/70 via-40% to-transparent pointer-events-none z-10" />
+
+          {/* BOTTOM GRADIENT MASK - Creates visual contrast for buttons & info */}
+          <GradientMaskBottom intensity={1} zIndex={18} heightPercent={55} />
         </div>
         
         {/* YES! overlay */}
