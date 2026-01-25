@@ -119,7 +119,29 @@ All user-facing tables have Row Level Security enabled:
 
 ## Pending Migrations
 
-No pending migrations at this time. Schema is up to date as of October 29, 2025.
+### **⚠️ REQUIRED: Clear Mock Client Photos (Jan 2026)**
+
+**Migration File**: `20260118000000_clear_client_mock_photos.sql`
+
+**Purpose**: Removes fake/mock photos from client profiles that appear on owner swipe cards
+
+**Status**: Migration file exists but needs to be applied to production/staging database
+
+**Impact**:
+- Clears profile_images from client_profiles table where images contain mock/placeholder URLs
+- Clears images, avatar_url, and profile_photo_url from profiles table for clients
+- Clients without real photos will show "Waiting for client to upload photos :)" placeholder
+
+**Action Required**: Apply this migration using Supabase CLI or dashboard:
+```bash
+supabase db push
+# OR manually run the migration via Supabase Dashboard
+```
+
+**Code Changes**:
+- ✅ Client-side cache version bumped to v5 (forces cache clear)
+- ✅ Added code-level filtering to exclude profiles with mock images
+- ✅ Fallback to placeholder when no images present
 
 ## Next Steps
 

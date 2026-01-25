@@ -15,6 +15,29 @@ function shuffleArray<T>(array: T[]): T[] {
   return shuffled;
 }
 
+// Helper function to check if images contain mock/fake/placeholder URLs
+function hasMockImages(images: string[] | null | undefined): boolean {
+  if (!images || images.length === 0) return false;
+
+  const mockPatterns = [
+    'placeholder',
+    'mock',
+    'test',
+    'example.com',
+    'unsplash.com',
+    'picsum.photos',
+    'loremflickr.com',
+    'dummyimage.com',
+    'via.placeholder.com'
+  ];
+
+  return images.some(imageUrl => {
+    if (!imageUrl) return false;
+    const lowerUrl = imageUrl.toLowerCase();
+    return mockPatterns.some(pattern => lowerUrl.includes(pattern));
+  });
+}
+
 export interface MatchedListing extends Listing {
   matchPercentage: number;
   matchReasons: string[];
@@ -1003,8 +1026,10 @@ export function useSmartClientMatching(
         }
 
         // Map profiles with placeholder images - filter out already-swiped profiles
+        // CRITICAL: Also filter out profiles with mock/fake images (unsplash, placeholder URLs, etc.)
         let filteredProfiles = (profiles as any[])
           .filter(profile => !swipedProfileIds.has(profile.id))
+          .filter(profile => !hasMockImages(profile.images)) // Remove profiles with fake/mock photos
           .map(profile => ({
             ...profile,
             images: profile.images && profile.images.length > 0
