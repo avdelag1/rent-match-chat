@@ -92,6 +92,7 @@ body {
 }
 
 /* App Header - Fixed top bar with safe-area-top - Responsive padding */
+/* NOTE: Background is now handled by TopBar component based on transparent prop */
 .app-header {
   position: fixed;
   top: 0;
@@ -102,8 +103,8 @@ body {
   padding-bottom: 6px;
   padding-left: max(var(--safe-left), 8px);
   padding-right: max(var(--safe-right), 8px);
-  background: hsl(var(--background));
-  border-bottom: 1px solid hsl(var(--border));
+  /* Default: transparent - let gradient overlays provide contrast */
+  /* Non-immersive routes apply bg via TopBar component class */
 }
 
 /* Responsive header padding for larger screens */

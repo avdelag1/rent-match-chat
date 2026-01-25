@@ -44,7 +44,7 @@ export const GradientMaskTop = memo(function GradientMaskTop({
   className = '',
   zIndex = 15,
   light = false,
-  heightPercent = 30,
+  heightPercent = 32,
 }: GradientMaskProps) {
   const baseColor = light ? '255,255,255' : '0,0,0';
 
@@ -54,13 +54,13 @@ export const GradientMaskTop = memo(function GradientMaskTop({
     left: 0,
     right: 0,
     height: `${heightPercent}%`,
-    // Multi-stop gradient for smooth, natural fade
+    // TINDER-STYLE gradient: Stronger at top for header contrast, smooth fade
     background: `linear-gradient(
       to bottom,
-      rgba(${baseColor}, ${0.65 * intensity}) 0%,
-      rgba(${baseColor}, ${0.5 * intensity}) 20%,
-      rgba(${baseColor}, ${0.35 * intensity}) 40%,
-      rgba(${baseColor}, ${0.15 * intensity}) 65%,
+      rgba(${baseColor}, ${0.75 * intensity}) 0%,
+      rgba(${baseColor}, ${0.60 * intensity}) 20%,
+      rgba(${baseColor}, ${0.40 * intensity}) 45%,
+      rgba(${baseColor}, ${0.15 * intensity}) 70%,
       rgba(${baseColor}, 0) 100%
     )`,
     // GPU acceleration
@@ -92,7 +92,7 @@ export const GradientMaskBottom = memo(function GradientMaskBottom({
   className = '',
   zIndex = 20,
   light = false,
-  heightPercent = 50,
+  heightPercent = 55,
 }: GradientMaskProps) {
   const baseColor = light ? '255,255,255' : '0,0,0';
 
@@ -102,14 +102,14 @@ export const GradientMaskBottom = memo(function GradientMaskBottom({
     left: 0,
     right: 0,
     height: `${heightPercent}%`,
-    // Multi-stop gradient for smooth, natural fade - optimized for button visibility
+    // TINDER-STYLE gradient: Strong at bottom for buttons/info, smooth upward fade
     background: `linear-gradient(
       to top,
-      rgba(${baseColor}, ${0.85 * intensity}) 0%,
-      rgba(${baseColor}, ${0.75 * intensity}) 15%,
-      rgba(${baseColor}, ${0.55 * intensity}) 35%,
-      rgba(${baseColor}, ${0.3 * intensity}) 55%,
-      rgba(${baseColor}, ${0.1 * intensity}) 75%,
+      rgba(${baseColor}, ${0.90 * intensity}) 0%,
+      rgba(${baseColor}, ${0.80 * intensity}) 12%,
+      rgba(${baseColor}, ${0.60 * intensity}) 30%,
+      rgba(${baseColor}, ${0.35 * intensity}) 50%,
+      rgba(${baseColor}, ${0.12 * intensity}) 70%,
       rgba(${baseColor}, 0) 100%
     )`,
     // GPU acceleration

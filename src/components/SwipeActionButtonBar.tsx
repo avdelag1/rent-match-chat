@@ -112,7 +112,8 @@ const ActionButton = memo(({
   const iconSize = size === 'large' ? LARGE_ICON_SIZE : SMALL_ICON_SIZE;
   const isPrimary = size === 'large';
 
-  // Premium color configurations
+  // Premium color configurations - TINDER STYLE with transparent backgrounds
+  // Only borders and icons provide visual definition, gradient overlay does the rest
   const variantConfig = useMemo(() => {
     const configs: Record<string, {
       iconColor: string;
@@ -123,45 +124,45 @@ const ActionButton = memo(({
     }> = {
       like: {
         iconColor: '#22c55e',
-        bgColor: 'rgba(34, 197, 94, 0.15)',
-        pressedBg: 'rgba(34, 197, 94, 0.3)',
+        bgColor: 'rgba(34, 197, 94, 0.08)',
+        pressedBg: 'rgba(34, 197, 94, 0.20)',
         glowColor: 'rgba(34, 197, 94, 0.4)',
-        borderColor: 'rgba(34, 197, 94, 0.3)',
+        borderColor: 'rgba(34, 197, 94, 0.35)',
       },
       dislike: {
         iconColor: '#ef4444',
-        bgColor: 'rgba(239, 68, 68, 0.15)',
-        pressedBg: 'rgba(239, 68, 68, 0.3)',
+        bgColor: 'rgba(239, 68, 68, 0.08)',
+        pressedBg: 'rgba(239, 68, 68, 0.20)',
         glowColor: 'rgba(239, 68, 68, 0.4)',
-        borderColor: 'rgba(239, 68, 68, 0.3)',
+        borderColor: 'rgba(239, 68, 68, 0.35)',
       },
       amber: {
         iconColor: '#f59e0b',
-        bgColor: 'rgba(245, 158, 11, 0.12)',
-        pressedBg: 'rgba(245, 158, 11, 0.25)',
+        bgColor: 'rgba(245, 158, 11, 0.06)',
+        pressedBg: 'rgba(245, 158, 11, 0.18)',
         glowColor: 'rgba(245, 158, 11, 0.35)',
-        borderColor: 'rgba(245, 158, 11, 0.25)',
+        borderColor: 'rgba(245, 158, 11, 0.30)',
       },
       cyan: {
         iconColor: '#06b6d4',
-        bgColor: 'rgba(6, 182, 212, 0.12)',
-        pressedBg: 'rgba(6, 182, 212, 0.25)',
+        bgColor: 'rgba(6, 182, 212, 0.06)',
+        pressedBg: 'rgba(6, 182, 212, 0.18)',
         glowColor: 'rgba(6, 182, 212, 0.35)',
-        borderColor: 'rgba(6, 182, 212, 0.25)',
+        borderColor: 'rgba(6, 182, 212, 0.30)',
       },
       purple: {
         iconColor: '#a855f7',
-        bgColor: 'rgba(168, 85, 247, 0.12)',
-        pressedBg: 'rgba(168, 85, 247, 0.25)',
+        bgColor: 'rgba(168, 85, 247, 0.06)',
+        pressedBg: 'rgba(168, 85, 247, 0.18)',
         glowColor: 'rgba(168, 85, 247, 0.35)',
-        borderColor: 'rgba(168, 85, 247, 0.25)',
+        borderColor: 'rgba(168, 85, 247, 0.30)',
       },
       default: {
-        iconColor: 'rgba(255, 255, 255, 0.85)',
-        bgColor: 'rgba(255, 255, 255, 0.08)',
-        pressedBg: 'rgba(255, 255, 255, 0.18)',
+        iconColor: 'rgba(255, 255, 255, 0.9)',
+        bgColor: 'rgba(255, 255, 255, 0.04)',
+        pressedBg: 'rgba(255, 255, 255, 0.12)',
         glowColor: 'rgba(255, 255, 255, 0.2)',
-        borderColor: 'rgba(255, 255, 255, 0.15)',
+        borderColor: 'rgba(255, 255, 255, 0.20)',
       },
     };
     return configs[variant] || configs.default;
@@ -183,17 +184,17 @@ const ActionButton = memo(({
         height: buttonSize,
         // PILL-SHAPED: Fully rounded for modern premium look
         borderRadius: '50%',
-        // Subtle border for definition against gradient
+        // Subtle border for definition against gradient - stronger for visibility
         border: `1.5px solid ${variantConfig.borderColor}`,
-        // Premium semi-transparent background
+        // TINDER-STYLE: Ultra-light background - gradient overlay handles contrast
         backgroundColor: isPressed ? variantConfig.pressedBg : variantConfig.bgColor,
-        // Light backdrop blur - subtle glass effect
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        // Subtle shadow - no heavy chrome
+        // Lighter backdrop blur - subtle glass effect without heavy frosting
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
+        // Softer shadow - cleaner, more modern
         boxShadow: isPressed
-          ? `0 0 24px ${variantConfig.glowColor}, inset 0 1px 0 rgba(255,255,255,0.1)`
-          : `0 4px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.08)`,
+          ? `0 0 20px ${variantConfig.glowColor}`
+          : `0 2px 12px rgba(0,0,0,0.15)`,
         // GPU acceleration
         transform: 'translateZ(0)',
         backfaceVisibility: 'hidden',

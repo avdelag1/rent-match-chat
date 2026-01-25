@@ -210,12 +210,14 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
   return (
     <nav className="app-bottom-bar pointer-events-none px-1">
       <div
-        // FULL-WIDTH LAYOUT: Use available screen width, spread buttons across full width with edge coverage
-        className="flex items-center justify-between w-full max-w-xl mx-auto px-2 py-2 pointer-events-auto bg-background/90 rounded-3xl shadow-[0_2px_12px_rgba(0,0,0,0.2)]"
+        // TINDER-STYLE: No background frame - buttons float on gradient overlay
+        // The swipe card's GradientMaskBottom provides the visual contrast
+        className="flex items-center justify-between w-full max-w-xl mx-auto px-2 py-2 pointer-events-auto"
         style={{
           // GPU acceleration for smooth animations
           transform: 'translateZ(0)',
           backfaceVisibility: 'hidden',
+          // No background - pure transparent for Tinder-style floating buttons
         }}
       >
         {navItems.map((item, index) => {
