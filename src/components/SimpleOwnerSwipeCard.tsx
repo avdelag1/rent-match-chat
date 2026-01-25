@@ -17,6 +17,8 @@ import { triggerHaptic } from '@/utils/haptics';
 import { SwipeActionButtonBar } from './SwipeActionButtonBar';
 import { useMagnifier } from '@/hooks/useMagnifier';
 import { GradientMaskTop, GradientMaskBottom } from '@/components/ui/GradientMasks';
+import { CompactRatingDisplay } from '@/components/RatingDisplay';
+import { useUserRatingAggregate } from '@/hooks/useRatingSystem';
 
 // LOWERED thresholds for faster, more responsive swipe
 const SWIPE_THRESHOLD = 80; // Reduced from 120 - card triggers sooner
@@ -208,6 +210,9 @@ function SimpleOwnerSwipeCardComponent({
   // FIX: Move useTransform hook to top level - hooks must not be called inside JSX
   // This was causing "Rendered fewer hooks than expected" error when card unmounted
   const cardFilter = useTransform(cardBlur, (v) => `blur(${v}px)`);
+
+  // Fetch user rating aggregate for this client profile
+  const { data: ratingAggregate, isLoading: isRatingLoading } = useUserRatingAggregate(profile?.user_id);
 
   // Image state
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -496,6 +501,18 @@ function SimpleOwnerSwipeCardComponent({
         
         {/* Content overlay - Positioned higher for Tinder style (above button area) */}
         <div className="absolute bottom-24 left-0 right-0 p-4 z-20 pointer-events-none">
+          {/* Rating Display - Bottom of card, above profile info (same as client side) */}
+          <div className="mb-3">
+            <div className="inline-flex bg-black/40 backdrop-blur-sm rounded-full px-3 py-1.5">
+              <CompactRatingDisplay
+                aggregate={ratingAggregate}
+                isLoading={isRatingLoading}
+                showReviews={false}
+                className="text-white"
+              />
+            </div>
+          </div>
+
           {/* Photo 0: Name + Age */}
           {currentImageIndex % 4 === 0 && (
             <>
