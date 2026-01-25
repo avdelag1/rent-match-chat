@@ -182,30 +182,17 @@ const ActionButton = memo(({
       style={{
         width: buttonSize,
         height: buttonSize,
-        // PILL-SHAPED: Fully rounded for modern premium look
-        borderRadius: '50%',
-        // Subtle border for definition against gradient - stronger for visibility
-        border: `1.5px solid ${variantConfig.borderColor}`,
-        // TINDER-STYLE: Ultra-light background - gradient overlay handles contrast
-        backgroundColor: isPressed ? variantConfig.pressedBg : variantConfig.bgColor,
-        // Lighter backdrop blur - subtle glass effect without heavy frosting
-        backdropFilter: 'blur(8px)',
-        WebkitBackdropFilter: 'blur(8px)',
-        // Softer shadow - cleaner, more modern
-        boxShadow: isPressed
-          ? `0 0 20px ${variantConfig.glowColor}`
-          : `0 2px 12px rgba(0,0,0,0.15)`,
+        // NO FRAME: Just floating icons with subtle glow on press
+        backgroundColor: 'transparent',
+        border: 'none',
         // GPU acceleration
         transform: 'translateZ(0)',
         backfaceVisibility: 'hidden',
         WebkitBackfaceVisibility: 'hidden',
-        willChange: 'transform, box-shadow, background-color',
-        // Smooth transitions
-        transition: 'background-color 120ms ease-out, box-shadow 180ms ease-out, border-color 120ms ease-out',
+        willChange: 'transform',
         // Disabled state
         opacity: disabled ? 0.35 : 1,
         cursor: disabled ? 'not-allowed' : 'pointer',
-        // Invisible padding extends touch target
         padding: 0,
       }}
       className="flex items-center justify-center touch-manipulation select-none relative"
