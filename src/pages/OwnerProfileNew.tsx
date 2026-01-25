@@ -108,7 +108,7 @@ const OwnerProfileNew = () => {
             isClient={false}
           />
 
-          {/* Liked Clients */}
+          {/* Your Liked Clients */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -122,8 +122,8 @@ const OwnerProfileNew = () => {
                 >
                   <Flame className="w-5 h-5 text-orange-500" />
                   <div className="flex-1 text-left">
-                    <div className="font-medium text-foreground">Liked Clients</div>
-                    <div className="text-sm text-muted-foreground">View clients you've liked</div>
+                    <div className="font-medium text-foreground">Your Likes</div>
+                    <div className="text-sm text-muted-foreground">Clients you've liked</div>
                   </div>
                   <div className="text-lg font-bold text-foreground">{stats?.likedClientsCount ?? 0}</div>
                 </button>
@@ -131,7 +131,7 @@ const OwnerProfileNew = () => {
             </Card>
           </motion.div>
 
-          {/* Who Liked You */}
+          {/* Clients Who Liked You */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -145,7 +145,7 @@ const OwnerProfileNew = () => {
                 >
                   <Heart className="w-5 h-5 text-pink-500" />
                   <div className="flex-1 text-left">
-                    <div className="font-medium text-foreground">Who Liked You</div>
+                    <div className="font-medium text-foreground">Clients Who Liked You</div>
                     <div className="text-sm text-muted-foreground">See clients interested in your listings</div>
                   </div>
                   <div className="text-lg font-bold text-foreground">{stats?.interestedClientsCount ?? 0}</div>
