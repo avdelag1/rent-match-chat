@@ -319,30 +319,47 @@ export function useStartConversation() {
       }
 
       if (!conversationId) {
-        // Determine roles by checking if users have listings (owners have listings, clients don't)
+        // IMPROVED: Determine roles using user_roles table (more reliable than checking listings)
         let myRole = 'client';
         let otherRole = 'client';
-        
+
         try {
-          // Check if current user has listings (owner) or not (client)
-          const myListingsCheck = await (supabase as any)
-            .from('listings')
-            .select('id', { count: 'exact' })
+          // Check both users' roles from user_roles table
+          const { data: myRoleData } = await supabase
+            .from('user_roles')
+            .select('role')
             .eq('user_id', user.id)
-            .limit(1);
-          
-          myRole = (myListingsCheck.data && myListingsCheck.data.length > 0) ? 'owner' : 'client';
+            .maybeSingle();
 
-          // Check if other user has listings
-          const otherListingsCheck = await (supabase as any)
-            .from('listings')
-            .select('id', { count: 'exact' })
+          const { data: otherRoleData } = await supabase
+            .from('user_roles')
+            .select('role')
             .eq('user_id', otherUserId)
-            .limit(1);
+            .maybeSingle();
 
+          myRole = myRoleData?.role || 'client';
+          otherRole = otherRoleData?.role || 'client';
 
-          otherRole = (otherListingsCheck.data && otherListingsCheck.data.length > 0) ? 'owner' : 'client';
+          // FALLBACK: If roles not found in user_roles, check listings as backup
+          if (!myRoleData) {
+            const myListingsCheck = await supabase
+              .from('listings')
+              .select('id')
+              .eq('user_id', user.id)
+              .limit(1);
+            myRole = (myListingsCheck.data && myListingsCheck.data.length > 0) ? 'owner' : 'client';
+          }
+
+          if (!otherRoleData) {
+            const otherListingsCheck = await supabase
+              .from('listings')
+              .select('id')
+              .eq('user_id', otherUserId)
+              .limit(1);
+            otherRole = (otherListingsCheck.data && otherListingsCheck.data.length > 0) ? 'owner' : 'client';
+          }
         } catch (roleCheckError) {
+          logger.error('Error checking user roles:', roleCheckError);
           // If we can't determine roles, assume the initiator is client and other is owner
           myRole = 'client';
           otherRole = 'owner';
