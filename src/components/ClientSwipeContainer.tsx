@@ -13,6 +13,7 @@ import { useSwipeUndo } from '@/hooks/useSwipeUndo';
 import { useRecordProfileView } from '@/hooks/useProfileRecycling';
 import { usePrefetchImages } from '@/hooks/usePrefetchImages';
 import { useSwipeDeckStore, persistDeckToSession, getDeckFromSession } from '@/state/swipeDeckStore';
+import { useSwipeDismissal } from '@/hooks/useSwipeDismissal';
 import { shallow } from 'zustand/shallow';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -222,6 +223,9 @@ const ClientSwipeContainerComponent = ({
   const startConversation = useStartConversation();
   const recordProfileView = useRecordProfileView();
 
+  // Swipe dismissal tracking for client profiles
+  const { dismissedIds, dismissTarget, filterDismissed } = useSwipeDismissal('client');
+
   // FIX: Sync local state when undo completes successfully
   useEffect(() => {
     if (undoSuccess) {
@@ -257,8 +261,9 @@ const ClientSwipeContainerComponent = ({
   useEffect(() => {
     if (clientProfiles.length > 0 && !isLoading) {
       const existingIds = new Set(deckQueueRef.current.map(p => p.user_id));
+      const dismissedSet = new Set(dismissedIds);
       const newProfiles = clientProfiles.filter(p =>
-        !existingIds.has(p.user_id) && !swipedIdsRef.current.has(p.user_id)
+        !existingIds.has(p.user_id) && !swipedIdsRef.current.has(p.user_id) && !dismissedSet.has(p.user_id)
       );
 
       if (newProfiles.length > 0) {
@@ -284,7 +289,7 @@ const ClientSwipeContainerComponent = ({
       }
       isFetchingMore.current = false;
     }
-  }, [clientProfiles, isLoading, setOwnerDeck, category, isOwnerReady, markOwnerReady]);
+  }, [clientProfiles, isLoading, setOwnerDeck, category, isOwnerReady, markOwnerReady, dismissedIds]);
 
   // INSTANT SWIPE: Update UI immediately, fire DB operations in background
   const executeSwipe = useCallback((direction: 'left' | 'right') => {
@@ -330,6 +335,11 @@ const ClientSwipeContainerComponent = ({
         });
       }),
 
+      // Track dismissal on left swipe (dislike)
+      direction === 'left' ? dismissTarget(profile.user_id).catch(() => {
+        // Non-critical error - already logged in hook
+      }) : Promise.resolve(),
+
       // Record for undo - pass category so deck can be properly restored
       Promise.resolve(recordSwipe(profile.user_id, 'profile', direction === 'right' ? 'like' : 'pass', category))
     ]).catch(err => {
@@ -359,7 +369,7 @@ const ClientSwipeContainerComponent = ({
     if (nextNextImage) {
       preloadClientImageToCache(nextNextImage);
     }
-  }, [swipeMutation, recordSwipe, recordProfileView, markOwnerSwiped, category]);
+  }, [swipeMutation, recordSwipe, recordProfileView, markOwnerSwiped, category, dismissTarget]);
 
   const handleSwipe = useCallback((direction: 'left' | 'right') => {
     const profile = deckQueueRef.current[currentIndexRef.current];

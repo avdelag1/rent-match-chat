@@ -21,6 +21,7 @@ import { useRecordProfileView } from '@/hooks/useProfileRecycling';
 import { usePrefetchImages } from '@/hooks/usePrefetchImages';
 import { useSwipePrefetch, usePrefetchManager } from '@/hooks/usePrefetchManager';
 import { useSwipeDeckStore, persistDeckToSession, getDeckFromSession } from '@/state/swipeDeckStore';
+import { useSwipeDismissal } from '@/hooks/useSwipeDismissal';
 import { shallow } from 'zustand/shallow';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -366,6 +367,9 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   const swipeMutation = useSwipeWithMatch();
   const startConversation = useStartConversation();
 
+  // Swipe dismissal tracking
+  const { dismissedIds, dismissTarget, filterDismissed } = useSwipeDismissal('listing');
+
   // FIX: Sync local state when undo completes successfully
   useEffect(() => {
     if (undoSuccess) {
@@ -572,8 +576,9 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     hasNewListingsRef.current = false;
 
     const existingIds = new Set(deckQueueRef.current.map(l => l.id));
+    const dismissedSet = new Set(dismissedIds);
     const newListings = smartListings.filter(l =>
-      !existingIds.has(l.id) && !swipedIdsRef.current.has(l.id)
+      !existingIds.has(l.id) && !swipedIdsRef.current.has(l.id) && !dismissedSet.has(l.id)
     );
 
     if (newListings.length > 0) {
@@ -599,7 +604,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     }
 
     isFetchingMore.current = false;
-  }, [listingIdsSignature, isLoading, isFetching, smartListings, setClientDeck, isClientReady, markClientReady]);
+  }, [listingIdsSignature, isLoading, isFetching, smartListings, setClientDeck, isClientReady, markClientReady, dismissedIds]);
 
   // Get current visible cards for 2-card stack (top + next)
   // Use currentIndex from state (already synced with currentIndexRef)
@@ -659,6 +664,13 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
       // The optimistic update will persist until next refetch
     });
 
+    // Track dismissal on left swipe (dislike)
+    if (direction === 'left') {
+      dismissTarget(listing.id).catch(() => {
+        // Non-critical error - already logged in hook
+      });
+    }
+
     // Zustand update - DEFERRED until animation complete
     markClientSwiped(listing.id);
 
@@ -711,7 +723,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
       preloadImageToCache(nextNextCard.images[0]);
       imagePreloadController.preload(nextNextCard.images[0], 'high');
     }
-  }, [recordSwipe, recordProfileView, markClientSwiped, queryClient]);
+  }, [recordSwipe, recordProfileView, markClientSwiped, queryClient, dismissTarget]);
 
   // PHASE 1: Called when user swipes - ONLY updates refs and triggers animation
   // NO React state updates, NO Zustand updates, NO persistence

@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { logger } from '@/utils/prodLogger';
 import { triggerHaptic } from '@/utils/haptics';
+import { useSwipeDeckStore } from '@/state/swipeDeckStore';
 
 export type ActiveMode = 'client' | 'owner';
 
@@ -71,6 +72,10 @@ export function ActiveModeProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
+
+  // Get deck reset functions to clear opposite mode's deck when switching
+  const resetClientDeck = useSwipeDeckStore((state) => state.resetClientDeck);
+  const resetOwnerDeck = useSwipeDeckStore((state) => state.resetOwnerDeck);
 
   // Initialize from localStorage synchronously - instant, no flash
   const [localMode, setLocalMode] = useState<ActiveMode>(() => {
@@ -189,11 +194,22 @@ export function ActiveModeProvider({ children }: { children: ReactNode }) {
     // 5. Update query cache IMMEDIATELY
     queryClient.setQueryData(['active-mode', user.id], newMode);
 
-    // 6. Navigate IMMEDIATELY
+    // 6. Clear opposite mode's deck to prevent flash
+    if (newMode === 'client') {
+      // Switching to client mode, clear all owner decks
+      ['property', 'moto', 'motorcycle', 'bicycle', 'services', 'worker', 'default'].forEach((category) => {
+        resetOwnerDeck(category);
+      });
+    } else {
+      // Switching to owner mode, clear client deck
+      resetClientDeck();
+    }
+
+    // 7. Navigate IMMEDIATELY
     const targetPath = getTargetPath(newMode);
     navigate(targetPath, { replace: true });
 
-    // 7. Show success toast
+    // 8. Show success toast
     toast({
       title: `Switched to ${newMode === 'client' ? 'I Need' : 'I Offer'} mode`,
       description: newMode === 'client'
@@ -210,7 +226,7 @@ export function ActiveModeProvider({ children }: { children: ReactNode }) {
     // 10. Save to database in background (fire and forget)
     saveModeToDatabase(newMode);
 
-  }, [user?.id, isSwitching, localMode, queryClient, getTargetPath, navigate, saveModeToDatabase]);
+  }, [user?.id, isSwitching, localMode, queryClient, getTargetPath, navigate, saveModeToDatabase, resetClientDeck, resetOwnerDeck]);
 
   // Toggle between modes
   const toggleMode = useCallback(() => {
