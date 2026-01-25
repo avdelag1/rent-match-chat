@@ -2,7 +2,7 @@
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Shield, FileText, HelpCircle, Info, ChevronRight } from "lucide-react";
+import { ArrowLeft, Shield, FileText, HelpCircle, Info, ChevronRight, Scale } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { AccountSecurity } from "@/components/AccountSecurity";
@@ -30,6 +30,13 @@ const OwnerSettingsNew = () => {
       description: 'View and manage your contracts',
       color: 'text-orange-500',
       action: () => navigate('/owner/contracts')
+    },
+    {
+      icon: Scale,
+      label: 'Legal Services',
+      description: 'Get legal help for property matters',
+      color: 'text-purple-500',
+      action: () => navigate('/owner/legal-services')
     },
     {
       icon: HelpCircle,
