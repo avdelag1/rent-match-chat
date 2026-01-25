@@ -159,15 +159,37 @@ async function syncSwipe(swipe: QueuedSwipe): Promise<boolean> {
       return true;
     } else if (swipe.targetType === 'profile') {
       // Owner liking a client -> owner_likes table
-      const { error } = await supabase
+      // CRITICAL FIX: Handle partial unique index properly
+
+      // Check if like already exists
+      const { data: existingLike } = await supabase
         .from('owner_likes')
-        .upsert({
-          owner_id: user.id,
-          client_id: swipe.targetId,
-        }, {
-          onConflict: 'owner_id,client_id',
-          ignoreDuplicates: false,
-        });
+        .select('id')
+        .eq('owner_id', user.id)
+        .eq('client_id', swipe.targetId)
+        .is('listing_id', null)
+        .maybeSingle();
+
+      let error;
+      if (existingLike) {
+        // Already exists, update timestamp
+        const result = await supabase
+          .from('owner_likes')
+          .update({ created_at: new Date().toISOString() })
+          .eq('id', existingLike.id);
+        error = result.error;
+      } else {
+        // Insert new like
+        const result = await supabase
+          .from('owner_likes')
+          .insert({
+            owner_id: user.id,
+            client_id: swipe.targetId,
+            listing_id: null,
+            is_super_like: false
+          });
+        error = result.error;
+      }
 
       if (error) {
         logger.error('[OfflineQueue] Owner like sync failed:', swipe.targetId, error);
