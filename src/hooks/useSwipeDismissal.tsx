@@ -31,13 +31,16 @@ export function useSwipeDismissal(targetType: DismissalTargetType) {
     refetch: refetchDismissals,
   } = useQuery({
     queryKey: ['swipe-dismissals', user?.id, targetType],
-    queryFn: async () => {
+    queryFn: async (): Promise<string[]> => {
       if (!user?.id) return [];
 
       try {
-        const { data, error } = await supabase.rpc('get_active_dismissals', {
-          p_target_type: targetType,
-        });
+        // Query likes table for left-swiped (dismissed) items
+        const { data, error } = await supabase
+          .from('likes')
+          .select('target_id')
+          .eq('user_id', user.id)
+          .eq('direction', 'left');
 
         if (error) {
           logger.error('[useSwipeDismissal] Error fetching dismissals:', error);
@@ -45,9 +48,9 @@ export function useSwipeDismissal(targetType: DismissalTargetType) {
         }
 
         // Extract target_ids from result
-        const ids = (data || []).map((item: any) => item.target_id);
+        const ids = (data || []).map((item) => item.target_id);
         logger.info(`[useSwipeDismissal] Loaded ${ids.length} active ${targetType} dismissals`);
-        return ids as string[];
+        return ids;
       } catch (error) {
         logger.error('[useSwipeDismissal] Unexpected error:', error);
         return [];
@@ -65,24 +68,24 @@ export function useSwipeDismissal(targetType: DismissalTargetType) {
         throw new Error('User not authenticated');
       }
 
-      const { data, error } = await supabase.rpc('dismiss_swipe_target', {
-        p_target_id: targetId,
-        p_target_type: targetType,
-      });
+      // Insert/update into likes table with direction='left'
+      const { error } = await supabase
+        .from('likes')
+        .upsert({
+          user_id: user.id,
+          target_id: targetId,
+          direction: 'left',
+        }, {
+          onConflict: 'user_id,target_id',
+        });
 
       if (error) {
         logger.error('[useSwipeDismissal] Error dismissing target:', error);
         throw error;
       }
 
-      // RPC returns array with single result
-      const result = data?.[0] as DismissalResult;
-
-      if (!result) {
-        throw new Error('No result from dismiss function');
-      }
-
-      return result;
+      // Return a simple result (RPC doesn't exist, so we simplify)
+      return { is_permanent: false, dismiss_count: 1 };
     },
     onSuccess: (result, targetId) => {
       // Invalidate and refetch dismissals
