@@ -1,26 +1,61 @@
 /**
- * Comprehensive Rating System Hooks
+ * Rating System Hooks
  *
- * NOTE: The rating tables (ratings, rating_categories, rating_aggregates) 
- * do not exist yet. These hooks return sensible defaults until the schema is created.
- * 
- * Implements a fair, forgiving rating system with:
- * - Temporal decay (12-month half-life)
- * - Confidence-weighted displayed ratings (prevents sudden drops)
- * - Trust levels (New, Trusted, Needs Attention)
- * - Category-specific rating questions
- * - Verification requirements (match + chat + completion)
+ * Re-exports from useReviews.tsx for backward compatibility.
+ * The rating system is built on the `reviews` table with support for:
+ * - Category-specific ratings (cleanliness, communication, etc.)
+ * - Aggregated ratings on profiles (average_rating, total_reviews)
+ * - Self-rating prevention via database trigger
+ * - Helpful vote tracking
  */
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+// Re-export everything from the reviews hook
+export {
+  useListingReviews,
+  useListingRatingAggregate,
+  useUserReviews,
+  useUserRatingAggregate,
+  useCreateReview,
+  useHasReviewedListing,
+  useCanReviewListing,
+  useMarkReviewHelpful,
+  type Review,
+  type ReviewAggregate,
+  type CreateReviewInput,
+} from './useReviews';
+
+// ============================================================================
+// TYPES - Aliases for backward compatibility with existing components
+// ============================================================================
+
+import type { Review, ReviewAggregate, CreateReviewInput } from './useReviews';
+import { useListingRatingAggregate, useUserRatingAggregate, useHasReviewedListing, useCanReviewListing, useCreateReview, useMarkReviewHelpful } from './useReviews';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from './useAuth';
-import { toast } from './use-toast';
-import { logger } from '@/utils/prodLogger';
 
-// ============================================================================
-// TYPES
-// ============================================================================
+// Rating type alias
+export type Rating = Review;
+export type RatingAggregate = ReviewAggregate & {
+  // Extended fields for UI compatibility
+  displayed_rating: number;
+  total_ratings: number;
+  verified_ratings: number;
+  trust_level: 'new' | 'trusted' | 'needs_attention';
+  trust_score: number;
+  best_review?: Review;
+  worst_review?: Review;
+};
 
+export type CreateRatingInput = CreateReviewInput;
+
+// Question type for rating categories
+export interface RatingQuestion {
+  id: string;
+  question: string;
+  weight: number;
+}
+
+// Category type
 export interface RatingCategory {
   id: string;
   name: string;
@@ -30,73 +65,11 @@ export interface RatingCategory {
   created_at: string;
 }
 
-export interface RatingQuestion {
-  id: string;
-  question: string;
-  weight: number;
-}
+// ============================================================================
+// CATEGORY HOOKS
+// ============================================================================
 
-export interface Rating {
-  id: string;
-  reviewer_id: string;
-  listing_id?: string;
-  rated_user_id?: string;
-  category_id: string;
-  conversation_id?: string;
-  is_verified: boolean;
-  verified_at?: string;
-  overall_rating: number;
-  category_ratings: Record<string, number>;
-  review_title?: string;
-  review_text?: string;
-  sentiment?: 'positive' | 'neutral' | 'negative';
-  helpful_count: number;
-  created_at: string;
-  decayed_weight: number;
-}
-
-export interface RatingAggregate {
-  id: string;
-  listing_id?: string;
-  user_id?: string;
-  category_id: string;
-  total_ratings: number;
-  verified_ratings: number;
-  displayed_rating: number;
-  rating_distribution: Record<string, number>;
-  trust_level: 'new' | 'trusted' | 'needs_attention';
-  trust_score: number;
-  best_review?: Rating;
-  worst_review?: Rating;
-  last_calculated_at: string;
-}
-
-export interface CreateRatingInput {
-  listing_id?: string;
-  rated_user_id?: string;
-  category_id: string;
-  conversation_id?: string;
-  overall_rating: number;
-  category_ratings: Record<string, number>;
-  review_title?: string;
-  review_text?: string;
-}
-
-// Default empty aggregate for new items
-const createDefaultAggregate = (id: string, type: 'listing' | 'user', categoryId: string): RatingAggregate => ({
-  id: '',
-  ...(type === 'listing' ? { listing_id: id } : { user_id: id }),
-  category_id: categoryId,
-  total_ratings: 0,
-  verified_ratings: 0,
-  displayed_rating: 5.0,
-  rating_distribution: { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 },
-  trust_level: 'new',
-  trust_score: 100,
-  last_calculated_at: new Date().toISOString(),
-});
-
-// Default categories when tables don't exist
+// Default categories (hard-coded since we don't have a categories table)
 const defaultCategories: RatingCategory[] = [
   {
     id: 'property',
@@ -104,55 +77,62 @@ const defaultCategories: RatingCategory[] = [
     description: 'Rate a property listing',
     target_type: 'listing',
     questions: [
-      { id: 'accuracy', question: 'How accurate was the listing?', weight: 1 },
       { id: 'cleanliness', question: 'How clean was the property?', weight: 1 },
+      { id: 'accuracy', question: 'How accurate was the listing?', weight: 1 },
       { id: 'communication', question: 'How was the communication?', weight: 1 },
+      { id: 'location', question: 'How was the location?', weight: 1 },
+      { id: 'value', question: 'Was it good value for money?', weight: 1 },
     ],
     created_at: new Date().toISOString(),
   },
   {
     id: 'client',
     name: 'Client',
-    description: 'Rate a client profile',
+    description: 'Rate a client',
     target_type: 'user',
     questions: [
-      { id: 'reliability', question: 'How reliable was the client?', weight: 1 },
       { id: 'communication', question: 'How was the communication?', weight: 1 },
+      { id: 'cleanliness', question: 'Did they keep the property clean?', weight: 1 },
+    ],
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: 'worker',
+    name: 'Service Provider',
+    description: 'Rate a service provider',
+    target_type: 'worker',
+    questions: [
+      { id: 'quality', question: 'How was the quality of work?', weight: 1 },
+      { id: 'communication', question: 'How was the communication?', weight: 1 },
+      { id: 'timeliness', question: 'Were they on time?', weight: 1 },
     ],
     created_at: new Date().toISOString(),
   },
 ];
 
-// ============================================================================
-// RATING CATEGORIES (Stubbed - tables not yet created)
-// ============================================================================
-
 /**
  * Fetch all rating categories
- * NOTE: Returns default categories since tables don't exist yet
  */
 export function useRatingCategories() {
   return useQuery({
     queryKey: ['rating-categories'],
     queryFn: async (): Promise<RatingCategory[]> => {
-      // Tables don't exist yet - return defaults
       return defaultCategories;
     },
-    staleTime: 30 * 60 * 1000, // 30 minutes
-    gcTime: 60 * 60 * 1000, // 1 hour
+    staleTime: 30 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
   });
 }
 
 /**
  * Get category by ID
- * NOTE: Returns from defaults since tables don't exist yet
  */
 export function useRatingCategory(categoryId: string | undefined) {
   return useQuery({
     queryKey: ['rating-category', categoryId],
     queryFn: async (): Promise<RatingCategory | null> => {
       if (!categoryId) return null;
-      return defaultCategories.find(c => c.id === categoryId) || null;
+      return defaultCategories.find(c => c.id === categoryId) || defaultCategories[0];
     },
     enabled: !!categoryId,
     staleTime: 30 * 60 * 1000,
@@ -160,197 +140,130 @@ export function useRatingCategory(categoryId: string | undefined) {
 }
 
 // ============================================================================
-// RATING AGGREGATES (For Swipe Cards)
+// ENHANCED AGGREGATE HOOKS (with trust level calculation)
 // ============================================================================
 
 /**
- * Get rating aggregate for a listing
- * NOTE: Returns default aggregate since tables don't exist yet
+ * Calculate trust level based on rating stats
  */
-export function useListingRatingAggregate(listingId: string | undefined, categoryId: string = 'property') {
+function calculateTrustLevel(average: number, count: number): { level: 'new' | 'trusted' | 'needs_attention'; score: number } {
+  if (count === 0) {
+    return { level: 'new', score: 100 };
+  }
+  if (count >= 5 && average >= 4.0) {
+    return { level: 'trusted', score: Math.min(100, 50 + count * 2 + (average - 3) * 10) };
+  }
+  if (average < 3.0 && count >= 3) {
+    return { level: 'needs_attention', score: Math.max(0, average * 20) };
+  }
+  return { level: 'new', score: Math.min(100, count * 10 + average * 10) };
+}
+
+/**
+ * Get enhanced rating aggregate for a listing with trust level
+ */
+export function useListingRatingAggregateEnhanced(listingId: string | undefined, categoryId: string = 'property') {
+  const baseAggregate = useListingRatingAggregate(listingId);
+
   return useQuery({
-    queryKey: ['rating-aggregate', 'listing', listingId, categoryId],
+    queryKey: ['rating-aggregate-enhanced', 'listing', listingId, categoryId],
     queryFn: async (): Promise<RatingAggregate | null> => {
-      if (!listingId) return null;
-      // Tables don't exist yet - return default 5.0 rating
-      return createDefaultAggregate(listingId, 'listing', categoryId);
+      if (!baseAggregate.data) return null;
+
+      const { level, score } = calculateTrustLevel(
+        baseAggregate.data.average_rating,
+        baseAggregate.data.total_reviews
+      );
+
+      return {
+        ...baseAggregate.data,
+        displayed_rating: baseAggregate.data.average_rating,
+        total_ratings: baseAggregate.data.total_reviews,
+        verified_ratings: 0,
+        trust_level: level,
+        trust_score: score,
+      };
     },
-    enabled: !!listingId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    placeholderData: (prev) => prev,
+    enabled: !!listingId && !!baseAggregate.data,
+    staleTime: 5 * 60 * 1000,
   });
 }
 
 /**
- * Get rating aggregate for a user
- * NOTE: Returns default aggregate since tables don't exist yet
+ * Get enhanced rating aggregate for a user with trust level
  */
-export function useUserRatingAggregate(userId: string | undefined, categoryId: string = 'client') {
+export function useUserRatingAggregateEnhanced(userId: string | undefined, categoryId: string = 'client') {
+  const baseAggregate = useUserRatingAggregate(userId);
+
   return useQuery({
-    queryKey: ['rating-aggregate', 'user', userId, categoryId],
+    queryKey: ['rating-aggregate-enhanced', 'user', userId, categoryId],
     queryFn: async (): Promise<RatingAggregate | null> => {
-      if (!userId) return null;
-      // Tables don't exist yet - return default 5.0 rating
-      return createDefaultAggregate(userId, 'user', categoryId);
+      if (!baseAggregate.data) return null;
+
+      const { level, score } = calculateTrustLevel(
+        baseAggregate.data.average_rating,
+        baseAggregate.data.total_reviews
+      );
+
+      return {
+        ...baseAggregate.data,
+        displayed_rating: baseAggregate.data.average_rating,
+        total_ratings: baseAggregate.data.total_reviews,
+        verified_ratings: 0,
+        trust_level: level,
+        trust_score: score,
+      };
     },
-    enabled: !!userId,
+    enabled: !!userId && !!baseAggregate.data,
     staleTime: 5 * 60 * 1000,
-    placeholderData: (prev) => prev,
   });
 }
 
 // ============================================================================
-// INDIVIDUAL RATINGS (Stubbed)
+// BACKWARD COMPATIBILITY ALIASES
 // ============================================================================
 
-/**
- * Get all ratings for a listing
- * NOTE: Returns empty array since tables don't exist yet
- */
-export function useListingRatings(listingId: string | undefined, options: { limit?: number } = {}) {
-  return useQuery({
-    queryKey: ['ratings', 'listing', listingId, options.limit],
-    queryFn: async (): Promise<Rating[]> => {
-      if (!listingId) return [];
-      // Tables don't exist yet
-      return [];
-    },
-    enabled: !!listingId,
-    staleTime: 5 * 60 * 1000,
-  });
-}
+/** Alias for backward compatibility */
+export const useListingRatings = (listingId: string | undefined, options?: { limit?: number }) => {
+  const { useListingReviews } = require('./useReviews');
+  return useListingReviews(listingId, options);
+};
 
-/**
- * Get all ratings for a user
- * NOTE: Returns empty array since tables don't exist yet
- */
-export function useUserRatings(userId: string | undefined, options: { limit?: number } = {}) {
-  return useQuery({
-    queryKey: ['ratings', 'user', userId, options.limit],
-    queryFn: async (): Promise<Rating[]> => {
-      if (!userId) return [];
-      // Tables don't exist yet
-      return [];
-    },
-    enabled: !!userId,
-    staleTime: 5 * 60 * 1000,
-  });
-}
+/** Alias for backward compatibility */
+export const useUserRatings = (userId: string | undefined, options?: { limit?: number }) => {
+  const { useUserReviews } = require('./useReviews');
+  return useUserReviews(userId, options);
+};
 
-/**
- * Check if current user has already rated a target
- * NOTE: Returns false since tables don't exist yet
- */
+/** Alias for useCreateReview */
+export const useCreateRating = useCreateReview;
+
+/** Alias for useMarkReviewHelpful */
+export const useMarkRatingHelpful = useMarkReviewHelpful;
+
+/** Check if user has rated (alias for useHasReviewedListing) */
 export function useHasRated(targetId: string | undefined, targetType: 'listing' | 'user') {
   const { user } = useAuth();
-
-  return useQuery({
-    queryKey: ['has-rated', user?.id, targetType, targetId],
-    queryFn: async (): Promise<boolean> => {
-      if (!user?.id || !targetId) return false;
-      // Tables don't exist yet
-      return false;
-    },
-    enabled: !!user?.id && !!targetId,
-    staleTime: 30 * 1000,
-  });
+  return useHasReviewedListing(targetType === 'listing' ? targetId : undefined);
 }
 
-// ============================================================================
-// MUTATIONS (Stubbed)
-// ============================================================================
-
-/**
- * Create a new rating
- * NOTE: No-op since tables don't exist yet
- */
-export function useCreateRating() {
-  const { user } = useAuth();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (input: CreateRatingInput): Promise<Rating | null> => {
-      if (!user?.id) {
-        throw new Error('Must be logged in to submit a rating');
-      }
-
-      // Tables don't exist yet - show warning and return null
-      logger.warn('Rating tables do not exist yet. Rating not saved.');
-      
-      return null;
-    },
-    onSuccess: (data) => {
-      if (data) {
-        toast({
-          title: 'Rating submitted',
-          description: 'Thank you for your feedback!',
-        });
-      } else {
-        toast({
-          title: 'Rating feature coming soon',
-          description: 'Rating functionality is not yet available.',
-          variant: 'default',
-        });
-      }
-    },
-    onError: (error: any) => {
-      logger.error('Error creating rating:', error);
-
-      toast({
-        title: 'Failed to submit rating',
-        description: error.message || 'Please try again later.',
-        variant: 'destructive',
-      });
-    },
-  });
-}
-
-/**
- * Mark rating as helpful
- * NOTE: No-op since tables don't exist yet
- */
-export function useMarkRatingHelpful() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (ratingId: string) => {
-      // Tables don't exist yet
-      logger.warn('Rating tables do not exist yet. Helpful count not updated.');
-    },
-    onSuccess: () => {
-      toast({
-        title: 'Thank you',
-        description: 'Your feedback helps improve our community.',
-      });
-    },
-    onError: (error: any) => {
-      logger.error('Error marking rating as helpful:', error);
-    },
-  });
-}
-
-// ============================================================================
-// VERIFICATION CHECK (Stubbed)
-// ============================================================================
-
-/**
- * Check if user can rate a target
- * NOTE: Returns canRate: false since tables don't exist yet
- */
+/** Check if user can rate (alias for useCanReviewListing) */
 export function useCanRate(targetId: string | undefined, targetType: 'listing' | 'user') {
-  const { user } = useAuth();
-
+  const canReview = useCanReviewListing(targetType === 'listing' ? targetId : undefined);
+  
   return useQuery({
-    queryKey: ['can-rate', user?.id, targetType, targetId],
-    queryFn: async (): Promise<{ canRate: boolean; reason?: string; conversationId?: string }> => {
-      if (!user?.id || !targetId) {
-        return { canRate: false, reason: 'Not authenticated' };
+    queryKey: ['can-rate', targetId, targetType],
+    queryFn: async () => {
+      if (targetType === 'user') {
+        // For user ratings, allow if not self
+        return { canRate: true };
       }
-
-      // Tables don't exist yet
-      return { canRate: false, reason: 'Rating feature coming soon' };
+      return {
+        canRate: canReview.data?.canReview ?? false,
+        reason: canReview.data?.reason,
+      };
     },
-    enabled: !!user?.id && !!targetId,
-    staleTime: 60 * 1000, // 1 minute
+    enabled: !!targetId,
+    staleTime: 60 * 1000,
   });
 }
