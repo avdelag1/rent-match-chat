@@ -339,9 +339,12 @@ const ClientSwipeContainerComponent = ({
         targetType: 'profile'
       }).catch((err) => {
         logger.error('[ClientSwipeContainer] CRITICAL: Failed to save swipe to database:', err);
-        sonnerToast.error('Failed to save your swipe', {
-          description: 'Please check your connection and try again'
-        });
+        // Only show user-facing error for critical failures (not self-likes or duplicates)
+        if (!err.message?.includes('cannot like your own')) {
+          sonnerToast.error('Failed to save your swipe', {
+            description: 'Please check your connection and try again'
+          });
+        }
       }),
 
       // Track dismissal on left swipe (dislike)

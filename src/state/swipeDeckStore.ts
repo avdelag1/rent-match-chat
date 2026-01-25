@@ -76,7 +76,7 @@ const createEmptyDeckState = (): DeckState => ({
 
 // CACHE INVALIDATION: Clear stale localStorage on app load to prevent FK errors
 // This runs once on module load and clears any stale mock data
-const CACHE_VERSION = 'v3'; // Bump this to force clear old caches
+const CACHE_VERSION = 'v4'; // v4: Clear mock/fake client profile photos (Jan 2026)
 const CACHE_KEY = 'swipe-deck-store';
 const CACHE_VERSION_KEY = 'swipe-deck-version';
 if (typeof window !== 'undefined') {

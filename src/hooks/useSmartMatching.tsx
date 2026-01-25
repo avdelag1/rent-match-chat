@@ -987,7 +987,7 @@ export function useSmartClientMatching(
         const { data: profiles, error: profileError } = await supabase
           .from('profiles')
           .select(CLIENT_SWIPE_CARD_FIELDS)
-          .neq('id', userId)
+          .neq('id', userId!) // CRITICAL: Never show user their own profile
           .eq('user_roles.role', 'client')
           .range(start, end);
 
