@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { triggerHaptic } from '@/utils/haptics';
 import { SimpleSwipeCard, SimpleSwipeCardRef } from './SimpleSwipeCard';
 import { SwipeActionButtonBar } from './SwipeActionButtonBar';
+import { AmbientSwipeBackground } from './AmbientSwipeBackground';
 import { preloadImageToCache, isImageDecodedInCache } from '@/lib/swipe/imageCache';
 
 // FIX #3: Lazy-load modals to prevent them from affecting swipe tree
@@ -1188,6 +1189,13 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
       className="relative w-full h-full flex-1 flex flex-col"
       onMouseEnter={handleDeckHover}
     >
+      {/* AMBIENT BACKGROUND: Diagonal carousel of swipe cards
+          - Lives at z-index: -1 (below everything)
+          - Non-interactive (pointer-events: none)
+          - Slows down during swipe animation (when swipeDirection is active)
+          - Communicates "swipe marketplace" at first glance */}
+      <AmbientSwipeBackground isPaused={swipeDirection !== null} />
+
       <div className="relative flex-1 w-full">
         {/* Single card - no background placeholder layer */}
 
