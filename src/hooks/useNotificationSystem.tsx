@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { logger } from '@/utils/prodLogger';
+import { useProfileCache } from '@/hooks/useProfileCache';
 
 type NotificationType = 'like' | 'message' | 'super_like' | 'match' | 'new_user' | 'premium_purchase' | 'activation_purchase';
 
@@ -40,6 +41,7 @@ export function useNotificationSystem() {
   const [pendingNotifications, setPendingNotifications] = useState<Notification[]>([]);
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { getProfile } = useProfileCache();
 
   // OPTIMIZATION: Batch pending notifications every 100ms to reduce re-renders
   useEffect(() => {
@@ -110,22 +112,12 @@ export function useNotificationSystem() {
         },
         async (payload) => {
           const swipe = payload.new;
-          
-          // Get swiper profile
-          const { data: swiperProfile } = await supabase
-            .from('profiles')
-            .select('full_name, avatar_url')
-            .eq('id', swipe.user_id)
-            .maybeSingle();
 
-          const { data: swiperRoleData } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', swipe.user_id)
-            .maybeSingle();
+          // PERFORMANCE: Get swiper profile from cache (prevents N+1 queries)
+          const swiperProfile = await getProfile(swipe.user_id);
 
           if (swiperProfile) {
-            const swiperRole = swiperRoleData?.role as 'client' | 'owner' | undefined;
+            const swiperRole = swiperProfile.role;
             const notification: Notification = {
               id: `swipe-${swipe.id}`,
               type: swipe.swipe_type === 'super_like' ? 'super_like' : 'like',
@@ -133,7 +125,7 @@ export function useNotificationSystem() {
               message: swipe.swipe_type === 'super_like'
                 ? 'gave you a Super Like! ⭐'
                 : 'liked your profile! 🔥',
-              avatar: swiperProfile.avatar_url,
+              avatar: swiperProfile.avatar_url || undefined,
               timestamp: new Date(),
               read: false,
               relatedUserId: swipe.user_id,
@@ -174,30 +166,20 @@ export function useNotificationSystem() {
             .eq('id', message.conversation_id)
             .maybeSingle();
 
-          if (conversation && 
+          if (conversation &&
               (conversation.client_id === user.id || conversation.owner_id === user.id)) {
-            
-            // Get sender info and role
-            const { data: senderProfile } = await supabase
-              .from('profiles')
-              .select('full_name, avatar_url')
-              .eq('id', message.sender_id)
-              .maybeSingle();
 
-            const { data: senderRoleData } = await supabase
-              .from('user_roles')
-              .select('role')
-              .eq('user_id', message.sender_id)
-              .maybeSingle();
+            // PERFORMANCE: Get sender info from cache (prevents N+1 queries)
+            const senderProfile = await getProfile(message.sender_id);
 
             if (senderProfile) {
-              const senderRole = senderRoleData?.role as 'client' | 'owner' | undefined;
+              const senderRole = senderProfile.role;
               const notification: Notification = {
                 id: `message-${message.id}`,
                 type: 'message',
                 title: senderProfile.full_name || 'Someone',
                 message: `sent you a message: "${message.message_text.slice(0, 50)}${message.message_text.length > 50 ? '...' : ''}"`,
-                avatar: senderProfile.avatar_url,
+                avatar: senderProfile.avatar_url || undefined,
                 timestamp: new Date(),
                 read: false,
                 relatedUserId: message.sender_id,

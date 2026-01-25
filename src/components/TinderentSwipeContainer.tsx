@@ -274,12 +274,29 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     // Skip on initial mount
     if (!prevFiltersRef.current && !filters) return;
 
-    // Check if filters actually changed (deep comparison of relevant fields)
+    // PERFORMANCE: Use efficient comparison instead of JSON.stringify
+    const arraysEqual = (a?: any[], b?: any[]) => {
+      if (!a && !b) return true;
+      if (!a || !b) return false;
+      if (a.length !== b.length) return false;
+      return a.every((val, i) => val === b[i]);
+    };
+
+    const objectsEqual = (a?: any, b?: any) => {
+      if (!a && !b) return true;
+      if (!a || !b) return false;
+      const keysA = Object.keys(a);
+      const keysB = Object.keys(b);
+      if (keysA.length !== keysB.length) return false;
+      return keysA.every(key => a[key] === b[key]);
+    };
+
+    // Check if filters actually changed (optimized comparison)
     const filtersChanged =
-      JSON.stringify(prevFiltersRef.current?.categories) !== JSON.stringify(filters?.categories) ||
-      JSON.stringify(prevFiltersRef.current?.category) !== JSON.stringify(filters?.category) ||
+      !arraysEqual(prevFiltersRef.current?.categories, filters?.categories) ||
+      !arraysEqual(prevFiltersRef.current?.category, filters?.category) ||
       prevFiltersRef.current?.listingType !== filters?.listingType ||
-      JSON.stringify(prevFiltersRef.current?.priceRange) !== JSON.stringify(filters?.priceRange);
+      !objectsEqual(prevFiltersRef.current?.priceRange, filters?.priceRange);
 
     if (filtersChanged) {
       logger.info('[TinderentSwipeContainer] Filters changed, resetting deck');
