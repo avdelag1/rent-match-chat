@@ -118,7 +118,7 @@ function DepthParallaxBackgroundComponent({ enabled = true }: DepthParallaxBackg
   // Static fallback for unsupported devices
   if (!isSupported || !enabled) {
     return (
-      <div className="fixed inset-0 pointer-events-none" style={{ zIndex: -2 }}>
+      <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
         {/* Static subtle gradient - no animation */}
         <div 
           className="absolute inset-0"
@@ -131,7 +131,7 @@ function DepthParallaxBackgroundComponent({ enabled = true }: DepthParallaxBackg
   }
 
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: -2 }}>
+    <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
       {/* Parallax layer - moves with swipe */}
       <div
         ref={layerRef}
@@ -141,11 +141,11 @@ function DepthParallaxBackgroundComponent({ enabled = true }: DepthParallaxBackg
           transform: 'translate3d(0, 0, 0)',
         }}
       >
-        {/* Primary depth gradient - warm glow */}
+        {/* Primary depth gradient - warm glow - MORE VISIBLE */}
         <div 
           className="absolute inset-0"
           style={{
-            background: 'radial-gradient(ellipse 90% 70% at 30% 30%, hsl(0 70% 50% / 0.04) 0%, transparent 60%)',
+            background: 'radial-gradient(ellipse 90% 70% at 30% 30%, hsl(0 70% 50% / 0.08) 0%, transparent 60%)',
           }}
         />
         
@@ -153,7 +153,7 @@ function DepthParallaxBackgroundComponent({ enabled = true }: DepthParallaxBackg
         <div 
           className="absolute inset-0"
           style={{
-            background: 'radial-gradient(ellipse 70% 80% at 70% 70%, hsl(25 80% 50% / 0.035) 0%, transparent 55%)',
+            background: 'radial-gradient(ellipse 70% 80% at 70% 70%, hsl(25 80% 50% / 0.06) 0%, transparent 55%)',
           }}
         />
         
@@ -161,7 +161,7 @@ function DepthParallaxBackgroundComponent({ enabled = true }: DepthParallaxBackg
         <div 
           className="absolute inset-0"
           style={{
-            background: 'radial-gradient(ellipse 60% 50% at 80% 20%, hsl(270 60% 50% / 0.025) 0%, transparent 50%)',
+            background: 'radial-gradient(ellipse 60% 50% at 80% 20%, hsl(270 60% 50% / 0.04) 0%, transparent 50%)',
           }}
         />
         
