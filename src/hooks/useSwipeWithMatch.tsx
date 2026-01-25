@@ -42,9 +42,10 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
             .upsert({
               owner_id: user.id,
               client_id: targetId,
+              listing_id: null, // Explicit null for general profile likes
               is_super_like: false
             }, {
-              onConflict: 'owner_id,client_id',
+              onConflict: 'owner_id,client_id,listing_id',
               ignoreDuplicates: false
             })
             .select()

@@ -391,22 +391,9 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
           {/* TOP GRADIENT MASK - Creates visual contrast for header UI */}
           <GradientMaskTop intensity={1} zIndex={15} heightPercent={28} />
 
-          {/* Rating Display - Floats INSIDE the top gradient */}
-          <div
-            className="absolute top-3 left-4 z-25 bg-black/40 backdrop-blur-sm rounded-full px-3 py-1.5"
-            style={{ marginTop: 'env(safe-area-inset-top, 0px)' }}
-          >
-            <CompactRatingDisplay
-              aggregate={ratingAggregate}
-              isLoading={isRatingLoading}
-              showReviews={false}
-              className="text-white"
-            />
-          </div>
-
-          {/* Image dots - Float INSIDE the top gradient */}
+          {/* Image dots - Positioned below header area */}
           {imageCount > 1 && (
-            <div className="absolute top-3 right-4 z-25 flex gap-1 max-w-[40%]" style={{ marginTop: 'env(safe-area-inset-top, 0px)' }}>
+            <div className="absolute top-16 left-4 right-4 z-25 flex gap-1" style={{ marginTop: 'env(safe-area-inset-top, 0px)' }}>
               {images.map((_, idx) => (
                 <div
                   key={idx}
@@ -466,6 +453,17 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
         
         {/* Content overlay - Using CardInfoHierarchy for 2-second scanning */}
         <div className="absolute bottom-24 left-0 right-0 p-4 z-20 pointer-events-none">
+          {/* Rating Display - Bottom of card, above property info */}
+          <div className="mb-3">
+            <div className="inline-flex bg-black/40 backdrop-blur-sm rounded-full px-3 py-1.5">
+              <CompactRatingDisplay
+                aggregate={ratingAggregate}
+                isLoading={isRatingLoading}
+                showReviews={false}
+                className="text-white"
+              />
+            </div>
+          </div>
           {/* Determine card type and render appropriate info hierarchy */}
           {listing.category === 'vehicle' || listing.vehicle_type ? (
             <VehicleCardInfo
