@@ -585,10 +585,10 @@ export default function NotificationsPage() {
                                         >
                                           {property.title}
                                         </h3>
-                                        {property.location && (
+                                        {(property.city || property.neighborhood) && (
                                           <div className="flex items-center gap-1 mt-1 text-muted-foreground">
                                             <MapPin className="w-3 h-3" />
-                                            <span className="text-xs line-clamp-1">{property.location}</span>
+                                            <span className="text-xs line-clamp-1">{property.city || property.neighborhood}</span>
                                           </div>
                                         )}
                                       </div>

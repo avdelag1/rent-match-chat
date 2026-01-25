@@ -1,20 +1,25 @@
 /** SPEED OF LIGHT: DashboardLayout is now rendered at route level */
-import { PageTransition } from '@/components/PageTransition';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useContracts, useActiveDeals } from "@/hooks/useContracts";
-import { FileText, Clock, CheckCircle, AlertTriangle, Eye, Plus } from "lucide-react";
+import { FileText, Clock, CheckCircle, AlertTriangle, Eye, Plus, FileEdit, Upload } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useState } from "react";
 import { ContractUploadDialog } from "@/components/ContractUploadDialog";
 import { ContractSigningDialog } from "@/components/ContractSigningDialog";
+import { ContractTemplateSelector } from "@/components/ContractTemplateSelector";
+import { ContractDocumentDialog } from "@/components/ContractDocumentDialog";
+import { ContractTemplate } from "@/data/contractTemplates";
 
 const OwnerContracts = () => {
   const { data: contracts, isLoading: contractsLoading } = useContracts();
   const { data: activeDeals, isLoading: dealsLoading } = useActiveDeals();
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [selectedContract, setSelectedContract] = useState<string | null>(null);
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<ContractTemplate | null>(null);
+  const [showDocumentEditor, setShowDocumentEditor] = useState(false);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -35,6 +40,18 @@ const OwnerContracts = () => {
       case 'disputed': return <AlertTriangle className="w-4 h-4" />;
       default: return <FileText className="w-4 h-4" />;
     }
+  };
+
+  const handleSelectTemplate = (template: ContractTemplate) => {
+    setSelectedTemplate(template);
+    setShowTemplateSelector(false);
+    setShowDocumentEditor(true);
+  };
+
+  const handleBackToTemplates = () => {
+    setShowDocumentEditor(false);
+    setSelectedTemplate(null);
+    setShowTemplateSelector(true);
   };
 
   if (contractsLoading || dealsLoading) {
@@ -58,14 +75,55 @@ const OwnerContracts = () => {
           </div>
 
           {/* Action Buttons */}
-          <div className="mb-6 sm:mb-8 flex justify-center">
-            <Button 
-              onClick={() => setShowUploadDialog(true)}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Create New Contract
-            </Button>
+          <div className="mb-6 sm:mb-8">
+            <Card className="bg-gray-800/50 backdrop-blur-sm border-gray-700/50">
+              <CardContent className="p-4 sm:p-6">
+                <h3 className="text-white font-semibold mb-4">Create New Contract</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <Button
+                    onClick={() => setShowTemplateSelector(true)}
+                    className="bg-blue-600 hover:bg-blue-700 h-auto py-4"
+                  >
+                    <div className="flex items-center gap-3">
+                      <FileEdit className="w-5 h-5" />
+                      <div className="text-left">
+                        <div className="font-semibold">Use Template</div>
+                        <div className="text-xs opacity-80">Lease, rental, moto, bicycle, services</div>
+                      </div>
+                    </div>
+                  </Button>
+                  <Button
+                    onClick={() => setShowUploadDialog(true)}
+                    variant="outline"
+                    className="border-gray-600 hover:bg-gray-700 h-auto py-4"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Upload className="w-5 h-5" />
+                      <div className="text-left">
+                        <div className="font-semibold">Upload PDF</div>
+                        <div className="text-xs opacity-80">Upload existing contract file</div>
+                      </div>
+                    </div>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Template Categories Info */}
+          <div className="mb-6">
+            <Card className="bg-gradient-to-r from-blue-900/50 to-purple-900/50 backdrop-blur-sm border-blue-700/50">
+              <CardContent className="p-4">
+                <div className="flex flex-wrap gap-2 justify-center">
+                  <Badge className="bg-blue-500/20 text-blue-300">Long-Term Rental</Badge>
+                  <Badge className="bg-purple-500/20 text-purple-300">Property Sale</Badge>
+                  <Badge className="bg-cyan-500/20 text-cyan-300">Bicycle Rental</Badge>
+                  <Badge className="bg-red-500/20 text-red-300">Moto Rental</Badge>
+                  <Badge className="bg-orange-500/20 text-orange-300">Service Contract</Badge>
+                  <Badge className="bg-green-500/20 text-green-300">Short-Term Rental</Badge>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Active Deals Section */}
@@ -124,11 +182,11 @@ const OwnerContracts = () => {
                     Create your first contract to start managing rental agreements.
                   </p>
                   <Button
-                    onClick={() => setShowUploadDialog(true)}
-                    className="bg-green-600 hover:bg-green-700 text-sm sm:text-base"
+                    onClick={() => setShowTemplateSelector(true)}
+                    className="bg-blue-600 hover:bg-blue-700 text-sm sm:text-base"
                   >
                     <Plus className="w-4 h-4 mr-2" />
-                    Create Contract
+                    Create Contract from Template
                   </Button>
                 </CardContent>
               </Card>
@@ -189,6 +247,22 @@ const OwnerContracts = () => {
           contractId={selectedContract}
           open={!!selectedContract}
           onOpenChange={() => setSelectedContract(null)}
+        />
+      )}
+
+      <ContractTemplateSelector
+        open={showTemplateSelector}
+        onOpenChange={setShowTemplateSelector}
+        onSelectTemplate={handleSelectTemplate}
+        userRole="owner"
+      />
+
+      {selectedTemplate && (
+        <ContractDocumentDialog
+          open={showDocumentEditor}
+          onOpenChange={setShowDocumentEditor}
+          template={selectedTemplate}
+          onBack={handleBackToTemplates}
         />
       )}
     </>

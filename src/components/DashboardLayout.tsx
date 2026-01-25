@@ -35,7 +35,7 @@ const CategorySelectionDialog = lazy(() => import('@/components/CategorySelectio
 const SavedSearchesDialog = lazy(() => import('@/components/SavedSearchesDialog').then(m => ({ default: m.SavedSearchesDialog })))
 const MessageActivationPackages = lazy(() => import('@/components/MessageActivationPackages').then(m => ({ default: m.MessageActivationPackages })))
 const PushNotificationPrompt = lazy(() => import('@/components/PushNotificationPrompt').then(m => ({ default: m.PushNotificationPrompt })))
-const FloatingWelcome = lazy(() => import('@/components/FloatingWelcome').then(m => ({ default: m.FloatingWelcome })))
+const WelcomeNotification = lazy(() => import('@/components/WelcomeNotification').then(m => ({ default: m.WelcomeNotification })))
 
 // Hooks
 import { useListings } from "@/hooks/useListings"
@@ -460,7 +460,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           - GPU-accelerated CSS animations (no JS loop)
           - Respects reduced motion preferences
           - Zero battery impact */}
-      <LiveHDBackground theme="default" showOrbs={false} intensity={1.0} />
+      <LiveHDBackground theme="default" showOrbs={true} intensity={0.7} />
 
       {/* PERF FIX: NotificationSystem has its own Suspense boundary to never suspend dashboard paint */}
       <Suspense fallback={null}>
@@ -663,12 +663,11 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         <PushNotificationPrompt />
       </Suspense>
 
-      {/* Floating Welcome for First-Time Users */}
+      {/* Welcome Notification Banner for First-Time Users */}
       <Suspense fallback={null}>
-        <FloatingWelcome
+        <WelcomeNotification
           isOpen={shouldShowWelcome}
           onClose={dismissWelcome}
-          userRole={userRole === 'admin' ? 'client' : userRole}
         />
       </Suspense>
     </div>

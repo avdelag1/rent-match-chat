@@ -27,64 +27,64 @@ interface LiveHDBackgroundProps {
   intensity?: number;
 }
 
-// Theme configurations with rich, HD-feeling gradients
+// Theme configurations with rich, HD-feeling gradients - enhanced for black background
 const THEMES: Record<BackgroundTheme, {
   base: string;
   orbs: string[];
   gradient: string;
 }> = {
   default: {
-    base: 'hsl(240 10% 4%)',
+    base: 'hsl(0 0% 0%)',
     orbs: [
-      'radial-gradient(circle, rgba(239, 68, 68, 0.25) 0%, transparent 70%)',
-      'radial-gradient(circle, rgba(168, 85, 247, 0.20) 0%, transparent 70%)',
-      'radial-gradient(circle, rgba(59, 130, 246, 0.18) 0%, transparent 70%)',
+      'radial-gradient(circle, rgba(239, 68, 68, 0.20) 0%, transparent 65%)',
+      'radial-gradient(circle, rgba(249, 115, 22, 0.18) 0%, transparent 65%)',
+      'radial-gradient(circle, rgba(168, 85, 247, 0.15) 0%, transparent 65%)',
     ],
-    gradient: 'linear-gradient(135deg, hsl(240 10% 4%) 0%, hsl(240 10% 8%) 50%, hsl(240 10% 6%) 100%)',
+    gradient: 'linear-gradient(135deg, hsl(0 0% 0%) 0%, hsl(0 0% 3%) 50%, hsl(0 0% 0%) 100%)',
   },
   warm: {
-    base: 'hsl(20 10% 5%)',
+    base: 'hsl(0 0% 0%)',
     orbs: [
-      'radial-gradient(circle, rgba(251, 146, 60, 0.12) 0%, transparent 70%)',
-      'radial-gradient(circle, rgba(239, 68, 68, 0.10) 0%, transparent 70%)',
-      'radial-gradient(circle, rgba(245, 158, 11, 0.08) 0%, transparent 70%)',
+      'radial-gradient(circle, rgba(251, 146, 60, 0.15) 0%, transparent 65%)',
+      'radial-gradient(circle, rgba(239, 68, 68, 0.12) 0%, transparent 65%)',
+      'radial-gradient(circle, rgba(245, 158, 11, 0.10) 0%, transparent 65%)',
     ],
-    gradient: 'linear-gradient(135deg, hsl(20 10% 5%) 0%, hsl(15 12% 8%) 50%, hsl(20 10% 6%) 100%)',
+    gradient: 'linear-gradient(135deg, hsl(0 0% 0%) 0%, hsl(15 5% 3%) 50%, hsl(0 0% 0%) 100%)',
   },
   cool: {
-    base: 'hsl(220 15% 5%)',
+    base: 'hsl(0 0% 0%)',
     orbs: [
-      'radial-gradient(circle, rgba(59, 130, 246, 0.12) 0%, transparent 70%)',
-      'radial-gradient(circle, rgba(6, 182, 212, 0.10) 0%, transparent 70%)',
-      'radial-gradient(circle, rgba(168, 85, 247, 0.08) 0%, transparent 70%)',
+      'radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 65%)',
+      'radial-gradient(circle, rgba(6, 182, 212, 0.12) 0%, transparent 65%)',
+      'radial-gradient(circle, rgba(168, 85, 247, 0.10) 0%, transparent 65%)',
     ],
-    gradient: 'linear-gradient(135deg, hsl(220 15% 5%) 0%, hsl(225 18% 8%) 50%, hsl(220 15% 6%) 100%)',
+    gradient: 'linear-gradient(135deg, hsl(0 0% 0%) 0%, hsl(220 8% 3%) 50%, hsl(0 0% 0%) 100%)',
   },
   neutral: {
-    base: 'hsl(0 0% 5%)',
+    base: 'hsl(0 0% 0%)',
     orbs: [
-      'radial-gradient(circle, rgba(255, 255, 255, 0.04) 0%, transparent 70%)',
-      'radial-gradient(circle, rgba(148, 163, 184, 0.06) 0%, transparent 70%)',
-      'radial-gradient(circle, rgba(100, 116, 139, 0.05) 0%, transparent 70%)',
+      'radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 65%)',
+      'radial-gradient(circle, rgba(148, 163, 184, 0.06) 0%, transparent 65%)',
+      'radial-gradient(circle, rgba(100, 116, 139, 0.05) 0%, transparent 65%)',
     ],
-    gradient: 'linear-gradient(135deg, hsl(0 0% 5%) 0%, hsl(0 0% 8%) 50%, hsl(0 0% 6%) 100%)',
+    gradient: 'linear-gradient(135deg, hsl(0 0% 0%) 0%, hsl(0 0% 2%) 50%, hsl(0 0% 0%) 100%)',
   },
   vibrant: {
-    base: 'hsl(260 10% 5%)',
+    base: 'hsl(0 0% 0%)',
     orbs: [
-      'radial-gradient(circle, rgba(236, 72, 153, 0.12) 0%, transparent 70%)',
-      'radial-gradient(circle, rgba(139, 92, 246, 0.10) 0%, transparent 70%)',
-      'radial-gradient(circle, rgba(34, 197, 94, 0.08) 0%, transparent 70%)',
+      'radial-gradient(circle, rgba(236, 72, 153, 0.15) 0%, transparent 65%)',
+      'radial-gradient(circle, rgba(139, 92, 246, 0.12) 0%, transparent 65%)',
+      'radial-gradient(circle, rgba(34, 197, 94, 0.10) 0%, transparent 65%)',
     ],
-    gradient: 'linear-gradient(135deg, hsl(260 10% 5%) 0%, hsl(270 12% 8%) 50%, hsl(260 10% 6%) 100%)',
+    gradient: 'linear-gradient(135deg, hsl(0 0% 0%) 0%, hsl(270 5% 3%) 50%, hsl(0 0% 0%) 100%)',
   },
 };
 
-// Orb animation configurations for organic motion
+// Orb animation configurations for organic motion - slower, smoother
 const ORB_CONFIGS = [
-  { size: '50%', x: '-10%', y: '10%', duration: '25s', delay: '0s' },
-  { size: '45%', x: '60%', y: '60%', duration: '30s', delay: '-10s' },
-  { size: '55%', x: '30%', y: '-15%', duration: '35s', delay: '-20s' },
+  { size: '60%', x: '-15%', y: '5%', duration: '35s', delay: '0s' },
+  { size: '50%', x: '55%', y: '55%', duration: '40s', delay: '-15s' },
+  { size: '55%', x: '25%', y: '-10%', duration: '45s', delay: '-25s' },
 ];
 
 function LiveHDBackgroundComponent({

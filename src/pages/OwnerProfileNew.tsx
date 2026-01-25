@@ -13,7 +13,7 @@ import { useOwnerProfile } from "@/hooks/useOwnerProfile";
 import {
   User, LogOut, Building2, Eye, MessageCircle,
   Camera, ArrowLeft, Crown, Settings as SettingsIcon,
-  Flame, Palette, Heart
+  Flame, Palette, Heart, Scale, FileText
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -222,6 +222,20 @@ const OwnerProfileNew = () => {
                 >
                   <Building2 className="w-5 h-5 text-primary" />
                   <span className="flex-1 text-left text-foreground">Manage Listings</span>
+                </button>
+                <button
+                  onClick={() => navigate('/owner/contracts')}
+                  className="w-full flex items-center gap-3 p-4 hover:bg-muted/50 transition-colors border-b border-border"
+                >
+                  <FileText className="w-5 h-5 text-blue-500" />
+                  <span className="flex-1 text-left text-foreground">Contract Management</span>
+                </button>
+                <button
+                  onClick={() => navigate('/owner/legal-services')}
+                  className="w-full flex items-center gap-3 p-4 hover:bg-muted/50 transition-colors border-b border-border"
+                >
+                  <Scale className="w-5 h-5 text-purple-500" />
+                  <span className="flex-1 text-left text-foreground">Legal Services</span>
                 </button>
                 <button
                   onClick={() => navigate('/subscription-packages')}
