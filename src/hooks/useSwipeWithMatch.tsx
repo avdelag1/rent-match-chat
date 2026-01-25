@@ -43,6 +43,11 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
           // Save like to owner_likes table
           logger.info('[useSwipeWithMatch] Saving owner like for client:', { ownerId: user.id, clientId: targetId });
 
+          // CRITICAL FIX: Use proper conflict handling for partial unique indexes
+          // We have two partial unique indexes on owner_likes:
+          // 1. (owner_id, client_id) WHERE listing_id IS NULL
+          // 2. (owner_id, client_id, listing_id) WHERE listing_id IS NOT NULL
+          // For profile likes (listing_id = NULL), we use the first index
           const { data: ownerLike, error: ownerLikeError } = await supabase
             .from('owner_likes')
             .upsert({
@@ -51,7 +56,7 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
               listing_id: null, // Explicit null for general profile likes
               is_super_like: false
             }, {
-              onConflict: 'owner_id,client_id,listing_id',
+              onConflict: 'owner_id,client_id',
               ignoreDuplicates: false
             })
             .select()
