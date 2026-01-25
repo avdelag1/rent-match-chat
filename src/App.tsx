@@ -52,6 +52,7 @@ import ClientDashboard from "./pages/ClientDashboard";
 import ClientProfile from "./pages/ClientProfileNew";
 import ClientSettings from "./pages/ClientSettingsNew";
 import ClientLikedProperties from "./pages/ClientLikedProperties";
+import ClientWhoLikedYou from "./pages/ClientWhoLikedYou";
 import ClientSavedSearches from "./pages/ClientSavedSearches";
 import ClientSecurity from "./pages/ClientSecurity";
 import ClientWorkerDiscovery from "./pages/ClientWorkerDiscovery";
@@ -168,6 +169,7 @@ const App = () => (
                       <Route path="/client/profile" element={<ClientProfile />} />
                       <Route path="/client/settings" element={<ClientSettings />} />
                       <Route path="/client/liked-properties" element={<ClientLikedProperties />} />
+                      <Route path="/client/who-liked-you" element={<ClientWhoLikedYou />} />
                       <Route path="/client/saved-searches" element={<ClientSavedSearches />} />
                       <Route path="/client/security" element={<ClientSecurity />} />
                       <Route path="/client/services" element={<ClientWorkerDiscovery />} />

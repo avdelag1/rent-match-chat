@@ -8,6 +8,7 @@ import { useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useClientProfile } from "@/hooks/useClientProfile";
+import { useClientStats } from "@/hooks/useClientStats";
 import { useAuth } from "@/hooks/useAuth";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -28,6 +29,7 @@ const ClientProfileNew = () => {
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const { data: profile, isLoading } = useClientProfile();
+  const { data: stats } = useClientStats();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -147,32 +149,79 @@ const ClientProfileNew = () => {
             </motion.div>
           )}
 
-          {/* Quick Stats */}
+          {/* Quick Stats - Clickable */}
           <motion.div
             className="grid grid-cols-3 gap-3"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...fastSpring, delay: 0.1 }}
           >
-            <Card className="bg-card border-border">
+            <Card
+              className="bg-card border-border cursor-pointer hover:bg-muted/50 transition-colors"
+              onClick={() => navigate('/client/who-liked-you')}
+            >
               <CardContent className="p-3 text-center">
                 <Flame className="w-5 h-5 text-orange-500 mx-auto mb-1" />
-                <div className="text-lg font-bold text-foreground">0</div>
+                <div className="text-lg font-bold text-foreground">{stats?.likesReceived ?? 0}</div>
                 <div className="text-xs text-muted-foreground">Likes</div>
               </CardContent>
             </Card>
-            <Card className="bg-card border-border">
+            <Card
+              className="bg-card border-border cursor-pointer hover:bg-muted/50 transition-colors"
+              onClick={() => navigate('/messages')}
+            >
               <CardContent className="p-3 text-center">
                 <Sparkles className="w-5 h-5 text-amber-500 mx-auto mb-1" />
-                <div className="text-lg font-bold text-foreground">0</div>
+                <div className="text-lg font-bold text-foreground">{stats?.matchesCount ?? 0}</div>
                 <div className="text-xs text-muted-foreground">Matches</div>
               </CardContent>
             </Card>
-            <Card className="bg-card border-border">
+            <Card
+              className="bg-card border-border cursor-pointer hover:bg-muted/50 transition-colors"
+              onClick={() => navigate('/messages')}
+            >
               <CardContent className="p-3 text-center">
                 <MessageCircle className="w-5 h-5 text-blue-500 mx-auto mb-1" />
-                <div className="text-lg font-bold text-foreground">0</div>
+                <div className="text-lg font-bold text-foreground">{stats?.activeChats ?? 0}</div>
                 <div className="text-xs text-muted-foreground">Chats</div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Liked Properties & Who Liked You */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ ...fastSpring, delay: 0.12 }}
+            className="space-y-3"
+          >
+            <Card className="bg-card border-border">
+              <CardContent className="p-4">
+                <button
+                  onClick={() => navigate('/client/liked-properties')}
+                  className="w-full flex items-center gap-3"
+                >
+                  <Flame className="w-5 h-5 text-orange-500" />
+                  <div className="flex-1 text-left">
+                    <div className="font-medium text-foreground">Liked Properties</div>
+                    <div className="text-sm text-muted-foreground">View properties you've liked</div>
+                  </div>
+                </button>
+              </CardContent>
+            </Card>
+            <Card className="bg-card border-border">
+              <CardContent className="p-4">
+                <button
+                  onClick={() => navigate('/client/who-liked-you')}
+                  className="w-full flex items-center gap-3"
+                >
+                  <Heart className="w-5 h-5 text-pink-500" />
+                  <div className="flex-1 text-left">
+                    <div className="font-medium text-foreground">Who Liked You</div>
+                    <div className="text-sm text-muted-foreground">See owners interested in you</div>
+                  </div>
+                  <div className="text-lg font-bold text-foreground">{stats?.likesReceived ?? 0}</div>
+                </button>
               </CardContent>
             </Card>
           </motion.div>

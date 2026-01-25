@@ -155,7 +155,7 @@ const OwnerProfileNew = () => {
                     <div className="font-medium text-foreground">Liked Clients</div>
                     <div className="text-sm text-muted-foreground">View clients you've liked</div>
                   </div>
-                  <div className="text-lg font-bold text-foreground">0</div>
+                  <div className="text-lg font-bold text-foreground">{stats?.likedClientsCount ?? 0}</div>
                 </button>
               </CardContent>
             </Card>
@@ -178,6 +178,7 @@ const OwnerProfileNew = () => {
                     <div className="font-medium text-foreground">Who Liked You</div>
                     <div className="text-sm text-muted-foreground">See clients interested in your listings</div>
                   </div>
+                  <div className="text-lg font-bold text-foreground">{stats?.interestedClientsCount ?? 0}</div>
                 </button>
               </CardContent>
             </Card>
