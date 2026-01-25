@@ -176,8 +176,8 @@ const ClientProfileNew = () => {
                 >
                   <Heart className="w-5 h-5 text-pink-500" />
                   <div className="flex-1 text-left">
-                    <div className="font-medium text-foreground">Owners Who Liked You</div>
-                    <div className="text-sm text-muted-foreground">See owners interested in you</div>
+                    <div className="font-medium text-foreground">Who Liked You</div>
+                    <div className="text-sm text-muted-foreground">See who's interested in you</div>
                   </div>
                 </button>
               </CardContent>
