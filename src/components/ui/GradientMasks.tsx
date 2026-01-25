@@ -1,19 +1,15 @@
 /**
- * GRADIENT MASK SYSTEM
+ * GRADIENT MASK SYSTEM - CURVED SCREEN EFFECT
  *
- * Two reusable gradient overlay layers that create the Tinder-style
- * visual effect where UI appears to emerge from the photo.
- *
- * CRITICAL: These gradients create contrast for floating UI elements.
- * They are NOT transparent containers - they are visual "shades"
- * that make text/buttons readable against any photo.
+ * Creates the Tinder-style curved vignette effect that persists
+ * across all pages for a consistent floating UI experience.
  *
  * Features:
  * - GPU-friendly (uses opacity + transform only)
  * - pointer-events: none (clicks pass through)
- * - Smooth fade gradients (not flat transparency)
+ * - Smooth curved gradient that simulates screen curvature
  * - Supports both light and dark themes
- * - Works for client AND owner swipe views
+ * - Works on ALL pages for consistent navigation contrast
  */
 
 import { memo, CSSProperties } from 'react';
@@ -27,40 +23,41 @@ interface GradientMaskProps {
   zIndex?: number;
   /** Use light theme (white gradient instead of black) */
   light?: boolean;
-  /** Extend height percentage (default: 30% for top, 45% for bottom) */
+  /** Extend height percentage (default: 28% for top, 45% for bottom) */
   heightPercent?: number;
 }
 
 /**
- * TOP GRADIENT MASK
+ * TOP GRADIENT MASK - CURVED SCREEN EFFECT
  *
- * Covers the top 25-30% of the screen with a gradient that:
- * - Starts solid dark at the top (behind status bar/notch)
- * - Fades smoothly to fully transparent
- * - Provides contrast for TopBar UI, rating displays, etc.
+ * Creates a subtle curved shadow at the top of the screen:
+ * - Darkest at the very top edge (simulates screen curve)
+ * - Smooth gradient fade to transparent
+ * - Provides contrast for TopBar UI elements
  */
 export const GradientMaskTop = memo(function GradientMaskTop({
   intensity = 1,
   className = '',
   zIndex = 15,
   light = false,
-  heightPercent = 32,
+  heightPercent = 28,
 }: GradientMaskProps) {
   const baseColor = light ? '255,255,255' : '0,0,0';
 
   const style: CSSProperties = {
-    position: 'absolute',
+    position: 'fixed', // Fixed to persist across scroll
     top: 0,
     left: 0,
     right: 0,
     height: `${heightPercent}%`,
-    // TINDER-STYLE gradient: Stronger at top for header contrast, smooth fade
+    // CURVED SCREEN gradient: Strong edge, smooth curved fade
     background: `linear-gradient(
       to bottom,
-      rgba(${baseColor}, ${0.75 * intensity}) 0%,
-      rgba(${baseColor}, ${0.60 * intensity}) 20%,
-      rgba(${baseColor}, ${0.40 * intensity}) 45%,
-      rgba(${baseColor}, ${0.15 * intensity}) 70%,
+      rgba(${baseColor}, ${0.85 * intensity}) 0%,
+      rgba(${baseColor}, ${0.65 * intensity}) 15%,
+      rgba(${baseColor}, ${0.40 * intensity}) 35%,
+      rgba(${baseColor}, ${0.18 * intensity}) 60%,
+      rgba(${baseColor}, ${0.05 * intensity}) 80%,
       rgba(${baseColor}, 0) 100%
     )`,
     // GPU acceleration
@@ -79,37 +76,36 @@ export const GradientMaskTop = memo(function GradientMaskTop({
 });
 
 /**
- * BOTTOM GRADIENT MASK
+ * BOTTOM GRADIENT MASK - CURVED SCREEN EFFECT
  *
- * Covers the bottom 40-50% of the screen with a gradient that:
- * - Starts transparent at top
- * - Fades to solid dark at the bottom
- * - Provides contrast for swipe buttons, card info, CTAs
- * - Taller than top mask to accommodate more UI elements
+ * Creates a subtle curved shadow at the bottom of the screen:
+ * - Darkest at the very bottom edge (simulates screen curve)
+ * - Smooth gradient fade to transparent
+ * - Provides contrast for navigation and swipe buttons
  */
 export const GradientMaskBottom = memo(function GradientMaskBottom({
   intensity = 1,
   className = '',
   zIndex = 20,
   light = false,
-  heightPercent = 55,
+  heightPercent = 50,
 }: GradientMaskProps) {
   const baseColor = light ? '255,255,255' : '0,0,0';
 
   const style: CSSProperties = {
-    position: 'absolute',
+    position: 'fixed', // Fixed to persist across scroll
     bottom: 0,
     left: 0,
     right: 0,
     height: `${heightPercent}%`,
-    // TINDER-STYLE gradient: Strong at bottom for buttons/info, smooth upward fade
+    // CURVED SCREEN gradient: Strong edge at bottom, smooth curved fade upward
     background: `linear-gradient(
       to top,
       rgba(${baseColor}, ${0.90 * intensity}) 0%,
-      rgba(${baseColor}, ${0.80 * intensity}) 12%,
-      rgba(${baseColor}, ${0.60 * intensity}) 30%,
-      rgba(${baseColor}, ${0.35 * intensity}) 50%,
-      rgba(${baseColor}, ${0.12 * intensity}) 70%,
+      rgba(${baseColor}, ${0.75 * intensity}) 10%,
+      rgba(${baseColor}, ${0.55 * intensity}) 25%,
+      rgba(${baseColor}, ${0.30 * intensity}) 45%,
+      rgba(${baseColor}, ${0.10 * intensity}) 65%,
       rgba(${baseColor}, 0) 100%
     )`,
     // GPU acceleration
