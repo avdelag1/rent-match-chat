@@ -206,7 +206,7 @@ const ImageCarouselComponent = ({
     // If first load (no displayedSrc yet), show immediately and decode
     if (!displayedSrc) {
       setDisplayedSrc(currentImageSrc);
-      decodeImageFast(currentImageSrc).then((success) => {
+      decodeImageFastFast(currentImageSrc).then((success) => {
         if (success) {
           evictLRUIfNeeded();
           globalImageCache.set(currentImageSrc, { loaded: true, decoded: true, lastAccessed: Date.now() });
@@ -222,7 +222,7 @@ const ImageCarouselComponent = ({
       setPreviousSrc(displayedSrc);
       setIsTransitioning(true);
 
-      decodeImageFast(currentImageSrc).then((success) => {
+      decodeImageFastFast(currentImageSrc).then((success) => {
         decodingRef.current = false;
         if (success) {
           evictLRUIfNeeded();

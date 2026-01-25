@@ -14,54 +14,55 @@ import { Button } from '@/components/ui/button';
 import { useFilterStore } from '@/state/filterStore';
 import type { ClientGender, ClientType as FilterClientType } from '@/types/filters';
 
-type Gender = 'male' | 'female' | 'any';
-type ClientType = 'all' | 'hire' | 'rent' | 'buy';
+// Use types that match the filter store
+type Gender = ClientGender;
+type ClientType = FilterClientType;
 
-const genderOptions = [
+const genderOptions: { id: Gender; label: string; description: string; icon: React.ReactNode }[] = [
   {
-    id: 'any' as Gender,
+    id: 'any',
     label: 'All',
     description: 'Show everyone',
     icon: <Users className="w-6 h-6" />
   },
   {
-    id: 'female' as Gender,
+    id: 'female',
     label: 'Women',
     description: 'Female clients',
     icon: <User className="w-6 h-6" />
   },
   {
-    id: 'male' as Gender,
+    id: 'male',
     label: 'Men',
     description: 'Male clients',
     icon: <User className="w-6 h-6" />
   },
 ];
 
-const clientTypeOptions = [
+const clientTypeOptions: { id: ClientType; label: string; description: string; icon: React.ReactNode; gradient: string }[] = [
   {
-    id: 'all' as ClientType,
+    id: 'all',
     label: 'All Types',
     description: 'Show all clients',
     icon: <Users className="w-6 h-6" />,
     gradient: 'from-gray-500 to-slate-600'
   },
   {
-    id: 'hire' as ClientType,
+    id: 'hire',
     label: 'Hiring',
     description: 'Looking to hire services',
     icon: <Briefcase className="w-6 h-6" />,
     gradient: 'from-purple-500 to-violet-600'
   },
   {
-    id: 'rent' as ClientType,
+    id: 'rent',
     label: 'Renting',
     description: 'Looking to rent',
     icon: <Home className="w-6 h-6" />,
     gradient: 'from-blue-500 to-indigo-600'
   },
   {
-    id: 'buy' as ClientType,
+    id: 'buy',
     label: 'Buying',
     description: 'Looking to purchase',
     icon: <ShoppingCart className="w-6 h-6" />,
@@ -79,19 +80,19 @@ export default function OwnerFilters() {
   const setClientType = useFilterStore((state) => state.setClientType);
 
   // Local state initialized from store
-  const [localGender, setLocalGender] = useState<Gender>(storeGender);
-  const [localClientType, setLocalClientType] = useState<ClientType>(storeClientType);
+  const [localGender, setLocalGender] = useState<Gender>(storeGender as Gender);
+  const [localClientType, setLocalClientType] = useState<ClientType>(storeClientType as ClientType);
 
   // Sync local state with store on mount
   useEffect(() => {
-    setLocalGender(storeGender);
-    setLocalClientType(storeClientType);
+    setLocalGender(storeGender as Gender);
+    setLocalClientType(storeClientType as ClientType);
   }, [storeGender, storeClientType]);
 
   const handleApply = useCallback(() => {
     // Apply filters to store
-    setClientGender(localGender as ClientGender);
-    setClientType(localClientType as FilterClientType);
+    setClientGender(localGender);
+    setClientType(localClientType);
     navigate(-1);
   }, [navigate, localGender, localClientType, setClientGender, setClientType]);
 
