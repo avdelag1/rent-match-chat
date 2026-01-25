@@ -47,22 +47,35 @@ interface Notification {
   read: boolean;
   link_url?: string | null;
   related_user_id?: string | null;
-  metadata?: any;
+  metadata?: {
+    role?: 'client' | 'owner';
+    targetType?: 'listing' | 'profile';
+    [key: string]: any;
+  };
 }
 
-const NotificationIcon = ({ type, className = "w-5 h-5" }: { type: string; className?: string }) => {
+const NotificationIcon = ({ type, role = 'neutral', className = "w-5 h-5" }: { type: string; role?: 'client' | 'owner' | 'neutral'; className?: string }) => {
+  // Client uses cooler tones (blue, cyan, purple), Owner uses warmer tones (orange, red, amber)
   switch (type) {
     case 'new_message':
     case 'message':
-      return <MessageSquare className={`${className} text-blue-500`} />;
+      return role === 'client'
+        ? <MessageSquare className={`${className} text-blue-500`} />
+        : <MessageSquare className={`${className} text-amber-500`} />;
     case 'new_like':
     case 'like':
-      return <Flame className={`${className} text-orange-500`} />;
+      return role === 'client'
+        ? <Flame className={`${className} text-cyan-500`} />
+        : <Flame className={`${className} text-orange-500`} />;
     case 'new_match':
     case 'match':
-      return <Sparkles className={`${className} text-amber-500`} />;
+      return role === 'client'
+        ? <Sparkles className={`${className} text-purple-500`} />
+        : <Sparkles className={`${className} text-amber-500`} />;
     case 'super_like':
-      return <Star className={`${className} text-yellow-500`} />;
+      return role === 'client'
+        ? <Star className={`${className} text-purple-500`} />
+        : <Star className={`${className} text-yellow-500`} />;
     case 'property':
       return <Home className={`${className} text-emerald-500`} />;
     case 'yacht':
@@ -76,18 +89,52 @@ const NotificationIcon = ({ type, className = "w-5 h-5" }: { type: string; class
   }
 };
 
-const bgGradients: Record<string, string> = {
-  'new_message': 'from-blue-500/20 to-cyan-500/10',
-  'message': 'from-blue-500/20 to-cyan-500/10',
-  'new_like': 'from-orange-500/20 to-amber-500/10',
-  'like': 'from-orange-500/20 to-amber-500/10',
-  'new_match': 'from-amber-500/20 to-yellow-500/10',
-  'match': 'from-amber-500/20 to-yellow-500/10',
-  'super_like': 'from-yellow-500/20 to-orange-500/10',
-  'property': 'from-emerald-500/20 to-teal-500/10',
-  'yacht': 'from-cyan-500/20 to-blue-500/10',
-  'bicycle': 'from-orange-500/20 to-red-500/10',
-  'vehicle': 'from-purple-500/20 to-pink-500/10',
+// Helper function to get notification role from metadata
+const getNotificationRole = (notification: Notification): 'client' | 'owner' | 'neutral' => {
+  if (notification.metadata?.role) {
+    return notification.metadata.role;
+  }
+  if (notification.metadata?.targetType === 'listing') {
+    return 'client'; // Client liked a listing
+  }
+  if (notification.metadata?.targetType === 'profile') {
+    return 'owner'; // Owner liked a profile
+  }
+  return 'neutral';
+};
+
+const getBgGradient = (type: string, role: 'client' | 'owner' | 'neutral' = 'neutral'): string => {
+  switch (type) {
+    case 'new_message':
+    case 'message':
+      return role === 'client'
+        ? 'from-blue-500/20 to-cyan-500/10'
+        : 'from-amber-500/20 to-yellow-500/10';
+    case 'new_like':
+    case 'like':
+      return role === 'client'
+        ? 'from-cyan-500/20 to-blue-500/10'
+        : 'from-orange-500/20 to-amber-500/10';
+    case 'new_match':
+    case 'match':
+      return role === 'client'
+        ? 'from-purple-500/20 to-pink-500/10'
+        : 'from-amber-500/20 to-yellow-500/10';
+    case 'super_like':
+      return role === 'client'
+        ? 'from-purple-500/20 to-pink-500/10'
+        : 'from-yellow-500/20 to-orange-500/10';
+    case 'property':
+      return 'from-emerald-500/20 to-teal-500/10';
+    case 'yacht':
+      return 'from-cyan-500/20 to-blue-500/10';
+    case 'bicycle':
+      return 'from-orange-500/20 to-red-500/10';
+    case 'vehicle':
+      return 'from-purple-500/20 to-pink-500/10';
+    default:
+      return 'from-card/80 to-card/40';
+  }
 };
 
 export default function NotificationsPage() {
@@ -426,20 +473,22 @@ export default function NotificationsPage() {
                 ) : (
                   <div className="space-y-2">
                     <AnimatePresence mode="popLayout">
-                      {notifications.map((notification, index) => (
-                        <motion.div
-                          key={notification.id}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, x: -100 }}
-                          transition={{ delay: index * 0.02 }}
-                        >
-                          <Card className={`bg-gradient-to-br ${bgGradients[notification.type] || 'from-card/80 to-card/40'} border-border/40 hover:border-border/60 transition-all group`}>
-                            <CardContent className="p-4">
-                              <div className="flex items-start gap-3">
-                                <div className="p-2.5 rounded-xl bg-background/50 shadow-sm">
-                                  <NotificationIcon type={notification.type} className="w-5 h-5" />
-                                </div>
+                      {notifications.map((notification, index) => {
+                        const role = getNotificationRole(notification);
+                        return (
+                          <motion.div
+                            key={notification.id}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, x: -100 }}
+                            transition={{ delay: index * 0.02 }}
+                          >
+                            <Card className={`bg-gradient-to-br ${getBgGradient(notification.type, role)} border-border/40 hover:border-border/60 transition-all group`}>
+                              <CardContent className="p-4">
+                                <div className="flex items-start gap-3">
+                                  <div className="p-2.5 rounded-xl bg-background/50 shadow-sm">
+                                    <NotificationIcon type={notification.type} role={role} className="w-5 h-5" />
+                                  </div>
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-start justify-between gap-2">
                                     <div className="flex-1 min-w-0">
@@ -470,7 +519,8 @@ export default function NotificationsPage() {
                             </CardContent>
                           </Card>
                         </motion.div>
-                      ))}
+                        );
+                      })}
                     </AnimatePresence>
                   </div>
                 )}
