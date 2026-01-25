@@ -94,14 +94,14 @@ class RealtimeSubscriptionManager {
       const channel = supabase
         .channel(channelName)
         .on(
-          'postgres_changes',
+          'postgres_changes' as any,
           {
             event: config.event,
             schema: 'public',
             table: config.table,
             filter: config.filter,
-          },
-          (payload) => {
+          } as any,
+          (payload: any) => {
             // Notify all listeners
             const currentEntry = this.subscriptions.get(subscriptionKey);
             if (currentEntry) {

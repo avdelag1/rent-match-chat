@@ -342,21 +342,21 @@ export function useStartConversation() {
 
           // FALLBACK: If roles not found in user_roles, check listings as backup
           if (!myRoleData) {
-            const myListingsCheck = await supabase
+            const { data: myListingsData } = await supabase
               .from('listings')
               .select('id')
-              .eq('user_id', user.id)
+              .eq('owner_id', user.id)
               .limit(1);
-            myRole = (myListingsCheck.data && myListingsCheck.data.length > 0) ? 'owner' : 'client';
+            myRole = (myListingsData && myListingsData.length > 0) ? 'owner' : 'client';
           }
 
           if (!otherRoleData) {
-            const otherListingsCheck = await supabase
+            const { data: otherListingsData } = await supabase
               .from('listings')
               .select('id')
-              .eq('user_id', otherUserId)
+              .eq('owner_id', otherUserId)
               .limit(1);
-            otherRole = (otherListingsCheck.data && otherListingsCheck.data.length > 0) ? 'owner' : 'client';
+            otherRole = (otherListingsData && otherListingsData.length > 0) ? 'owner' : 'client';
           }
         } catch (roleCheckError) {
           logger.error('Error checking user roles:', roleCheckError);

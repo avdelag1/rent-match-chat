@@ -153,7 +153,7 @@ export default function PublicListingPreview() {
   const mode = listing.mode || 'rent';
   const hasImages = listing.images && listing.images.length > 0;
   const isFreeMessagingCategory = FREE_MESSAGING_CATEGORIES.includes(category);
-  const canDirectMessage = user && isFreeMessagingCategory && user.id !== listing.user_id;
+  const canDirectMessage = user && isFreeMessagingCategory && user.id !== listing.owner_id;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
@@ -540,16 +540,13 @@ export default function PublicListingPreview() {
       {/* Direct Message Dialog for Moto/Bicycle */}
       {listing && canDirectMessage && (
         <DirectMessageDialog
-          isOpen={showDirectMessageDialog}
-          onClose={() => setShowDirectMessageDialog(false)}
-          listing={{
-            id: listing.id,
-            title: listing.title || 'Untitled Listing',
-            category: category,
-            price: listing.price,
-            images: listing.images,
-            user_id: listing.user_id
+          open={showDirectMessageDialog}
+          onOpenChange={setShowDirectMessageDialog}
+          onConfirm={() => {
+            setShowDirectMessageDialog(false);
           }}
+          recipientName="the owner"
+          category={category}
         />
       )}
     </div>

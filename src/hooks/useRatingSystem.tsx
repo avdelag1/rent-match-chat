@@ -1,6 +1,9 @@
 /**
  * Comprehensive Rating System Hooks
  *
+ * NOTE: The rating tables (ratings, rating_categories, rating_aggregates) 
+ * do not exist yet. These hooks return sensible defaults until the schema is created.
+ * 
  * Implements a fair, forgiving rating system with:
  * - Temporal decay (12-month half-life)
  * - Confidence-weighted displayed ratings (prevents sudden drops)
@@ -10,7 +13,6 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from './use-toast';
 import { logger } from '@/utils/prodLogger';
@@ -94,55 +96,63 @@ const createDefaultAggregate = (id: string, type: 'listing' | 'user', categoryId
   last_calculated_at: new Date().toISOString(),
 });
 
+// Default categories when tables don't exist
+const defaultCategories: RatingCategory[] = [
+  {
+    id: 'property',
+    name: 'Property',
+    description: 'Rate a property listing',
+    target_type: 'listing',
+    questions: [
+      { id: 'accuracy', question: 'How accurate was the listing?', weight: 1 },
+      { id: 'cleanliness', question: 'How clean was the property?', weight: 1 },
+      { id: 'communication', question: 'How was the communication?', weight: 1 },
+    ],
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: 'client',
+    name: 'Client',
+    description: 'Rate a client profile',
+    target_type: 'user',
+    questions: [
+      { id: 'reliability', question: 'How reliable was the client?', weight: 1 },
+      { id: 'communication', question: 'How was the communication?', weight: 1 },
+    ],
+    created_at: new Date().toISOString(),
+  },
+];
+
 // ============================================================================
-// RATING CATEGORIES (Placeholder - tables not yet created)
+// RATING CATEGORIES (Stubbed - tables not yet created)
 // ============================================================================
 
 /**
  * Fetch all rating categories
+ * NOTE: Returns default categories since tables don't exist yet
  */
 export function useRatingCategories() {
   return useQuery({
     queryKey: ['rating-categories'],
     queryFn: async (): Promise<RatingCategory[]> => {
-      const { data, error } = await supabase
-        .from('rating_categories')
-        .select('*')
-        .order('name');
-
-      if (error) {
-        logger.error('Error fetching rating categories:', error);
-        throw error;
-      }
-
-      return data || [];
+      // Tables don't exist yet - return defaults
+      return defaultCategories;
     },
-    staleTime: 30 * 60 * 1000, // 30 minutes - categories rarely change
+    staleTime: 30 * 60 * 1000, // 30 minutes
     gcTime: 60 * 60 * 1000, // 1 hour
   });
 }
 
 /**
  * Get category by ID
+ * NOTE: Returns from defaults since tables don't exist yet
  */
 export function useRatingCategory(categoryId: string | undefined) {
   return useQuery({
     queryKey: ['rating-category', categoryId],
     queryFn: async (): Promise<RatingCategory | null> => {
       if (!categoryId) return null;
-
-      const { data, error } = await supabase
-        .from('rating_categories')
-        .select('*')
-        .eq('id', categoryId)
-        .single();
-
-      if (error) {
-        logger.error('Error fetching rating category:', error);
-        return null;
-      }
-
-      return data;
+      return defaultCategories.find(c => c.id === categoryId) || null;
     },
     enabled: !!categoryId,
     staleTime: 30 * 60 * 1000,
@@ -155,37 +165,15 @@ export function useRatingCategory(categoryId: string | undefined) {
 
 /**
  * Get rating aggregate for a listing
- * Used on swipe cards to show rating, count, and trust level
+ * NOTE: Returns default aggregate since tables don't exist yet
  */
 export function useListingRatingAggregate(listingId: string | undefined, categoryId: string = 'property') {
   return useQuery({
     queryKey: ['rating-aggregate', 'listing', listingId, categoryId],
     queryFn: async (): Promise<RatingAggregate | null> => {
       if (!listingId) return null;
-
-      const { data, error } = await supabase
-        .from('rating_aggregates')
-        .select(`
-          *,
-          best_review:ratings!rating_aggregates_best_review_id_fkey(*),
-          worst_review:ratings!rating_aggregates_worst_review_id_fkey(*)
-        `)
-        .eq('listing_id', listingId)
-        .eq('category_id', categoryId)
-        .maybeSingle();
-
-      if (error) {
-        logger.error('Error fetching listing rating aggregate:', error);
-        // Return default aggregate on error
-        return createDefaultAggregate(listingId, 'listing', categoryId);
-      }
-
-      if (!data) {
-        // No ratings yet - return default 5.0
-        return createDefaultAggregate(listingId, 'listing', categoryId);
-      }
-
-      return data as RatingAggregate;
+      // Tables don't exist yet - return default 5.0 rating
+      return createDefaultAggregate(listingId, 'listing', categoryId);
     },
     enabled: !!listingId,
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -195,37 +183,15 @@ export function useListingRatingAggregate(listingId: string | undefined, categor
 
 /**
  * Get rating aggregate for a user
- * Used to show user ratings on profile cards
+ * NOTE: Returns default aggregate since tables don't exist yet
  */
 export function useUserRatingAggregate(userId: string | undefined, categoryId: string = 'client') {
   return useQuery({
     queryKey: ['rating-aggregate', 'user', userId, categoryId],
     queryFn: async (): Promise<RatingAggregate | null> => {
       if (!userId) return null;
-
-      const { data, error } = await supabase
-        .from('rating_aggregates')
-        .select(`
-          *,
-          best_review:ratings!rating_aggregates_best_review_id_fkey(*),
-          worst_review:ratings!rating_aggregates_worst_review_id_fkey(*)
-        `)
-        .eq('user_id', userId)
-        .eq('category_id', categoryId)
-        .maybeSingle();
-
-      if (error) {
-        logger.error('Error fetching user rating aggregate:', error);
-        // Return default aggregate on error
-        return createDefaultAggregate(userId, 'user', categoryId);
-      }
-
-      if (!data) {
-        // No ratings yet - return default 5.0
-        return createDefaultAggregate(userId, 'user', categoryId);
-      }
-
-      return data as RatingAggregate;
+      // Tables don't exist yet - return default 5.0 rating
+      return createDefaultAggregate(userId, 'user', categoryId);
     },
     enabled: !!userId,
     staleTime: 5 * 60 * 1000,
@@ -234,37 +200,20 @@ export function useUserRatingAggregate(userId: string | undefined, categoryId: s
 }
 
 // ============================================================================
-// INDIVIDUAL RATINGS
+// INDIVIDUAL RATINGS (Stubbed)
 // ============================================================================
 
 /**
  * Get all ratings for a listing
+ * NOTE: Returns empty array since tables don't exist yet
  */
 export function useListingRatings(listingId: string | undefined, options: { limit?: number } = {}) {
   return useQuery({
     queryKey: ['ratings', 'listing', listingId, options.limit],
     queryFn: async (): Promise<Rating[]> => {
       if (!listingId) return [];
-
-      let query = supabase
-        .from('ratings')
-        .select('*')
-        .eq('listing_id', listingId)
-        .eq('is_active', true)
-        .order('created_at', { ascending: false });
-
-      if (options.limit) {
-        query = query.limit(options.limit);
-      }
-
-      const { data, error } = await query;
-
-      if (error) {
-        logger.error('Error fetching listing ratings:', error);
-        throw error;
-      }
-
-      return data || [];
+      // Tables don't exist yet
+      return [];
     },
     enabled: !!listingId,
     staleTime: 5 * 60 * 1000,
@@ -273,32 +222,15 @@ export function useListingRatings(listingId: string | undefined, options: { limi
 
 /**
  * Get all ratings for a user
+ * NOTE: Returns empty array since tables don't exist yet
  */
 export function useUserRatings(userId: string | undefined, options: { limit?: number } = {}) {
   return useQuery({
     queryKey: ['ratings', 'user', userId, options.limit],
     queryFn: async (): Promise<Rating[]> => {
       if (!userId) return [];
-
-      let query = supabase
-        .from('ratings')
-        .select('*')
-        .eq('rated_user_id', userId)
-        .eq('is_active', true)
-        .order('created_at', { ascending: false });
-
-      if (options.limit) {
-        query = query.limit(options.limit);
-      }
-
-      const { data, error } = await query;
-
-      if (error) {
-        logger.error('Error fetching user ratings:', error);
-        throw error;
-      }
-
-      return data || [];
+      // Tables don't exist yet
+      return [];
     },
     enabled: !!userId,
     staleTime: 5 * 60 * 1000,
@@ -307,6 +239,7 @@ export function useUserRatings(userId: string | undefined, options: { limit?: nu
 
 /**
  * Check if current user has already rated a target
+ * NOTE: Returns false since tables don't exist yet
  */
 export function useHasRated(targetId: string | undefined, targetType: 'listing' | 'user') {
   const { user } = useAuth();
@@ -315,101 +248,50 @@ export function useHasRated(targetId: string | undefined, targetType: 'listing' 
     queryKey: ['has-rated', user?.id, targetType, targetId],
     queryFn: async (): Promise<boolean> => {
       if (!user?.id || !targetId) return false;
-
-      const query = supabase
-        .from('ratings')
-        .select('id', { count: 'exact', head: true })
-        .eq('reviewer_id', user.id)
-        .eq('is_active', true);
-
-      if (targetType === 'listing') {
-        query.eq('listing_id', targetId);
-      } else {
-        query.eq('rated_user_id', targetId);
-      }
-
-      const { count, error } = await query;
-
-      if (error) {
-        logger.error('Error checking has rated:', error);
-        return false;
-      }
-
-      return (count || 0) > 0;
+      // Tables don't exist yet
+      return false;
     },
     enabled: !!user?.id && !!targetId,
-    staleTime: 60 * 1000, // 1 minute
+    staleTime: 30 * 1000,
   });
 }
 
 // ============================================================================
-// CREATE/UPDATE RATING
+// MUTATIONS (Stubbed)
 // ============================================================================
 
 /**
  * Create a new rating
+ * NOTE: No-op since tables don't exist yet
  */
 export function useCreateRating() {
-  const queryClient = useQueryClient();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: CreateRatingInput): Promise<Rating> => {
+    mutationFn: async (input: CreateRatingInput): Promise<Rating | null> => {
       if (!user?.id) {
-        throw new Error('You must be logged in to submit a rating');
+        throw new Error('Must be logged in to submit a rating');
       }
 
-      // Calculate sentiment based on overall rating
-      let sentiment: 'positive' | 'neutral' | 'negative' = 'neutral';
-      if (input.overall_rating >= 4) {
-        sentiment = 'positive';
-      } else if (input.overall_rating <= 2) {
-        sentiment = 'negative';
-      }
-
-      const { data, error } = await supabase
-        .from('ratings')
-        .insert({
-          reviewer_id: user.id,
-          listing_id: input.listing_id,
-          rated_user_id: input.rated_user_id,
-          category_id: input.category_id,
-          conversation_id: input.conversation_id,
-          overall_rating: input.overall_rating,
-          category_ratings: input.category_ratings,
-          review_title: input.review_title,
-          review_text: input.review_text,
-          sentiment,
-          is_verified: !!input.conversation_id, // Verified if from a conversation
-        })
-        .select()
-        .single();
-
-      if (error) {
-        logger.error('Error creating rating:', error);
-        throw error;
-      }
-
-      return data as Rating;
+      // Tables don't exist yet - show warning and return null
+      logger.warn('Rating tables do not exist yet. Rating not saved.');
+      
+      return null;
     },
     onSuccess: (data) => {
-      toast({
-        title: 'Rating submitted',
-        description: 'Thank you for your feedback!',
-      });
-
-      // Invalidate related queries
-      if (data.listing_id) {
-        queryClient.invalidateQueries({ queryKey: ['rating-aggregate', 'listing', data.listing_id] });
-        queryClient.invalidateQueries({ queryKey: ['ratings', 'listing', data.listing_id] });
+      if (data) {
+        toast({
+          title: 'Rating submitted',
+          description: 'Thank you for your feedback!',
+        });
+      } else {
+        toast({
+          title: 'Rating feature coming soon',
+          description: 'Rating functionality is not yet available.',
+          variant: 'default',
+        });
       }
-
-      if (data.rated_user_id) {
-        queryClient.invalidateQueries({ queryKey: ['rating-aggregate', 'user', data.rated_user_id] });
-        queryClient.invalidateQueries({ queryKey: ['ratings', 'user', data.rated_user_id] });
-      }
-
-      queryClient.invalidateQueries({ queryKey: ['has-rated'] });
     },
     onError: (error: any) => {
       logger.error('Error creating rating:', error);
@@ -425,38 +307,35 @@ export function useCreateRating() {
 
 /**
  * Mark rating as helpful
+ * NOTE: No-op since tables don't exist yet
  */
 export function useMarkRatingHelpful() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (ratingId: string) => {
-      const { error } = await supabase.rpc('increment_rating_helpful', {
-        rating_id: ratingId,
-      });
-
-      if (error) {
-        logger.error('Error marking rating as helpful:', error);
-        throw error;
-      }
+      // Tables don't exist yet
+      logger.warn('Rating tables do not exist yet. Helpful count not updated.');
     },
     onSuccess: () => {
-      // Invalidate all ratings queries to refresh counts
-      queryClient.invalidateQueries({ queryKey: ['ratings'] });
-      queryClient.invalidateQueries({ queryKey: ['rating-aggregate'] });
+      toast({
+        title: 'Thank you',
+        description: 'Your feedback helps improve our community.',
+      });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       logger.error('Error marking rating as helpful:', error);
     },
   });
 }
 
 // ============================================================================
-// VERIFICATION HELPERS
+// VERIFICATION CHECK (Stubbed)
 // ============================================================================
 
 /**
- * Check if user can rate a listing/user based on conversation history
+ * Check if user can rate a target
+ * NOTE: Returns canRate: false since tables don't exist yet
  */
 export function useCanRate(targetId: string | undefined, targetType: 'listing' | 'user') {
   const { user } = useAuth();
@@ -468,46 +347,8 @@ export function useCanRate(targetId: string | undefined, targetType: 'listing' |
         return { canRate: false, reason: 'Not authenticated' };
       }
 
-      // Check if user has already rated this target
-      const hasRatedQuery = supabase
-        .from('ratings')
-        .select('id', { count: 'exact', head: true })
-        .eq('reviewer_id', user.id)
-        .eq('is_active', true);
-
-      if (targetType === 'listing') {
-        hasRatedQuery.eq('listing_id', targetId);
-      } else {
-        hasRatedQuery.eq('rated_user_id', targetId);
-      }
-
-      const { count: hasRatedCount } = await hasRatedQuery;
-
-      if (hasRatedCount && hasRatedCount > 0) {
-        return { canRate: false, reason: 'You have already rated this' };
-      }
-
-      // Check if there's a conversation with this target
-      // For listings, check conversation with listing owner
-      // For users, check conversation with the user
-      const { data: conversations, error: convError } = await supabase
-        .from('conversations')
-        .select('id, participant1_id, participant2_id, messages(count)')
-        .or(`participant1_id.eq.${user.id},participant2_id.eq.${user.id}`)
-        .limit(1);
-
-      if (convError) {
-        logger.error('Error checking conversations:', convError);
-        return { canRate: false, reason: 'Error checking eligibility' };
-      }
-
-      // For now, allow rating if there's any conversation
-      // TODO: Add more sophisticated checks (e.g., deal completion)
-      if (conversations && conversations.length > 0) {
-        return { canRate: true, conversationId: conversations[0].id };
-      }
-
-      return { canRate: false, reason: 'You must have an interaction first' };
+      // Tables don't exist yet
+      return { canRate: false, reason: 'Rating feature coming soon' };
     },
     enabled: !!user?.id && !!targetId,
     staleTime: 60 * 1000, // 1 minute

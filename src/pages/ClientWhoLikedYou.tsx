@@ -83,7 +83,7 @@ const ClientWhoLikedYou = () => {
       // Fetch owner profiles
       const { data: ownerProfiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, full_name, business_name')
+        .select('id, full_name')
         .in('id', ownerIds);
 
       if (profilesError) {
@@ -100,7 +100,7 @@ const ClientWhoLikedYou = () => {
         listings = listingsData || [];
       }
 
-      const profileMap = new Map((ownerProfiles || []).map(p => [p.id, p]));
+      const profileMap = new Map((ownerProfiles || []).map((p: { id: string; full_name: string | null }) => [p.id, p]));
       const listingMap = new Map(listings.map(l => [l.id, l]));
 
       return likes.map(like => {
@@ -110,7 +110,7 @@ const ClientWhoLikedYou = () => {
           id: like.id,
           owner_id: like.owner_id,
           owner_name: profile?.full_name || 'Property Owner',
-          business_name: profile?.business_name || null,
+          business_name: null, // Field doesn't exist on profiles table
           listing_title: listing?.title || null,
           listing_id: like.listing_id,
           created_at: like.created_at,

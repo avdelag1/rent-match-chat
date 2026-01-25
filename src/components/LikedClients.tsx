@@ -73,6 +73,10 @@ interface LikedClient {
   property_types?: string[];
   moto_types?: string[];
   bicycle_types?: string[];
+  // Background check fields (optional - may not exist in all data sources)
+  has_criminal_record?: boolean;
+  background_check_status?: 'passed' | 'failed' | 'pending' | null;
+  criminal_record_type?: string | null;
 }
 
 export function LikedClients() {
