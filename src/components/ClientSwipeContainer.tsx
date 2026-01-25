@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect, memo } from 'react';
 import { triggerHaptic } from '@/utils/haptics';
 import { SimpleOwnerSwipeCard } from './SimpleOwnerSwipeCard';
-import { preloadClientImageToCache, isClientImageDecodedInCache } from './PhysicsOwnerClientCard';
+import { preloadClientImageToCache, isClientImageDecodedInCache } from '@/lib/swipe/imageCache';
 import { MatchCelebration } from './MatchCelebration';
 import { ShareDialog } from './ShareDialog';
 import { MessageConfirmationDialog } from './MessageConfirmationDialog';

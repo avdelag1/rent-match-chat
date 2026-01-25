@@ -98,6 +98,9 @@ const CardImage = memo(({ src, alt, name }: { src: string; alt: string; name?: s
     return <PlaceholderImage name={name} />;
   }
 
+  // Use smooth transition only for uncached images
+  const wasInCache = imageCache.has(src);
+
   return (
     <div
       className="absolute inset-0 w-full h-full"
@@ -109,20 +112,24 @@ const CardImage = memo(({ src, alt, name }: { src: string; alt: string; name?: s
         userSelect: 'none',
       }}
     >
-      {/* Skeleton - only show if image not in cache */}
+      {/* Skeleton - only show if image not in cache, smooth 150ms crossfade */}
       <div
         className="absolute inset-0 bg-gradient-to-br from-muted to-muted-foreground/20"
-        style={{ opacity: loaded ? 0 : 1, transition: 'opacity 0ms' }}
+        style={{
+          opacity: loaded ? 0 : 1,
+          transition: wasInCache ? 'none' : 'opacity 150ms ease-out',
+          transform: 'translateZ(0)',
+        }}
       />
 
-      {/* Image */}
+      {/* Image - smooth 150ms crossfade for uncached images */}
       <img
         src={src}
         alt={alt}
         className="absolute inset-0 w-full h-full object-cover"
         style={{
           opacity: loaded ? 1 : 0,
-          transition: 'opacity 0ms',
+          transition: wasInCache ? 'none' : 'opacity 150ms ease-out',
           WebkitUserDrag: 'none',
           pointerEvents: 'none',
         } as React.CSSProperties}

@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { triggerHaptic } from '@/utils/haptics';
 import { SimpleSwipeCard, SimpleSwipeCardRef } from './SimpleSwipeCard';
 import { SwipeActionButtonBar } from './SwipeActionButtonBar';
-import { preloadImageToCache, isImageDecodedInCache } from './PhysicsTinderSwipeCard';
+import { preloadImageToCache, isImageDecodedInCache } from '@/lib/swipe/imageCache';
 
 // FIX #3: Lazy-load modals to prevent them from affecting swipe tree
 // These are rendered via portal outside the swipe container's React tree
@@ -1027,27 +1027,26 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     const categoryColor = String(categoryInfo?.color || 'text-primary');
     return (
       <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center px-4">
+        {/* UNIFIED animation - all elements animate together, no staggered pop-in */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
           className="text-center space-y-6 p-8"
         >
-          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 400, damping: 20, delay: 0.1 }}>
-            <div className="w-24 h-24 mx-auto bg-gradient-to-br from-green-500/20 to-emerald-500/10 rounded-full flex items-center justify-center">
-              <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
-                <CategoryIcon className={`w-12 h-12 ${categoryColor}`} />
-              </motion.div>
-            </div>
-          </motion.div>
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="space-y-2">
+          <div className="w-24 h-24 mx-auto bg-gradient-to-br from-green-500/20 to-emerald-500/10 rounded-full flex items-center justify-center">
+            <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
+              <CategoryIcon className={`w-12 h-12 ${categoryColor}`} />
+            </motion.div>
+          </div>
+          <div className="space-y-2">
             <h3 className="text-xl font-semibold text-foreground">All Caught Up!</h3>
             <p className="text-muted-foreground text-sm max-w-xs mx-auto">
               You've seen all available {categoryLabel.toLowerCase()}. Check back later or refresh for new listings.
             </p>
-          </motion.div>
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="flex flex-col gap-3">
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          </div>
+          <div className="flex flex-col gap-3">
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Button
                 onClick={handleRefresh}
                 disabled={isRefreshing}
@@ -1058,7 +1057,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
               </Button>
             </motion.div>
             <p className="text-xs text-muted-foreground">New {categoryLabel.toLowerCase()} are added daily</p>
-          </motion.div>
+          </div>
         </motion.div>
       </div>
     );
@@ -1095,13 +1094,14 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     const categoryColor = String(categoryInfo?.color || 'text-primary');
     return (
       <div className="relative w-full h-full flex-1 max-w-lg mx-auto flex items-center justify-center px-4">
+        {/* UNIFIED animation - all elements animate together, no staggered pop-in */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
+          initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
           className="text-center space-y-6 p-8"
         >
-          <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
+          <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}>
             <div className="w-24 h-24 mx-auto bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
               <CategoryIcon className={`w-12 h-12 ${categoryColor}`} />
             </div>
@@ -1112,7 +1112,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
               Try adjusting your filters or refresh to discover new listings
             </p>
           </div>
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
             <Button
               onClick={handleRefresh}
               disabled={isRefreshing}

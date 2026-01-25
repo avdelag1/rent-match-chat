@@ -72,23 +72,24 @@ const CardImage = memo(({ src, alt }: { src: string; alt: string }) => {
         userSelect: 'none',
       }}
     >
-      {/* Skeleton */}
+      {/* Skeleton - GPU-accelerated with smooth 150ms crossfade */}
       <div
         className="absolute inset-0 bg-gradient-to-br from-muted to-muted-foreground/20"
         style={{
           opacity: loaded ? 0 : 1,
-          transition: 'opacity 50ms ease-out',
+          transition: 'opacity 150ms ease-out',
+          transform: 'translateZ(0)',
         }}
       />
 
-      {/* Image */}
+      {/* Image - smooth 150ms crossfade to prevent flash */}
       <img
         src={error ? FALLBACK_PLACEHOLDER : optimizedSrc}
         alt={alt}
         className="absolute inset-0 w-full h-full object-cover"
         style={{
           opacity: loaded ? 1 : 0,
-          transition: 'opacity 50ms ease-out',
+          transition: 'opacity 150ms ease-out',
           // CSS performance optimizations
           willChange: 'opacity',
           backfaceVisibility: 'hidden',
