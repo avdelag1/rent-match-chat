@@ -980,6 +980,7 @@ export function useSmartClientMatching(
 
         // CRITICAL: Only show CLIENT profiles to owners, exclude admins and other owners
         // PERF: Select only fields needed for owner's client swipe cards (reduces payload ~50%)
+        // FIXED: Removed non-existent columns (property_types, moto_types, bicycle_types)
         const CLIENT_SWIPE_CARD_FIELDS = `
           id,
           full_name,
@@ -999,9 +1000,7 @@ export function useSmartClientMatching(
           smoking,
           party_friendly,
           preferred_listing_type,
-          property_types,
-          moto_types,
-          bicycle_types,
+          preferred_property_types,
           user_roles!inner(role)
         `;
 
@@ -1093,16 +1092,18 @@ export function useSmartClientMatching(
               let hasMatchingCategory = false;
 
               // Check if client has preferences for any of the selected categories
+              // FIXED: Use preferred_property_types instead of non-existent columns
               for (const category of categories) {
-                if (category === 'property' && profile.property_types && profile.property_types.length > 0) {
+                if (category === 'property' && profile.preferred_property_types && profile.preferred_property_types.length > 0) {
                   hasMatchingCategory = true;
                   break;
                 }
-                if (category === 'motorcycle' && profile.moto_types && profile.moto_types.length > 0) {
+                // For motorcycle/bicycle, check preferred_listing_type or interests
+                if (category === 'motorcycle' && profile.preferred_listing_type?.includes('moto')) {
                   hasMatchingCategory = true;
                   break;
                 }
-                if (category === 'bicycle' && profile.bicycle_types && profile.bicycle_types.length > 0) {
+                if (category === 'bicycle' && profile.preferred_listing_type?.includes('bicycle')) {
                   hasMatchingCategory = true;
                   break;
                 }

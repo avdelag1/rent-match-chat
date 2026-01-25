@@ -218,9 +218,10 @@ export function LikedClients() {
           interests: profile.interests,
           monthly_income: profile.monthly_income,
           verified: profile.verified,
-          property_types: profile.property_types,
-          moto_types: profile.moto_types,
-          bicycle_types: profile.bicycle_types
+          // FIXED: Use correct column names that exist in profiles table
+          property_types: profile.preferred_property_types || [],
+          moto_types: [],  // These don't exist on profiles - use filter preferences table if needed
+          bicycle_types: []
         };
       }) as LikedClient[];
 
@@ -446,15 +447,19 @@ export function LikedClients() {
     // Category filter - IMPROVED: Use specific type fields instead of interests
     if (selectedCategory === 'all') return true;
 
-    // Match based on client's preference fields for each category
+    // FIXED: Match based on client's preference fields for each category
+    // Since moto_types and bicycle_types don't exist on profiles, show all clients for now
+    // The filtering is less strict but avoids showing empty categories
     if (selectedCategory === 'property') {
       return client.property_types && client.property_types.length > 0;
     }
     if (selectedCategory === 'motorcycle') {
-      return client.moto_types && client.moto_types.length > 0;
+      // Show all clients until we have proper moto preference tracking
+      return true;
     }
     if (selectedCategory === 'bicycle') {
-      return client.bicycle_types && client.bicycle_types.length > 0;
+      // Show all clients until we have proper bicycle preference tracking
+      return true;
     }
     if (selectedCategory === 'worker') {
       return client.interests?.some(interest =>
