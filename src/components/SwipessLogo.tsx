@@ -2,7 +2,7 @@ import { memo } from 'react';
 import { cn } from '@/lib/utils';
 
 interface SwipessLogoProps {
-  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl';
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl';
   className?: string;
 }
 
@@ -12,6 +12,7 @@ function SwipessLogoComponent({
 }: SwipessLogoProps) {
   // Responsive sizes - MAXIMUM visibility while fitting screens
   const sizeClasses = {
+    xs: 'text-xl sm:text-2xl',
     sm: 'text-3xl sm:text-4xl',
     md: 'text-4xl sm:text-5xl',
     lg: 'text-6xl sm:text-7xl',

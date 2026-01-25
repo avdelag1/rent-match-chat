@@ -129,14 +129,13 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
       const isDislike = variables.direction === 'left';
 
       if (isLike && variables.targetType === 'profile') {
-        // Owner swiping right on client - invalidate liked-clients query to refresh UI
+        // Owner swiping right on client - invalidate liked-clients cache so it shows in the list
         const invalidations = [
           queryClient.invalidateQueries({ queryKey: ['matches'] }),
-          queryClient.invalidateQueries({ queryKey: ['liked-clients'] }), // FIX: Invalidate to refresh liked clients list
-          queryClient.invalidateQueries({ queryKey: ['owner-stats'] }), // FIX: Update stats
+          queryClient.invalidateQueries({ queryKey: ['liked-clients'] }),
+          queryClient.invalidateQueries({ queryKey: ['owner-stats'] }),
         ];
         Promise.all(invalidations).catch(() => {});
-        logger.info('[useSwipeWithMatch] Invalidated liked-clients query after owner like');
       } else if (isLike && variables.targetType === 'listing') {
         // Client liking listing - DON'T invalidate cache, let optimistic update persist
         // Only invalidate matches to detect new matches

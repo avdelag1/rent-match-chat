@@ -13,7 +13,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const SVG_SOURCE = path.join(__dirname, '../public/icons/icon.svg');
+const SVG_SOURCE = path.join(__dirname, '../public/icons/s-logo.svg');
 const OUTPUT_DIR = path.join(__dirname, '../public/icons');
 
 // Icon sizes to generate

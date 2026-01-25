@@ -887,18 +887,18 @@ export function useSmartClientMatching(
       }
       try {
 
-        // Fetch liked profiles (right swipes) - these are NEVER shown again
-        const { data: likedProfiles, error: likesError } = await supabase
-          .from('likes')
-          .select('target_id')
-          .eq('user_id', userId)
-          .eq('direction', 'right');
+        // CRITICAL FIX: For owners, fetch liked clients from owner_likes table
+        // Owner swipes on clients are stored in owner_likes, not likes table
+        const { data: ownerLikedClients, error: ownerLikesError } = await supabase
+          .from('owner_likes')
+          .select('client_id')
+          .eq('owner_id', userId);
 
         const likedIds = new Set<string>();
-        if (!likesError && likedProfiles) {
-          for (const row of likedProfiles) {
-            if (row.target_id) {
-              likedIds.add(row.target_id);
+        if (!ownerLikesError && ownerLikedClients) {
+          for (const row of ownerLikedClients) {
+            if (row.client_id) {
+              likedIds.add(row.client_id);
             }
           }
         }

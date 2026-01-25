@@ -4,13 +4,14 @@ import { Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useUnreadNotifications } from '@/hooks/useUnreadNotifications';
+import { useNavigate } from 'react-router-dom';
 import { SwipessLogo } from './SwipessLogo';
 import { QuickFilterDropdown, QuickFilters } from './QuickFilterDropdown';
 import { ModeSwitcher } from './ModeSwitcher';
 
 // Colorful gradient text for "Message Activation" button - Red/Orange theme
 const MessageActivationText = () => (
-  <span className="font-bold text-xs tracking-tight bg-gradient-to-r from-red-500 via-orange-500 to-amber-500 bg-clip-text text-transparent">
+  <span className="font-bold text-sm tracking-tight bg-gradient-to-r from-red-500 via-orange-500 to-amber-500 bg-clip-text text-transparent">
     Message Activation
   </span>
 );
@@ -44,6 +45,7 @@ function TopBarComponent({
   userRole,
 }: TopBarProps) {
   const { unreadCount: notificationCount } = useUnreadNotifications();
+  const navigate = useNavigate();
 
   const defaultFilters: QuickFilters = {
     categories: [],
@@ -52,23 +54,32 @@ function TopBarComponent({
     clientType: 'all',
   };
 
+  const handleLogoClick = () => {
+    if (userRole === 'owner') {
+      navigate('/owner/dashboard');
+    } else {
+      navigate('/client/dashboard');
+    }
+  };
+
   return (
     <header
       className={cn('app-header bg-background/95 border-b border-white/5 shadow-sm', className)}
     >
-      <div className="flex items-center justify-between h-10 max-w-screen-xl mx-auto">
+      <div className="flex items-center justify-between h-12 max-w-screen-xl mx-auto">
         {/* Left side: Logo + Mode Switch + Filters */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <motion.div
-            className="flex items-center gap-0.5 select-none"
+            className="flex items-center gap-0.5 select-none cursor-pointer"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
+            onClick={handleLogoClick}
           >
-            <SwipessLogo size="sm" />
+            <SwipessLogo size="xs" />
           </motion.div>
 
           {/* Mode Switcher - Switch between Client and Owner modes */}
-          <ModeSwitcher variant="pill" size="sm" />
+          <ModeSwitcher variant="pill" size="md" />
 
           {/* Quick Filter Dropdown */}
           {showFilters && filters && onFiltersChange && userRole && (
@@ -81,11 +92,11 @@ function TopBarComponent({
         </div>
 
         {/* Right side: Actions */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           {/* Message Activations Button - Colorful Text (no badge) */}
           <Button
             variant="ghost"
-            className="relative h-10 px-3 hover:bg-white/10 rounded-xl transition-all duration-200 flex items-center"
+            className="relative h-11 px-4 hover:bg-white/10 rounded-xl transition-all duration-200 flex items-center"
             onClick={onMessageActivationsClick}
             aria-label="Message activations"
           >
@@ -96,20 +107,51 @@ function TopBarComponent({
           <Button
             variant="ghost"
             size="icon"
-            className="relative h-10 w-10 hover:bg-white/10 rounded-xl transition-all duration-200"
+            className="relative h-11 w-11 hover:bg-white/10 rounded-xl transition-all duration-200 group"
             onClick={onNotificationsClick}
             aria-label={`Notifications${notificationCount > 0 ? ` (${notificationCount} unread)` : ''}`}
           >
-            <Bell className="h-5 w-5 text-foreground/80" />
+            <motion.div
+              className="relative"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+            >
+              {/* Bell icon with gradient on hover */}
+              <Bell
+                className={cn(
+                  "h-6 w-6 transition-all duration-300",
+                  notificationCount > 0
+                    ? "text-orange-500 group-hover:text-orange-400"
+                    : "text-foreground/80 group-hover:text-foreground"
+                )}
+              />
+              {/* Animated ring effect when there are notifications */}
+              <AnimatePresence>
+                {notificationCount > 0 && (
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1.2, opacity: 0 }}
+                    exit={{ scale: 1.5, opacity: 0 }}
+                    transition={{
+                      duration: 1.5,
+                      repeat: Infinity,
+                      ease: "easeOut"
+                    }}
+                    className="absolute inset-0 rounded-full border-2 border-orange-500"
+                  />
+                )}
+              </AnimatePresence>
+            </motion.div>
             <AnimatePresence mode="wait">
               {notificationCount > 0 && (
                 <motion.span
                   key="notification-badge"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.15 }}
-                  className="absolute -top-0.5 -right-0.5 bg-gradient-to-br from-red-500 to-orange-500 text-white text-[10px] font-bold rounded-full min-w-[20px] h-[20px] flex items-center justify-center shadow-lg shadow-red-500/50 ring-2 ring-background"
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0, opacity: 0 }}
+                  transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+                  className="absolute -top-0.5 -right-0.5 bg-gradient-to-br from-orange-500 to-red-500 text-white text-[10px] font-bold rounded-full min-w-[20px] h-[20px] flex items-center justify-center shadow-lg shadow-orange-500/50 ring-2 ring-background"
                 >
                   {notificationCount > 99 ? '99+' : notificationCount}
                 </motion.span>
