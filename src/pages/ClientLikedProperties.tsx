@@ -61,11 +61,11 @@ function MotorcycleIcon({ className }: { className?: string }) {
 
 // Category configuration with dynamic titles
 const categories = [
-  { id: 'all', label: 'all', icon: Flame, title: 'liked items', subtitle: 'items you\'ve shown interest in' },
-  { id: 'property', label: 'properties', icon: Home, title: 'liked properties', subtitle: 'properties you\'ve shown interest in' },
-  { id: 'motorcycle', label: 'motos', icon: MotorcycleIcon, title: 'liked motos', subtitle: 'motorcycles you\'ve shown interest in' },
-  { id: 'bicycle', label: 'bikes', icon: Bike, title: 'liked bikes', subtitle: 'bicycles you\'ve shown interest in' },
-  { id: 'worker', label: 'services', icon: Briefcase, title: 'liked services', subtitle: 'services you\'ve shown interest in' },
+  { id: 'all', label: 'all', icon: Flame, title: 'Your Likes', subtitle: '' },
+  { id: 'property', label: 'properties', icon: Home, title: 'Your Likes', subtitle: '' },
+  { id: 'motorcycle', label: 'motos', icon: MotorcycleIcon, title: 'Your Likes', subtitle: '' },
+  { id: 'bicycle', label: 'bikes', icon: Bike, title: 'Your Likes', subtitle: '' },
+  { id: 'worker', label: 'services', icon: Briefcase, title: 'Your Likes', subtitle: '' },
 ];
 
 const ClientLikedProperties = () => {

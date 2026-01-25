@@ -124,18 +124,6 @@ export function LikedClients() {
 
       logger.info('[LikedClients] Fetching liked clients for owner:', user.id);
 
-      // CRITICAL FIX: Get owner's listing categories to filter clients appropriately
-      const { data: ownerListings } = await supabase
-        .from('listings')
-        .select('category')
-        .eq('owner_id', user.id)
-        .eq('status', 'active');
-
-      // Extract unique categories from owner's listings
-      const ownerCategories = new Set(
-        (ownerListings || []).map(listing => listing.category).filter(Boolean)
-      );
-
       // Get likes where the owner liked clients from owner_likes table
       const { data: ownerLikes, error: likesError } = await supabase
         .from('owner_likes')
@@ -205,30 +193,12 @@ export function LikedClients() {
 
       if (!profiles || profiles.length === 0) return [];
 
-      // CRITICAL FIX: Filter clients to only show those interested in owner's listing categories
-      // This prevents showing clients interested in vehicles/yachts when owner only has properties
-      const filteredProfiles = profiles.filter(profile => {
-        // If owner has no active listings, show all liked clients
-        if (ownerCategories.size === 0) return true;
-
-        // Check if client's interests/preferences match any of owner's listing categories
-        // Map category names: property, motorcycle, bicycle, yacht, vehicle, worker
-        const hasMatchingInterest =
-          (ownerCategories.has('property') && profile.property_types?.length > 0) ||
-          (ownerCategories.has('motorcycle') && profile.moto_types?.length > 0) ||
-          (ownerCategories.has('bicycle') && profile.bicycle_types?.length > 0) ||
-          (ownerCategories.has('yacht') && profile.interests?.some((i: string) =>
-            i.toLowerCase().includes('yacht') || i.toLowerCase().includes('boat'))) ||
-          (ownerCategories.has('vehicle') && profile.interests?.some((i: string) =>
-            i.toLowerCase().includes('car') || i.toLowerCase().includes('vehicle'))) ||
-          (ownerCategories.has('worker') && profile.interests?.some((i: string) =>
-            i.toLowerCase().includes('service') || i.toLowerCase().includes('worker')));
-
-        return hasMatchingInterest;
-      });
+      // FIX: Show ALL liked clients without category filtering
+      // Owners should see every client they liked, regardless of category matching
+      // Category filtering is done via the UI tabs, not in the data fetch
 
       // Return the client profiles with like data
-      const likedClientsList = filteredProfiles.map(profile => {
+      const likedClientsList = profiles.map(profile => {
         const like = ownerLikes.find(l => l.client_id === profile.id);
         return {
           id: profile.id,
@@ -571,8 +541,8 @@ export function LikedClients() {
                 <Flame className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div>
-                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Liked Clients</h1>
-                <p className="text-sm sm:text-base text-muted-foreground">Manage your liked client profiles and start conversations</p>
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Your Likes</h1>
+                <p className="text-sm sm:text-base text-muted-foreground">Clients you've liked</p>
               </div>
             </div>
             <Button
