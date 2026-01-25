@@ -73,11 +73,18 @@ const clientTypeOptions: { id: OwnerClientType; label: string; icon: React.React
   { id: 'buy', label: 'Buying', icon: <Briefcase className="w-4 h-4" />, color: 'from-green-500 to-emerald-500' },
 ];
 
-// Pink/Mexican color "Quick Filter" text
+// Pink/Mexican color "Quick Filter" text - responsive sizing
 const QuickFilterText = () => (
-  <span className="font-semibold text-sm tracking-tight whitespace-nowrap bg-gradient-to-r from-pink-500 via-rose-500 to-pink-400 bg-clip-text text-transparent">
-    Quick Filter
-  </span>
+  <>
+    {/* Abbreviated on very small screens */}
+    <span className="sm:hidden font-semibold text-xs tracking-tight whitespace-nowrap bg-gradient-to-r from-pink-500 via-rose-500 to-pink-400 bg-clip-text text-transparent">
+      Filter
+    </span>
+    {/* Full text on larger screens */}
+    <span className="hidden sm:inline font-semibold text-sm tracking-tight whitespace-nowrap bg-gradient-to-r from-pink-500 via-rose-500 to-pink-400 bg-clip-text text-transparent">
+      Quick Filter
+    </span>
+  </>
 );
 
 function QuickFilterDropdownComponent({ filters, onChange, userRole, className }: QuickFilterDropdownProps) {
@@ -350,14 +357,14 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
 
   return (
     <div className={cn('relative', className)}>
-      {/* Quick Filter Button - IMPROVED: Better touch target */}
+      {/* Quick Filter Button - IMPROVED: Better touch target and responsive sizing */}
       <motion.button
         ref={buttonRef}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          'relative flex items-center gap-2 px-5 h-11 rounded-xl transition-all duration-200 touch-manipulation',
+          'relative flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 md:px-5 h-9 sm:h-10 md:h-11 rounded-xl transition-all duration-200 touch-manipulation',
           'bg-white/5 hover:bg-white/10'
         )}
       >
@@ -369,7 +376,7 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0 }}
-              className="bg-gradient-to-br from-orange-500 to-pink-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center"
+              className="bg-gradient-to-br from-orange-500 to-pink-500 text-white text-[10px] sm:text-xs font-bold rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center"
             >
               {activeFilterCount}
             </motion.span>

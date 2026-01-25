@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell } from 'lucide-react';
+import { Bell, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useUnreadNotifications } from '@/hooks/useUnreadNotifications';
@@ -10,10 +10,16 @@ import { QuickFilterDropdown, QuickFilters } from './QuickFilterDropdown';
 import { ModeSwitcher } from './ModeSwitcher';
 
 // Colorful gradient text for "Message Activation" button - Red/Orange theme
+// Shows full text on md+ screens, abbreviated on smaller screens
 const MessageActivationText = () => (
-  <span className="font-bold text-sm tracking-tight bg-gradient-to-r from-red-500 via-orange-500 to-amber-500 bg-clip-text text-transparent">
-    Message Activation
-  </span>
+  <>
+    {/* Full text on medium screens and up */}
+    <span className="hidden sm:inline font-bold text-xs sm:text-sm tracking-tight bg-gradient-to-r from-red-500 via-orange-500 to-amber-500 bg-clip-text text-transparent whitespace-nowrap">
+      Message Activation
+    </span>
+    {/* Icon only on extra small screens */}
+    <Zap className="sm:hidden h-5 w-5 text-orange-500" />
+  </>
 );
 
 export type OwnerClientGender = 'female' | 'male' | 'any';
@@ -66,11 +72,11 @@ function TopBarComponent({
     <header
       className={cn('app-header bg-background/95 border-b border-white/5 shadow-sm', className)}
     >
-      <div className="flex items-center justify-between h-12 max-w-screen-xl mx-auto">
+      <div className="flex items-center justify-between h-12 max-w-screen-xl mx-auto gap-1 sm:gap-2">
         {/* Left side: Logo + Mode Switch + Filters */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 min-w-0 flex-shrink">
           <motion.div
-            className="flex items-center gap-0.5 select-none cursor-pointer"
+            className="flex items-center gap-0.5 select-none cursor-pointer flex-shrink-0"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleLogoClick}
@@ -79,35 +85,40 @@ function TopBarComponent({
           </motion.div>
 
           {/* Mode Switcher - Switch between Client and Owner modes */}
-          <ModeSwitcher variant="pill" size="md" />
+          <div className="flex-shrink-0">
+            <ModeSwitcher variant="pill" size="sm" className="md:hidden" />
+            <ModeSwitcher variant="pill" size="md" className="hidden md:flex" />
+          </div>
 
           {/* Quick Filter Dropdown */}
           {showFilters && filters && onFiltersChange && userRole && (
-            <QuickFilterDropdown
-              filters={filters}
-              onChange={onFiltersChange}
-              userRole={userRole}
-            />
+            <div className="flex-shrink-0">
+              <QuickFilterDropdown
+                filters={filters}
+                onChange={onFiltersChange}
+                userRole={userRole}
+              />
+            </div>
           )}
         </div>
 
-        {/* Right side: Actions */}
-        <div className="flex items-center gap-2">
+        {/* Right side: Actions - Always visible */}
+        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
           {/* Message Activations Button - Colorful Text (no badge) */}
           <Button
             variant="ghost"
-            className="relative h-11 px-4 hover:bg-white/10 rounded-xl transition-all duration-200 flex items-center"
+            className="relative h-9 sm:h-10 md:h-11 px-2 sm:px-3 md:px-4 hover:bg-white/10 rounded-xl transition-all duration-200 flex items-center"
             onClick={onMessageActivationsClick}
             aria-label="Message activations"
           >
             <MessageActivationText />
           </Button>
 
-          {/* Notifications */}
+          {/* Notifications - Always visible with prominent styling */}
           <Button
             variant="ghost"
             size="icon"
-            className="relative h-11 w-11 hover:bg-white/10 rounded-xl transition-all duration-200 group"
+            className="relative h-9 w-9 sm:h-10 sm:w-10 md:h-11 md:w-11 hover:bg-white/10 rounded-xl transition-all duration-200 group flex-shrink-0"
             onClick={onNotificationsClick}
             aria-label={`Notifications${notificationCount > 0 ? ` (${notificationCount} unread)` : ''}`}
           >
@@ -120,7 +131,7 @@ function TopBarComponent({
               {/* Bell icon with gradient on hover */}
               <Bell
                 className={cn(
-                  "h-6 w-6 transition-all duration-300",
+                  "h-5 w-5 sm:h-6 sm:w-6 transition-all duration-300",
                   notificationCount > 0
                     ? "text-orange-500 group-hover:text-orange-400"
                     : "text-foreground/80 group-hover:text-foreground"
@@ -151,7 +162,7 @@ function TopBarComponent({
                   animate={{ scale: 1, opacity: 1 }}
                   exit={{ scale: 0, opacity: 0 }}
                   transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-                  className="absolute -top-0.5 -right-0.5 bg-gradient-to-br from-orange-500 to-red-500 text-white text-[10px] font-bold rounded-full min-w-[20px] h-[20px] flex items-center justify-center shadow-lg shadow-orange-500/50 ring-2 ring-background"
+                  className="absolute -top-0.5 -right-0.5 bg-gradient-to-br from-orange-500 to-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] sm:min-w-[20px] h-[18px] sm:h-[20px] flex items-center justify-center shadow-lg shadow-orange-500/50 ring-2 ring-background"
                 >
                   {notificationCount > 99 ? '99+' : notificationCount}
                 </motion.span>
