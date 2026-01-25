@@ -147,7 +147,7 @@ const ClientProfileNew = () => {
             </motion.div>
           )}
 
-          {/* Liked Properties & Who Liked You */}
+          {/* Your Likes & Who Liked You */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}

@@ -193,9 +193,9 @@ export function LikedClients() {
 
       if (!profiles || profiles.length === 0) return [];
 
-      // FIX: Show ALL liked clients - don't filter by category
-      // If an owner liked a client, they should see them in their liked list
-      // The category tabs below allow filtering by interest type
+      // FIX: Show ALL liked clients without category filtering
+      // Owners should see every client they liked, regardless of category matching
+      // Category filtering is done via the UI tabs, not in the data fetch
 
       // Return the client profiles with like data
       const likedClientsList = profiles.map(profile => {
@@ -541,8 +541,8 @@ export function LikedClients() {
                 <Flame className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div>
-                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Liked Clients</h1>
-                <p className="text-sm sm:text-base text-muted-foreground">Manage your liked client profiles and start conversations</p>
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Your Likes</h1>
+                <p className="text-sm sm:text-base text-muted-foreground">Clients you've liked</p>
               </div>
             </div>
             <Button

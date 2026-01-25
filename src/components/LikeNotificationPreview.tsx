@@ -161,7 +161,7 @@ export function LikeNotificationPreview({
         {/* Header - Show role instead of name */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
+            <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${likerInfo.type === 'client' ? 'from-cyan-500 to-blue-500' : 'from-orange-500 to-red-500'} flex items-center justify-center`}>
               <Flame className="w-5 h-5 text-white fill-white" />
             </div>
             <div>
