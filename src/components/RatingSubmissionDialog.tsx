@@ -95,13 +95,15 @@ export function RatingSubmissionDialog({
     }
 
     const input: CreateRatingInput = {
-      [targetType === 'listing' ? 'listing_id' : 'rated_user_id']: targetId,
-      category_id: categoryId,
-      overall_rating: overallRating,
-      category_ratings: categoryRatings,
+      [targetType === 'listing' ? 'listing_id' : 'reviewed_id']: targetId,
+      rating: overallRating,
       review_title: reviewTitle.trim() || undefined,
-      review_text: reviewText.trim() || undefined,
-      conversation_id: canRateData?.conversationId,
+      comment: reviewText.trim() || undefined,
+      cleanliness_rating: categoryRatings['cleanliness'],
+      communication_rating: categoryRatings['communication'],
+      accuracy_rating: categoryRatings['accuracy'],
+      location_rating: categoryRatings['location'],
+      value_rating: categoryRatings['value'],
     };
 
     try {

@@ -3127,6 +3127,7 @@ export type Database = {
           age: number | null
           amenities_wanted: string[] | null
           avatar_url: string | null
+          average_rating: number | null
           background_check_available: boolean | null
           background_check_required: boolean | null
           bio: string | null
@@ -3258,6 +3259,7 @@ export type Database = {
           social_media_verification: string | null
           specializations: string[] | null
           theme_preference: string | null
+          total_reviews: number | null
           travel_frequency: string | null
           updated_at: string | null
           usage_intent: string | null
@@ -3274,6 +3276,7 @@ export type Database = {
           age?: number | null
           amenities_wanted?: string[] | null
           avatar_url?: string | null
+          average_rating?: number | null
           background_check_available?: boolean | null
           background_check_required?: boolean | null
           bio?: string | null
@@ -3405,6 +3408,7 @@ export type Database = {
           social_media_verification?: string | null
           specializations?: string[] | null
           theme_preference?: string | null
+          total_reviews?: number | null
           travel_frequency?: string | null
           updated_at?: string | null
           usage_intent?: string | null
@@ -3421,6 +3425,7 @@ export type Database = {
           age?: number | null
           amenities_wanted?: string[] | null
           avatar_url?: string | null
+          average_rating?: number | null
           background_check_available?: boolean | null
           background_check_required?: boolean | null
           bio?: string | null
@@ -3552,6 +3557,7 @@ export type Database = {
           social_media_verification?: string | null
           specializations?: string[] | null
           theme_preference?: string | null
+          total_reviews?: number | null
           travel_frequency?: string | null
           updated_at?: string | null
           usage_intent?: string | null
@@ -4411,30 +4417,118 @@ export type Database = {
         }
         Relationships: []
       }
-      reviews: {
+      review_helpful_votes: {
         Row: {
-          comment: string | null
-          created_at: string | null
+          created_at: string
           id: string
-          listing_id: string | null
-          rating: number | null
-          reviewer_id: string | null
+          review_id: string
+          user_id: string
         }
         Insert: {
-          comment?: string | null
-          created_at?: string | null
-          id: string
-          listing_id?: string | null
-          rating?: number | null
-          reviewer_id?: string | null
+          created_at?: string
+          id?: string
+          review_id: string
+          user_id: string
         }
         Update: {
-          comment?: string | null
-          created_at?: string | null
+          created_at?: string
           id?: string
+          review_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_helpful_votes_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_helpful_votes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_helpful_votes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reviews: {
+        Row: {
+          accuracy_rating: number | null
+          cleanliness_rating: number | null
+          comment: string | null
+          communication_rating: number | null
+          created_at: string | null
+          flag_reason: string | null
+          helpful_count: number | null
+          id: string
+          is_flagged: boolean | null
+          is_verified_stay: boolean | null
+          listing_id: string | null
+          location_rating: number | null
+          rating: number | null
+          responded_at: string | null
+          response_text: string | null
+          review_title: string | null
+          review_type: string | null
+          reviewed_id: string | null
+          reviewer_id: string | null
+          updated_at: string | null
+          value_rating: number | null
+        }
+        Insert: {
+          accuracy_rating?: number | null
+          cleanliness_rating?: number | null
+          comment?: string | null
+          communication_rating?: number | null
+          created_at?: string | null
+          flag_reason?: string | null
+          helpful_count?: number | null
+          id: string
+          is_flagged?: boolean | null
+          is_verified_stay?: boolean | null
           listing_id?: string | null
+          location_rating?: number | null
           rating?: number | null
+          responded_at?: string | null
+          response_text?: string | null
+          review_title?: string | null
+          review_type?: string | null
+          reviewed_id?: string | null
           reviewer_id?: string | null
+          updated_at?: string | null
+          value_rating?: number | null
+        }
+        Update: {
+          accuracy_rating?: number | null
+          cleanliness_rating?: number | null
+          comment?: string | null
+          communication_rating?: number | null
+          created_at?: string | null
+          flag_reason?: string | null
+          helpful_count?: number | null
+          id?: string
+          is_flagged?: boolean | null
+          is_verified_stay?: boolean | null
+          listing_id?: string | null
+          location_rating?: number | null
+          rating?: number | null
+          responded_at?: string | null
+          response_text?: string | null
+          review_title?: string | null
+          review_type?: string | null
+          reviewed_id?: string | null
+          reviewer_id?: string | null
+          updated_at?: string | null
+          value_rating?: number | null
         }
         Relationships: [
           {
@@ -4456,6 +4550,20 @@ export type Database = {
             columns: ["listing_id"]
             isOneToOne: false
             referencedRelation: "listings_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_reviewed_id_fkey"
+            columns: ["reviewed_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_reviewed_id_fkey"
+            columns: ["reviewed_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
           {
@@ -7067,6 +7175,10 @@ export type Database = {
       increment_conversation_count: {
         Args: { p_user_id: string }
         Returns: boolean
+      }
+      increment_review_helpful: {
+        Args: { p_review_id: string }
+        Returns: undefined
       }
       increment_usage_count:
         | { Args: never; Returns: undefined }

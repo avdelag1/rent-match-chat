@@ -68,7 +68,7 @@ const ClientProfileCardComponent = ({
   const rotate = useTransform(x, [-200, 200], [-15, 15]);
 
   // Fetch rating aggregate for this client profile
-  const { data: ratingAggregate, isLoading: isRatingLoading } = useUserRatingAggregate(profile.user_id || String(profile.id), 'client');
+  const { data: ratingAggregate, isLoading: isRatingLoading } = useUserRatingAggregate(profile.user_id || String(profile.id));
 
   const images = profile.profile_images || [];
   const hasMultipleImages = images.length > 1;

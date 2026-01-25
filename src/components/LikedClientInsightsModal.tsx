@@ -69,7 +69,7 @@ function LikedClientInsightsModalComponent({ open, onOpenChange, client }: Liked
   const [reportDetails, setReportDetails] = useState('');
 
   // Fetch rating aggregate for this client
-  const { data: ratingAggregate } = useUserRatingAggregate(client?.user_id, 'client');
+  const { data: ratingAggregate } = useUserRatingAggregate(client?.user_id);
 
   const clientImages = client?.profile_images || client?.images || [];
 
