@@ -67,8 +67,29 @@ interface CompactRatingDisplayProps {
   showReviews?: boolean;
 }
 
-export const CompactRatingDisplay = memo<CompactRatingDisplayProps>(
-  ({ aggregate, className, showReviews = true }) => {
+// Skeleton loader for rating display
+const RatingSkeleton = memo(() => (
+  <div className="flex items-center gap-2 text-sm animate-pulse">
+    <div className="flex items-center gap-1">
+      <div className="w-4 h-4 bg-muted rounded" />
+      <div className="w-8 h-4 bg-muted rounded" />
+    </div>
+    <div className="w-12 h-5 bg-muted rounded-full" />
+  </div>
+));
+
+RatingSkeleton.displayName = 'RatingSkeleton';
+
+interface CompactRatingDisplayPropsWithLoading extends CompactRatingDisplayProps {
+  isLoading?: boolean;
+}
+
+export const CompactRatingDisplay = memo<CompactRatingDisplayPropsWithLoading>(
+  ({ aggregate, className, showReviews = true, isLoading = false }) => {
+    if (isLoading) {
+      return <RatingSkeleton />;
+    }
+
     if (!aggregate) {
       // No ratings yet - show default 5.0 with "New" badge
       return (

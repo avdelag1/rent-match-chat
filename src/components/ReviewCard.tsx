@@ -1,3 +1,10 @@
+/**
+ * @deprecated This component is DEPRECATED and uses the old review system.
+ * Use @/components/RatingDisplay.tsx components instead.
+ *
+ * This file is kept for reference only and will not function with the current database schema.
+ */
+
 import { Star, User } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
