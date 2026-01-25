@@ -109,10 +109,8 @@ export function LikedClients() {
   const categories = [
     { id: 'all', label: 'All', icon: Users },
     { id: 'property', label: 'Property', icon: Home },
-    { id: 'vehicle', label: 'Vehicle', icon: Car },
-    { id: 'motorcycle', label: 'Moto', icon: Car },
+    { id: 'motorcycle', label: 'Motos', icon: Car },
     { id: 'bicycle', label: 'Bicycle', icon: Bike },
-    { id: 'yacht', label: 'Yacht', icon: Ship },
     { id: 'worker', label: 'Services', icon: Users }
   ];
 
@@ -457,16 +455,6 @@ export function LikedClients() {
     }
     if (selectedCategory === 'bicycle') {
       return client.bicycle_types && client.bicycle_types.length > 0;
-    }
-    if (selectedCategory === 'vehicle') {
-      return client.interests?.some(interest =>
-        interest.toLowerCase().includes('car') || interest.toLowerCase().includes('vehicle')
-      );
-    }
-    if (selectedCategory === 'yacht') {
-      return client.interests?.some(interest =>
-        interest.toLowerCase().includes('yacht') || interest.toLowerCase().includes('boat')
-      );
     }
     if (selectedCategory === 'worker') {
       return client.interests?.some(interest =>

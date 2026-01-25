@@ -7,7 +7,7 @@
 /**
  * Available listing categories
  * These are the UI representation values
- * Note: 'services' maps to 'worker' in the database
+ * IMPORTANT: Only properties, motos, bicycles, and services are supported
  */
 export type QuickFilterCategory =
   | 'property'
