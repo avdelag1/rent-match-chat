@@ -10,16 +10,13 @@ import { QuickFilterDropdown, QuickFilters } from './QuickFilterDropdown';
 import { ModeSwitcher } from './ModeSwitcher';
 import { useScrollDirection } from '@/hooks/useScrollDirection';
 
-// Colorful gradient text for "Message Activation" button - ULTRA BRIGHT with glow
-// Shows full text on md+ screens, abbreviated on smaller screens
+// Clean bright text for "Message Activation" button - no glow, pure color
 const MessageActivationText = () => (
   <>
-    {/* Full text on medium screens and up */}
-    <span className="hidden sm:inline font-bold text-xs sm:text-sm tracking-tight bg-gradient-to-r from-amber-300 via-orange-400 to-yellow-300 bg-clip-text text-transparent whitespace-nowrap drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]">
+    <span className="hidden sm:inline font-bold text-sm tracking-tight bg-gradient-to-r from-amber-400 via-orange-500 to-yellow-400 bg-clip-text text-transparent whitespace-nowrap">
       Message Activation
     </span>
-    {/* Icon only on extra small screens - brighter glow */}
-    <Zap className="sm:hidden h-5 w-5 text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
+    <Zap className="sm:hidden h-5 w-5 text-amber-400" />
   </>
 );
 
@@ -96,9 +93,9 @@ function TopBarComponent({
         className
       )}
     >
-      <div className="flex items-center justify-between h-12 max-w-screen-xl mx-auto gap-1 sm:gap-2">
-        {/* Left side: Logo + Mode Switch + Filters */}
-        <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 min-w-0 flex-shrink">
+      <div className="flex items-center justify-between h-12 max-w-screen-xl mx-auto gap-2">
+        {/* Left side: Logo + Mode Switch + Filters - properly aligned */}
+        <div className="flex items-center gap-3 min-w-0 flex-shrink">
           <motion.div
             className="flex items-center gap-0.5 select-none cursor-pointer flex-shrink-0"
             whileHover={{ scale: 1.02 }}
@@ -152,13 +149,13 @@ function TopBarComponent({
               whileTap={{ scale: 0.95 }}
               transition={{ type: 'spring', stiffness: 400, damping: 17 }}
             >
-              {/* Bell icon - ULTRA BRIGHT with glow */}
+              {/* Bell icon - clean bright color */}
               <Bell
                 className={cn(
-                  "h-5 w-5 sm:h-6 sm:w-6 transition-all duration-300",
+                  "h-5 w-5 sm:h-6 sm:w-6 transition-colors duration-200",
                   notificationCount > 0
-                    ? "text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)] group-hover:text-amber-200"
-                    : "text-white drop-shadow-[0_0_4px_rgba(255,255,255,0.5)] group-hover:text-white"
+                    ? "text-amber-400 group-hover:text-amber-300"
+                    : "text-white/90 group-hover:text-white"
                 )}
               />
               {/* Animated ring effect when there are notifications */}

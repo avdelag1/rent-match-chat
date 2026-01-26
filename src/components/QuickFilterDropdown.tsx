@@ -73,15 +73,13 @@ const clientTypeOptions: { id: OwnerClientType; label: string; icon: React.React
   { id: 'buy', label: 'Buying', icon: <Briefcase className="w-4 h-4" />, color: 'from-green-500 to-emerald-500' },
 ];
 
-// ULTRA BRIGHT Pink/Mexican color "Quick Filter" text - with glow effect
+// Clean bright Pink text for "Quick Filter" button - no glow
 const QuickFilterText = () => (
   <>
-    {/* Abbreviated on very small screens */}
-    <span className="sm:hidden font-bold text-xs tracking-tight whitespace-nowrap bg-gradient-to-r from-pink-300 via-rose-400 to-pink-300 bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(244,114,182,0.7)]">
+    <span className="sm:hidden font-bold text-xs tracking-tight whitespace-nowrap text-pink-400">
       Filter
     </span>
-    {/* Full text on larger screens */}
-    <span className="hidden sm:inline font-bold text-sm tracking-tight whitespace-nowrap bg-gradient-to-r from-pink-300 via-rose-400 to-pink-300 bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(244,114,182,0.7)]">
+    <span className="hidden sm:inline font-bold text-sm tracking-tight whitespace-nowrap text-pink-400">
       Quick Filter
     </span>
   </>

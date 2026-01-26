@@ -164,29 +164,29 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
     return location.pathname === item.path;
   };
 
-  // Get icon color class only (for the Icon component) - ULTRA BRIGHT with glow
+  // Get icon color class - clean bright colors, no glow
   const getIconColorClass = (item: NavItem, active: boolean) => {
-    if (!active) return 'text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.6)]';
+    if (!active) return 'text-white/70';
 
     switch (item.id) {
       case 'browse':
-        return 'text-white drop-shadow-[0_0_16px_rgba(255,255,255,1)]';
+        return 'text-white';
       case 'likes':
       case 'liked':
-        return 'text-orange-300 drop-shadow-[0_0_20px_rgba(251,146,60,1)]';
+        return 'text-orange-400';
       case 'messages':
-        return 'text-blue-300 drop-shadow-[0_0_20px_rgba(96,165,250,1)]';
+        return 'text-blue-400';
       case 'listings':
-        return 'text-white drop-shadow-[0_0_16px_rgba(255,255,255,1)]';
+        return 'text-white';
       case 'profile':
-        return 'text-white drop-shadow-[0_0_16px_rgba(255,255,255,1)]';
+        return 'text-white';
       case 'hire':
       case 'services':
-        return 'text-emerald-300 drop-shadow-[0_0_20px_rgba(52,211,153,1)]';
+        return 'text-emerald-400';
       case 'filter':
-        return 'text-purple-300 drop-shadow-[0_0_20px_rgba(192,132,252,1)]';
+        return 'text-purple-400';
       default:
-        return 'text-white drop-shadow-[0_0_16px_rgba(255,255,255,1)]';
+        return 'text-white';
     }
   };
 
