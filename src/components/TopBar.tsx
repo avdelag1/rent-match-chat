@@ -131,7 +131,7 @@ function TopBarComponent({
           {/* Message Activations Button - ULTRA BRIGHT with glow effect */}
           <Button
             variant="ghost"
-            className="relative h-9 sm:h-10 md:h-11 px-2 sm:px-3 md:px-4 hover:bg-white/15 rounded-xl transition-all duration-200 flex items-center border border-amber-500/30 bg-amber-500/10 hover:border-amber-400/50 shadow-[0_0_12px_rgba(251,191,36,0.3)] hover:shadow-[0_0_20px_rgba(251,191,36,0.5)]"
+            className="relative h-9 sm:h-10 md:h-11 px-2 sm:px-3 md:px-4 hover:bg-transparent rounded-xl transition-all duration-200 flex items-center"
             onClick={onMessageActivationsClick}
             aria-label="Message activations"
           >
@@ -142,7 +142,7 @@ function TopBarComponent({
           <Button
             variant="ghost"
             size="icon"
-            className="relative h-9 w-9 sm:h-10 sm:w-10 md:h-11 md:w-11 hover:bg-white/15 rounded-xl transition-all duration-200 group flex-shrink-0 border border-orange-500/30 bg-orange-500/10 hover:border-orange-400/50 shadow-[0_0_10px_rgba(249,115,22,0.25)] hover:shadow-[0_0_16px_rgba(249,115,22,0.4)]"
+            className="relative h-9 w-9 sm:h-10 sm:w-10 md:h-11 md:w-11 hover:bg-transparent rounded-xl transition-all duration-200 group flex-shrink-0"
             onClick={onNotificationsClick}
             aria-label={`Notifications${notificationCount > 0 ? ` (${notificationCount} unread)` : ''}`}
           >

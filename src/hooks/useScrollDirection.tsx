@@ -44,9 +44,15 @@ export function useScrollDirection({
   const ticking = useRef(false);
 
   const updateScrollDirection = useCallback(() => {
-    const target = targetSelector 
-      ? document.querySelector(targetSelector) 
-      : null;
+    // Try the specified selector first, then fall back to main content area, then window
+    let target = targetSelector ? document.querySelector(targetSelector) : null;
+    
+    // Fallback to common scroll containers if selector not found
+    if (!target && targetSelector) {
+      target = document.querySelector('main[class*="overflow"]') || 
+               document.querySelector('[class*="dashboard-content"]') ||
+               document.querySelector('main');
+    }
     
     const currentScrollY = target 
       ? target.scrollTop 
