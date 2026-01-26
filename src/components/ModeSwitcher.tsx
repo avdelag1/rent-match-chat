@@ -162,7 +162,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
     );
   }
 
-  // Pill variant (default) - Compact with mode indicator + micro-animations - ULTRA BRIGHT
+  // Pill variant (default) - Compact with mode indicator - clean bright colors
   return (
     <motion.button
       onClick={(e) => handleToggle(e)}
@@ -193,20 +193,20 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
             <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
           ) : activeMode === 'client' ? (
             <>
-              <Search className="h-3.5 w-3.5 text-orange-400 drop-shadow-[0_0_6px_rgba(249,115,22,0.7)]" />
-              <span className="font-bold text-orange-400 drop-shadow-[0_0_4px_rgba(249,115,22,0.5)]">Client</span>
+              <Search className="h-3.5 w-3.5 text-orange-400" />
+              <span className="font-bold text-orange-400">Client</span>
             </>
           ) : (
             <>
-              <Briefcase className="h-3.5 w-3.5 text-emerald-400 drop-shadow-[0_0_6px_rgba(16,185,129,0.7)]" />
-              <span className="font-bold text-emerald-400 drop-shadow-[0_0_4px_rgba(16,185,129,0.5)]">Owner</span>
+              <Briefcase className="h-3.5 w-3.5 text-emerald-400" />
+              <span className="font-bold text-emerald-400">Owner</span>
             </>
           )}
         </motion.div>
       </AnimatePresence>
 
       {/* Switch icon */}
-      <ArrowLeftRight className="h-3 w-3 text-muted-foreground opacity-60" />
+      <ArrowLeftRight className="h-3 w-3 text-white/60" />
     </motion.button>
   );
 }
