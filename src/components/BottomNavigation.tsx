@@ -166,27 +166,27 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
 
   // Get icon color class only (for the Icon component) - ULTRA BRIGHT with glow
   const getIconColorClass = (item: NavItem, active: boolean) => {
-    if (!active) return 'text-white/80 drop-shadow-[0_0_4px_rgba(255,255,255,0.3)]';
+    if (!active) return 'text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.6)]';
 
     switch (item.id) {
       case 'browse':
-        return 'text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]';
+        return 'text-white drop-shadow-[0_0_16px_rgba(255,255,255,1)]';
       case 'likes':
       case 'liked':
-        return 'text-orange-400 drop-shadow-[0_0_10px_rgba(251,146,60,0.9)]';
+        return 'text-orange-300 drop-shadow-[0_0_20px_rgba(251,146,60,1)]';
       case 'messages':
-        return 'text-blue-400 drop-shadow-[0_0_10px_rgba(96,165,250,0.9)]';
+        return 'text-blue-300 drop-shadow-[0_0_20px_rgba(96,165,250,1)]';
       case 'listings':
-        return 'text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]';
+        return 'text-white drop-shadow-[0_0_16px_rgba(255,255,255,1)]';
       case 'profile':
-        return 'text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]';
+        return 'text-white drop-shadow-[0_0_16px_rgba(255,255,255,1)]';
       case 'hire':
       case 'services':
-        return 'text-emerald-400 drop-shadow-[0_0_10px_rgba(52,211,153,0.9)]';
+        return 'text-emerald-300 drop-shadow-[0_0_20px_rgba(52,211,153,1)]';
       case 'filter':
-        return 'text-purple-400 drop-shadow-[0_0_10px_rgba(192,132,252,0.9)]';
+        return 'text-purple-300 drop-shadow-[0_0_20px_rgba(192,132,252,1)]';
       default:
-        return 'text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]';
+        return 'text-white drop-shadow-[0_0_16px_rgba(255,255,255,1)]';
     }
   };
 

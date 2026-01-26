@@ -365,7 +365,7 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
           'relative flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 md:px-5 h-9 sm:h-10 md:h-11 rounded-xl transition-all duration-200 touch-manipulation',
-          'bg-pink-500/15 hover:bg-pink-500/25 border border-pink-500/40 hover:border-pink-400/60 shadow-[0_0_12px_rgba(244,114,182,0.3)] hover:shadow-[0_0_18px_rgba(244,114,182,0.45)]'
+          'hover:bg-transparent'
         )}
       >
         <QuickFilterText />

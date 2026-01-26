@@ -169,11 +169,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
       disabled={isSwitching || !canSwitchMode}
       className={cn(
         'relative flex items-center gap-1.5 rounded-xl px-2.5',
-        'bg-white/10 border',
-        activeMode === 'client' 
-          ? 'border-orange-500/40 shadow-[0_0_12px_rgba(249,115,22,0.35)]' 
-          : 'border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.35)]',
-        'hover:bg-white/15',
+        'hover:bg-transparent',
         'active:scale-[0.97] transition-all duration-200',
         'disabled:opacity-50 disabled:cursor-not-allowed',
         sizeClasses[size],
