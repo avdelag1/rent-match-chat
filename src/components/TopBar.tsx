@@ -10,16 +10,16 @@ import { QuickFilterDropdown, QuickFilters } from './QuickFilterDropdown';
 import { ModeSwitcher } from './ModeSwitcher';
 import { useScrollDirection } from '@/hooks/useScrollDirection';
 
-// Colorful gradient text for "Message Activation" button - BRIGHTER Red/Orange theme
+// Colorful gradient text for "Message Activation" button - ULTRA BRIGHT with glow
 // Shows full text on md+ screens, abbreviated on smaller screens
 const MessageActivationText = () => (
   <>
     {/* Full text on medium screens and up */}
-    <span className="hidden sm:inline font-bold text-xs sm:text-sm tracking-tight bg-gradient-to-r from-orange-400 via-amber-400 to-yellow-400 bg-clip-text text-transparent whitespace-nowrap drop-shadow-sm">
+    <span className="hidden sm:inline font-bold text-xs sm:text-sm tracking-tight bg-gradient-to-r from-amber-300 via-orange-400 to-yellow-300 bg-clip-text text-transparent whitespace-nowrap drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]">
       Message Activation
     </span>
-    {/* Icon only on extra small screens */}
-    <Zap className="sm:hidden h-5 w-5 text-amber-400 drop-shadow-sm" />
+    {/* Icon only on extra small screens - brighter glow */}
+    <Zap className="sm:hidden h-5 w-5 text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
   </>
 );
 
@@ -128,21 +128,21 @@ function TopBarComponent({
 
         {/* Right side: Actions - Always visible */}
         <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-          {/* Message Activations Button - Colorful Text (no badge) */}
+          {/* Message Activations Button - ULTRA BRIGHT with glow effect */}
           <Button
             variant="ghost"
-            className="relative h-9 sm:h-10 md:h-11 px-2 sm:px-3 md:px-4 hover:bg-white/10 rounded-xl transition-all duration-200 flex items-center"
+            className="relative h-9 sm:h-10 md:h-11 px-2 sm:px-3 md:px-4 hover:bg-white/15 rounded-xl transition-all duration-200 flex items-center border border-amber-500/30 bg-amber-500/10 hover:border-amber-400/50 shadow-[0_0_12px_rgba(251,191,36,0.3)] hover:shadow-[0_0_20px_rgba(251,191,36,0.5)]"
             onClick={onMessageActivationsClick}
             aria-label="Message activations"
           >
             <MessageActivationText />
           </Button>
 
-          {/* Notifications - Always visible with prominent styling */}
+          {/* Notifications - ULTRA BRIGHT with glow styling */}
           <Button
             variant="ghost"
             size="icon"
-            className="relative h-9 w-9 sm:h-10 sm:w-10 md:h-11 md:w-11 hover:bg-white/10 rounded-xl transition-all duration-200 group flex-shrink-0"
+            className="relative h-9 w-9 sm:h-10 sm:w-10 md:h-11 md:w-11 hover:bg-white/15 rounded-xl transition-all duration-200 group flex-shrink-0 border border-orange-500/30 bg-orange-500/10 hover:border-orange-400/50 shadow-[0_0_10px_rgba(249,115,22,0.25)] hover:shadow-[0_0_16px_rgba(249,115,22,0.4)]"
             onClick={onNotificationsClick}
             aria-label={`Notifications${notificationCount > 0 ? ` (${notificationCount} unread)` : ''}`}
           >
@@ -152,13 +152,13 @@ function TopBarComponent({
               whileTap={{ scale: 0.95 }}
               transition={{ type: 'spring', stiffness: 400, damping: 17 }}
             >
-              {/* Bell icon - BRIGHTER */}
+              {/* Bell icon - ULTRA BRIGHT with glow */}
               <Bell
                 className={cn(
-                  "h-5 w-5 sm:h-6 sm:w-6 transition-all duration-300 drop-shadow-sm",
+                  "h-5 w-5 sm:h-6 sm:w-6 transition-all duration-300",
                   notificationCount > 0
-                    ? "text-amber-400 group-hover:text-amber-300"
-                    : "text-white/90 group-hover:text-white"
+                    ? "text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)] group-hover:text-amber-200"
+                    : "text-white drop-shadow-[0_0_4px_rgba(255,255,255,0.5)] group-hover:text-white"
                 )}
               />
               {/* Animated ring effect when there are notifications */}

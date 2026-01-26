@@ -162,15 +162,18 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
     );
   }
 
-  // Pill variant (default) - Compact with mode indicator + micro-animations
+  // Pill variant (default) - Compact with mode indicator + micro-animations - ULTRA BRIGHT
   return (
     <motion.button
       onClick={(e) => handleToggle(e)}
       disabled={isSwitching || !canSwitchMode}
       className={cn(
         'relative flex items-center gap-1.5 rounded-xl px-2.5',
-        'bg-white/5',
-        'hover:bg-white/10',
+        'bg-white/10 border',
+        activeMode === 'client' 
+          ? 'border-orange-500/40 shadow-[0_0_12px_rgba(249,115,22,0.35)]' 
+          : 'border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.35)]',
+        'hover:bg-white/15',
         'active:scale-[0.97] transition-all duration-200',
         'disabled:opacity-50 disabled:cursor-not-allowed',
         sizeClasses[size],
@@ -194,13 +197,13 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
             <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
           ) : activeMode === 'client' ? (
             <>
-              <Search className="h-3.5 w-3.5 text-primary" />
-              <span className="font-semibold text-primary">Client</span>
+              <Search className="h-3.5 w-3.5 text-orange-400 drop-shadow-[0_0_6px_rgba(249,115,22,0.7)]" />
+              <span className="font-bold text-orange-400 drop-shadow-[0_0_4px_rgba(249,115,22,0.5)]">Client</span>
             </>
           ) : (
             <>
-              <Briefcase className="h-3.5 w-3.5 text-emerald-500" />
-              <span className="font-semibold text-emerald-500">Owner</span>
+              <Briefcase className="h-3.5 w-3.5 text-emerald-400 drop-shadow-[0_0_6px_rgba(16,185,129,0.7)]" />
+              <span className="font-bold text-emerald-400 drop-shadow-[0_0_4px_rgba(16,185,129,0.5)]">Owner</span>
             </>
           )}
         </motion.div>
