@@ -1,21 +1,15 @@
 /**
  * Ultra-Fast Service Worker - Optimized for lightning-speed loading
  * 
- * PWA UPDATE FIX: Forces downloaded PWAs to update automatically
- * - skipWaiting() called immediately on install for instant updates
- * - Version bumped with each deploy via timestamp
- * - Old caches purged aggressively on activate
+ * PWA UPDATE FIX: Controlled updates without reload loops
+ * - skipWaiting() only called via message, not automatically
+ * - Version is static (update this on each deploy)
+ * - Old caches purged on activate
  */
 
-// CRITICAL: Version timestamp - change this to force PWA update
-// This is automatically updated by the build process
-const SW_VERSION = '20260126001'; // YYYYMMDDHHH format - UPDATE ON EACH DEPLOY
-
-// Extract version from SW registration URL (e.g., /sw.js?v=1234567890)
-// Use SW_VERSION as primary, URL param as fallback
-const SW_URL = new URL(self.location);
-const URL_VERSION = SW_URL.searchParams.get('v') || SW_VERSION;
-const CACHE_VERSION = `swipess-v${URL_VERSION}`;
+// IMPORTANT: Update this version string on each deploy to trigger PWA updates
+const SW_VERSION = '2026012600';
+const CACHE_VERSION = `swipess-v${SW_VERSION}`;
 const CACHE_NAME = CACHE_VERSION;
 const STATIC_CACHE = `${CACHE_NAME}-static`;
 const DYNAMIC_CACHE = `${CACHE_NAME}-dynamic`;
@@ -80,14 +74,9 @@ self.addEventListener('message', (event) => {
   }
 });
 
-// Install service worker - SKIP WAITING immediately for instant PWA updates
+// Install service worker - DO NOT skipWaiting here to prevent reload loops
+// skipWaiting is called via message from main.tsx only during genuine updates
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing new version:', CACHE_VERSION);
-  
-  // CRITICAL: Skip waiting to activate immediately
-  // This ensures downloaded PWAs get updates right away
-  self.skipWaiting();
-  
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then((cache) => {
@@ -95,7 +84,7 @@ self.addEventListener('install', (event) => {
           new Request(url, { cache: 'reload' })
         ));
       })
-      .catch(error => console.error('[SW] Cache failed:', error))
+      .catch(() => {})
   );
 });
 
@@ -212,40 +201,36 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Activate service worker and clean old caches AGGRESSIVELY
+// Activate service worker and clean old caches
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating new version:', CACHE_VERSION);
-  
   event.waitUntil(
     Promise.all([
-      // Take control of all clients IMMEDIATELY - critical for PWA updates
+      // Take control of all clients
       self.clients.claim(),
 
-      // AGGRESSIVE CLEANUP: Delete ALL old caches from any previous version
+      // Clean up ALL old caches from previous versions
       caches.keys().then((cacheNames) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
             // Delete any cache that doesn't match current version
-            // This includes old tinderent-, swipess-, swipes-, swipematch- caches
             const isCurrentCache = cacheName === STATIC_CACHE || 
                                    cacheName === DYNAMIC_CACHE || 
                                    cacheName === IMAGE_CACHE;
             
             if (!isCurrentCache) {
-              console.log('[SW] Purging old cache:', cacheName);
               return caches.delete(cacheName);
             }
           })
         );
       }),
 
-      // Enforce cache size limits to prevent bloat
+      // Enforce cache size limits
       enforceImageCacheLimit(),
       enforceDynamicCacheLimit()
     ])
   );
 
-  // Notify clients about the update so they can refresh
+  // Notify clients about the update
   self.clients.matchAll().then(clients => {
     clients.forEach(client => {
       client.postMessage({

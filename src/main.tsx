@@ -110,66 +110,60 @@ deferredInit(async () => {
   }
 }, 5000);
 
-// Service Worker with AGGRESSIVE update handling for PWA
+// Service Worker with controlled update handling for PWA
 if ("serviceWorker" in navigator && import.meta.env.PROD) {
   window.addEventListener("load", () => {
     // Track if we had a controller before (for reload logic)
     const hadController = !!navigator.serviceWorker.controller;
     
-    // Use timestamp as version for cache busting
-    const swVersion = Date.now().toString();
+    // Store the current SW controller to detect actual updates
+    let currentController = navigator.serviceWorker.controller;
 
     navigator.serviceWorker
-      .register(`/sw.js?v=${swVersion}`)
+      .register("/sw.js")
       .then((registration) => {
-        console.log('[PWA] Service Worker registered');
-        
-        // Check for updates immediately on PWA launch
+        // Check for updates on launch (once)
         registration.update();
         
-        // Check for updates periodically (every 2 minutes for faster updates)
-        setInterval(() => registration.update(), 120000);
+        // Check for updates periodically (every 5 minutes)
+        setInterval(() => registration.update(), 300000);
 
         // Handle new SW waiting to activate
         registration.addEventListener("updatefound", () => {
           const newWorker = registration.installing;
           if (newWorker) {
-            console.log('[PWA] New Service Worker found, installing...');
             newWorker.addEventListener("statechange", () => {
-              // New SW is installed - skip waiting immediately
-              if (newWorker.state === "installed") {
-                console.log('[PWA] New version installed, activating...');
-                newWorker.postMessage({ type: "SKIP_WAITING" });
+              // New SW is installed and ready - activate it
+              if (newWorker.state === "installed" && registration.waiting) {
+                // Only skip waiting if there's an existing controller (update scenario)
+                if (navigator.serviceWorker.controller) {
+                  registration.waiting.postMessage({ type: "SKIP_WAITING" });
+                }
               }
             });
           }
         });
         
-        // If there's already a waiting worker, activate it now
-        if (registration.waiting) {
-          console.log('[PWA] Waiting worker found, activating...');
+        // If there's already a waiting worker on page load, activate it
+        if (registration.waiting && navigator.serviceWorker.controller) {
           registration.waiting.postMessage({ type: "SKIP_WAITING" });
         }
       })
-      .catch((error) => {
-        console.error('[PWA] Service Worker registration failed:', error);
-      });
+      .catch(() => {});
 
-    // Reload when new SW takes control
+    // Reload ONLY when an UPDATED SW takes control (not on first install)
     let refreshing = false;
     navigator.serviceWorker.addEventListener("controllerchange", () => {
-      if (hadController && !refreshing) {
+      // Only reload if:
+      // 1. We had a controller before (not first install)
+      // 2. The controller actually changed (real update)
+      // 3. We haven't already started refreshing
+      if (hadController && currentController && !refreshing) {
         refreshing = true;
-        console.log('[PWA] New version activated, reloading...');
         window.location.reload();
       }
-    });
-    
-    // Listen for SW update messages
-    navigator.serviceWorker.addEventListener("message", (event) => {
-      if (event.data?.type === "SW_UPDATED") {
-        console.log('[PWA] Received update notification:', event.data.version);
-      }
+      // Update reference for next check
+      currentController = navigator.serviceWorker.controller;
     });
   });
 }
