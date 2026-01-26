@@ -1,17 +1,18 @@
 /**
- * SIMPLE SWIPE CARD
+ * TINDER-STYLE SWIPE CARD
  *
- * Uses the EXACT same pattern as the landing page logo swipe.
- * Simple, clean, no complex physics - just framer-motion's built-in drag.
+ * Full diagonal movement with physics-based animations.
+ * Card follows finger freely in any direction with natural rotation.
  * 
- * PERFORMANCE OPTIMIZATIONS:
- * - Pointer events for instant touch response (no 300ms delay)
- * - GPU-accelerated transforms
- * - Press-and-hold magnifier for image inspection
+ * KEY FEATURES:
+ * - Free XY movement (diagonal swipes)
+ * - Rotation based on drag position (pivot from bottom)
+ * - Spring physics for snap-back and exit
+ * - Next card visible underneath with scale/opacity anticipation
  */
 
 import { memo, useRef, useState, useCallback, useMemo, useEffect, forwardRef, useImperativeHandle } from 'react';
-import { motion, useMotionValue, useTransform, PanInfo, animate } from 'framer-motion';
+import { motion, useMotionValue, useTransform, PanInfo, animate, useSpring } from 'framer-motion';
 import { triggerHaptic } from '@/utils/haptics';
 import { getCardImageUrl } from '@/utils/imageOptimization';
 import { Listing } from '@/hooks/useListings';
@@ -29,35 +30,32 @@ export interface SimpleSwipeCardRef {
   triggerSwipe: (direction: 'left' | 'right') => void;
 }
 
-// LOWERED thresholds for faster, more responsive swipe
-const SWIPE_THRESHOLD = 80; // Reduced from 120 - card triggers sooner
-const VELOCITY_THRESHOLD = 300; // Reduced from 500 - fast flicks work better
+// Tinder-style thresholds
+const SWIPE_THRESHOLD = 100; // Distance to trigger swipe
+const VELOCITY_THRESHOLD = 400; // Velocity to trigger swipe
 const FALLBACK_PLACEHOLDER = '/placeholder.svg';
 
-// Global image cache for instant photo switching - shared across all cards
+// Max rotation angle (degrees) based on horizontal position
+const MAX_ROTATION = 12;
+
+// Global image cache for instant photo switching
 const imageCache = new Map<string, boolean>();
 
-// Calculate exit distance dynamically based on viewport for reliable off-screen animation
-const getExitDistance = () => typeof window !== 'undefined' ? window.innerWidth + 100 : 600;
+// Calculate exit distance dynamically
+const getExitDistance = () => typeof window !== 'undefined' ? window.innerWidth * 1.5 : 800;
 
 /**
- * SPRING TUNING CONFIGS - Three pre-tuned profiles for different feels
- *
- * All configs use mass: 0.5 for lighter, more responsive feel
- * Adjust stiffness/damping to tune the snap-back behavior
+ * SPRING CONFIGS - Tinder-tuned physics
  */
 const SPRING_CONFIGS = {
-  // SNAPPY: Very responsive, minimal overshoot - feels tight and controlled
-  SNAPPY: { stiffness: 1200, damping: 40, mass: 0.5 },
-
-  // NATIVE: iOS-like feel - balanced between snappy and smooth
-  NATIVE: { stiffness: 800, damping: 35, mass: 0.5 },
-
-  // SOFT: Gentle spring with slight bounce - feels playful
-  SOFT: { stiffness: 500, damping: 30, mass: 0.6 },
+  // SNAPPY: Quick response, minimal overshoot
+  SNAPPY: { stiffness: 600, damping: 30, mass: 0.8 },
+  // NATIVE: iOS-like balanced feel (DEFAULT)
+  NATIVE: { stiffness: 400, damping: 28, mass: 1 },
+  // SOFT: Playful with bounce
+  SOFT: { stiffness: 300, damping: 22, mass: 1.2 },
 };
 
-// Active spring config - change this to switch feels
 const ACTIVE_SPRING = SPRING_CONFIGS.NATIVE;
 
 /**
@@ -151,27 +149,31 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
 }, ref) => {
   const isDragging = useRef(false);
   const hasExited = useRef(false);
-  // Track if the card is currently animating out to prevent reset interference
   const isExitingRef = useRef(false);
-  // Track the listing ID to detect changes
   const lastListingIdRef = useRef(listing.id);
+  const dragStartY = useRef(0);
 
-  // Motion value for horizontal position - EXACTLY like the landing page logo
+  // Motion values for BOTH X and Y - enables diagonal movement
   const x = useMotionValue(0);
+  const y = useMotionValue(0);
 
-  // Transform effects based on x position - EXACTLY like the landing page logo
-  const cardOpacity = useTransform(x, [-200, 0, 200], [0.5, 1, 0.5]);
-  const cardScale = useTransform(x, [-200, 0, 200], [0.9, 1, 0.9]);
-  const cardRotate = useTransform(x, [-200, 0, 200], [-8, 0, 8]);
-  const cardBlur = useTransform(x, [-200, 0, 200], [4, 0, 4]);
+  // Tinder-style rotation: pivots from bottom of card based on X drag
+  // When you drag right, card rotates clockwise (positive rotation)
+  // Rotation is proportional to X position, giving natural "pivot" feel
+  const cardRotate = useTransform(x, [-300, 0, 300], [-MAX_ROTATION, 0, MAX_ROTATION]);
 
-  // Like/Pass overlay opacity
-  const likeOpacity = useTransform(x, [0, SWIPE_THRESHOLD], [0, 1]);
-  const passOpacity = useTransform(x, [-SWIPE_THRESHOLD, 0], [1, 0]);
+  // Card opacity decreases as it moves away from center
+  const cardOpacity = useTransform(
+    x,
+    [-300, -100, 0, 100, 300],
+    [0.6, 0.9, 1, 0.9, 0.6]
+  );
 
-  // FIX: Move useTransform hook to top level - hooks must not be called inside JSX
-  // This was causing "Rendered fewer hooks than expected" error when card unmounted
-  const cardFilter = useTransform(cardBlur, (v) => `blur(${v}px)`);
+  // Like/Pass overlay opacity based on X position
+  const likeOpacity = useTransform(x, [0, SWIPE_THRESHOLD * 0.5, SWIPE_THRESHOLD], [0, 0.5, 1]);
+  const passOpacity = useTransform(x, [-SWIPE_THRESHOLD, -SWIPE_THRESHOLD * 0.5, 0], [1, 0.5, 0]);
+
+  // No blur effect - clean swipe without filter overhead
 
   // Image state
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -207,14 +209,14 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
       lastListingIdRef.current = listing.id;
 
       // Only reset if we're not currently in an exit animation
-      // This prevents the glitch where the card snaps back before disappearing
       if (!isExitingRef.current) {
         hasExited.current = false;
         setCurrentImageIndex(0);
         x.set(0);
+        y.set(0);
       }
     }
-  }, [listing.id, x]);
+  }, [listing.id, x, y]);
 
   // Magnifier hook for press-and-hold zoom - MUST be called before any callbacks that use it
   // FULL-IMAGE ZOOM: Entire image zooms on press-and-hold, no lens/clipping
@@ -242,59 +244,75 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
     return unsubscribe;
   }, [x, isTop, updateParallaxDrag]);
 
-  const handleDragStart = useCallback(() => {
+  const handleDragStart = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     isDragging.current = true;
+    dragStartY.current = info.point.y;
     triggerHaptic('light');
   }, []);
 
   const handleDragEnd = useCallback((_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    // End parallax effect when drag ends
     endParallaxDrag();
     
     if (hasExited.current) return;
 
-    const offset = info.offset.x;
-    const velocity = info.velocity.x;
+    const offsetX = info.offset.x;
+    const offsetY = info.offset.y;
+    const velocityX = info.velocity.x;
+    const velocityY = info.velocity.y;
 
-    // Check if swipe threshold is met (either distance OR velocity)
-    const shouldSwipe = Math.abs(offset) > SWIPE_THRESHOLD || Math.abs(velocity) > VELOCITY_THRESHOLD;
+    // Swipe threshold based on X distance or velocity
+    const shouldSwipe = Math.abs(offsetX) > SWIPE_THRESHOLD || Math.abs(velocityX) > VELOCITY_THRESHOLD;
 
     if (shouldSwipe) {
       hasExited.current = true;
       isExitingRef.current = true;
-      const direction = offset > 0 ? 'right' : 'left';
+      const direction = offsetX > 0 ? 'right' : 'left';
 
-      // Trigger haptic
       triggerHaptic(direction === 'right' ? 'success' : 'warning');
 
-      // NOTE: Swipe is queued by parent container, not here (prevents duplicates)
+      // Exit in the SAME direction of the swipe gesture (diagonal physics)
+      const exitDistance = getExitDistance();
+      const exitX = direction === 'right' ? exitDistance : -exitDistance;
+      
+      // Calculate Y exit based on swipe angle - maintains diagonal trajectory
+      const swipeAngle = Math.atan2(offsetY, Math.abs(offsetX));
+      const exitY = Math.tan(swipeAngle) * exitDistance * (offsetY > 0 ? 1 : 1);
 
-      // Calculate exit distance based on viewport to ensure card fully exits
-      const exitX = direction === 'right' ? getExitDistance() : -getExitDistance();
-
-      // INSTANT exit animation - no bounce-back, fast duration
+      // Spring-based exit animation - feels more natural than tween
       animate(x, exitX, {
-        type: 'tween',
-        duration: 0.15, // Faster exit for instant feel
-        ease: [0.25, 0.1, 0.25, 1], // Faster ease-out
+        type: 'spring',
+        stiffness: 600,
+        damping: 30,
+        velocity: velocityX,
         onComplete: () => {
           isExitingRef.current = false;
           onSwipe(direction);
         },
       });
+      
+      // Animate Y in parallel
+      animate(y, Math.min(Math.max(exitY, -300), 300), {
+        type: 'spring',
+        stiffness: 600,
+        damping: 30,
+        velocity: velocityY,
+      });
     } else {
-      // Quick snap back with tuned spring physics
+      // Spring snap-back to center - BOTH X and Y
       animate(x, 0, {
+        type: 'spring',
+        ...ACTIVE_SPRING,
+      });
+      animate(y, 0, {
         type: 'spring',
         ...ACTIVE_SPRING,
       });
     }
 
-    // Reset dragging state
     setTimeout(() => {
       isDragging.current = false;
     }, 100);
-  }, [listing.id, onSwipe, x, endParallaxDrag]);
+  }, [listing.id, onSwipe, x, y, endParallaxDrag]);
 
   const handleCardTap = useCallback(() => {
     if (!isDragging.current && onTap) {
@@ -338,22 +356,26 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
 
     triggerHaptic(direction === 'right' ? 'success' : 'warning');
 
-    // NOTE: Swipe is queued by parent container, not here (prevents duplicates)
-
-    // Calculate exit distance based on viewport to ensure card fully exits
     const exitX = direction === 'right' ? getExitDistance() : -getExitDistance();
 
-    // INSTANT exit animation
+    // Spring-based exit for button taps (consistent physics)
     animate(x, exitX, {
-      type: 'tween',
-      duration: 0.15, // Fast exit
-      ease: [0.25, 0.1, 0.25, 1],
+      type: 'spring',
+      stiffness: 500,
+      damping: 30,
       onComplete: () => {
         isExitingRef.current = false;
         onSwipe(direction);
       },
     });
-  }, [listing.id, onSwipe, x]);
+    
+    // Slight upward arc for button swipes
+    animate(y, -50, {
+      type: 'spring',
+      stiffness: 500,
+      damping: 30,
+    });
+  }, [listing.id, onSwipe, x, y]);
 
   // Expose triggerSwipe method to parent via ref
   useImperativeHandle(ref, () => ({
@@ -369,17 +391,17 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
 
   // Render based on position - all hooks called above regardless of render path
   if (!isTop) {
-    // Render a simple static preview for non-top cards
+    // Non-top card: simple static preview (no interaction, just visual)
     return (
       <div
-        className="absolute inset-0 overflow-hidden shadow-lg"
+        className="absolute inset-0 overflow-hidden"
         style={{
-          transform: 'scale(0.95)',
-          opacity: 0.7,
-          pointerEvents: 'none'
+          pointerEvents: 'none',
         }}
       >
         <CardImage src={currentImage} alt={listing.title || 'Listing'} />
+        {/* Bottom gradient for depth */}
+        <GradientMaskBottom intensity={0.6} zIndex={2} heightPercent={40} />
       </div>
     );
   }
@@ -387,29 +409,25 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
 
   return (
     <div className="absolute inset-0 flex flex-col">
-      {/* Draggable Card - FULL-SCREEN with edge-to-edge photo */}
+      {/* Draggable Card - FREE XY MOVEMENT (Tinder-style diagonal) */}
       <motion.div
-        drag={!isMagnifierActive() ? "x" : false}
-        dragConstraints={{ left: 0, right: 0 }}
-        dragElastic={1} // Full elasticity for instant response to touch
-        dragMomentum={true} // Allow momentum for natural feel
-        dragTransition={{ bounceStiffness: ACTIVE_SPRING.stiffness, bounceDamping: ACTIVE_SPRING.damping }}
+        drag={!isMagnifierActive()}
+        dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+        dragElastic={0.9}
+        dragMomentum={false}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
         onClick={handleCardTap}
         style={{
           x,
-          opacity: cardOpacity,
-          scale: cardScale,
+          y,
           rotate: cardRotate,
-          filter: cardFilter,
-          // CSS performance optimizations for instant touch response
-          willChange: 'transform, opacity, filter',
+          opacity: cardOpacity,
+          transformOrigin: 'bottom center',
+          willChange: 'transform, opacity',
           backfaceVisibility: 'hidden',
           WebkitBackfaceVisibility: 'hidden',
-          perspective: 1000,
-          // Disable all browser touch delays
-          touchAction: 'pan-y',
+          touchAction: 'none',
           WebkitTapHighlightColor: 'transparent',
           WebkitTouchCallout: 'none',
         } as any}
