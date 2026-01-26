@@ -86,14 +86,15 @@ deferredInit(async () => {
     ]);
     logBundleSize();
     checkAppVersion();
-    setupUpdateChecker();
+    // Check for updates every 60 seconds (more aggressive)
+    setupUpdateChecker(60000);
     initPerformanceOptimizations();
     initWebVitalsMonitoring();
     initOfflineSync(); // PERF: Sync queued swipes when back online
   } catch {
     // Silently ignore - these are optional optimizations
   }
-}, 3000);
+}, 2000); // Start earlier (2s instead of 3s)
 
 // Priority 3: Configuración nativa (solo en app móvil)
 deferredInit(async () => {
@@ -110,60 +111,52 @@ deferredInit(async () => {
   }
 }, 5000);
 
-// Service Worker with controlled update handling for PWA
+// Service Worker with AGGRESSIVE update handling for PWA
 if ("serviceWorker" in navigator && import.meta.env.PROD) {
   window.addEventListener("load", () => {
-    // Track if we had a controller before (for reload logic)
-    const hadController = !!navigator.serviceWorker.controller;
-    
-    // Store the current SW controller to detect actual updates
-    let currentController = navigator.serviceWorker.controller;
-
     navigator.serviceWorker
-      .register("/sw.js")
+      .register("/sw.js", { updateViaCache: 'none' }) // Never use HTTP cache for SW
       .then((registration) => {
-        // Check for updates on launch (once)
+        console.log('[SW] Registered successfully');
+        
+        // Check for updates immediately
         registration.update();
         
-        // Check for updates periodically (every 5 minutes)
-        setInterval(() => registration.update(), 300000);
+        // Check for updates frequently (every 60 seconds)
+        setInterval(() => registration.update(), 60000);
 
         // Handle new SW waiting to activate
         registration.addEventListener("updatefound", () => {
           const newWorker = registration.installing;
           if (newWorker) {
+            console.log('[SW] New version installing...');
             newWorker.addEventListener("statechange", () => {
-              // New SW is installed and ready - activate it
-              if (newWorker.state === "installed" && registration.waiting) {
-                // Only skip waiting if there's an existing controller (update scenario)
-                if (navigator.serviceWorker.controller) {
-                  registration.waiting.postMessage({ type: "SKIP_WAITING" });
-                }
+              if (newWorker.state === "installed") {
+                console.log('[SW] New version installed');
+                // If there's a waiting worker, it will auto-activate via skipWaiting()
+                // The page will reload when controllerchange fires
               }
             });
           }
         });
-        
-        // If there's already a waiting worker on page load, activate it
-        if (registration.waiting && navigator.serviceWorker.controller) {
-          registration.waiting.postMessage({ type: "SKIP_WAITING" });
-        }
       })
-      .catch(() => {});
+      .catch((err) => console.error('[SW] Registration failed:', err));
 
-    // Reload ONLY when an UPDATED SW takes control (not on first install)
+    // Reload when new SW takes control (regardless of previous state)
     let refreshing = false;
     navigator.serviceWorker.addEventListener("controllerchange", () => {
-      // Only reload if:
-      // 1. We had a controller before (not first install)
-      // 2. The controller actually changed (real update)
-      // 3. We haven't already started refreshing
-      if (hadController && currentController && !refreshing) {
+      if (!refreshing) {
         refreshing = true;
+        console.log('[SW] New version active, reloading...');
         window.location.reload();
       }
-      // Update reference for next check
-      currentController = navigator.serviceWorker.controller;
+    });
+
+    // Listen for update messages from SW
+    navigator.serviceWorker.addEventListener('message', (event) => {
+      if (event.data?.type === 'SW_UPDATED') {
+        console.log('[SW] Update notification received:', event.data.version);
+      }
     });
   });
 }

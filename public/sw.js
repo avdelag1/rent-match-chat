@@ -1,14 +1,15 @@
 /**
  * Ultra-Fast Service Worker - Optimized for lightning-speed loading
  * 
- * PWA UPDATE FIX: Controlled updates without reload loops
- * - skipWaiting() only called via message, not automatically
- * - Version is static (update this on each deploy)
- * - Old caches purged on activate
+ * PWA UPDATE FIX: Aggressive updates to ensure users always get latest version
+ * - skipWaiting() called immediately on install for instant activation
+ * - Caches are version-stamped and aggressively purged
+ * - Build time injected by Vite at build time
  */
 
-// IMPORTANT: Update this version string on each deploy to trigger PWA updates
-const SW_VERSION = '2026012600';
+// IMPORTANT: This version is auto-updated by vite.config.ts on each build
+// __BUILD_TIME__ is replaced with actual timestamp during production build
+const SW_VERSION = typeof '__BUILD_TIME__' !== 'undefined' ? '__BUILD_TIME__' : Date.now().toString();
 const CACHE_VERSION = `swipess-v${SW_VERSION}`;
 const CACHE_NAME = CACHE_VERSION;
 const STATIC_CACHE = `${CACHE_NAME}-static`;
@@ -48,13 +49,12 @@ self.addEventListener('message', (event) => {
   }
 
   // CRITICAL: Allow app to force skip waiting for immediate update
-  // This enables instant app refresh when user accepts update prompt
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
 
   // Clear all caches on demand (for cache corruption recovery)
-  if (event.data && event.data.type === 'CLEAR_CACHES') {
+  if (event.data && event.data.type === 'CLEAR_ALL_CACHES') {
     caches.keys().then(names => {
       return Promise.all(names.map(name => caches.delete(name)));
     }).then(() => {
@@ -64,19 +64,28 @@ self.addEventListener('message', (event) => {
     });
   }
 
+  // Force reload all clients after cache clear
+  if (event.data && event.data.type === 'FORCE_REFRESH_ALL') {
+    self.clients.matchAll().then(clients => {
+      clients.forEach(client => {
+        client.postMessage({ type: 'FORCE_REFRESH' });
+      });
+    });
+  }
+
   // OFFLINE QUEUE: Store failed requests for retry when back online
   if (event.data && event.data.type === 'QUEUE_REQUEST') {
-    // This would integrate with Background Sync API when available
-    // For now, just acknowledge
     if (event.ports[0]) {
       event.ports[0].postMessage({ type: 'REQUEST_QUEUED' });
     }
   }
 });
 
-// Install service worker - DO NOT skipWaiting here to prevent reload loops
-// skipWaiting is called via message from main.tsx only during genuine updates
+// Install service worker - AGGRESSIVE: skipWaiting immediately
 self.addEventListener('install', (event) => {
+  // Skip waiting immediately to activate new SW right away
+  self.skipWaiting();
+  
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then((cache) => {
@@ -201,15 +210,16 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Activate service worker and clean old caches
+// Activate service worker and clean old caches - AGGRESSIVE cleanup
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     Promise.all([
-      // Take control of all clients
+      // Take control of all clients immediately
       self.clients.claim(),
 
-      // Clean up ALL old caches from previous versions
+      // Clean up ALL old caches from previous versions - be aggressive
       caches.keys().then((cacheNames) => {
+        console.log('[SW] Cleaning old caches. Current version:', CACHE_VERSION);
         return Promise.all(
           cacheNames.map((cacheName) => {
             // Delete any cache that doesn't match current version
@@ -218,6 +228,7 @@ self.addEventListener('activate', (event) => {
                                    cacheName === IMAGE_CACHE;
             
             if (!isCurrentCache) {
+              console.log('[SW] Deleting old cache:', cacheName);
               return caches.delete(cacheName);
             }
           })
@@ -230,12 +241,13 @@ self.addEventListener('activate', (event) => {
     ])
   );
 
-  // Notify clients about the update
-  self.clients.matchAll().then(clients => {
+  // Notify ALL clients about the update with version info
+  self.clients.matchAll({ type: 'window' }).then(clients => {
     clients.forEach(client => {
       client.postMessage({
         type: 'SW_UPDATED',
-        version: CACHE_VERSION
+        version: CACHE_VERSION,
+        timestamp: Date.now()
       });
     });
   });
