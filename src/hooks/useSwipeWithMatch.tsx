@@ -56,8 +56,25 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
       if (targetType === 'profile') {
         // Owner swiping on a client profile
         if (direction === 'right') {
-          // Save like to owner_likes table
           logger.info('[useSwipeWithMatch] Saving owner like for client:', { ownerId: user.id, clientId: targetId });
+
+          // CRITICAL: Verify the client_id exists in profiles table before inserting
+          // This prevents FK violations from stale cached profile data
+          const { data: clientExists, error: verifyError } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('id', targetId)
+            .maybeSingle();
+
+          if (verifyError || !clientExists) {
+            logger.error('[useSwipeWithMatch] Client profile not found in database - likely stale cache data:', {
+              clientId: targetId,
+              error: verifyError?.message
+            });
+            // Don't throw - just skip this like and continue to prevent UI freeze
+            // The stale profile will be removed from cache on next refresh
+            return { id: 'invalid-profile', skipped: true, reason: 'Profile not found' };
+          }
 
           // CRITICAL FIX: Use proper conflict handling for partial unique indexes
           // We have two partial unique indexes on owner_likes:
@@ -104,10 +121,11 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
           }
 
           if (ownerLikeError) {
-            // Handle expected errors gracefully (unique constraint violations, RLS)
+            // Handle expected errors gracefully (unique constraint violations, RLS, FK violations)
             const errorCode = ownerLikeError.code;
             const isUniqueViolation = errorCode === '23505';
             const isRLSViolation = errorCode === '42501';
+            const isFKViolation = errorCode === '23503'; // FK constraint violation
 
             if (isUniqueViolation) {
               // This is fine - user already liked this client, just log and continue
@@ -118,6 +136,14 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
               // RLS policy violation - log but don't crash the swipe flow
               logger.warn('[useSwipeWithMatch] RLS policy blocked like insert, continuing without save:', ownerLikeError.message);
               like = { id: 'rls-blocked', owner_id: user.id, client_id: targetId };
+            } else if (isFKViolation) {
+              // FK violation means the client_id doesn't exist in profiles table
+              // This happens with stale cached data - skip without error
+              logger.warn('[useSwipeWithMatch] FK violation - client profile not in database (stale cache):', {
+                clientId: targetId,
+                error: ownerLikeError.message
+              });
+              like = { id: 'fk-violation', owner_id: user.id, client_id: targetId, skipped: true };
             } else {
               // Unexpected error - log and throw
               logger.error('[useSwipeWithMatch] Failed to save owner like:', {
