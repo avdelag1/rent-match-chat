@@ -99,21 +99,48 @@ export function useScrollDirection({
   }, [updateScrollDirection]);
 
   useEffect(() => {
-    const target = targetSelector 
-      ? document.querySelector(targetSelector) 
-      : window;
+    // CRITICAL FIX: Find the scroll target with retry logic for dynamic DOM
+    const findTarget = (): Element | Window | null => {
+      if (!targetSelector) return window;
+      
+      let target = document.querySelector(targetSelector);
+      
+      // Fallback chain for common scroll containers
+      if (!target) {
+        target = document.querySelector('main[class*="overflow"]') || 
+                 document.querySelector('[id*="scroll-container"]') ||
+                 document.querySelector('main');
+      }
+      
+      return target;
+    };
     
-    if (!target) return;
+    const target = findTarget();
+    
+    if (!target) {
+      // Retry after a short delay if target not found (DOM might not be ready)
+      const retryTimeout = setTimeout(() => {
+        const retryTarget = findTarget();
+        if (retryTarget) {
+          retryTarget.addEventListener('scroll', handleScroll, { passive: true });
+        }
+      }, 100);
+      return () => clearTimeout(retryTimeout);
+    }
     
     // Initialize
-    const initialScrollY = targetSelector && target instanceof Element
+    const initialScrollY = target instanceof Element
       ? target.scrollTop 
       : window.pageYOffset || document.documentElement.scrollTop;
     
     lastScrollY.current = initialScrollY;
     setScrollY(initialScrollY);
     setIsAtTop(initialScrollY <= 5);
-    setIsVisible(true);
+    // DON'T reset isVisible on navigation - preserve scroll state
+    // Only set visible if we're actually at top
+    if (initialScrollY <= 5) {
+      setIsVisible(true);
+    }
     
     target.addEventListener('scroll', handleScroll, { passive: true });
     

@@ -2594,25 +2594,31 @@ export type Database = {
         Row: {
           client_id: string
           created_at: string
+          direction: string
           id: string
           is_super_like: boolean | null
           listing_id: string | null
+          metadata: Json | null
           owner_id: string
         }
         Insert: {
           client_id: string
           created_at?: string
+          direction?: string
           id?: string
           is_super_like?: boolean | null
           listing_id?: string | null
+          metadata?: Json | null
           owner_id: string
         }
         Update: {
           client_id?: string
           created_at?: string
+          direction?: string
           id?: string
           is_super_like?: boolean | null
           listing_id?: string | null
+          metadata?: Json | null
           owner_id?: string
         }
         Relationships: [
