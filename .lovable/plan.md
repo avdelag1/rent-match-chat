@@ -1,221 +1,183 @@
 
-# Database & Filter System Fix Plan
+## Goal
+Make filters “always work” (client + owner) and make TopBar/BottomNavigation hide-on-scroll work permanently (never “stops after a while”).
 
-## Overview
-This plan addresses three key issues:
-1. **Build Errors** - TypeScript type mismatches in `useNotificationSystem.tsx` and `useSmartMatching.tsx`
-2. **Unused Tables** - Numerous database tables with zero records that may no longer be needed
-3. **Filter Persistence** - Ensuring filters are properly saved and retrieved from the database
+This will be done by removing duplicated filter state, fixing category naming mismatches, ensuring filter preference rows actually exist in Supabase, and making the scroll listener re-bind reliably even if the scroll container changes.
 
 ---
 
-## Part 1: Fix Build Errors (Critical)
+## What I found (root causes)
 
-### Error 1: useNotificationSystem.tsx Type Mismatch
+### A) Quick filter “not working” is mostly a data-flow + naming problem
+1) **Two different filter sources exist**:
+- `DashboardLayout` maintains **local** `quickFilters` state and passes it to `TopBar` → `QuickFilterDropdown`.
+- Separately, the app has a **global** Zustand filter store (`src/state/filterStore.ts`) and DB persistence (`useFilterPersistence`), but **DashboardLayout’s quick filters are not using the store**.
 
-**Problem**: The `DBNotification` interface expects columns (`notification_type`, `title`, `is_read`) that don't exist in the actual `notifications` table.
+Result: filters can appear to “randomly” not apply after navigations / mode switches / restores, because the UI is changing one state while the swipe queries use another.
 
-**Actual table schema**:
-```
-id (uuid)
-user_id (uuid)
-type (text)      ← Not "notification_type"
-message (text)
-read (boolean)   ← Not "is_read"
-created_at (timestamp)
-```
+2) **Category naming mismatch** (critical bug):
+- The unified app type says **motorcycle** (never “moto”) (`src/types/filters.ts`).
+- `ClientFilters.tsx` uses local category id `'moto'` and then does:
+  `setStoreCategory(activeCategory as QuickFilterCategory)`
+  which means it can write invalid category values into the store.
 
-**Fix**: Update the `DBNotification` interface and mapping logic to match the actual database schema:
-- Change `notification_type` to `type`
-- Change `is_read` to `read`
-- Make `title` optional or derive from `type`
+This can break downstream logic and make quick category switching look broken.
 
-### Error 2: useSmartMatching.tsx Type Comparisons (Lines 1315, 1319, 1322)
+3) **Owner category filtering is logically inconsistent with DB fields**
+- Owner quick category switching relies on checking `profile.preferred_listing_type?.includes('moto')` etc.
+- In your DB, `profiles.preferred_listing_type` is **text**, and current data shows it’s mostly `'rent'`, not `'moto'`/`'bicycle'`.
+So even if the UI changes category, the filtering logic can’t match.
 
-**Problem**: Comparing `MatchedClientProfile.id` (type `number`) with `userId` (type `string`).
+### B) Your “client/owner advanced filters” tables exist, but have no rows
+In Test DB right now:
+- `client_filter_preferences`: 0 rows
+- `owner_client_preferences`: 0 rows
+So “filters” can’t persist and matching logic that expects these preferences will behave like “no preferences set”.
 
-The `MatchedClientProfile` interface has:
-- `id: number` (from client_profiles table)
-- `user_id: string` (UUID reference)
+`saved_filters` has 2 rows, but that’s mostly “preset storage”, not the detailed per-category preferences you want.
 
-The code incorrectly compares `p.id === userId` when it should only compare `p.user_id === userId`.
+### C) Hide-on-scroll stops working because the listener may be attached to the wrong scroll container over time
+`useScrollDirection` attaches to a target once (with limited retries). If your active scrolling ends up happening in a different container later (nested scroll areas, dialogs, pages with their own scroll regions), the bars won’t respond.
 
-**Fix**: Remove comparisons involving `p.id` and only use `p.user_id`:
-```typescript
-// Line 1315: Change from
-const hasOwnProfile = sortedClients.some(p => p.id === userId || p.user_id === userId);
-// To
-const hasOwnProfile = sortedClients.some(p => p.user_id === userId);
-
-// Similar fixes for lines 1319 and 1322
-```
+Even though you added baseline fixes, the “stop after a while” symptom strongly suggests **the listener is no longer observing the actual container that is being scrolled**.
 
 ---
 
-## Part 2: Database Cleanup - Unused Tables
+## Implementation plan (what I will change)
 
-Based on the database analysis, the following tables have **zero rows** and appear unused. They fall into categories:
+### 1) Unify quick filters into ONE source of truth (Zustand filter store)
+**Objective:** Top quick filters always immediately affect the swipe deck queries.
 
-### Category A: Potentially Removable (Zero Data, No Active Usage)
+**Changes:**
+- Update `DashboardLayout.tsx` to **stop storing its own `quickFilters` state**.
+- Replace it with values read from `useFilterStore()`:
+  - categories, listingType (client)
+  - clientGender, clientType (owner)
+- `TopBar.tsx` will no longer receive `filters`/`onFiltersChange` from local state.
+  Instead, `TopBar` (and `QuickFilterDropdown`) will dispatch store actions:
+  - `setCategories`, `setListingType`, `setClientGender`, `setClientType`, `reset...`
 
-| Table | Purpose | Recommendation |
-|-------|---------|----------------|
-| `channel_participants` | Legacy messaging | Remove (uses `conversations` now) |
-| `communication_channels` | Legacy messaging | Remove |
-| `mfa_methods` | Multi-factor auth | Remove (not implemented) |
-| `user_authentication_methods` | Auth methods | Remove |
-| `messages` | Legacy direct messages | Remove (uses `conversation_messages`) |
-| `match_conversations` | Legacy matching | Remove |
-| `swipes` | Old swipe system | Remove (uses `likes` table now) |
-| `user_likes` | Duplicate of `likes` | Remove |
-| `favorites` | Duplicate of `likes` | Consider removing |
-
-### Category B: Keep but Monitor (Infrastructure Tables)
-
-| Table | Purpose | Status |
-|-------|---------|--------|
-| `rate_limit_log` | Security | Keep - needed for rate limiting |
-| `security_audit_log` | Security | Keep - audit trail |
-| `security_event_logs` | Security | Keep - security monitoring |
-| `notifications` | Notifications | Keep - schema needs fixing (see Part 1) |
-| `admin_*` tables | Admin system | Keep - for future admin panel |
-
-### Category C: Feature Tables (Keep, Need Data)
-
-| Table | Purpose | Status |
-|-------|---------|--------|
-| `saved_filters` | User filter preferences | Keep - 2 rows, working |
-| `client_filter_preferences` | Detailed client filters | Keep - needs data flow fix |
-| `owner_client_preferences` | Owner filter settings | Keep - needs data flow fix |
-| `saved_searches` | Saved search criteria | Keep - not being used yet |
+**Outcome:**
+- When you tap quick filter chips/dropdown, it updates the store immediately.
+- `useFilterPersistence` already listens to the store → it will persist correctly.
 
 ---
 
-## Part 3: Filter System Data Flow Fix
+### 2) Fix category naming everywhere (eliminate “moto” in UI state)
+**Objective:** No invalid category values get written anywhere.
 
-The current filter system has a disconnect between the UI and database persistence.
+**Changes:**
+- `src/pages/ClientFilters.tsx`
+  - Change the local category type from `'moto'` to `'motorcycle'`
+  - Update the categories array and UI labels accordingly
+  - Ensure `setStoreCategory(...)` receives a valid `QuickFilterCategory` every time
+- Check owner-side “category” handling too:
+  - Standardize to: `property | motorcycle | bicycle | services`
+  - Ensure DB mapping is consistently applied only where needed (`services` → `worker` for listings table only)
 
-### Current Architecture
-```
-UI State (Zustand filterStore)
-     ↓ (immediate)
-Swipe Deck Display
-     
-saved_filters table ← Not connected to filterStore!
-```
-
-### Required Architecture
-```
-UI State (Zustand filterStore)
-     ↓ (immediate)
-Swipe Deck Display
-     ↓ (background sync)
-saved_filters table (persistence)
-     ↑ (on mount)
-Restore from DB
-```
-
-### Implementation Steps
-
-1. **Add Database Sync to FilterStore**
-   - Create a `persistFilters` action in `filterStore.ts`
-   - On filter change, debounce and save to `saved_filters` table
-   - On app mount, load active filter from database
-
-2. **Fix useSavedFilters Hook**
-   - Currently works but not connected to the central store
-   - Add integration with `useFilterStore`
-
-3. **Ensure Filter Tables Have Correct RLS**
-   - `saved_filters`: User can only read/write their own rows
-   - `client_filter_preferences`: User can only read/write their own rows
-   - `owner_client_preferences`: User can only read/write their own rows
+**Outcome:**
+- Quick category switching won’t silently fail due to mismatched strings.
 
 ---
 
-## Part 4: Notifications Table Schema Fix
+### 3) Make owner-side category filtering actually work (based on real DB fields)
+**Objective:** When owner switches category, it really shows clients interested in that category.
 
-The `notifications` table schema doesn't match what the code expects. Two options:
+Given current DB reality:
+- `profiles.preferred_listing_type` is text like `'rent'`, not category-coded.
 
-### Option A: Update Code (Recommended)
-Modify `useNotificationSystem.tsx` to work with current schema:
-- Map `type` to notification category
-- Generate `title` from `type`
-- Use `read` instead of `is_read`
+**Implementation approach (robust, minimal schema dependency):**
+- Use `client_filter_preferences` as the source for what categories a client wants (it has booleans like `interested_in_properties`, `interested_in_motorcycles`, `interested_in_bicycles`, etc.).
+- Update `useSmartClientMatching` to filter clients by:
+  - join/lookup client preferences (via a second query or a view) OR
+  - use existing columns in `profiles` if you already store category interests there (we’ll confirm in code and use the reliable one)
 
-### Option B: Update Database
-Add missing columns via migration:
-- Add `title` column (text, nullable)
-- Add `notification_type` column (or rename `type`)
-- Rename `read` to `is_read`
+**Note:** If we need a performant single-query approach, we can add a lightweight view (security_invoker) that exposes: client_id + category_interest flags.
 
-**Recommendation**: Option A is safer and faster.
-
----
-
-## Implementation Order
-
-1. **Fix Build Errors** (Immediate - unblocks development)
-   - Fix `useNotificationSystem.tsx` interface
-   - Fix `useSmartMatching.tsx` comparisons
-
-2. **Filter Persistence** (High Priority)
-   - Add database sync to filterStore
-   - Connect useSavedFilters to central store
-   - Test filter save/load cycle
-
-3. **Database Cleanup** (After confirming no dependencies)
-   - Create migration to drop unused tables
-   - Run only after thorough testing
+**Outcome:**
+- Owner category quick filter becomes deterministic and based on real data.
 
 ---
 
-## Technical Details
+### 4) Ensure preference rows exist so “filters” persist and apply
+**Objective:** The first time a user uses filters, the DB will have the needed rows.
 
-### File Changes Required
+**Client side:**
+- When user opens/uses client filters, do an **upsert** to `client_filter_preferences` to ensure a row exists for that user.
 
-| File | Changes |
-|------|---------|
-| `src/hooks/useNotificationSystem.tsx` | Update DBNotification interface to match DB schema |
-| `src/hooks/useSmartMatching.tsx` | Fix type comparisons (3 locations) |
-| `src/state/filterStore.ts` | Add persistence actions and on-mount loading |
-| `src/hooks/useSavedFilters.ts` | Integrate with filterStore |
+**Owner side:**
+- When owner opens/uses owner filters, do an **upsert** to `owner_client_preferences`.
 
-### Database Operations
+This can be done purely in application code (no schema change required).
 
-**Check RLS Policies**:
-```sql
-SELECT schemaname, tablename, policyname, permissive, roles, cmd, qual
-FROM pg_policies 
-WHERE tablename IN ('saved_filters', 'client_filter_preferences', 'owner_client_preferences');
-```
-
-**Tables to Drop** (Phase 2, after confirmation):
-- `channel_participants`
-- `communication_channels`
-- `mfa_methods`
-- `messages`
-- `match_conversations`
-- `swipes`
-- `user_likes`
-- `user_authentication_methods`
+**Outcome:**
+- Your tables won’t be empty; filtering/matching logic can depend on them.
 
 ---
 
-## Risk Assessment
+### 5) Make quick filter switching show a correct “empty results” state (instead of “broken”)
+Right now your DB has only 2 active listings, both `category='property'`. So switching to bicycle/motorcycle/services should show 0 results.
 
-| Change | Risk | Mitigation |
-|--------|------|------------|
-| Type fixes | Low | Straightforward interface updates |
-| Filter persistence | Medium | Test with real user scenarios |
-| Table drops | High | Create backup migrations, test thoroughly |
+**Changes:**
+- Ensure `TinderentSwipeContainer` reset flow immediately clears cards and shows the “All caught up / No results” state.
+- Add user-friendly message like:
+  “No results in Bicycle yet. Try Property or create your first Bicycle listing.”
+
+**Outcome:**
+- Users won’t interpret “no results” as “quick filter not working”.
 
 ---
 
-## Summary
+### 6) Make hide-on-scroll permanent (never stops)
+**Objective:** TopBar + BottomNavigation always hide on scroll down and return on scroll up, forever.
 
-This plan will:
-1. Fix the 4 build errors immediately
-2. Ensure filters persist to the database correctly
-3. Identify 8+ unused tables for potential cleanup
-4. Improve the notifications system reliability
+**Fix strategy:**
+- Change `useScrollDirection` so it:
+  1) Attaches to the current scroll container
+  2) Detects if the container changed later (DOM replaced, route swap, overlay, etc.)
+  3) Automatically detaches + re-attaches
+- Also widen the behavior so it works even when the user is scrolling inside a nested scroll container:
+  - Listen in capture phase on `document` for scroll events, or
+  - Use a small rebind loop that always tracks `#dashboard-scroll-container` if present.
+
+**Outcome:**
+- Even if the scrollable element changes, the bars keep working.
+
+---
+
+### 7) Verification checklist (what I’ll test after implementing)
+1) `/client/dashboard`
+   - Tap quick filter categories repeatedly: property → bicycle → motorcycle → services
+   - Confirm deck resets instantly and shows correct empty states
+2) `/owner/dashboard`
+   - Confirm you never see yourself (even if deck restored from cache before auth was ready)
+   - Switch quick filters and confirm it triggers deck reset and correct results
+3) Scroll behavior
+   - Scroll down inside dashboard → bars hide
+   - Scroll up → bars show
+   - Navigate to another dashboard page and back → still works
+   - Scroll inside a nested scroll view (where applicable) → still works
+
+---
+
+## Files I expect to change (high level)
+- `src/components/DashboardLayout.tsx` (remove local quickFilters, use store, build combinedFilters from store)
+- `src/components/TopBar.tsx` (wire QuickFilterDropdown to store actions)
+- `src/components/QuickFilterDropdown.tsx` (dispatch store actions; remove reliance on passed `filters` object if we fully centralize)
+- `src/pages/ClientFilters.tsx` (replace `'moto'` with `'motorcycle'`, store-safe category)
+- `src/hooks/useSmartMatching.tsx` (owner-side category filtering logic based on real data)
+- `src/hooks/useScrollDirection.tsx` (auto rebind to scroll container / capture nested scrolls)
+- Potential small updates to filter-related pages/components to ensure preference rows are created (upserts)
+
+---
+
+## Supabase tables/policies status (what’s already OK, what’s missing)
+- RLS policies exist for `saved_filters`, `client_filter_preferences`, `owner_client_preferences`.
+- The big missing piece is: **the app isn’t writing rows**, so the tables are empty and filtering can’t work “for real”.
+
+We’ll fix that in code first (no schema changes required).
+
+---
+
+## If you want me to continue
+Next request should be: “Continue and implement the filter + quick filter fixes and the permanent hide-on-scroll fix.”
