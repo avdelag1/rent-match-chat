@@ -1197,10 +1197,34 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
       <AmbientSwipeBackground isPaused={swipeDirection !== null} />
 
       <div className="relative flex-1 w-full">
-        {/* Single card - no background placeholder layer */}
+        {/* NEXT CARD - Visible behind current card (Tinder-style anticipation)
+            - Scale slightly smaller to create depth
+            - Lower z-index so it sits behind
+            - Already preloaded so transition is instant */}
+        {(() => {
+          const nextCard = deckQueueRef.current[currentIndexRef.current + 1];
+          if (!nextCard) return null;
+          return (
+            <div
+              key={`next-${nextCard.id}`}
+              className="w-full h-full absolute inset-0"
+              style={{ 
+                zIndex: 5,
+                transform: 'scale(0.95)',
+                opacity: 0.7,
+                pointerEvents: 'none',
+              }}
+            >
+              <SimpleSwipeCard
+                listing={nextCard}
+                onSwipe={() => {}}
+                isTop={false}
+              />
+            </div>
+          );
+        })()}
 
-        {/* Current card on top - fully interactive */}
-        {/* Physics engine handles ALL animations - no Framer Motion wrapper needed */}
+        {/* CURRENT CARD - Top of stack, fully interactive */}
         {topCard && (
           <div
             key={topCard.id}
