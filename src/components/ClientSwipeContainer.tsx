@@ -271,9 +271,16 @@ const ClientSwipeContainerComponent = ({
     if (clientProfiles.length > 0 && !isLoading) {
       const existingIds = new Set(deckQueueRef.current.map(p => p.user_id));
       const dismissedSet = new Set(dismissedIds);
-      const newProfiles = clientProfiles.filter(p =>
-        !existingIds.has(p.user_id) && !swipedIdsRef.current.has(p.user_id) && !dismissedSet.has(p.user_id)
-      );
+      
+      // CRITICAL: Filter out current user's own profile AND dismissed/swiped profiles
+      const newProfiles = clientProfiles.filter(p => {
+        // NEVER show user their own profile (defense in depth)
+        if (user?.id && p.user_id === user.id) {
+          logger.warn('[ClientSwipeContainer] Filtering out own profile from deck:', p.user_id);
+          return false;
+        }
+        return !existingIds.has(p.user_id) && !swipedIdsRef.current.has(p.user_id) && !dismissedSet.has(p.user_id);
+      });
 
       if (newProfiles.length > 0) {
         deckQueueRef.current = [...deckQueueRef.current, ...newProfiles];
@@ -298,7 +305,7 @@ const ClientSwipeContainerComponent = ({
       }
       isFetchingMore.current = false;
     }
-  }, [clientProfiles, isLoading, setOwnerDeck, category, isOwnerReady, markOwnerReady, dismissedIds]);
+  }, [clientProfiles, isLoading, setOwnerDeck, category, isOwnerReady, markOwnerReady, dismissedIds, user?.id]);
 
   // INSTANT SWIPE: Update UI immediately, fire DB operations in background
   const executeSwipe = useCallback((direction: 'left' | 'right') => {
@@ -306,6 +313,13 @@ const ClientSwipeContainerComponent = ({
     // FIX: Add explicit null/undefined check to prevent errors
     if (!profile || !profile.user_id) {
       logger.warn('[ClientSwipeContainer] Cannot swipe - no valid profile at current index');
+      return;
+    }
+
+    // CRITICAL: Prevent swiping on own profile (should never happen, but defense in depth)
+    if (user?.id && profile.user_id === user.id) {
+      logger.error('[ClientSwipeContainer] BLOCKED: Attempted to swipe on own profile!', { userId: user.id });
+      sonnerToast.error('Oops!', { description: 'You cannot swipe on your own profile' });
       return;
     }
 
