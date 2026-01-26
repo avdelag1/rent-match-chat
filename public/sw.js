@@ -1,17 +1,21 @@
 /**
  * Ultra-Fast Service Worker - Optimized for lightning-speed loading
- *
- * CACHE VERSIONING FIX:
- * Version is now extracted from the registration URL query param (?v=...)
- * This ensures cache busting works correctly since /public/ files aren't processed by Vite.
- * The version is passed at registration time from main.tsx using the build timestamp.
+ * 
+ * PWA UPDATE FIX: Forces downloaded PWAs to update automatically
+ * - skipWaiting() called immediately on install for instant updates
+ * - Version bumped with each deploy via timestamp
+ * - Old caches purged aggressively on activate
  */
 
+// CRITICAL: Version timestamp - change this to force PWA update
+// This is automatically updated by the build process
+const SW_VERSION = '20260126001'; // YYYYMMDDHHH format - UPDATE ON EACH DEPLOY
+
 // Extract version from SW registration URL (e.g., /sw.js?v=1234567890)
-// Fallback to installation timestamp if no version provided
+// Use SW_VERSION as primary, URL param as fallback
 const SW_URL = new URL(self.location);
-const URL_VERSION = SW_URL.searchParams.get('v') || Date.now().toString();
-const CACHE_VERSION = `tinderent-v${URL_VERSION}`;
+const URL_VERSION = SW_URL.searchParams.get('v') || SW_VERSION;
+const CACHE_VERSION = `swipess-v${URL_VERSION}`;
 const CACHE_NAME = CACHE_VERSION;
 const STATIC_CACHE = `${CACHE_NAME}-static`;
 const DYNAMIC_CACHE = `${CACHE_NAME}-dynamic`;
@@ -20,7 +24,8 @@ const IMAGE_CACHE = `${CACHE_NAME}-images`;
 // Critical assets to precache immediately for offline-first experience
 const urlsToCache = [
   '/',
-  '/manifest.json'
+  '/manifest.json',
+  '/manifest.webmanifest'
 ];
 
 // Cache TTL settings (in seconds)
@@ -75,8 +80,14 @@ self.addEventListener('message', (event) => {
   }
 });
 
-// Install service worker - DO NOT skipWaiting() here to allow controlled update flow
+// Install service worker - SKIP WAITING immediately for instant PWA updates
 self.addEventListener('install', (event) => {
+  console.log('[SW] Installing new version:', CACHE_VERSION);
+  
+  // CRITICAL: Skip waiting to activate immediately
+  // This ensures downloaded PWAs get updates right away
+  self.skipWaiting();
+  
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then((cache) => {
@@ -201,23 +212,27 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Activate service worker and clean old caches
+// Activate service worker and clean old caches AGGRESSIVELY
 self.addEventListener('activate', (event) => {
+  console.log('[SW] Activating new version:', CACHE_VERSION);
+  
   event.waitUntil(
     Promise.all([
-      // Take control of all clients immediately
+      // Take control of all clients IMMEDIATELY - critical for PWA updates
       self.clients.claim(),
 
-      // Clean up old caches - delete any cache that doesn't match current version
+      // AGGRESSIVE CLEANUP: Delete ALL old caches from any previous version
       caches.keys().then((cacheNames) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
-            // Only delete caches that belong to this app and are not the current ones
-            if (cacheName.startsWith('tinderent-') &&
-                cacheName !== STATIC_CACHE &&
-                cacheName !== DYNAMIC_CACHE &&
-                cacheName !== IMAGE_CACHE) {
-              console.log('[SW] Deleting old cache:', cacheName);
+            // Delete any cache that doesn't match current version
+            // This includes old tinderent-, swipess-, swipes-, swipematch- caches
+            const isCurrentCache = cacheName === STATIC_CACHE || 
+                                   cacheName === DYNAMIC_CACHE || 
+                                   cacheName === IMAGE_CACHE;
+            
+            if (!isCurrentCache) {
+              console.log('[SW] Purging old cache:', cacheName);
               return caches.delete(cacheName);
             }
           })
