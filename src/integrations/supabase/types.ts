@@ -287,38 +287,6 @@ export type Database = {
         }
         Relationships: []
       }
-      channel_participants: {
-        Row: {
-          channel_id: string | null
-          id: string
-          joined_at: string | null
-          role: string | null
-          user_id: string | null
-        }
-        Insert: {
-          channel_id?: string | null
-          id?: string
-          joined_at?: string | null
-          role?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          channel_id?: string | null
-          id?: string
-          joined_at?: string | null
-          role?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "channel_participants_channel_id_fkey"
-            columns: ["channel_id"]
-            isOneToOne: false
-            referencedRelation: "communication_channels"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       client_category_preferences: {
         Row: {
           category: string
@@ -787,27 +755,6 @@ export type Database = {
         }
         Relationships: []
       }
-      communication_channels: {
-        Row: {
-          created_at: string | null
-          id: string
-          name: string | null
-          type: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          name?: string | null
-          type?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          name?: string | null
-          type?: string | null
-        }
-        Relationships: []
-      }
       contract_signatures: {
         Row: {
           contract_id: string
@@ -1025,6 +972,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "conversations_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "recommended_listings"
+            referencedColumns: ["listing_id"]
+          },
+          {
             foreignKeyName: "conversations_match_id_fkey"
             columns: ["match_id"]
             isOneToOne: false
@@ -1081,6 +1035,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "fk_conversations_listing_id"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "recommended_listings"
+            referencedColumns: ["listing_id"]
+          },
+          {
             foreignKeyName: "fk_conversations_match_id"
             columns: ["match_id"]
             isOneToOne: false
@@ -1123,6 +1084,33 @@ export type Database = {
           details?: Json | null
           id?: string
           timestamp?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      database_activity_tracker: {
+        Row: {
+          accessed_at: string | null
+          details: Json | null
+          id: number
+          operation: string
+          table_name: string
+          user_id: string | null
+        }
+        Insert: {
+          accessed_at?: string | null
+          details?: Json | null
+          id?: number
+          operation: string
+          table_name: string
+          user_id?: string | null
+        }
+        Update: {
+          accessed_at?: string | null
+          details?: Json | null
+          id?: number
+          operation?: string
+          table_name?: string
           user_id?: string | null
         }
         Relationships: []
@@ -1329,6 +1317,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "favorites_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "recommended_listings"
+            referencedColumns: ["listing_id"]
+          },
+          {
             foreignKeyName: "favorites_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -1444,6 +1439,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "listings_public"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "legal_documents_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "recommended_listings"
+            referencedColumns: ["listing_id"]
           },
         ]
       }
@@ -1941,44 +1943,6 @@ export type Database = {
         }
         Relationships: []
       }
-      match_conversations: {
-        Row: {
-          id: number
-          is_read: boolean | null
-          match_id: number | null
-          message_text: string
-          message_type: string | null
-          sender_id: string | null
-          sent_at: string | null
-        }
-        Insert: {
-          id?: never
-          is_read?: boolean | null
-          match_id?: number | null
-          message_text: string
-          message_type?: string | null
-          sender_id?: string | null
-          sent_at?: string | null
-        }
-        Update: {
-          id?: never
-          is_read?: boolean | null
-          match_id?: number | null
-          message_text?: string
-          message_type?: string | null
-          sender_id?: string | null
-          sent_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "match_conversations_match_id_fkey"
-            columns: ["match_id"]
-            isOneToOne: false
-            referencedRelation: "property_matches"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       matches: {
         Row: {
           client_id: string
@@ -2062,6 +2026,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "fk_matches_listing_id"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "recommended_listings"
+            referencedColumns: ["listing_id"]
+          },
+          {
             foreignKeyName: "fk_matches_owner_id"
             columns: ["owner_id"]
             isOneToOne: false
@@ -2109,6 +2080,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "listings_public"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "recommended_listings"
+            referencedColumns: ["listing_id"]
           },
           {
             foreignKeyName: "matches_owner_id_fkey"
@@ -2165,86 +2143,6 @@ export type Database = {
         }
         Relationships: []
       }
-      messages: {
-        Row: {
-          created_at: string | null
-          id: string
-          is_read: boolean | null
-          listing_id: string | null
-          message_text: string | null
-          receiver_id: string | null
-          sender_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id: string
-          is_read?: boolean | null
-          listing_id?: string | null
-          message_text?: string | null
-          receiver_id?: string | null
-          sender_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          is_read?: boolean | null
-          listing_id?: string | null
-          message_text?: string | null
-          receiver_id?: string | null
-          sender_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "messages_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "messages_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings_browse"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "messages_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "messages_receiver_id_fkey"
-            columns: ["receiver_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "messages_receiver_id_fkey"
-            columns: ["receiver_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "messages_sender_id_fkey"
-            columns: ["sender_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "messages_sender_id_fkey"
-            columns: ["sender_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       mexico_locations: {
         Row: {
           city: string
@@ -2266,33 +2164,6 @@ export type Database = {
           id?: string
           neighborhoods?: string[] | null
           state?: string
-        }
-        Relationships: []
-      }
-      mfa_methods: {
-        Row: {
-          created_at: string | null
-          id: string
-          is_active: boolean | null
-          method: string | null
-          secret: string | null
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          is_active?: boolean | null
-          method?: string | null
-          secret?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          is_active?: boolean | null
-          method?: string | null
-          secret?: string | null
-          user_id?: string | null
         }
         Relationships: []
       }
@@ -2451,6 +2322,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "owner_client_matches_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "recommended_listings"
+            referencedColumns: ["listing_id"]
+          },
+          {
             foreignKeyName: "owner_client_matches_owner_id_fkey"
             columns: ["owner_id"]
             isOneToOne: false
@@ -2588,6 +2466,13 @@ export type Database = {
             referencedRelation: "listings_public"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "owner_client_preferences_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "recommended_listings"
+            referencedColumns: ["listing_id"]
+          },
         ]
       }
       owner_likes: {
@@ -2658,6 +2543,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "owner_likes_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "recommended_listings"
+            referencedColumns: ["listing_id"]
+          },
+          {
             foreignKeyName: "owner_likes_owner_id_fkey"
             columns: ["owner_id"]
             isOneToOne: false
@@ -2672,6 +2564,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      owner_likes_deleted_backups: {
+        Row: {
+          client_id: string
+          created_at: string
+          deleted_at: string | null
+          direction: string
+          id: string
+          is_super_like: boolean | null
+          listing_id: string | null
+          metadata: Json | null
+          owner_id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          deleted_at?: string | null
+          direction?: string
+          id?: string
+          is_super_like?: boolean | null
+          listing_id?: string | null
+          metadata?: Json | null
+          owner_id: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          deleted_at?: string | null
+          direction?: string
+          id?: string
+          is_super_like?: boolean | null
+          listing_id?: string | null
+          metadata?: Json | null
+          owner_id?: string
+        }
+        Relationships: []
       }
       owner_profiles: {
         Row: {
@@ -2712,57 +2640,6 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
           verified_owner?: boolean | null
-        }
-        Relationships: []
-      }
-      owner_properties: {
-        Row: {
-          amenities: string[] | null
-          capacity: number | null
-          created_at: string | null
-          description: string | null
-          id: number
-          location: Json | null
-          operating_hours: Json | null
-          owner_id: string | null
-          price_range: string | null
-          property_images: string[] | null
-          property_name: string
-          property_type: string | null
-          tags: string[] | null
-          updated_at: string | null
-        }
-        Insert: {
-          amenities?: string[] | null
-          capacity?: number | null
-          created_at?: string | null
-          description?: string | null
-          id?: never
-          location?: Json | null
-          operating_hours?: Json | null
-          owner_id?: string | null
-          price_range?: string | null
-          property_images?: string[] | null
-          property_name: string
-          property_type?: string | null
-          tags?: string[] | null
-          updated_at?: string | null
-        }
-        Update: {
-          amenities?: string[] | null
-          capacity?: number | null
-          created_at?: string | null
-          description?: string | null
-          id?: never
-          location?: Json | null
-          operating_hours?: Json | null
-          owner_id?: string | null
-          price_range?: string | null
-          property_images?: string[] | null
-          property_name?: string
-          property_type?: string | null
-          tags?: string[] | null
-          updated_at?: string | null
         }
         Relationships: []
       }
@@ -3575,737 +3452,6 @@ export type Database = {
         }
         Relationships: []
       }
-      properties: {
-        Row: {
-          accessibility_features: Json | null
-          active: boolean | null
-          amenities: string[] | null
-          bathrooms: number | null
-          bedrooms: number | null
-          created_at: string | null
-          description: string | null
-          energy_efficiency_rating: string | null
-          id: number
-          images: string[] | null
-          insurance_details: Json | null
-          last_renovation_date: string | null
-          location: Json | null
-          maintenance_history: Json | null
-          occupancy_rate: number | null
-          owner_id: string | null
-          price: number | null
-          price_history: Json | null
-          property_documents: Json | null
-          property_status: string | null
-          property_type: string | null
-          square_meters: number | null
-          title: string
-          updated_at: string | null
-          virtual_tour_url: string | null
-        }
-        Insert: {
-          accessibility_features?: Json | null
-          active?: boolean | null
-          amenities?: string[] | null
-          bathrooms?: number | null
-          bedrooms?: number | null
-          created_at?: string | null
-          description?: string | null
-          energy_efficiency_rating?: string | null
-          id?: never
-          images?: string[] | null
-          insurance_details?: Json | null
-          last_renovation_date?: string | null
-          location?: Json | null
-          maintenance_history?: Json | null
-          occupancy_rate?: number | null
-          owner_id?: string | null
-          price?: number | null
-          price_history?: Json | null
-          property_documents?: Json | null
-          property_status?: string | null
-          property_type?: string | null
-          square_meters?: number | null
-          title: string
-          updated_at?: string | null
-          virtual_tour_url?: string | null
-        }
-        Update: {
-          accessibility_features?: Json | null
-          active?: boolean | null
-          amenities?: string[] | null
-          bathrooms?: number | null
-          bedrooms?: number | null
-          created_at?: string | null
-          description?: string | null
-          energy_efficiency_rating?: string | null
-          id?: never
-          images?: string[] | null
-          insurance_details?: Json | null
-          last_renovation_date?: string | null
-          location?: Json | null
-          maintenance_history?: Json | null
-          occupancy_rate?: number | null
-          owner_id?: string | null
-          price?: number | null
-          price_history?: Json | null
-          property_documents?: Json | null
-          property_status?: string | null
-          property_type?: string | null
-          square_meters?: number | null
-          title?: string
-          updated_at?: string | null
-          virtual_tour_url?: string | null
-        }
-        Relationships: []
-      }
-      property_availability: {
-        Row: {
-          blocked_reason: string | null
-          created_at: string | null
-          end_date: string
-          id: number
-          is_available: boolean | null
-          property_id: number | null
-          start_date: string
-          updated_at: string | null
-        }
-        Insert: {
-          blocked_reason?: string | null
-          created_at?: string | null
-          end_date: string
-          id?: never
-          is_available?: boolean | null
-          property_id?: number | null
-          start_date: string
-          updated_at?: string | null
-        }
-        Update: {
-          blocked_reason?: string | null
-          created_at?: string | null
-          end_date?: string
-          id?: never
-          is_available?: boolean | null
-          property_id?: number | null
-          start_date?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "property_availability_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      property_comments: {
-        Row: {
-          comment: string | null
-          created_at: string | null
-          id: string
-          listing_id: string | null
-          user_id: string | null
-        }
-        Insert: {
-          comment?: string | null
-          created_at?: string | null
-          id: string
-          listing_id?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          comment?: string | null
-          created_at?: string | null
-          id?: string
-          listing_id?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "property_comments_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "property_comments_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings_browse"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "property_comments_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "property_comments_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "property_comments_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      property_favorites: {
-        Row: {
-          created_at: string | null
-          id: string
-          listing_id: string | null
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id: string
-          listing_id?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          listing_id?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "property_favorites_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "property_favorites_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings_browse"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "property_favorites_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "property_favorites_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "property_favorites_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      property_features: {
-        Row: {
-          created_at: string | null
-          feature: string | null
-          id: string
-          listing_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          feature?: string | null
-          id: string
-          listing_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          feature?: string | null
-          id?: string
-          listing_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "property_features_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "property_features_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings_browse"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "property_features_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings_public"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      property_images: {
-        Row: {
-          created_at: string | null
-          id: string
-          image_url: string | null
-          listing_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id: string
-          image_url?: string | null
-          listing_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          image_url?: string | null
-          listing_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "property_images_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "property_images_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings_browse"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "property_images_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings_public"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      property_interactions: {
-        Row: {
-          created_at: string | null
-          id: number
-          interaction_type: string | null
-          matched: boolean | null
-          property_id: number | null
-          tenant_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: never
-          interaction_type?: string | null
-          matched?: boolean | null
-          property_id?: number | null
-          tenant_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: never
-          interaction_type?: string | null
-          matched?: boolean | null
-          property_id?: number | null
-          tenant_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "property_interactions_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      property_match_messages: {
-        Row: {
-          created_at: string | null
-          id: number
-          is_read: boolean | null
-          match_id: number | null
-          message: string
-          sender_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: never
-          is_read?: boolean | null
-          match_id?: number | null
-          message: string
-          sender_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: never
-          is_read?: boolean | null
-          match_id?: number | null
-          message?: string
-          sender_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "property_match_messages_match_id_fkey"
-            columns: ["match_id"]
-            isOneToOne: false
-            referencedRelation: "property_matches"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      property_matches: {
-        Row: {
-          created_at: string | null
-          id: number
-          match_score: number | null
-          owner_notes: string | null
-          property_id: number | null
-          status: string | null
-          tenant_id: string | null
-          tenant_notes: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: never
-          match_score?: number | null
-          owner_notes?: string | null
-          property_id?: number | null
-          status?: string | null
-          tenant_id?: string | null
-          tenant_notes?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: never
-          match_score?: number | null
-          owner_notes?: string | null
-          property_id?: number | null
-          status?: string | null
-          tenant_id?: string | null
-          tenant_notes?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "property_matches_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      property_ratings: {
-        Row: {
-          created_at: string | null
-          id: string
-          listing_id: string | null
-          rating: number | null
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id: string
-          listing_id?: string | null
-          rating?: number | null
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          listing_id?: string | null
-          rating?: number | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "property_ratings_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "property_ratings_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings_browse"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "property_ratings_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "property_ratings_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "property_ratings_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      property_recommendations: {
-        Row: {
-          id: number
-          property_id: number | null
-          recommendation_score: number | null
-          recommended_at: string | null
-          user_id: string | null
-          viewed: boolean | null
-        }
-        Insert: {
-          id?: never
-          property_id?: number | null
-          recommendation_score?: number | null
-          recommended_at?: string | null
-          user_id?: string | null
-          viewed?: boolean | null
-        }
-        Update: {
-          id?: never
-          property_id?: number | null
-          recommendation_score?: number | null
-          recommended_at?: string | null
-          user_id?: string | null
-          viewed?: boolean | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "property_recommendations_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      property_reports: {
-        Row: {
-          created_at: string | null
-          id: string
-          report_details: string | null
-          report_reason: string
-          reported_listing_id: string
-          reporter_id: string
-          status: string
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          report_details?: string | null
-          report_reason: string
-          reported_listing_id: string
-          reporter_id: string
-          status?: string
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          report_details?: string | null
-          report_reason?: string
-          reported_listing_id?: string
-          reporter_id?: string
-          status?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "property_reports_reported_listing_id_fkey"
-            columns: ["reported_listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "property_reports_reported_listing_id_fkey"
-            columns: ["reported_listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings_browse"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "property_reports_reported_listing_id_fkey"
-            columns: ["reported_listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings_public"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      property_swipes: {
-        Row: {
-          id: number
-          is_active: boolean | null
-          match_status: string | null
-          property_id: number | null
-          swipe_timestamp: string | null
-          swipe_type: string | null
-          swiper_id: string | null
-        }
-        Insert: {
-          id?: never
-          is_active?: boolean | null
-          match_status?: string | null
-          property_id?: number | null
-          swipe_timestamp?: string | null
-          swipe_type?: string | null
-          swiper_id?: string | null
-        }
-        Update: {
-          id?: never
-          is_active?: boolean | null
-          match_status?: string | null
-          property_id?: number | null
-          swipe_timestamp?: string | null
-          swipe_type?: string | null
-          swiper_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "property_swipes_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      property_tours: {
-        Row: {
-          created_at: string | null
-          id: string
-          listing_id: string | null
-          tour_date: string | null
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id: string
-          listing_id?: string | null
-          tour_date?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          listing_id?: string | null
-          tour_date?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "property_tours_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "property_tours_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings_browse"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "property_tours_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "property_tours_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "property_tours_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      property_viewing_requests: {
-        Row: {
-          created_at: string | null
-          id: number
-          notes: string | null
-          owner_id: string | null
-          property_id: number | null
-          proposed_datetime: string
-          requester_id: string | null
-          status: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: never
-          notes?: string | null
-          owner_id?: string | null
-          property_id?: number | null
-          proposed_datetime: string
-          requester_id?: string | null
-          status?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: never
-          notes?: string | null
-          owner_id?: string | null
-          property_id?: number | null
-          proposed_datetime?: string
-          requester_id?: string | null
-          status?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "property_viewing_requests_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       push_outbox: {
         Row: {
           attempt_count: number | null
@@ -4557,6 +3703,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "listings_public"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "recommended_listings"
+            referencedColumns: ["listing_id"]
           },
           {
             foreignKeyName: "reviews_reviewed_id_fkey"
@@ -5137,48 +4290,6 @@ export type Database = {
         }
         Relationships: []
       }
-      tenant_profiles: {
-        Row: {
-          additional_info: string | null
-          created_at: string | null
-          id: number
-          max_budget: number | null
-          monthly_income: number | null
-          move_in_date: string | null
-          occupation: string | null
-          preferred_location: Json | null
-          preferred_property_type: string[] | null
-          updated_at: string | null
-          user_id: string | null
-        }
-        Insert: {
-          additional_info?: string | null
-          created_at?: string | null
-          id?: never
-          max_budget?: number | null
-          monthly_income?: number | null
-          move_in_date?: string | null
-          occupation?: string | null
-          preferred_location?: Json | null
-          preferred_property_type?: string[] | null
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          additional_info?: string | null
-          created_at?: string | null
-          id?: never
-          max_budget?: number | null
-          monthly_income?: number | null
-          move_in_date?: string | null
-          occupation?: string | null
-          preferred_location?: Json | null
-          preferred_property_type?: string[] | null
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
       translations: {
         Row: {
           id: string
@@ -5200,6 +4311,27 @@ export type Database = {
           language_code?: string | null
           namespace?: string | null
           value?: string | null
+        }
+        Relationships: []
+      }
+      user_action_limits: {
+        Row: {
+          action: string
+          count: number
+          user_id: string
+          window_start: string
+        }
+        Insert: {
+          action: string
+          count?: number
+          user_id: string
+          window_start: string
+        }
+        Update: {
+          action?: string
+          count?: number
+          user_id?: string
+          window_start?: string
         }
         Relationships: []
       }
@@ -5274,36 +4406,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      user_authentication_methods: {
-        Row: {
-          created_at: string | null
-          id: string
-          is_primary: boolean | null
-          last_login: string | null
-          provider: string | null
-          provider_user_id: string | null
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          is_primary?: boolean | null
-          last_login?: string | null
-          provider?: string | null
-          provider_user_id?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          is_primary?: boolean | null
-          last_login?: string | null
-          provider?: string | null
-          provider_user_id?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
       }
       user_block_list: {
         Row: {
@@ -5599,15 +4701,7 @@ export type Database = {
           property_id?: number | null
           target_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "user_interactions_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       user_likes: {
         Row: {
@@ -5854,63 +4948,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      user_profiles: {
-        Row: {
-          bio: string | null
-          created_at: string | null
-          email: string | null
-          full_name: string | null
-          id: number
-          is_banned: boolean | null
-          last_active_at: string | null
-          location: Json | null
-          phone: string | null
-          profile_image_url: string | null
-          role: string
-          subscription_expires_at: string | null
-          subscription_tier: string | null
-          updated_at: string | null
-          user_id: string | null
-          verification_status: string | null
-        }
-        Insert: {
-          bio?: string | null
-          created_at?: string | null
-          email?: string | null
-          full_name?: string | null
-          id?: never
-          is_banned?: boolean | null
-          last_active_at?: string | null
-          location?: Json | null
-          phone?: string | null
-          profile_image_url?: string | null
-          role: string
-          subscription_expires_at?: string | null
-          subscription_tier?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-          verification_status?: string | null
-        }
-        Update: {
-          bio?: string | null
-          created_at?: string | null
-          email?: string | null
-          full_name?: string | null
-          id?: never
-          is_banned?: boolean | null
-          last_active_at?: string | null
-          location?: Json | null
-          phone?: string | null
-          profile_image_url?: string | null
-          role?: string
-          subscription_expires_at?: string | null
-          subscription_tier?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-          verification_status?: string | null
-        }
-        Relationships: []
       }
       user_push_subscriptions: {
         Row: {
@@ -6217,30 +5254,6 @@ export type Database = {
           },
         ]
       }
-      users: {
-        Row: {
-          email: string
-          id: string
-          profile_data: Json | null
-          subscription_tier: string
-          user_type: string
-        }
-        Insert: {
-          email: string
-          id?: string
-          profile_data?: Json | null
-          subscription_tier: string
-          user_type: string
-        }
-        Update: {
-          email?: string
-          id?: string
-          profile_data?: Json | null
-          subscription_tier?: string
-          user_type?: string
-        }
-        Relationships: []
-      }
       vendors: {
         Row: {
           category: string
@@ -6545,6 +5558,50 @@ export type Database = {
         }
         Relationships: []
       }
+      recommended_listings: {
+        Row: {
+          city: string | null
+          client_id: string | null
+          listing_id: string | null
+          listing_type: string | null
+          match_score: number | null
+          owner_avg_rating: number | null
+          owner_id: string | null
+          owner_review_count: number | null
+          price: number | null
+          title: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_listings_owner_profiles"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_listings_owner_profiles"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listings_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listings_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vw_push_outbox_failures: {
         Row: {
           attempt_count: number | null
@@ -6715,6 +5772,10 @@ export type Database = {
           title: string
         }[]
       }
+      archive_inactive_conversations: {
+        Args: { p_days_inactive?: number }
+        Returns: number
+      }
       assign_user_subscription: {
         Args: {
           p_package_name: string
@@ -6752,11 +5813,11 @@ export type Database = {
       }
       calculate_match_score:
         | {
-            Args: { client_profile_id: string; listing_id: string }
+            Args: { input_text: string; match_threshold: number }
             Returns: number
           }
         | {
-            Args: { input_text: string; match_threshold: number }
+            Args: { p_client_id: string; p_listing_id: string }
             Returns: number
           }
         | {
@@ -6788,7 +5849,20 @@ export type Database = {
           old_package_name: string
         }[]
       }
+      check_and_increment_rate_limit: {
+        Args: {
+          p_action: string
+          p_limit: number
+          p_user_id: string
+          p_window_seconds: number
+        }
+        Returns: boolean
+      }
       check_is_admin: { Args: never; Returns: boolean }
+      check_message_activation_required: {
+        Args: { p_listing_id: string }
+        Returns: boolean
+      }
       check_property_availability: {
         Args: {
           p_end_date: string
@@ -6825,9 +5899,14 @@ export type Database = {
             Args: { p_required_role: string; p_user_id: string }
             Returns: boolean
           }
+      cleanup_old_swipes: { Args: { p_days_old?: number }; Returns: number }
       complete_user_onboarding: {
         Args: { onboarding_data?: Json; user_id: string }
         Returns: undefined
+      }
+      current_window_start: {
+        Args: { window_seconds: number }
+        Returns: string
       }
       deactivate_expired_subscriptions: { Args: never; Returns: undefined }
       delete_user_account: {
@@ -6867,6 +5946,15 @@ export type Database = {
         | { Args: { table_name: string }; Returns: string }
       enablelongtransactions: { Args: never; Returns: string }
       equals: { Args: { geom1: unknown; geom2: unknown }; Returns: boolean }
+      flag_stale_listings: {
+        Args: { p_days_stale?: number }
+        Returns: {
+          days_since_update: number
+          listing_id: string
+          owner_id: string
+          title: string
+        }[]
+      }
       geometry: { Args: { "": string }; Returns: unknown }
       geometry_above: {
         Args: { geom1: unknown; geom2: unknown }
@@ -7093,6 +6181,10 @@ export type Database = {
           longitude: number
           role: string
         }[]
+      }
+      get_platform_statistics: {
+        Args: { p_end_date?: string; p_start_date?: string }
+        Returns: Json
       }
       get_potential_clients_for_owner:
         | { Args: never; Returns: Record<string, unknown>[] }
@@ -7337,6 +6429,27 @@ export type Database = {
         Returns: {
           property_id: number
           recommendation_score: number
+        }[]
+      }
+      search_listings: {
+        Args: {
+          p_city?: string
+          p_limit?: number
+          p_listing_type?: string
+          p_max_price?: number
+          p_min_price?: number
+          p_search_query: string
+        }
+        Returns: {
+          city: string
+          created_at: string
+          description: string
+          listing_id: string
+          listing_type: string
+          owner_id: string
+          price: number
+          search_rank: number
+          title: string
         }[]
       }
       secure_function_template: { Args: { param1: string }; Returns: string }
@@ -7987,6 +7100,21 @@ export type Database = {
           table_name: string
         }
         Returns: string
+      }
+      upsert_toggle_owner_like: {
+        Args: {
+          p_client_id: string
+          p_direction: string
+          p_listing_id: string
+          p_rate_limit_max?: number
+          p_rate_limit_window_seconds?: number
+        }
+        Returns: {
+          action: string
+          current_likes: number
+          like_id: string
+          owner_id: string
+        }[]
       }
       upsert_user_role: {
         Args: { p_role: string; p_user_id: string }

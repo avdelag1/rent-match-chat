@@ -1312,14 +1312,15 @@ export function useSmartClientMatching(
         });
 
         // Verify none of the returned profiles are the user's own profile
-        const hasOwnProfile = sortedClients.some(p => p.id === userId || p.user_id === userId);
+        // Note: p.id is numeric (table PK), p.user_id is the UUID we compare against
+        const hasOwnProfile = sortedClients.some(p => p.user_id === userId);
         if (hasOwnProfile) {
           logger.error('[SmartMatching] CRITICAL BUG: User\'s own profile in results!', {
             userId: userId,
-            profiles: sortedClients.filter(p => p.id === userId || p.user_id === userId)
+            profiles: sortedClients.filter(p => p.user_id === userId)
           });
           // Filter it out as last resort
-          const cleanedClients = sortedClients.filter(p => p.id !== userId && p.user_id !== userId);
+          const cleanedClients = sortedClients.filter(p => p.user_id !== userId);
           return cleanedClients;
         }
 
