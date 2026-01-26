@@ -7,12 +7,13 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useResponsiveContext } from '@/contexts/ResponsiveContext'
 import { prefetchRoleRoutes } from '@/utils/routePrefetcher'
 import { logger } from '@/utils/prodLogger'
+import { useFilterStore } from '@/state/filterStore'
+import type { QuickFilterCategory } from '@/types/filters'
 
 // New Mobile Navigation Components
 import { TopBar } from '@/components/TopBar'
 import { BottomNavigation } from '@/components/BottomNavigation'
 import { AdvancedFilters } from '@/components/AdvancedFilters'
-import { QuickFilters, QuickFilterCategory } from '@/components/QuickFilterDropdown'
 import { LiveHDBackground } from '@/components/LiveHDBackground'
 
 // Lazy-loaded Dialogs (improves bundle size and initial load)
@@ -131,12 +132,13 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const [showMessageActivations, setShowMessageActivations] = useState(false)
 
   const [appliedFilters, setAppliedFilters] = useState<any>(null);
-  const [quickFilters, setQuickFilters] = useState<QuickFilters>({
-    categories: [],
-    listingType: 'both',
-    clientGender: 'any',
-    clientType: 'all',
-  });
+
+  // ========== UNIFIED FILTER STATE FROM ZUSTAND STORE ==========
+  // Single source of truth - no more local quickFilters state
+  const categories = useFilterStore((state) => state.categories);
+  const listingType = useFilterStore((state) => state.listingType);
+  const clientGender = useFilterStore((state) => state.clientGender);
+  const clientType = useFilterStore((state) => state.clientType);
 
   const navigate = useNavigate()
   const location = useLocation()
@@ -373,11 +375,8 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
     });
   }, [])
 
-  // Handle quick filter changes
-  const handleQuickFilterChange = useCallback((newQuickFilters: QuickFilters) => {
-    logger.info('[DashboardLayout] Quick filter changed:', newQuickFilters);
-    setQuickFilters(newQuickFilters);
-  }, []);
+  // Quick filters are now handled directly by QuickFilterDropdown dispatching to the store
+  // No more local handler needed - store is single source of truth
 
   // Map quick filter category names to database category names
   const mapCategoryToDatabase = useCallback((category: QuickFilterCategory): string => {
@@ -391,14 +390,13 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   }, []);
 
   // Combine quick filters with applied filters - MEMOIZED to prevent identity changes
+  // Now reads directly from Zustand store values instead of local state
   const combinedFilters = useMemo(() => {
     const base = appliedFilters || {};
 
-    // Check if any quick filters are active
-    const hasClientQuickFilters = quickFilters.categories.length > 0 ||
-                                   quickFilters.listingType !== 'both';
-    const hasOwnerQuickFilters = (quickFilters.clientGender && quickFilters.clientGender !== 'any') ||
-                                  (quickFilters.clientType && quickFilters.clientType !== 'all');
+    // Check if any quick filters are active (from store)
+    const hasClientQuickFilters = categories.length > 0 || listingType !== 'both';
+    const hasOwnerQuickFilters = clientGender !== 'any' || clientType !== 'all';
 
     // If no quick filters active, return base filters
     if (!hasClientQuickFilters && !hasOwnerQuickFilters) {
@@ -406,27 +404,27 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
     }
 
     // Check if services category is selected
-    const hasServicesCategory = quickFilters.categories.includes('services');
+    const hasServicesCategory = categories.includes('services');
 
     // Map quick filter categories to database categories
-    const mappedCategories = quickFilters.categories.length > 0
-      ? quickFilters.categories.map(mapCategoryToDatabase)
+    const mappedCategories = categories.length > 0
+      ? categories.map(mapCategoryToDatabase)
       : undefined;
 
     return {
       ...base,
       // Client quick filter categories take precedence if set
-      category: quickFilters.categories.length === 0 ? base.category : undefined,
+      category: categories.length === 0 ? base.category : undefined,
       categories: mappedCategories,
       // Quick filter listing type takes precedence if not 'both'
-      listingType: quickFilters.listingType !== 'both' ? quickFilters.listingType : base.listingType,
+      listingType: listingType !== 'both' ? listingType : base.listingType,
       // Services filter - derived from categories
       showHireServices: hasServicesCategory || undefined,
       // Owner quick filters
-      clientGender: quickFilters.clientGender !== 'any' ? quickFilters.clientGender : undefined,
-      clientType: quickFilters.clientType !== 'all' ? quickFilters.clientType : undefined,
+      clientGender: clientGender !== 'any' ? clientGender : undefined,
+      clientType: clientType !== 'all' ? clientType : undefined,
     };
-  }, [appliedFilters, quickFilters, mapCategoryToDatabase]);
+  }, [appliedFilters, categories, listingType, clientGender, clientType, mapCategoryToDatabase]);
 
   // FIX: Memoize cloned children to prevent infinite re-renders
   const enhancedChildren = useMemo(() => {
@@ -484,8 +482,6 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           onNotificationsClick={handleNotificationsClick}
           onMessageActivationsClick={handleMessageActivationsClick}
           showFilters={isOnDiscoveryPage}
-          filters={quickFilters}
-          onFiltersChange={handleQuickFilterChange}
           userRole={userRole === 'admin' ? 'client' : userRole}
           transparent={isImmersiveDashboard}
           hideOnScroll={true}

@@ -34,11 +34,12 @@ const MotorcycleIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-type CategoryType = 'property' | 'moto' | 'bicycle' | 'services';
+// Use standardized category types that match the filter store
+type CategoryType = 'property' | 'motorcycle' | 'bicycle' | 'services';
 
 const categories: { id: CategoryType; name: string; icon: React.ElementType; color: string }[] = [
   { id: 'property', name: 'Properties', icon: Home, color: 'text-blue-500' },
-  { id: 'moto', name: 'Motos', icon: MotorcycleIcon, color: 'text-slate-500' },
+  { id: 'motorcycle', name: 'Motos', icon: MotorcycleIcon, color: 'text-slate-500' },
   { id: 'bicycle', name: 'Bicycles', icon: Bike, color: 'text-emerald-500' },
   { id: 'services', name: 'Workers', icon: Wrench, color: 'text-purple-500' },
 ];
@@ -48,7 +49,7 @@ export default function ClientFilters() {
   const [activeCategory, setActiveCategory] = useState<CategoryType>('property');
   const [filterCounts, setFilterCounts] = useState<Record<CategoryType, number>>({
     property: 0,
-    moto: 0,
+    motorcycle: 0,
     bicycle: 0,
     services: 0,
   });
@@ -58,17 +59,17 @@ export default function ClientFilters() {
   const resetClientFilters = useFilterStore((state) => state.resetClientFilters);
 
   const handleApplyFilters = useCallback(() => {
-    // Apply the selected category to the filter store
+    // Apply the selected category to the filter store (now uses correct type)
     setStoreCategory(activeCategory as QuickFilterCategory);
-    // Navigate to swipe page with filters applied
-    navigate('/client/swipe');
+    // Navigate back to dashboard with filters applied
+    navigate(-1);
   }, [activeCategory, setStoreCategory, navigate]);
 
   const handleClearAll = useCallback(() => {
-    // Reset local state
+    // Reset local state with correct category name
     setFilterCounts({
       property: 0,
-      moto: 0,
+      motorcycle: 0,
       bicycle: 0,
       services: 0,
     });
@@ -177,10 +178,10 @@ export default function ClientFilters() {
                   activeCount={filterCounts.property}
                 />
               )}
-              {activeCategory === 'moto' && (
+              {activeCategory === 'motorcycle' && (
                 <MotoClientFilters
-                  onApply={(filters) => handleFilterApply('moto', filters)}
-                  activeCount={filterCounts.moto}
+                  onApply={(filters) => handleFilterApply('motorcycle', filters)}
+                  activeCount={filterCounts.motorcycle}
                 />
               )}
               {activeCategory === 'bicycle' && (

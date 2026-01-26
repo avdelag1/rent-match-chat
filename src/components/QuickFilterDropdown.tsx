@@ -2,6 +2,7 @@ import { memo, useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, Home, Bike, Wrench, X, Users, User, Briefcase } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useFilterStore } from '@/state/filterStore';
 import type { QuickFilterCategory, QuickFilters, ClientGender, ClientType } from '@/types/filters';
 
 // Custom motorcycle icon
@@ -15,14 +16,6 @@ const MotorcycleIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-// Custom jet icon
-const JetIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M22 2L11 13" />
-    <path d="M22 2l-7 20-4-9-9-4 20-7z" />
-  </svg>
-);
-
 // Re-export unified types
 export type { QuickFilterCategory, QuickFilters } from '@/types/filters';
 
@@ -32,8 +25,6 @@ export type OwnerClientGender = ClientGender;
 export type OwnerClientType = ClientType;
 
 interface QuickFilterDropdownProps {
-  filters: QuickFilters;
-  onChange: (filters: QuickFilters) => void;
   userRole: 'client' | 'owner';
   className?: string;
 }
@@ -85,22 +76,36 @@ const QuickFilterText = () => (
   </>
 );
 
-function QuickFilterDropdownComponent({ filters, onChange, userRole, className }: QuickFilterDropdownProps) {
+function QuickFilterDropdownComponent({ userRole, className }: QuickFilterDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [hoveredCategory, setHoveredCategory] = useState<QuickFilterCategory | null>(null);
   const [clickedCategory, setClickedCategory] = useState<QuickFilterCategory | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
-  // Count active filters
+  // ========== READ FROM ZUSTAND STORE ==========
+  const categories = useFilterStore((state) => state.categories);
+  const listingType = useFilterStore((state) => state.listingType);
+  const clientGender = useFilterStore((state) => state.clientGender);
+  const clientType = useFilterStore((state) => state.clientType);
+  
+  // ========== DISPATCH ACTIONS TO STORE ==========
+  const setCategories = useFilterStore((state) => state.setCategories);
+  const setListingType = useFilterStore((state) => state.setListingType);
+  const setClientGender = useFilterStore((state) => state.setClientGender);
+  const setClientType = useFilterStore((state) => state.setClientType);
+  const resetClientFilters = useFilterStore((state) => state.resetClientFilters);
+  const resetOwnerFilters = useFilterStore((state) => state.resetOwnerFilters);
+
+  // Count active filters from store values
   const activeFilterCount = (() => {
     let count = 0;
     if (userRole === 'client') {
-      count += filters.categories.length;
-      if (filters.listingType !== 'both') count += 1;
+      count += categories.length;
+      if (listingType !== 'both') count += 1;
     } else {
-      if (filters.clientGender && filters.clientGender !== 'any') count += 1;
-      if (filters.clientType && filters.clientType !== 'all') count += 1;
+      if (clientGender !== 'any') count += 1;
+      if (clientType !== 'all') count += 1;
     }
     return count;
   })();
@@ -128,42 +133,29 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
     setClickedCategory(clickedCategory === categoryId ? null : categoryId);
   };
 
-  const handleCategorySelect = (categoryId: QuickFilterCategory, listingType: QuickFilterListingType) => {
-    // Apply category with listing type
-    const newFilters = {
-      ...filters,
-      categories: [categoryId],
-      listingType,
-    };
-
-
-    onChange(newFilters);
+  const handleCategorySelect = (categoryId: QuickFilterCategory, selectedListingType: QuickFilterListingType) => {
+    // Apply category with listing type - dispatch to store
+    setCategories([categoryId]);
+    setListingType(selectedListingType);
     setIsOpen(false);
     setHoveredCategory(null);
     setClickedCategory(null);
   };
 
   const handleGenderSelect = (gender: OwnerClientGender) => {
-    onChange({
-      ...filters,
-      clientGender: gender,
-    });
+    setClientGender(gender);
   };
 
   const handleClientTypeSelect = (type: OwnerClientType) => {
-    onChange({
-      ...filters,
-      clientType: type,
-    });
+    setClientType(type);
   };
 
   const handleClearFilters = () => {
-    onChange({
-      categories: [],
-      listingType: 'both',
-      clientGender: 'any',
-      clientType: 'all',
-    });
+    if (userRole === 'client') {
+      resetClientFilters();
+    } else {
+      resetOwnerFilters();
+    }
     setIsOpen(false);
     setHoveredCategory(null);
     setClickedCategory(null);
@@ -197,7 +189,7 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
               onClick={() => handleGenderSelect(option.id)}
               className={cn(
                 'flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all duration-200 touch-manipulation min-h-[44px]',
-                filters.clientGender === option.id
+                clientGender === option.id
                   ? `bg-gradient-to-r ${option.color} text-white shadow-md`
                   : 'bg-muted/50 text-muted-foreground hover:bg-muted border border-white/5'
               )}
@@ -219,7 +211,7 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
               onClick={() => handleClientTypeSelect(option.id)}
               className={cn(
                 'flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all duration-150 touch-manipulation min-h-[44px] will-change-transform active:scale-95',
-                filters.clientType === option.id
+                clientType === option.id
                   ? `bg-gradient-to-r ${option.color} text-white shadow-md`
                   : 'bg-muted/50 text-muted-foreground hover:bg-muted border border-white/5'
               )}
@@ -280,7 +272,7 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
                 onClick={() => handleCategoryClick(category.id)}
                 className={cn(
                   'w-full flex items-center justify-between px-4 sm:px-5 py-3 sm:py-3.5 text-sm transition-all duration-200 touch-manipulation min-h-[52px]',
-                  filters.categories.includes(category.id)
+                  categories.includes(category.id)
                     ? 'bg-gradient-to-r ' + category.color + ' text-white'
                     : 'text-foreground/80 hover:bg-white/5'
                 )}
@@ -288,7 +280,7 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
                 <div className="flex items-center gap-2 sm:gap-3">
                   <span className={cn(
                     'p-1.5 sm:p-2 rounded-lg',
-                    filters.categories.includes(category.id)
+                    categories.includes(category.id)
                       ? 'bg-white/20'
                       : `bg-gradient-to-br ${category.color} bg-opacity-20`
                   )}>
@@ -324,21 +316,21 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
                       isMobile ? "w-full" : "min-w-[160px]"
                     )}>
                       <div className="py-1 sm:py-2">
-                        {listingTypeOptions.map((listingType, ltIndex) => (
+                        {listingTypeOptions.map((ltOption, ltIndex) => (
                           <motion.button
-                            key={listingType.id}
+                            key={ltOption.id}
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: ltIndex * 0.05 }}
-                            onClick={() => handleCategorySelect(category.id, listingType.id)}
+                            onClick={() => handleCategorySelect(category.id, ltOption.id)}
                             className={cn(
                               'w-full flex items-center px-4 sm:px-5 py-2.5 sm:py-3 text-sm transition-all duration-200 touch-manipulation min-h-[48px]',
-                              filters.categories.includes(category.id) && filters.listingType === listingType.id
+                              categories.includes(category.id) && listingType === ltOption.id
                                 ? `bg-gradient-to-r ${category.color} text-white`
                                 : 'text-foreground/80 hover:bg-white/5'
                             )}
                           >
-                            <span className="font-medium text-sm sm:text-base">{listingType.label}</span>
+                            <span className="font-medium text-sm sm:text-base">{ltOption.label}</span>
                           </motion.button>
                         ))}
                       </div>

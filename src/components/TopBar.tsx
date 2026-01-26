@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { useUnreadNotifications } from '@/hooks/useUnreadNotifications';
 import { useNavigate } from 'react-router-dom';
 import { SwipessLogo } from './SwipessLogo';
-import { QuickFilterDropdown, QuickFilters } from './QuickFilterDropdown';
+import { QuickFilterDropdown } from './QuickFilterDropdown';
 import { ModeSwitcher } from './ModeSwitcher';
 import { useScrollDirection } from '@/hooks/useScrollDirection';
 
@@ -20,22 +20,12 @@ const MessageActivationText = () => (
   </>
 );
 
-export type OwnerClientGender = 'female' | 'male' | 'any';
-export type OwnerClientType = 'all' | 'hire' | 'rent' | 'buy';
-
-export interface OwnerFilters {
-  clientGender?: OwnerClientGender;
-  clientType?: OwnerClientType;
-}
-
 interface TopBarProps {
   onNotificationsClick?: () => void;
   onMessageActivationsClick?: () => void;
   className?: string;
-  // Filter props
+  // Filter props - simplified, dropdown reads from store directly
   showFilters?: boolean;
-  filters?: QuickFilters;
-  onFiltersChange?: (filters: QuickFilters) => void;
   userRole?: 'client' | 'owner';
   // Immersive mode - transparent header for full-bleed swipe cards
   transparent?: boolean;
@@ -48,8 +38,6 @@ function TopBarComponent({
   onMessageActivationsClick,
   className,
   showFilters,
-  filters,
-  onFiltersChange,
   userRole,
   transparent = false,
   hideOnScroll = false,
@@ -63,13 +51,6 @@ function TopBarComponent({
   });
   const { unreadCount: notificationCount } = useUnreadNotifications();
   const navigate = useNavigate();
-
-  const defaultFilters: QuickFilters = {
-    categories: [],
-    listingType: 'both',
-    clientGender: 'any',
-    clientType: 'all',
-  };
 
   const handleLogoClick = () => {
     if (userRole === 'owner') {
@@ -111,14 +92,10 @@ function TopBarComponent({
             <ModeSwitcher variant="pill" size="md" className="hidden md:flex" />
           </div>
 
-          {/* Quick Filter Dropdown */}
-          {showFilters && filters && onFiltersChange && userRole && (
+          {/* Quick Filter Dropdown - now reads/writes directly to store */}
+          {showFilters && userRole && (
             <div className="flex-shrink-0">
-              <QuickFilterDropdown
-                filters={filters}
-                onChange={onFiltersChange}
-                userRole={userRole}
-              />
+              <QuickFilterDropdown userRole={userRole} />
             </div>
           )}
         </div>

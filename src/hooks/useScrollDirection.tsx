@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 export type ScrollDirection = 'up' | 'down' | 'none';
 
@@ -7,7 +7,7 @@ interface UseScrollDirectionOptions {
   threshold?: number;
   /** Whether to show the element at the very top of scroll */
   showAtTop?: boolean;
-  /** Target element selector (defaults to window) */
+  /** Target element selector (defaults to document-level detection) */
   targetSelector?: string;
 }
 
@@ -25,8 +25,14 @@ interface UseScrollDirectionReturn {
 /**
  * Hook to detect scroll direction for hide/show navigation behavior
  * 
- * CRITICAL: This hook must be STABLE across navigation to prevent reset.
- * Uses refs for scroll tracking to avoid dependency issues.
+ * PERMANENT FIX: Uses document-level scroll capture with automatic rebind
+ * to ensure it never stops working, even after navigation or DOM changes.
+ * 
+ * Strategy:
+ * 1. Uses document-level capture phase listener (catches ALL scroll events)
+ * 2. Dynamically detects the current scroll container each frame
+ * 3. Auto-rebinds if the target element changes
+ * 4. Uses refs to avoid effect dependency issues
  * 
  * Behavior:
  * - At top of page: Always visible
@@ -44,88 +50,83 @@ export function useScrollDirection({
   const [isAtTop, setIsAtTop] = useState(true);
   
   // Use refs to avoid effect dependencies that cause remounts
-  // lastObservedY tracks the most recent scroll position we saw (updated every frame)
-  const lastObservedY = useRef(0);
-  // lastTriggerY is the baseline for threshold calculations (only updated when we actually trigger a hide/show)
   const lastTriggerY = useRef(0);
   const ticking = useRef(false);
   const thresholdRef = useRef(threshold);
   const showAtTopRef = useRef(showAtTop);
   const targetSelectorRef = useRef(targetSelector);
+  const currentTargetRef = useRef<Element | null>(null);
+  const rebindIntervalRef = useRef<number | null>(null);
   
   // Update refs when props change
   thresholdRef.current = threshold;
   showAtTopRef.current = showAtTop;
   targetSelectorRef.current = targetSelector;
 
+  // Find the active scroll container
+  const findScrollContainer = useCallback((): Element | null => {
+    const selector = targetSelectorRef.current;
+    
+    // Try the specified selector first
+    if (selector) {
+      const target = document.querySelector(selector);
+      if (target) return target;
+    }
+    
+    // Fallback chain for common scroll containers
+    const fallbacks = [
+      '#dashboard-scroll-container',
+      'main[class*="overflow"]',
+      '[id*="scroll-container"]',
+      'main',
+    ];
+    
+    for (const fallback of fallbacks) {
+      const target = document.querySelector(fallback);
+      if (target && target.scrollHeight > target.clientHeight) {
+        return target;
+      }
+    }
+    
+    return null;
+  }, []);
+
+  // Get current scroll position from the active container
+  const getCurrentScrollY = useCallback((target: Element | null): number => {
+    if (!target) {
+      return window.pageYOffset || document.documentElement.scrollTop;
+    }
+    return target.scrollTop;
+  }, []);
+
   useEffect(() => {
-    // Find the scroll target
-    const findTarget = (): Element | Window | null => {
-      const selector = targetSelectorRef.current;
-      if (!selector) return window;
-      
-      let target = document.querySelector(selector);
-      
-      // Fallback chain for common scroll containers
-      if (!target) {
-        target = document.querySelector('main[class*="overflow"]') || 
-                 document.querySelector('[id*="scroll-container"]') ||
-                 document.querySelector('main');
-      }
-      
-      return target;
-    };
+    let animationFrameId: number | null = null;
     
-    let target = findTarget();
-    let retryCount = 0;
-    const maxRetries = 5;
-    
-    // Retry mechanism for dynamic DOM
-    const retryFindTarget = () => {
-      if (!target && retryCount < maxRetries) {
-        retryCount++;
-        target = findTarget();
-        if (target) {
-          attachListener();
-        } else {
-          setTimeout(retryFindTarget, 100);
-        }
-      }
-    };
-    
-    const handleScroll = () => {
+    // Main scroll handler - runs on every scroll event
+    const handleScroll = (event: Event) => {
+      // Only process if not already processing
       if (ticking.current) return;
       
       ticking.current = true;
-      requestAnimationFrame(() => {
-        const scrollTarget = findTarget();
+      
+      // Use requestAnimationFrame for performance
+      animationFrameId = requestAnimationFrame(() => {
+        // Find the current scroll container (may have changed)
+        const target = findScrollContainer();
+        currentTargetRef.current = target;
         
-        const currentScrollY = scrollTarget instanceof Element
-          ? scrollTarget.scrollTop 
-          : window.pageYOffset || document.documentElement.scrollTop;
-
-        // Always keep an up-to-date observed position to avoid baselines getting stale over time.
-        // (This is the root cause of “it works for a while then stops”.)
-        const prevObserved = lastObservedY.current;
-        lastObservedY.current = currentScrollY;
-
-        // Use threshold baseline for direction changes (stable, non-jittery behavior)
+        const currentScrollY = getCurrentScrollY(target);
         const diffFromTrigger = currentScrollY - lastTriggerY.current;
         
         // Update scroll position state
         setScrollY(currentScrollY);
         setIsAtTop(currentScrollY <= 5);
 
-        // At top - always visible + reset baselines so the next scroll-down hides correctly.
+        // At top - always visible + reset baseline
         if (showAtTopRef.current && currentScrollY <= 5) {
           setIsVisible(true);
           setScrollDirection('none');
-
-          // Reset both baselines at the top to prevent inverted diff after long scroll sessions.
           lastTriggerY.current = currentScrollY;
-          // Keep observed in sync (especially when top snaps due to momentum)
-          lastObservedY.current = currentScrollY;
-
           ticking.current = false;
           return;
         }
@@ -141,54 +142,65 @@ export function useScrollDirection({
             setScrollDirection('up');
             setIsVisible(true);
           }
-
-          // Update baseline only when a hide/show trigger happens
+          // Update baseline when a trigger happens
           lastTriggerY.current = currentScrollY;
         }
 
-        // If scroll container snaps (momentum/overscroll), keep baseline sane
-        // so we don't accumulate huge stale diffs.
-        if (Math.abs(currentScrollY - prevObserved) > 5000) {
+        // Handle scroll snapping/momentum jumps
+        if (Math.abs(diffFromTrigger) > 5000) {
           lastTriggerY.current = currentScrollY;
         }
         
         ticking.current = false;
       });
     };
-    
-    const attachListener = () => {
-      if (!target) return;
-      
-      // Initialize scroll position
-      const initialScrollY = target instanceof Element
-        ? target.scrollTop 
-        : window.pageYOffset || document.documentElement.scrollTop;
 
-      lastObservedY.current = initialScrollY;
-      lastTriggerY.current = initialScrollY;
-      setScrollY(initialScrollY);
-      setIsAtTop(initialScrollY <= 5);
-      
-      // Always start visible at top
-      if (initialScrollY <= 5) {
-        setIsVisible(true);
-      }
-      
-      target.addEventListener('scroll', handleScroll, { passive: true });
-    };
+    // DOCUMENT-LEVEL CAPTURE: Catches ALL scroll events in the capture phase
+    // This ensures we catch scrolls in any container, not just the target
+    document.addEventListener('scroll', handleScroll, { capture: true, passive: true });
     
-    if (target) {
-      attachListener();
-    } else {
-      retryFindTarget();
+    // Also listen on window for page-level scrolls
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    // REBIND CHECK: Periodically verify we're tracking the right container
+    // This handles cases where the DOM changes after navigation
+    rebindIntervalRef.current = window.setInterval(() => {
+      const newTarget = findScrollContainer();
+      if (newTarget !== currentTargetRef.current) {
+        currentTargetRef.current = newTarget;
+        // Reset baseline when container changes
+        if (newTarget) {
+          lastTriggerY.current = newTarget.scrollTop;
+        }
+      }
+    }, 1000);
+    
+    // Initialize scroll position
+    const initialTarget = findScrollContainer();
+    currentTargetRef.current = initialTarget;
+    const initialScrollY = getCurrentScrollY(initialTarget);
+    lastTriggerY.current = initialScrollY;
+    setScrollY(initialScrollY);
+    setIsAtTop(initialScrollY <= 5);
+    
+    // Always start visible at top
+    if (initialScrollY <= 5) {
+      setIsVisible(true);
     }
     
     return () => {
-      if (target) {
-        target.removeEventListener('scroll', handleScroll);
+      document.removeEventListener('scroll', handleScroll, { capture: true });
+      window.removeEventListener('scroll', handleScroll);
+      
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+      
+      if (rebindIntervalRef.current) {
+        clearInterval(rebindIntervalRef.current);
       }
     };
-  }, []); // Empty dependency array - effect runs once and uses refs for current values
+  }, [findScrollContainer, getCurrentScrollY]);
 
   return {
     scrollDirection,
