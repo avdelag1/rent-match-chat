@@ -27,12 +27,15 @@ interface Notification {
 
 interface DBNotification {
   id: string;
-  type: string;
+  notification_type: string;
+  title: string;
   message: string | null;
   created_at: string;
-  read: boolean | null;
+  is_read: boolean | null;
   link_url?: string;
   related_user_id?: string;
+  related_property_id?: string;
+  metadata?: Record<string, any>;
 }
 
 export function useNotificationSystem() {
@@ -73,21 +76,37 @@ export function useNotificationSystem() {
       }
 
       if (data && data.length > 0) {
-        const formattedNotifications: Notification[] = data.map((notif: DBNotification) => ({
-          id: notif.id,
-          type: (notif.type as NotificationType) || 'like',
-          title: notif.type === 'like' ? 'New Like' :
-                 notif.type === 'match' ? 'New Match' :
-                 notif.type === 'message' ? 'New Message' :
-                 notif.type === 'super_like' ? 'Super Like' :
-                 notif.type === 'premium_purchase' ? 'Premium Package' :
-                 notif.type === 'activation_purchase' ? 'Message Activations' : 'Notification',
-          message: notif.message || '',
-          timestamp: new Date(notif.created_at),
-          read: notif.read || false,
-          actionUrl: notif.link_url,
-          relatedUserId: notif.related_user_id || undefined,
-        }));
+        // Map database notification types to frontend types
+        const notificationTypeMap: Record<string, NotificationType> = {
+          'new_like': 'like',
+          'new_match': 'match',
+          'new_message': 'message',
+          'new_review': 'like',
+          'property_inquiry': 'message',
+          'contract_signed': 'like',
+          'contract_pending': 'like',
+          'payment_received': 'premium_purchase',
+          'profile_viewed': 'like',
+          'system_announcement': 'like',
+          'verification_approved': 'like',
+          'subscription_expiring': 'premium_purchase',
+        };
+
+        const formattedNotifications: Notification[] = data.map((notif: DBNotification) => {
+          const frontendType = notificationTypeMap[notif.notification_type] || 'like';
+          return {
+            id: notif.id,
+            type: frontendType,
+            title: notif.title || 'Notification',
+            message: notif.message || '',
+            timestamp: new Date(notif.created_at),
+            read: notif.is_read || false,
+            actionUrl: notif.link_url,
+            relatedUserId: notif.related_user_id || undefined,
+            avatar: notif.metadata?.liker_avatar || notif.metadata?.owner_avatar || notif.metadata?.sender_avatar,
+            metadata: notif.metadata,
+          };
+        });
         setNotifications(formattedNotifications);
       }
     };
@@ -95,160 +114,72 @@ export function useNotificationSystem() {
     fetchNotifications();
   }, [user?.id]);
 
-  // Subscribe to real-time notifications
+  // Subscribe to real-time notifications from the notifications table
+  // Database triggers automatically create notifications for likes, messages, matches
   useEffect(() => {
     if (!user?.id) return;
 
-    // Subscribe to swipes (likes/super likes)
-    const swipesChannel = supabase
-      .channel('user-swipes-notifications')
+    // Subscribe to notifications table - this receives all notification types
+    // Database triggers insert notifications for: likes, owner_likes, messages, matches
+    const notificationsChannel = supabase
+      .channel('user-notifications-realtime')
       .on(
         'postgres_changes',
         {
           event: 'INSERT',
           schema: 'public',
-          table: 'swipes',
-          filter: `target_id=eq.${user.id}`,
+          table: 'notifications',
+          filter: `user_id=eq.${user.id}`,
         },
         async (payload) => {
-          const swipe = payload.new;
+          const dbNotification = payload.new as any;
 
-          // PERFORMANCE: Get swiper profile from cache (prevents N+1 queries)
-          const swiperProfile = await getProfile(swipe.user_id);
+          // Map database notification to frontend format
+          const notificationTypeMap: Record<string, NotificationType> = {
+            'new_like': 'like',
+            'new_match': 'match',
+            'new_message': 'message',
+            'new_review': 'like',
+            'property_inquiry': 'message',
+            'contract_signed': 'like',
+            'contract_pending': 'like',
+            'payment_received': 'premium_purchase',
+            'profile_viewed': 'like',
+            'system_announcement': 'like',
+            'verification_approved': 'like',
+            'subscription_expiring': 'premium_purchase',
+          };
 
-          if (swiperProfile) {
-            const swiperRole = swiperProfile.role;
-            const notification: Notification = {
-              id: `swipe-${swipe.id}`,
-              type: swipe.swipe_type === 'super_like' ? 'super_like' : 'like',
-              title: swiperProfile.full_name || 'Someone',
-              message: swipe.swipe_type === 'super_like'
-                ? 'gave you a Super Like! ⭐'
-                : 'liked your profile! 🔥',
-              avatar: swiperProfile.avatar_url || undefined,
-              timestamp: new Date(),
-              read: false,
-              relatedUserId: swipe.user_id,
-              actionUrl: swiperRole === 'client' ? '/owner/liked-clients' : '/client/liked-properties',
-              metadata: {
-                role: swiperRole,
-                targetType: swiperRole === 'client' ? 'listing' : 'profile'
-              }
-            };
+          const notification: Notification = {
+            id: dbNotification.id,
+            type: notificationTypeMap[dbNotification.notification_type] || 'like',
+            title: dbNotification.title || 'Notification',
+            message: dbNotification.message || '',
+            timestamp: new Date(dbNotification.created_at),
+            read: dbNotification.is_read || false,
+            actionUrl: dbNotification.link_url,
+            relatedUserId: dbNotification.related_user_id,
+            metadata: dbNotification.metadata || {},
+          };
 
-            // OPTIMIZATION: Add to pending queue instead of immediate state update
-            setPendingNotifications(prev => [...prev, notification]);
+          // Add avatar from metadata if available
+          if (dbNotification.metadata?.liker_avatar) {
+            notification.avatar = dbNotification.metadata.liker_avatar;
+          } else if (dbNotification.metadata?.owner_avatar) {
+            notification.avatar = dbNotification.metadata.owner_avatar;
+          } else if (dbNotification.metadata?.sender_avatar) {
+            notification.avatar = dbNotification.metadata.sender_avatar;
           }
-        }
-      )
-      .subscribe();
 
-    // Subscribe to new conversation messages
-    const messagesChannel = supabase
-      .channel('user-message-notifications')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'conversation_messages',
-        },
-        async (payload) => {
-          const message = payload.new;
-          
-          // Only show notifications for messages not sent by current user
-          if (message.sender_id === user.id) return;
-          
-          // Check if current user is involved in the conversation
-          const { data: conversation } = await supabase
-            .from('conversations')
-            .select('*')
-            .eq('id', message.conversation_id)
-            .maybeSingle();
-
-          if (conversation &&
-              (conversation.client_id === user.id || conversation.owner_id === user.id)) {
-
-            // PERFORMANCE: Get sender info from cache (prevents N+1 queries)
-            const senderProfile = await getProfile(message.sender_id);
-
-            if (senderProfile) {
-              const senderRole = senderProfile.role;
-              const notification: Notification = {
-                id: `message-${message.id}`,
-                type: 'message',
-                title: senderProfile.full_name || 'Someone',
-                message: `sent you a message: "${message.message_text.slice(0, 50)}${message.message_text.length > 50 ? '...' : ''}"`,
-                avatar: senderProfile.avatar_url || undefined,
-                timestamp: new Date(),
-                read: false,
-                relatedUserId: message.sender_id,
-                conversationId: message.conversation_id,
-                actionUrl: '/messages',
-                metadata: {
-                  role: senderRole
-                }
-              };
-
-              // OPTIMIZATION: Add to pending queue instead of immediate state update
-              setPendingNotifications(prev => [...prev, notification]);
-            }
-          }
-        }
-      )
-      .subscribe();
-
-    // Subscribe to matches
-    const matchesChannel = supabase
-      .channel('user-match-notifications')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'matches',
-          filter: `or(client_id.eq.${user.id},owner_id.eq.${user.id})`,
-        },
-        async (payload) => {
-          const match = payload.new;
-          
-          // Only notify when match becomes mutual
-          if (match.is_mutual && !payload.old.is_mutual) {
-            const otherUserId = match.client_id === user.id ? match.owner_id : match.client_id;
-            
-            // Get other user's profile
-            const { data: otherProfile } = await supabase
-              .from('profiles')
-              .select('full_name, avatar_url')
-              .eq('id', otherUserId)
-              .maybeSingle();
-
-            if (otherProfile) {
-              const notification: Notification = {
-                id: `match-${match.id}`,
-                type: 'match',
-                title: 'It\'s a Match! 🎉',
-                message: `You and ${otherProfile.full_name} liked each other!`,
-                avatar: otherProfile.avatar_url,
-                timestamp: new Date(),
-                read: false,
-                relatedUserId: otherUserId,
-                actionUrl: '/messages'
-              };
-
-              // OPTIMIZATION: Add to pending queue instead of immediate state update
-              setPendingNotifications(prev => [...prev, notification]);
-            }
-          }
+          // OPTIMIZATION: Add to pending queue instead of immediate state update
+          setPendingNotifications(prev => [...prev, notification]);
         }
       )
       .subscribe();
 
     return () => {
-      // Properly unsubscribe before removing channels to prevent memory leaks
-      swipesChannel.unsubscribe();
-      messagesChannel.unsubscribe();
-      matchesChannel.unsubscribe();
+      // Properly unsubscribe before removing channel to prevent memory leaks
+      notificationsChannel.unsubscribe();
     };
   }, [user?.id]);
 
