@@ -10,16 +10,16 @@ import { QuickFilterDropdown, QuickFilters } from './QuickFilterDropdown';
 import { ModeSwitcher } from './ModeSwitcher';
 import { useScrollDirection } from '@/hooks/useScrollDirection';
 
-// Colorful gradient text for "Message Activation" button - ULTRA BRIGHT with glow
+// Colorful gradient text for "Message Activation" button - MAXIMUM VISIBILITY
 // Shows full text on md+ screens, abbreviated on smaller screens
 const MessageActivationText = () => (
   <>
-    {/* Full text on medium screens and up */}
-    <span className="hidden sm:inline font-bold text-xs sm:text-sm tracking-tight bg-gradient-to-r from-amber-300 via-orange-400 to-yellow-300 bg-clip-text text-transparent whitespace-nowrap drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]">
+    {/* Full text on medium screens and up - ULTRA BRIGHT yellow/gold */}
+    <span className="hidden sm:inline font-extrabold text-xs sm:text-sm tracking-tight text-yellow-300 whitespace-nowrap drop-shadow-[0_0_12px_rgba(253,224,71,1)] [text-shadow:0_0_20px_rgba(253,224,71,0.9),0_0_40px_rgba(253,224,71,0.6)]">
       Message Activation
     </span>
-    {/* Icon only on extra small screens - brighter glow */}
-    <Zap className="sm:hidden h-5 w-5 text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
+    {/* Icon only on extra small screens - maximum glow */}
+    <Zap className="sm:hidden h-5 w-5 text-yellow-300 drop-shadow-[0_0_16px_rgba(253,224,71,1)]" />
   </>
 );
 
@@ -152,13 +152,13 @@ function TopBarComponent({
               whileTap={{ scale: 0.95 }}
               transition={{ type: 'spring', stiffness: 400, damping: 17 }}
             >
-              {/* Bell icon - ULTRA BRIGHT with glow */}
+              {/* Bell icon - MAXIMUM VISIBILITY with intense glow */}
               <Bell
                 className={cn(
                   "h-5 w-5 sm:h-6 sm:w-6 transition-all duration-300",
                   notificationCount > 0
-                    ? "text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)] group-hover:text-amber-200"
-                    : "text-white drop-shadow-[0_0_4px_rgba(255,255,255,0.5)] group-hover:text-white"
+                    ? "text-yellow-300 drop-shadow-[0_0_16px_rgba(253,224,71,1)] [filter:drop-shadow(0_0_8px_rgba(253,224,71,0.9))]"
+                    : "text-white drop-shadow-[0_0_12px_rgba(255,255,255,0.9)] [filter:drop-shadow(0_0_6px_rgba(255,255,255,0.7))]"
                 )}
               />
               {/* Animated ring effect when there are notifications */}
