@@ -215,64 +215,13 @@ export function PWAInstallBanner() {
 
                 {/* S Logo App Icon */}
                 <div className="relative w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center shadow-xl ring-2 ring-orange-500/30 group-hover:ring-orange-500/50 transition-all duration-300">
-                  {/* App icon with S logo */}
-                  <motion.svg
-                    viewBox="0 0 64 64"
-                    className="w-full h-full"
+                  <motion.img
+                    src="/icons/s-logo-app.png"
+                    alt="Swipess"
+                    className="w-full h-full object-cover"
                     animate={{ scale: [1, 1.05, 1] }}
                     transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                  >
-                    <defs>
-                      <linearGradient id="bannerBgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#FF1493"/>
-                        <stop offset="30%" stopColor="#FF6B6B"/>
-                        <stop offset="50%" stopColor="#FF8E53"/>
-                        <stop offset="70%" stopColor="#FF6B9D"/>
-                        <stop offset="100%" stopColor="#E040FB"/>
-                      </linearGradient>
-                      <linearGradient id="bannerSGradient" x1="50%" y1="0%" x2="50%" y2="100%">
-                        <stop offset="0%" stopColor="#FFD700"/>
-                        <stop offset="20%" stopColor="#FFC947"/>
-                        <stop offset="40%" stopColor="#FF8E53"/>
-                        <stop offset="60%" stopColor="#FF6B9D"/>
-                        <stop offset="80%" stopColor="#9C7CF4"/>
-                        <stop offset="100%" stopColor="#7B68EE"/>
-                      </linearGradient>
-                      <filter id="bannerShadow" x="-20%" y="-20%" width="140%" height="140%">
-                        <feDropShadow dx="0.5" dy="1" stdDeviation="1" floodColor="#000000" floodOpacity="0.3"/>
-                      </filter>
-                    </defs>
-                    {/* Background */}
-                    <rect width="64" height="64" rx="14" fill="url(#bannerBgGradient)"/>
-                    {/* S letter */}
-                    <g filter="url(#bannerShadow)">
-                      <path
-                        d="M42 18
-                           C42 18, 38 14, 30 14
-                           C22 14, 16 18, 16 24
-                           C16 30, 20 33, 27 35
-                           L36 38
-                           C42 40, 47 44, 47 50
-                           C47 57, 40 61, 32 61
-                           C24 61, 18 57, 14 52
-
-                           L14 52
-                           C18 59, 25 64, 33 64
-                           C44 64, 52 58, 52 49
-                           C52 42, 46 38, 38 35
-                           L29 32
-                           C23 30, 20 27, 20 23
-                           C20 19, 24 16, 30 16
-                           C37 16, 42 19, 44 22"
-                        fill="none"
-                        stroke="url(#bannerSGradient)"
-                        strokeWidth="6"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        transform="translate(2, -5)"
-                      />
-                    </g>
-                  </motion.svg>
+                  />
                 </div>
 
                 {/* Text with enhanced styling */}
