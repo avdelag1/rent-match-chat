@@ -40,21 +40,15 @@ const LANE_CONFIGS = [
   },
 ];
 
-// Sample images for different categories (properties, services, items)
-// Using diverse marketplace content: properties, workers, vehicles, houses
+// Sample placeholder cards - using local placeholders instead of external images
+// These are simple gradient placeholders that create the ambient swipe effect
 const SAMPLE_IMAGES = [
-  'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=600&fit=crop', // Modern apartment
-  'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400&h=600&fit=crop', // Worker/service
-  'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=600&fit=crop', // Bike/vehicle
-  'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400&h=600&fit=crop', // House exterior
-  'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&h=600&fit=crop', // Service/worker
-  'https://images.unsplash.com/photo-1449844908441-8829872d2607?w=400&h=600&fit=crop', // Apartment interior
-  'https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=400&h=600&fit=crop', // Bicycle
-  'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=400&h=600&fit=crop', // Modern house
-  'https://images.unsplash.com/photo-1554995207-c18c203602cb?w=400&h=600&fit=crop', // Cozy apartment
-  'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&h=600&fit=crop', // Service worker
-  'https://images.unsplash.com/photo-1449844908441-8829872d2607?w=400&h=600&fit=crop', // Interior space
-  'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=600&fit=crop', // House/property
+  '/placeholder.svg',
+  '/placeholder.svg',
+  '/placeholder.svg',
+  '/placeholder.svg',
+  '/placeholder.svg',
+  '/placeholder.svg',
 ];
 
 /**
