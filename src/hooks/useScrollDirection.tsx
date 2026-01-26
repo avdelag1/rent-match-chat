@@ -44,7 +44,10 @@ export function useScrollDirection({
   const [isAtTop, setIsAtTop] = useState(true);
   
   // Use refs to avoid effect dependencies that cause remounts
-  const lastScrollY = useRef(0);
+  // lastObservedY tracks the most recent scroll position we saw (updated every frame)
+  const lastObservedY = useRef(0);
+  // lastTriggerY is the baseline for threshold calculations (only updated when we actually trigger a hide/show)
+  const lastTriggerY = useRef(0);
   const ticking = useRef(false);
   const thresholdRef = useRef(threshold);
   const showAtTopRef = useRef(showAtTop);
@@ -100,16 +103,36 @@ export function useScrollDirection({
         const currentScrollY = scrollTarget instanceof Element
           ? scrollTarget.scrollTop 
           : window.pageYOffset || document.documentElement.scrollTop;
-        
-        const diff = currentScrollY - lastScrollY.current;
+
+        // Always keep an up-to-date observed position to avoid baselines getting stale over time.
+        // (This is the root cause of “it works for a while then stops”.)
+        const prevObserved = lastObservedY.current;
+        lastObservedY.current = currentScrollY;
+
+        // Use threshold baseline for direction changes (stable, non-jittery behavior)
+        const diffFromTrigger = currentScrollY - lastTriggerY.current;
         
         // Update scroll position state
         setScrollY(currentScrollY);
         setIsAtTop(currentScrollY <= 5);
-        
-        // Check if we've scrolled past threshold
-        if (Math.abs(diff) >= thresholdRef.current) {
-          if (diff > 0) {
+
+        // At top - always visible + reset baselines so the next scroll-down hides correctly.
+        if (showAtTopRef.current && currentScrollY <= 5) {
+          setIsVisible(true);
+          setScrollDirection('none');
+
+          // Reset both baselines at the top to prevent inverted diff after long scroll sessions.
+          lastTriggerY.current = currentScrollY;
+          // Keep observed in sync (especially when top snaps due to momentum)
+          lastObservedY.current = currentScrollY;
+
+          ticking.current = false;
+          return;
+        }
+
+        // Check if we've scrolled past threshold since last trigger
+        if (Math.abs(diffFromTrigger) >= thresholdRef.current) {
+          if (diffFromTrigger > 0) {
             // Scrolling DOWN - hide
             setScrollDirection('down');
             setIsVisible(false);
@@ -118,14 +141,15 @@ export function useScrollDirection({
             setScrollDirection('up');
             setIsVisible(true);
           }
-          
-          lastScrollY.current = currentScrollY;
+
+          // Update baseline only when a hide/show trigger happens
+          lastTriggerY.current = currentScrollY;
         }
-        
-        // At top - always visible
-        if (showAtTopRef.current && currentScrollY <= 5) {
-          setIsVisible(true);
-          setScrollDirection('none');
+
+        // If scroll container snaps (momentum/overscroll), keep baseline sane
+        // so we don't accumulate huge stale diffs.
+        if (Math.abs(currentScrollY - prevObserved) > 5000) {
+          lastTriggerY.current = currentScrollY;
         }
         
         ticking.current = false;
@@ -139,8 +163,9 @@ export function useScrollDirection({
       const initialScrollY = target instanceof Element
         ? target.scrollTop 
         : window.pageYOffset || document.documentElement.scrollTop;
-      
-      lastScrollY.current = initialScrollY;
+
+      lastObservedY.current = initialScrollY;
+      lastTriggerY.current = initialScrollY;
       setScrollY(initialScrollY);
       setIsAtTop(initialScrollY <= 5);
       
