@@ -99,40 +99,41 @@ export function useNotificationSystem() {
   useEffect(() => {
     if (!user?.id) return;
 
-    // Subscribe to swipes (likes/super likes)
-    const swipesChannel = supabase
-      .channel('user-swipes-notifications')
+    // Subscribe to likes (client swiping right on listings)
+    const likesChannel = supabase
+      .channel('user-likes-notifications')
       .on(
         'postgres_changes',
         {
           event: 'INSERT',
           schema: 'public',
-          table: 'swipes',
+          table: 'likes',
           filter: `target_id=eq.${user.id}`,
         },
         async (payload) => {
-          const swipe = payload.new;
+          const like = payload.new;
 
-          // PERFORMANCE: Get swiper profile from cache (prevents N+1 queries)
-          const swiperProfile = await getProfile(swipe.user_id);
+          // PERFORMANCE: Get liker profile from cache (prevents N+1 queries)
+          const likerProfile = await getProfile(like.user_id);
 
-          if (swiperProfile) {
-            const swiperRole = swiperProfile.role;
+          if (likerProfile) {
+            const likerRole = likerProfile.role;
+            const isSuperLike = like.direction === 'super_like';
             const notification: Notification = {
-              id: `swipe-${swipe.id}`,
-              type: swipe.swipe_type === 'super_like' ? 'super_like' : 'like',
-              title: swiperProfile.full_name || 'Someone',
-              message: swipe.swipe_type === 'super_like'
+              id: `like-${like.id}`,
+              type: isSuperLike ? 'super_like' : 'like',
+              title: likerProfile.full_name || 'Someone',
+              message: isSuperLike
                 ? 'gave you a Super Like! ⭐'
                 : 'liked your profile! 🔥',
-              avatar: swiperProfile.avatar_url || undefined,
+              avatar: likerProfile.avatar_url || undefined,
               timestamp: new Date(),
               read: false,
-              relatedUserId: swipe.user_id,
-              actionUrl: swiperRole === 'client' ? '/owner/liked-clients' : '/client/liked-properties',
+              relatedUserId: like.user_id,
+              actionUrl: likerRole === 'client' ? '/owner/liked-clients' : '/client/liked-properties',
               metadata: {
-                role: swiperRole,
-                targetType: swiperRole === 'client' ? 'listing' : 'profile'
+                role: likerRole,
+                targetType: likerRole === 'client' ? 'listing' : 'profile'
               }
             };
 
@@ -246,7 +247,7 @@ export function useNotificationSystem() {
 
     return () => {
       // Properly unsubscribe before removing channels to prevent memory leaks
-      swipesChannel.unsubscribe();
+      likesChannel.unsubscribe();
       messagesChannel.unsubscribe();
       matchesChannel.unsubscribe();
     };
