@@ -29,10 +29,26 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
         throw new Error('User not authenticated. Please refresh the page.');
       }
 
-      // CRITICAL: Prevent self-likes
+      // CRITICAL: Prevent self-likes (should never happen due to query filtering, but defense in depth)
       if (targetType === 'profile' && targetId === user.id) {
-        logger.error('[useSwipeWithMatch] Attempted self-like, blocking:', { userId: user.id, targetId });
+        logger.error('[useSwipeWithMatch] CRITICAL: Attempted self-like - profile filter failed!', { userId: user.id, targetId });
         throw new Error('You cannot like your own profile');
+      }
+
+      // CRITICAL: Also check for own listings
+      if (targetType === 'listing') {
+        // We need to verify the listing doesn't belong to the user
+        // This should already be filtered by the query, but double-check
+        const { data: listing } = await supabase
+          .from('listings')
+          .select('owner_id')
+          .eq('id', targetId)
+          .maybeSingle();
+
+        if (listing && listing.owner_id === user.id) {
+          logger.error('[useSwipeWithMatch] CRITICAL: Attempted to like own listing - filter failed!', { userId: user.id, listingId: targetId });
+          throw new Error('You cannot like your own listing');
+        }
       }
 
       let like: any;

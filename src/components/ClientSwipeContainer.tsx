@@ -351,14 +351,22 @@ const ClientSwipeContainerComponent = ({
 
         const isExpectedError =
           errorMessage.includes('cannot like your own') ||
+          errorMessage.includes('your own profile') ||
           errorMessage.includes('duplicate') ||
           errorMessage.includes('already exists') ||
           errorMessage.includes('violates unique constraint') ||
           errorCode === '23505' || // Unique constraint violation
           errorCode === '42501';   // RLS policy violation
 
-        // Only show user-facing error for unexpected failures (network, auth, server errors)
-        if (!isExpectedError) {
+        // Show friendly message for self-likes (shouldn't happen but just in case)
+        if (errorMessage.includes('cannot like your own') || errorMessage.includes('your own profile')) {
+          logger.warn('[ClientSwipeContainer] User attempted to like their own profile - this should have been filtered');
+          sonnerToast.error('Oops!', {
+            description: 'You cannot swipe on your own profile'
+          });
+        }
+        // Only show generic error for truly unexpected failures (network, auth, server errors)
+        else if (!isExpectedError) {
           sonnerToast.error('Failed to save your swipe', {
             description: 'Please check your connection and try again'
           });

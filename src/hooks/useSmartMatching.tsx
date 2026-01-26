@@ -287,8 +287,19 @@ export function useSmartListingMatching(
     placeholderData: (prev) => prev,
     queryFn: async () => {
       // PERF: userId is passed in, no need for async getUser() call
-      if (!userId) return [];
+      if (!userId) {
+        logger.warn('[SmartMatching] No userId provided for listings, returning empty array');
+        return [];
+      }
+
+      // CRITICAL: Defensive check - ensure userId is valid
+      if (typeof userId !== 'string' || userId.trim() === '') {
+        logger.error('[SmartMatching] Invalid userId for listings:', userId);
+        return [];
+      }
+
       try {
+        logger.info('[SmartMatching] Fetching listings for user:', userId);
 
         const { data: preferences } = await supabase
           .from('client_filter_preferences')
@@ -513,9 +524,16 @@ export function useSmartListingMatching(
         }
 
         // Filter out already-swiped listings (both likes and dislikes)
-        filteredListings = filteredListings.filter(listing =>
-          !swipedListingIds.has(listing.id)
-        );
+        // CRITICAL: Also double-check that user never sees their own listings (defense in depth)
+        filteredListings = filteredListings.filter(listing => {
+          // Never show user their own listings
+          if (listing.owner_id === userId) {
+            logger.warn('[SmartMatching] CRITICAL: Own listing leaked through DB query, filtering it out:', listing.id);
+            return false;
+          }
+          // Filter out already-swiped listings
+          return !swipedListingIds.has(listing.id);
+        });
 
         if (!preferences) {
           return filteredListings.map(listing => ({
@@ -604,7 +622,30 @@ export function useSmartListingMatching(
             matchReasons: ['General listing'],
             incompatibleReasons: []
           }));
+          logger.info('[SmartMatching] Returning fallback listings:', {
+            totalReturned: fallbackListings.length,
+            userId: userId
+          });
           return shuffleArray(fallbackListings);
+        }
+
+        logger.info('[SmartMatching] Returning listings:', {
+          totalReturned: randomizedListings.length,
+          userId: userId,
+          page: page,
+          listingIds: randomizedListings.map(l => l.id).slice(0, 5) // Log first 5 IDs for debugging
+        });
+
+        // Verify none of the returned listings are the user's own
+        const hasOwnListing = randomizedListings.some(l => l.owner_id === userId);
+        if (hasOwnListing) {
+          logger.error('[SmartMatching] CRITICAL BUG: User\'s own listing in results!', {
+            userId: userId,
+            listings: randomizedListings.filter(l => l.owner_id === userId).map(l => l.id)
+          });
+          // Filter it out as last resort
+          const cleanedListings = randomizedListings.filter(l => l.owner_id !== userId);
+          return cleanedListings;
         }
 
         return randomizedListings;
@@ -906,9 +947,18 @@ export function useSmartClientMatching(
     queryFn: async () => {
       // PERF: userId is passed in, no need for async getUser() call
       if (!userId) {
+        logger.warn('[SmartMatching] No userId provided, returning empty profiles');
         return [] as MatchedClientProfile[];
       }
+
+      // CRITICAL: Defensive check - ensure userId is a valid UUID
+      if (typeof userId !== 'string' || userId.trim() === '') {
+        logger.error('[SmartMatching] Invalid userId:', userId);
+        return [] as MatchedClientProfile[];
+      }
+
       try {
+        logger.info('[SmartMatching] Fetching client profiles for owner:', userId);
 
         // CRITICAL FIX: For owners, fetch liked clients from owner_likes table
         // Owner swipes on clients are stored in owner_likes, not likes table
@@ -1009,7 +1059,7 @@ export function useSmartClientMatching(
         const { data: profiles, error: profileError } = await supabase
           .from('profiles')
           .select(CLIENT_SWIPE_CARD_FIELDS)
-          .neq('id', userId!) // CRITICAL: Never show user their own profile
+          .neq('id', userId) // CRITICAL: Never show user their own profile
           .eq('user_roles.role', 'client')
           .range(start, end);
 
@@ -1021,12 +1071,23 @@ export function useSmartClientMatching(
         }
 
         if (!profiles?.length) {
+          logger.info('[SmartMatching] No client profiles found for page:', page);
           return [] as MatchedClientProfile[];
         }
+
+        logger.info('[SmartMatching] Fetched profiles before filtering:', profiles.length);
 
         // Map profiles with placeholder images - filter out already-swiped profiles
         // CRITICAL: Also filter out profiles with mock/fake images (unsplash, placeholder URLs, etc.)
         let filteredProfiles = (profiles as any[])
+          .filter(profile => {
+            // CRITICAL: Double-check - never show user their own profile (defense in depth)
+            if (profile.id === userId) {
+              logger.warn('[SmartMatching] CRITICAL: Own profile leaked through DB query, filtering it out:', profile.id);
+              return false;
+            }
+            return true;
+          })
           .filter(profile => !swipedProfileIds.has(profile.id))
           .filter(profile => !hasMockImages(profile.images)) // Remove profiles with fake/mock photos
           .map(profile => ({
@@ -1242,6 +1303,25 @@ export function useSmartClientMatching(
 
         // Sort by match percentage
         const sortedClients = matchedClients.sort((a, b) => b.matchPercentage - a.matchPercentage);
+
+        logger.info('[SmartMatching] Returning client profiles:', {
+          totalReturned: sortedClients.length,
+          userId: userId,
+          page: page,
+          profileIds: sortedClients.map(p => p.id).slice(0, 5) // Log first 5 IDs for debugging
+        });
+
+        // Verify none of the returned profiles are the user's own profile
+        const hasOwnProfile = sortedClients.some(p => p.id === userId || p.user_id === userId);
+        if (hasOwnProfile) {
+          logger.error('[SmartMatching] CRITICAL BUG: User\'s own profile in results!', {
+            userId: userId,
+            profiles: sortedClients.filter(p => p.id === userId || p.user_id === userId)
+          });
+          // Filter it out as last resort
+          const cleanedClients = sortedClients.filter(p => p.id !== userId && p.user_id !== userId);
+          return cleanedClients;
+        }
 
         // Sort by match percentage only - no random shuffle during normal loads
         // Shuffling causes visual instability when returning to dashboard
