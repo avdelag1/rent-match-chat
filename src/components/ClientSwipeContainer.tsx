@@ -338,9 +338,27 @@ const ClientSwipeContainerComponent = ({
         direction,
         targetType: 'profile'
       }).catch((err) => {
-        logger.error('[ClientSwipeContainer] CRITICAL: Failed to save swipe to database:', err);
-        // Only show user-facing error for critical failures (not self-likes or duplicates)
-        if (!err.message?.includes('cannot like your own')) {
+        // Log all errors for debugging
+        logger.error('[ClientSwipeContainer] Swipe save error:', err);
+
+        // Don't show error toast for expected/non-critical errors:
+        // - Self-likes (user trying to like their own profile)
+        // - Duplicate likes (23505 is Postgres unique constraint violation)
+        // - RLS policy violations (42501)
+        // - Already exists errors
+        const errorMessage = err?.message?.toLowerCase() || '';
+        const errorCode = err?.code || '';
+
+        const isExpectedError =
+          errorMessage.includes('cannot like your own') ||
+          errorMessage.includes('duplicate') ||
+          errorMessage.includes('already exists') ||
+          errorMessage.includes('violates unique constraint') ||
+          errorCode === '23505' || // Unique constraint violation
+          errorCode === '42501';   // RLS policy violation
+
+        // Only show user-facing error for unexpected failures (network, auth, server errors)
+        if (!isExpectedError) {
           sonnerToast.error('Failed to save your swipe', {
             description: 'Please check your connection and try again'
           });
