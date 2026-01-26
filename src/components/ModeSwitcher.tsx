@@ -162,7 +162,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
     );
   }
 
-  // Pill variant (default) - Compact with mode indicator - MAXIMUM VISIBILITY
+  // Pill variant (default) - Compact with mode indicator + micro-animations - ULTRA BRIGHT
   return (
     <motion.button
       onClick={(e) => handleToggle(e)}
@@ -193,20 +193,20 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
             <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
           ) : activeMode === 'client' ? (
             <>
-              <Search className="h-4 w-4 text-orange-300 drop-shadow-[0_0_14px_rgba(253,186,116,1)] [filter:drop-shadow(0_0_8px_rgba(253,186,116,0.9))]" />
-              <span className="font-extrabold text-orange-300 [text-shadow:0_0_16px_rgba(253,186,116,1),0_0_32px_rgba(253,186,116,0.7)]">Client</span>
+              <Search className="h-3.5 w-3.5 text-orange-400 drop-shadow-[0_0_6px_rgba(249,115,22,0.7)]" />
+              <span className="font-bold text-orange-400 drop-shadow-[0_0_4px_rgba(249,115,22,0.5)]">Client</span>
             </>
           ) : (
             <>
-              <Briefcase className="h-4 w-4 text-emerald-300 drop-shadow-[0_0_14px_rgba(110,231,183,1)] [filter:drop-shadow(0_0_8px_rgba(110,231,183,0.9))]" />
-              <span className="font-extrabold text-emerald-300 [text-shadow:0_0_16px_rgba(110,231,183,1),0_0_32px_rgba(110,231,183,0.7)]">Owner</span>
+              <Briefcase className="h-3.5 w-3.5 text-emerald-400 drop-shadow-[0_0_6px_rgba(16,185,129,0.7)]" />
+              <span className="font-bold text-emerald-400 drop-shadow-[0_0_4px_rgba(16,185,129,0.5)]">Owner</span>
             </>
           )}
         </motion.div>
       </AnimatePresence>
 
-      {/* Switch icon - brighter */}
-      <ArrowLeftRight className="h-3.5 w-3.5 text-white/80 drop-shadow-[0_0_8px_rgba(255,255,255,0.6)]" />
+      {/* Switch icon */}
+      <ArrowLeftRight className="h-3 w-3 text-muted-foreground opacity-60" />
     </motion.button>
   );
 }
