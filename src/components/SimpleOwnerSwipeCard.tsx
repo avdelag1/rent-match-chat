@@ -1,16 +1,17 @@
 /**
- * SIMPLE OWNER SWIPE CARD
+ * TINDER-STYLE OWNER SWIPE CARD
+ *
+ * Full diagonal movement with physics-based animations.
+ * Card follows finger freely in any direction with natural rotation.
  * 
- * Uses the EXACT same pattern as the landing page logo swipe.
- * Simple, clean, no complex physics - just framer-motion's built-in drag.
- * 
- * PERFORMANCE OPTIMIZATIONS:
- * - Pointer events for instant touch response (no 300ms delay)
- * - GPU-accelerated transforms
- * - Press-and-hold magnifier for image inspection
+ * KEY FEATURES:
+ * - Free XY movement (diagonal swipes)
+ * - Rotation based on drag position (pivot from bottom)
+ * - Spring physics for snap-back and exit
+ * - Next card visible underneath with scale/opacity anticipation
  */
 
-import { memo, useRef, useState, useCallback, useMemo, useEffect } from 'react';
+import { memo, useRef, useState, useCallback, useMemo, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo, animate } from 'framer-motion';
 import { MapPin, DollarSign, Briefcase } from 'lucide-react';
 import { triggerHaptic } from '@/utils/haptics';
@@ -21,13 +22,35 @@ import { CompactRatingDisplay } from '@/components/RatingDisplay';
 import { useUserRatingAggregate } from '@/hooks/useRatingSystem';
 import { useParallaxStore } from '@/state/parallaxStore';
 
-// LOWERED thresholds for faster, more responsive swipe
-const SWIPE_THRESHOLD = 80; // Reduced from 120 - card triggers sooner
-const VELOCITY_THRESHOLD = 300; // Reduced from 500 - fast flicks work better
+// Exposed interface for parent to trigger swipe animations
+export interface SimpleOwnerSwipeCardRef {
+  triggerSwipe: (direction: 'left' | 'right') => void;
+}
 
-// Calculate exit distance dynamically based on viewport for reliable off-screen animation
-const getExitDistance = () => typeof window !== 'undefined' ? window.innerWidth + 100 : 600;
+// Tinder-style thresholds
+const SWIPE_THRESHOLD = 100; // Distance to trigger swipe
+const VELOCITY_THRESHOLD = 400; // Velocity to trigger swipe
+
+// Max rotation angle (degrees) based on horizontal position
+const MAX_ROTATION = 12;
+
+// Calculate exit distance dynamically based on viewport
+const getExitDistance = () => typeof window !== 'undefined' ? window.innerWidth * 1.5 : 800;
 const FALLBACK_PLACEHOLDER = '/placeholder.svg';
+
+/**
+ * SPRING CONFIGS - Tinder-tuned physics
+ */
+const SPRING_CONFIGS = {
+  // SNAPPY: Quick response, minimal overshoot
+  SNAPPY: { stiffness: 600, damping: 30, mass: 0.8 },
+  // NATIVE: iOS-like balanced feel (DEFAULT)
+  NATIVE: { stiffness: 400, damping: 28, mass: 1 },
+  // SOFT: Playful with bounce
+  SOFT: { stiffness: 300, damping: 22, mass: 1.2 },
+};
+
+const ACTIVE_SPRING = SPRING_CONFIGS.NATIVE;
 
 // Client profile type
 interface ClientProfile {
@@ -175,7 +198,7 @@ interface SimpleOwnerSwipeCardProps {
   hideActions?: boolean;
 }
 
-function SimpleOwnerSwipeCardComponent({
+const SimpleOwnerSwipeCardComponent = forwardRef<SimpleOwnerSwipeCardRef, SimpleOwnerSwipeCardProps>(({
   profile,
   onSwipe,
   onTap,
@@ -186,31 +209,30 @@ function SimpleOwnerSwipeCardComponent({
   onShare,
   isTop = true,
   hideActions = false,
-}: SimpleOwnerSwipeCardProps) {
+}, ref) => {
   const isDragging = useRef(false);
   const hasExited = useRef(false);
-  // Track if the card is currently animating out to prevent reset interference
   const isExitingRef = useRef(false);
-  // Track the profile ID to detect changes
-  // FIX: Add null check to prevent errors when profile is undefined
   const lastProfileIdRef = useRef(profile?.user_id || '');
+  const dragStartY = useRef(0);
 
-  // Motion value for horizontal position - EXACTLY like the landing page logo
+  // Motion values for BOTH X and Y - enables diagonal movement
   const x = useMotionValue(0);
+  const y = useMotionValue(0);
 
-  // Transform effects based on x position
-  const cardOpacity = useTransform(x, [-200, 0, 200], [0.5, 1, 0.5]);
-  const cardScale = useTransform(x, [-200, 0, 200], [0.9, 1, 0.9]);
-  const cardRotate = useTransform(x, [-200, 0, 200], [-8, 0, 8]);
-  const cardBlur = useTransform(x, [-200, 0, 200], [4, 0, 4]);
+  // Tinder-style rotation: pivots from bottom of card based on X drag
+  const cardRotate = useTransform(x, [-300, 0, 300], [-MAX_ROTATION, 0, MAX_ROTATION]);
 
-  // Like/Pass overlay opacity
-  const likeOpacity = useTransform(x, [0, SWIPE_THRESHOLD], [0, 1]);
-  const passOpacity = useTransform(x, [-SWIPE_THRESHOLD, 0], [1, 0]);
+  // Card opacity decreases as it moves away from center
+  const cardOpacity = useTransform(
+    x,
+    [-300, -100, 0, 100, 300],
+    [0.6, 0.9, 1, 0.9, 0.6]
+  );
 
-  // FIX: Move useTransform hook to top level - hooks must not be called inside JSX
-  // This was causing "Rendered fewer hooks than expected" error when card unmounted
-  const cardFilter = useTransform(cardBlur, (v) => `blur(${v}px)`);
+  // Like/Pass overlay opacity based on X position
+  const likeOpacity = useTransform(x, [0, SWIPE_THRESHOLD * 0.5, SWIPE_THRESHOLD], [0, 0.5, 1]);
+  const passOpacity = useTransform(x, [-SWIPE_THRESHOLD, -SWIPE_THRESHOLD * 0.5, 0], [1, 0.5, 0]);
 
   // Fetch user rating aggregate for this client profile
   const { data: ratingAggregate, isLoading: isRatingLoading } = useUserRatingAggregate(profile?.user_id);
@@ -262,7 +284,7 @@ function SimpleOwnerSwipeCardComponent({
         x.set(0);
       }
     }
-  }, [profile?.user_id, x]);
+  }, [profile?.user_id, x, y]);
 
   // Parallax store for ambient background effect
   const updateParallaxDrag = useParallaxStore((s) => s.updateDrag);
@@ -278,8 +300,9 @@ function SimpleOwnerSwipeCardComponent({
     return unsubscribe;
   }, [x, isTop, updateParallaxDrag]);
 
-  const handleDragStart = useCallback(() => {
+  const handleDragStart = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     isDragging.current = true;
+    dragStartY.current = info.point.y;
     triggerHaptic('light');
   }, []);
 
@@ -291,53 +314,68 @@ function SimpleOwnerSwipeCardComponent({
   });
 
   const handleDragEnd = useCallback((_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    // End parallax effect when drag ends
     endParallaxDrag();
     
     if (hasExited.current) return;
 
-    const offset = info.offset.x;
-    const velocity = info.velocity.x;
+    const offsetX = info.offset.x;
+    const offsetY = info.offset.y;
+    const velocityX = info.velocity.x;
+    const velocityY = info.velocity.y;
 
-    // Check if swipe threshold is met (either distance OR velocity)
-    const shouldSwipe = Math.abs(offset) > SWIPE_THRESHOLD || Math.abs(velocity) > VELOCITY_THRESHOLD;
+    // Swipe threshold based on X distance or velocity
+    const shouldSwipe = Math.abs(offsetX) > SWIPE_THRESHOLD || Math.abs(velocityX) > VELOCITY_THRESHOLD;
 
     if (shouldSwipe) {
       hasExited.current = true;
       isExitingRef.current = true;
-      const direction = offset > 0 ? 'right' : 'left';
+      const direction = offsetX > 0 ? 'right' : 'left';
 
       triggerHaptic(direction === 'right' ? 'success' : 'warning');
 
-      // NOTE: Swipe is queued by parent container, not here (prevents duplicates)
+      // Exit in the SAME direction of the swipe gesture (diagonal physics)
+      const exitDistance = getExitDistance();
+      const exitX = direction === 'right' ? exitDistance : -exitDistance;
+      
+      // Calculate Y exit based on swipe angle - maintains diagonal trajectory
+      const swipeAngle = Math.atan2(offsetY, Math.abs(offsetX));
+      const exitY = Math.tan(swipeAngle) * exitDistance * (offsetY > 0 ? 1 : 1);
 
-      // Calculate exit distance based on viewport to ensure card fully exits
-      const exitX = direction === 'right' ? getExitDistance() : -getExitDistance();
-
-      // INSTANT exit animation - no bounce-back, fast duration
+      // Spring-based exit animation - feels more natural than tween
       animate(x, exitX, {
-        type: 'tween',
-        duration: 0.15, // Faster exit for instant feel
-        ease: [0.25, 0.1, 0.25, 1], // Faster ease-out
+        type: 'spring',
+        stiffness: 600,
+        damping: 30,
+        velocity: velocityX,
         onComplete: () => {
           isExitingRef.current = false;
           onSwipe(direction);
         },
       });
+      
+      // Animate Y in parallel
+      animate(y, Math.min(Math.max(exitY, -300), 300), {
+        type: 'spring',
+        stiffness: 600,
+        damping: 30,
+        velocity: velocityY,
+      });
     } else {
-      // Quick snap back
+      // Spring snap-back to center - BOTH X and Y
       animate(x, 0, {
         type: 'spring',
-        stiffness: 500, // Stiffer for faster snap
-        damping: 35,
-        mass: 0.6, // Lighter for quicker response
+        ...ACTIVE_SPRING,
+      });
+      animate(y, 0, {
+        type: 'spring',
+        ...ACTIVE_SPRING,
       });
     }
 
     setTimeout(() => {
       isDragging.current = false;
     }, 100);
-  }, [profile?.user_id, onSwipe, x, endParallaxDrag]);
+  }, [profile?.user_id, onSwipe, x, y, endParallaxDrag]);
 
   const handleCardTap = useCallback(() => {
     if (!isDragging.current && onTap) {
@@ -381,22 +419,31 @@ function SimpleOwnerSwipeCardComponent({
 
     triggerHaptic(direction === 'right' ? 'success' : 'warning');
 
-    // NOTE: Swipe is queued by parent container, not here (prevents duplicates)
-
-    // Calculate exit distance based on viewport to ensure card fully exits
     const exitX = direction === 'right' ? getExitDistance() : -getExitDistance();
 
-    // INSTANT exit animation
+    // Spring-based exit for button taps (consistent physics)
     animate(x, exitX, {
-      type: 'tween',
-      duration: 0.15, // Fast exit
-      ease: [0.25, 0.1, 0.25, 1],
+      type: 'spring',
+      stiffness: 500,
+      damping: 30,
       onComplete: () => {
         isExitingRef.current = false;
         onSwipe(direction);
       },
     });
-  }, [profile?.user_id, onSwipe, x]);
+    
+    // Slight upward arc for button swipes
+    animate(y, -50, {
+      type: 'spring',
+      stiffness: 500,
+      damping: 30,
+    });
+  }, [profile?.user_id, onSwipe, x, y]);
+
+  // Expose triggerSwipe method to parent via ref
+  useImperativeHandle(ref, () => ({
+    triggerSwipe: handleButtonSwipe,
+  }), [handleButtonSwipe]);
 
   // FIX: Early return if profile is null/undefined to prevent errors
   // All hooks must be called above this point to maintain hook order
@@ -413,45 +460,42 @@ function SimpleOwnerSwipeCardComponent({
 
   // Render based on position - all hooks called above regardless of render path
   if (!isTop) {
+    // Non-top card: simple static preview (no interaction, just visual)
     return (
       <div
-        className="absolute inset-0 overflow-hidden shadow-lg"
+        className="absolute inset-0 overflow-hidden"
         style={{
-          transform: 'scale(0.95)',
-          opacity: 0.7,
-          pointerEvents: 'none'
+          pointerEvents: 'none',
         }}
       >
         <CardImage src={currentImage} alt={profile.name || 'Client'} name={profile.name} />
+        {/* Bottom gradient for depth */}
+        <GradientMaskBottom intensity={0.6} zIndex={2} heightPercent={40} />
       </div>
     );
   }
 
   return (
     <div className="absolute inset-0 flex flex-col">
-      {/* Draggable Card - FULL-SCREEN with edge-to-edge photo */}
+      {/* Draggable Card - FREE XY MOVEMENT (Tinder-style diagonal) */}
       <motion.div
-        drag={!isMagnifierActive() ? "x" : false}
-        dragConstraints={{ left: 0, right: 0 }}
-        dragElastic={1} // Full elasticity for instant response to touch
-        dragMomentum={true} // Allow momentum for natural feel
-        dragTransition={{ bounceStiffness: 500, bounceDamping: 30 }}
+        drag={!isMagnifierActive()}
+        dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+        dragElastic={0.9}
+        dragMomentum={false}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
         onClick={handleCardTap}
         style={{
           x,
-          opacity: cardOpacity,
-          scale: cardScale,
+          y,
           rotate: cardRotate,
-          filter: cardFilter,
-          // CSS performance optimizations for instant touch response
-          willChange: 'transform, opacity, filter',
+          opacity: cardOpacity,
+          transformOrigin: 'bottom center',
+          willChange: 'transform, opacity',
           backfaceVisibility: 'hidden',
           WebkitBackfaceVisibility: 'hidden',
-          perspective: 1000,
-          // Disable all browser touch delays
-          touchAction: 'pan-y',
+          touchAction: 'none',
           WebkitTapHighlightColor: 'transparent',
           WebkitTouchCallout: 'none',
         } as any}
@@ -494,11 +538,20 @@ function SimpleOwnerSwipeCardComponent({
         {/* YES! overlay */}
         <motion.div
           className="absolute top-8 left-8 z-30 pointer-events-none"
-          style={{ opacity: likeOpacity }}
+          style={{
+            opacity: likeOpacity,
+            willChange: 'opacity',
+            backfaceVisibility: 'hidden',
+            transform: 'translateZ(0)',
+          }}
         >
           <div
-            className="px-6 py-3 rounded-xl border-4 border-green-500 text-green-500 font-black text-3xl tracking-wider transform -rotate-12"
-            style={{ textShadow: '0 0 10px rgba(34, 197, 94, 0.6), 0 0 20px rgba(34, 197, 94, 0.4)' }}
+            className="px-6 py-3 rounded-xl border-4 border-green-500 text-green-500 font-black text-3xl tracking-wider"
+            style={{
+              transform: 'rotate(-12deg) translateZ(0)',
+              backfaceVisibility: 'hidden',
+              textShadow: '0 0 10px rgba(34, 197, 94, 0.6), 0 0 20px rgba(34, 197, 94, 0.4)',
+            }}
           >
             YES!
           </div>
@@ -507,11 +560,20 @@ function SimpleOwnerSwipeCardComponent({
         {/* NOPE overlay */}
         <motion.div
           className="absolute top-8 right-8 z-30 pointer-events-none"
-          style={{ opacity: passOpacity }}
+          style={{
+            opacity: passOpacity,
+            willChange: 'opacity',
+            backfaceVisibility: 'hidden',
+            transform: 'translateZ(0)',
+          }}
         >
           <div
-            className="px-6 py-3 rounded-xl border-4 border-red-500 text-red-500 font-black text-3xl tracking-wider transform rotate-12"
-            style={{ textShadow: '0 0 10px rgba(239, 68, 68, 0.6), 0 0 20px rgba(239, 68, 68, 0.4)' }}
+            className="px-6 py-3 rounded-xl border-4 border-red-500 text-red-500 font-black text-3xl tracking-wider"
+            style={{
+              transform: 'rotate(12deg) translateZ(0)',
+              backfaceVisibility: 'hidden',
+              textShadow: '0 0 10px rgba(239, 68, 68, 0.6), 0 0 20px rgba(239, 68, 68, 0.4)',
+            }}
           >
             NOPE
           </div>
@@ -649,6 +711,6 @@ function SimpleOwnerSwipeCardComponent({
       </motion.div>
     </div>
   );
-}
+});
 
 export const SimpleOwnerSwipeCard = memo(SimpleOwnerSwipeCardComponent);

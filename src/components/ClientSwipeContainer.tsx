@@ -729,14 +729,31 @@ const ClientSwipeContainerComponent = ({
     );
   }
 
-  // Main swipe view - edge-to-edge cards
+  // Main swipe view - edge-to-edge cards with next card visible behind
   return (
     <div className="relative w-full h-full flex-1 flex flex-col">
       <div className="relative flex-1 w-full">
-        {/* Single card - no background placeholder layer */}
+        {/* Next card visible behind - creates depth and anticipation */}
+        {nextCard && (
+          <div
+            key={`next-${nextCard.user_id}`}
+            className="w-full h-full absolute inset-0"
+            style={{ 
+              zIndex: 5,
+              transform: 'scale(0.95)',
+              opacity: 0.7,
+            }}
+          >
+            <SimpleOwnerSwipeCard
+              profile={nextCard}
+              onSwipe={() => {}}
+              isTop={false}
+              hideActions={true}
+            />
+          </div>
+        )}
 
         {/* Current card on top - fully interactive */}
-        {/* Physics engine handles ALL animations - no Framer Motion wrapper needed */}
         <div
           key={topCard.user_id}
           className="w-full h-full absolute inset-0"
