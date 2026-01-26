@@ -78,17 +78,32 @@ const ClientSwipeContainerComponent = ({
 
   // PERF: Get initial state ONCE using getState() - no subscription
   // This is synchronous and doesn't cause re-renders when store updates
+  // CRITICAL: Filter out own profile from cached deck items
+  const filterOwnProfile = useCallback((items: any[], userId: string | undefined) => {
+    if (!userId) return items;
+    return items.filter(p => {
+      const profileId = p.user_id || p.id;
+      if (profileId === userId) {
+        logger.warn('[ClientSwipeContainer] Filtering own profile from cached deck:', profileId);
+        return false;
+      }
+      return true;
+    });
+  }, []);
+
   const getInitialDeck = () => {
+    const userId = user?.id;
+    
     // Try session storage first (faster, tab-scoped)
     const sessionItems = getDeckFromSession('owner', category);
     if (sessionItems.length > 0) {
-      return sessionItems;
+      return filterOwnProfile(sessionItems, userId);
     }
     // Fallback to store items (persisted across sessions) - non-reactive read
     const storeState = useSwipeDeckStore.getState();
     const currentDeck = storeState.ownerDecks[category];
     if (currentDeck?.deckItems?.length > 0) {
-      return currentDeck.deckItems;
+      return filterOwnProfile(currentDeck.deckItems, userId);
     }
     return [];
   };
