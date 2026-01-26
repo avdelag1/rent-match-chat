@@ -25,17 +25,14 @@ interface Notification {
   };
 }
 
+// DBNotification matches actual Supabase schema: id, user_id, type, message, read, created_at
 interface DBNotification {
   id: string;
-  notification_type: string;
-  title: string;
-  message: string | null;
+  user_id: string;
+  type: string;           // Maps to notification_type in frontend
+  message: string;        // Main content
+  read: boolean;          // Read status
   created_at: string;
-  is_read: boolean | null;
-  link_url?: string;
-  related_user_id?: string;
-  related_property_id?: string;
-  metadata?: Record<string, any>;
 }
 
 export function useNotificationSystem() {
@@ -93,18 +90,30 @@ export function useNotificationSystem() {
         };
 
         const formattedNotifications: Notification[] = data.map((notif: DBNotification) => {
-          const frontendType = notificationTypeMap[notif.notification_type] || 'like';
+          const frontendType = notificationTypeMap[notif.type] || 'like';
+          // Generate title from type since DB schema doesn't have title column
+          const titleMap: Record<string, string> = {
+            'new_like': 'New Like',
+            'new_match': 'It\'s a Match!',
+            'new_message': 'New Message',
+            'new_review': 'New Review',
+            'property_inquiry': 'Property Inquiry',
+            'contract_signed': 'Contract Signed',
+            'payment_received': 'Payment Received',
+            'profile_viewed': 'Profile Viewed',
+            'system_announcement': 'Announcement',
+          };
           return {
             id: notif.id,
             type: frontendType,
-            title: notif.title || 'Notification',
+            title: titleMap[notif.type] || 'Notification',
             message: notif.message || '',
             timestamp: new Date(notif.created_at),
-            read: notif.is_read || false,
-            actionUrl: notif.link_url,
-            relatedUserId: notif.related_user_id || undefined,
-            avatar: notif.metadata?.liker_avatar || notif.metadata?.owner_avatar || notif.metadata?.sender_avatar,
-            metadata: notif.metadata,
+            read: notif.read || false,
+            actionUrl: undefined,
+            relatedUserId: undefined,
+            avatar: undefined,
+            metadata: {},
           };
         });
         setNotifications(formattedNotifications);

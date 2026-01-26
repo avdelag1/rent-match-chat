@@ -1,6 +1,7 @@
 import { Outlet, useLocation } from 'react-router-dom';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { useActiveMode } from '@/hooks/useActiveMode';
+import { useFilterPersistence } from '@/hooks/useFilterPersistence';
 import { useMemo, useEffect } from 'react';
 
 /**
@@ -40,6 +41,9 @@ function getRoleFromPath(pathname: string): 'client' | 'owner' {
 export function PersistentDashboardLayout() {
   const location = useLocation();
   const { activeMode, syncMode } = useActiveMode();
+  
+  // FILTER PERSISTENCE: Auto-restore and auto-save filters from/to database
+  useFilterPersistence();
 
   // SPEED OF LIGHT: Derive role from path INSTANTLY
   // No async calls, no loading states, no skeleton
