@@ -73,15 +73,15 @@ const clientTypeOptions: { id: OwnerClientType; label: string; icon: React.React
   { id: 'buy', label: 'Buying', icon: <Briefcase className="w-4 h-4" />, color: 'from-green-500 to-emerald-500' },
 ];
 
-// BRIGHTER Pink/Mexican color "Quick Filter" text - responsive sizing
+// ULTRA BRIGHT Pink/Mexican color "Quick Filter" text - with glow effect
 const QuickFilterText = () => (
   <>
     {/* Abbreviated on very small screens */}
-    <span className="sm:hidden font-semibold text-xs tracking-tight whitespace-nowrap bg-gradient-to-r from-pink-400 via-rose-400 to-pink-300 bg-clip-text text-transparent drop-shadow-sm">
+    <span className="sm:hidden font-bold text-xs tracking-tight whitespace-nowrap bg-gradient-to-r from-pink-300 via-rose-400 to-pink-300 bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(244,114,182,0.7)]">
       Filter
     </span>
     {/* Full text on larger screens */}
-    <span className="hidden sm:inline font-semibold text-sm tracking-tight whitespace-nowrap bg-gradient-to-r from-pink-400 via-rose-400 to-pink-300 bg-clip-text text-transparent drop-shadow-sm">
+    <span className="hidden sm:inline font-bold text-sm tracking-tight whitespace-nowrap bg-gradient-to-r from-pink-300 via-rose-400 to-pink-300 bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(244,114,182,0.7)]">
       Quick Filter
     </span>
   </>
@@ -357,7 +357,7 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
 
   return (
     <div className={cn('relative', className)}>
-      {/* Quick Filter Button - IMPROVED: Better touch target and responsive sizing */}
+      {/* Quick Filter Button - ULTRA BRIGHT with glow effect */}
       <motion.button
         ref={buttonRef}
         whileHover={{ scale: 1.02 }}
@@ -365,7 +365,7 @@ function QuickFilterDropdownComponent({ filters, onChange, userRole, className }
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
           'relative flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 md:px-5 h-9 sm:h-10 md:h-11 rounded-xl transition-all duration-200 touch-manipulation',
-          'bg-white/5 hover:bg-white/10'
+          'bg-pink-500/15 hover:bg-pink-500/25 border border-pink-500/40 hover:border-pink-400/60 shadow-[0_0_12px_rgba(244,114,182,0.3)] hover:shadow-[0_0_18px_rgba(244,114,182,0.45)]'
         )}
       >
         <QuickFilterText />

@@ -478,8 +478,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           firing on the same conversation_messages INSERT event. */}
 
       {/* Top Bar - Fixed with safe-area-top. Hidden on camera routes for fullscreen UX */}
-      {/* On immersive dashboard routes, TopBar becomes transparent for full-bleed cards */}
-      {/* On non-immersive routes, TopBar hides on scroll down and reappears on scroll up */}
+      {/* Hides smoothly on scroll down and reappears on scroll up for all routes */}
       {!isCameraRoute && (
         <TopBar
           onNotificationsClick={handleNotificationsClick}
@@ -489,7 +488,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           onFiltersChange={handleQuickFilterChange}
           userRole={userRole === 'admin' ? 'client' : userRole}
           transparent={isImmersiveDashboard}
-          hideOnScroll={!isImmersiveDashboard}
+          hideOnScroll={true}
         />
       )}
 
