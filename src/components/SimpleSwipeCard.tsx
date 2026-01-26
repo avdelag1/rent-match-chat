@@ -34,6 +34,9 @@ const SWIPE_THRESHOLD = 80; // Reduced from 120 - card triggers sooner
 const VELOCITY_THRESHOLD = 300; // Reduced from 500 - fast flicks work better
 const FALLBACK_PLACEHOLDER = '/placeholder.svg';
 
+// Global image cache for instant photo switching - shared across all cards
+const imageCache = new Map<string, boolean>();
+
 // Calculate exit distance dynamically based on viewport for reliable off-screen animation
 const getExitDistance = () => typeof window !== 'undefined' ? window.innerWidth + 100 : 600;
 
@@ -66,9 +69,13 @@ const ACTIVE_SPRING = SPRING_CONFIGS.NATIVE;
  * - Sits at the LOWEST z-layer (z-index: 1)
  */
 const CardImage = memo(({ src, alt }: { src: string; alt: string }) => {
-  const [loaded, setLoaded] = useState(false);
+  // Check if image was already cached - if so, show immediately (no skeleton)
+  const [loaded, setLoaded] = useState(() => imageCache.has(src));
   const [error, setError] = useState(false);
   const optimizedSrc = getCardImageUrl(src);
+
+  // Use smooth transition only for uncached images
+  const wasInCache = imageCache.has(src);
 
   return (
     <div
@@ -85,12 +92,12 @@ const CardImage = memo(({ src, alt }: { src: string; alt: string }) => {
         zIndex: 1,
       }}
     >
-      {/* Skeleton - GPU-accelerated with smooth 150ms crossfade */}
+      {/* Skeleton - GPU-accelerated with smooth 150ms crossfade (skip if cached) */}
       <div
         className="absolute inset-0 bg-gradient-to-br from-muted to-muted-foreground/20"
         style={{
           opacity: loaded ? 0 : 1,
-          transition: 'opacity 150ms ease-out',
+          transition: wasInCache ? 'none' : 'opacity 150ms ease-out',
           transform: 'translateZ(0)',
         }}
       />
@@ -105,7 +112,7 @@ const CardImage = memo(({ src, alt }: { src: string; alt: string }) => {
           objectFit: 'cover',
           objectPosition: 'center',
           opacity: loaded ? 1 : 0,
-          transition: 'opacity 150ms ease-out',
+          transition: wasInCache ? 'none' : 'opacity 150ms ease-out',
           // CSS performance optimizations
           willChange: 'opacity',
           backfaceVisibility: 'hidden',
@@ -114,7 +121,10 @@ const CardImage = memo(({ src, alt }: { src: string; alt: string }) => {
           WebkitUserDrag: 'none',
           pointerEvents: 'none',
         } as React.CSSProperties}
-        onLoad={() => setLoaded(true)}
+        onLoad={() => {
+          imageCache.set(src, true);
+          setLoaded(true);
+        }}
         onError={() => setError(true)}
         draggable={false}
         loading="eager"
@@ -174,6 +184,20 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
 
   const imageCount = images.length;
   const currentImage = images[currentImageIndex] || FALLBACK_PLACEHOLDER;
+
+  // AGGRESSIVE PRELOAD: When this card is on top, preload ALL its images immediately
+  // This ensures instant photo switching when user taps left/right
+  useEffect(() => {
+    if (!isTop || images.length <= 1) return;
+
+    images.forEach((imageUrl) => {
+      if (imageUrl && imageUrl !== FALLBACK_PLACEHOLDER && !imageCache.has(imageUrl)) {
+        const img = new Image();
+        img.onload = () => imageCache.set(imageUrl, true);
+        img.src = getCardImageUrl(imageUrl);
+      }
+    });
+  }, [isTop, images, listing.id]);
 
   // Reset state when listing changes - but ONLY if we're not mid-exit
   // This prevents the snap-back glitch caused by resetting during exit animation

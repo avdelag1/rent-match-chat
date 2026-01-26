@@ -360,6 +360,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         const targetPath = actualRole === 'client' ? '/client/dashboard' : '/owner/dashboard';
 
+        // AUTO-REFRESH: Invalidate all queries to force fresh data on sign-in
+        // This ensures the swipe deck and other dashboard data is refreshed
+        queryClient.invalidateQueries();
+
         toast({
           title: "Welcome back!",
           description: "Loading your dashboard...",
