@@ -660,32 +660,61 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     // Update local ref for swiped IDs (already done in phase 1, but ensure consistency)
     swipedIdsRef.current.add(listing.id);
 
-    // FIX: Immediate DB save with optimistic update for instant UI feedback
+    // FIX: Save to DB FIRST, then update cache only on success
+    // This prevents liked listings from showing in cache if DB save fails
     if (direction === 'right') {
-      // Optimistically add the liked listing to the cache immediately (before DB write)
-      queryClient.setQueryData(['liked-properties'], (oldData: any[] | undefined) => {
-        const currentListing = listing;
-        if (!oldData) {
-          return [currentListing];
+      // Save swipe to DB with proper error handling
+      swipeMutation.mutateAsync({
+        targetId: listing.id,
+        direction,
+        targetType: 'listing'
+      }).then(() => {
+        // SUCCESS: Add the liked listing to the cache AFTER DB write succeeds
+        queryClient.setQueryData(['liked-properties'], (oldData: any[] | undefined) => {
+          const currentListing = listing;
+          if (!oldData) {
+            return [currentListing];
+          }
+          // Check if already in the list to avoid duplicates
+          const exists = oldData.some((item: any) => item.id === currentListing.id);
+          if (exists) {
+            return oldData;
+          }
+          return [currentListing, ...oldData];
+        });
+      }).catch((err) => {
+        // ERROR: DB save failed - show error to user
+        logger.error('[TinderentSwipeContainer] Failed to save like:', err);
+
+        // Only show error for unexpected failures (not duplicates/RLS)
+        const errorMessage = err?.message?.toLowerCase() || '';
+        const errorCode = err?.code || '';
+        const isExpectedError =
+          errorMessage.includes('duplicate') ||
+          errorMessage.includes('already exists') ||
+          errorMessage.includes('unique constraint') ||
+          errorCode === '23505' || // Unique constraint violation
+          errorCode === '42501';   // RLS policy violation
+
+        if (!isExpectedError) {
+          toast({
+            title: 'Failed to save like',
+            description: 'Your like was not saved. Please try again.',
+            variant: 'destructive'
+          });
         }
-        // Check if already in the list to avoid duplicates
-        const exists = oldData.some((item: any) => item.id === currentListing.id);
-        if (exists) {
-          return oldData;
-        }
-        return [currentListing, ...oldData];
+      });
+    } else {
+      // For left swipes (dislikes), just save without cache update
+      swipeMutation.mutateAsync({
+        targetId: listing.id,
+        direction,
+        targetType: 'listing'
+      }).catch((err) => {
+        // Non-critical - dislike not saved, but user can continue swiping
+        logger.error('[TinderentSwipeContainer] Failed to save dislike:', err);
       });
     }
-
-    // Save swipe to DB immediately (not queued) - fire-and-forget but completes fast
-    swipeMutation.mutateAsync({
-      targetId: listing.id,
-      direction,
-      targetType: 'listing'
-    }).catch(() => {
-      // Non-critical error - user already saw the swipe complete
-      // The optimistic update will persist until next refetch
-    });
 
     // Track dismissal on left swipe (dislike)
     if (direction === 'left') {

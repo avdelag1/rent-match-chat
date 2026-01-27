@@ -304,8 +304,8 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
         ];
         Promise.all(invalidations).catch(() => {});
       } else if (isLike && variables.targetType === 'listing') {
-        // Client liking listing - DON'T invalidate cache, let optimistic update persist
-        // Only invalidate matches to detect new matches
+        // Client liking listing - cache is updated manually in TinderentSwipeContainer after DB save
+        // Only invalidate matches to detect new matches (don't invalidate liked-properties to avoid refetch race)
         queryClient.invalidateQueries({ queryKey: ['matches'] }).catch(() => {});
       } else if (isDislike) {
         // Invalidate dislikes cache so the disliked profiles are excluded from future fetches
