@@ -137,7 +137,7 @@ const CardImage = memo(({ src, alt, name }: { src: string; alt: string; name?: s
 
   return (
     <div
-      className="absolute inset-0 w-full h-full"
+      className="absolute inset-0 w-full h-full rounded-[24px]"
       style={{
         // GPU acceleration
         transform: 'translateZ(0)',
@@ -146,6 +146,7 @@ const CardImage = memo(({ src, alt, name }: { src: string; alt: string; name?: s
         userSelect: 'none',
         // LOWEST z-layer - image sits behind everything
         zIndex: 1,
+        overflow: 'hidden',
       }}
     >
       {/* Skeleton - only show if image not in cache, smooth 150ms crossfade */}
@@ -162,7 +163,7 @@ const CardImage = memo(({ src, alt, name }: { src: string; alt: string; name?: s
       <img
         src={src}
         alt={alt}
-        className="absolute inset-0 w-full h-full"
+        className="absolute inset-0 w-full h-full rounded-[24px]"
         style={{
           // CRITICAL: object-fit: cover ensures no letterboxing/padding
           objectFit: 'cover',
@@ -499,12 +500,12 @@ const SimpleOwnerSwipeCardComponent = forwardRef<SimpleOwnerSwipeCardRef, Simple
           WebkitTapHighlightColor: 'transparent',
           WebkitTouchCallout: 'none',
         } as any}
-        className="flex-1 cursor-grab active:cursor-grabbing select-none touch-none overflow-hidden relative"
+        className="flex-1 cursor-grab active:cursor-grabbing select-none touch-none relative rounded-[24px] overflow-hidden shadow-xl"
       >
         {/* Image area - FULL VIEWPORT with magnifier support */}
         <div
           ref={containerRef}
-          className="absolute inset-0 w-full h-full overflow-hidden"
+          className="absolute inset-0 w-full h-full overflow-hidden rounded-[24px]"
           onClick={handleImageTap}
           {...pointerHandlers}
           style={{
