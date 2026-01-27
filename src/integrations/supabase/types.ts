@@ -5509,52 +5509,23 @@ export type Database = {
           age: number | null
           avatar_url: string | null
           bio: string | null
+          budget_max: number | null
+          budget_min: number | null
           city: string | null
           created_at: string | null
           full_name: string | null
+          gender: string | null
           id: string | null
           images: string[] | null
           interests: string[] | null
           is_active: boolean | null
           lifestyle_tags: string[] | null
+          monthly_income: string | null
           occupation: string | null
           onboarding_completed: boolean | null
           preferred_activities: string[] | null
+          role: string | null
           verified: boolean | null
-        }
-        Insert: {
-          age?: number | null
-          avatar_url?: string | null
-          bio?: string | null
-          city?: string | null
-          created_at?: string | null
-          full_name?: string | null
-          id?: string | null
-          images?: string[] | null
-          interests?: string[] | null
-          is_active?: boolean | null
-          lifestyle_tags?: string[] | null
-          occupation?: string | null
-          onboarding_completed?: boolean | null
-          preferred_activities?: string[] | null
-          verified?: boolean | null
-        }
-        Update: {
-          age?: number | null
-          avatar_url?: string | null
-          bio?: string | null
-          city?: string | null
-          created_at?: string | null
-          full_name?: string | null
-          id?: string | null
-          images?: string[] | null
-          interests?: string[] | null
-          is_active?: boolean | null
-          lifestyle_tags?: string[] | null
-          occupation?: string | null
-          onboarding_completed?: boolean | null
-          preferred_activities?: string[] | null
-          verified?: boolean | null
         }
         Relationships: []
       }
