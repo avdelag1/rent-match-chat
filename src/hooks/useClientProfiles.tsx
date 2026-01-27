@@ -32,10 +32,12 @@ export function useClientProfiles(excludeSwipedIds: string[] = [], options: { en
       try {
         // CRITICAL: Query profiles_public directly to ensure all profiles exist in auth system
         // The client_profiles table may have orphan records that cause FK violations in owner_likes
+        // IMPORTANT: Filter by role='client' to only show clients, not owners
         const { data: profiles, error } = await supabase
           .from('profiles_public')
           .select('*')
           .neq('id', user.id)
+          .eq('role', 'client') // ✅ Only show clients in owner swipe deck
           .order('created_at', { ascending: false })
           .limit(100);
 
