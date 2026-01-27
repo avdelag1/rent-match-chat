@@ -1061,6 +1061,7 @@ export function useSmartClientMatching(
           .select(CLIENT_SWIPE_CARD_FIELDS)
           .neq('id', userId) // CRITICAL: Never show user their own profile
           .eq('user_roles.role', 'client')
+          .or('is_active.is.null,is_active.eq.true') // Only show active profiles (null or true)
           .range(start, end);
 
         if (profileError) {
