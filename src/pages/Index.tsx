@@ -84,11 +84,24 @@ const Index = () => {
     if (hasNavigated.current) return;
     if (!initialized) return; // Wait for auth to initialize
     if (loading) return;
-    
+
     // Not logged in - show landing page
     if (!user) return;
 
-    // Have role - navigate immediately
+    // PRIORITY 1: For new users, use metadata role immediately (don't wait for DB query)
+    // This prevents the loading screen hang after signup
+    if (isNewUser && !userRole) {
+      const metadataRole = user.user_metadata?.role as 'client' | 'owner' | undefined;
+      if (metadataRole) {
+        hasNavigated.current = true;
+        const targetPath = metadataRole === "client" ? "/client/dashboard" : "/owner/dashboard";
+        logger.log("[Index] New user - using metadata role, navigating to:", targetPath);
+        navigate(targetPath, { replace: true });
+        return;
+      }
+    }
+
+    // PRIORITY 2: Have role from DB - navigate immediately
     if (userRole) {
       hasNavigated.current = true;
       const targetPath = userRole === "client" ? "/client/dashboard" : "/owner/dashboard";
@@ -97,13 +110,13 @@ const Index = () => {
       return;
     }
 
-    // New user without role yet - check metadata for fallback
-    if (isNewUser && !userRole && !isLoadingRole) {
+    // PRIORITY 3: If not new user and role query failed after timeout, try metadata as last resort
+    if (!isNewUser && !userRole && !isLoadingRole) {
       const metadataRole = user.user_metadata?.role as 'client' | 'owner' | undefined;
       if (metadataRole) {
         hasNavigated.current = true;
         const targetPath = metadataRole === "client" ? "/client/dashboard" : "/owner/dashboard";
-        logger.log("[Index] Using metadata role, navigating to:", targetPath);
+        logger.log("[Index] Fallback - using metadata role, navigating to:", targetPath);
         navigate(targetPath, { replace: true });
         return;
       }
@@ -128,7 +141,29 @@ const Index = () => {
   }
 
   // User exists but still loading role - show loading
+  // But if polling has timed out (user age > 30s) and still no role, show error
   if (user && (isLoadingRole || (isNewUser && !userRole))) {
+    // If user is too old and still no role, something went wrong
+    if (userAgeMs > 30000 && !userRole && !isLoadingRole) {
+      return (
+        <div className="min-h-screen min-h-dvh flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
+          <div className="text-center space-y-4 p-4 max-w-md">
+            <div className="text-orange-500 text-4xl">⚠️</div>
+            <h2 className="text-white text-lg font-semibold">Setup Taking Longer Than Expected</h2>
+            <p className="text-white/70 text-sm">
+              Your account setup is taking longer than usual. Please refresh the page to continue.
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors"
+            >
+              Refresh Page
+            </button>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="min-h-screen min-h-dvh flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
         <div className="text-center space-y-4">
