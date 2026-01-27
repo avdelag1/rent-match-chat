@@ -240,9 +240,10 @@ export function useSwipedListings() {
         // Only exclude listings swiped within the last 1 day (reset after next day)
         const oneDayAgo = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString();
 
+        // FIXED: Use correct column name 'target_id'
         const { data: likes, error } = await supabase
           .from('likes')
-          .select('target_listing_id')
+          .select('target_id')
           .eq('user_id', user.user.id)
           .gte('created_at', oneDayAgo);
 
@@ -251,7 +252,7 @@ export function useSwipedListings() {
           return [];
         }
 
-        return likes?.map(l => l.target_listing_id) || [];
+        return likes?.map(l => l.target_id) || [];
       } catch (error) {
         if (import.meta.env.DEV) logger.error('Error in useSwipedListings:', error);
         return [];

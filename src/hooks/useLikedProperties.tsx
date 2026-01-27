@@ -34,13 +34,13 @@ export function useLikedProperties() {
       if (!user?.id) return [];
 
       // CORRECT QUERY: Single fetch using Supabase relation syntax
-      // Uses target_listing_id (the new column name after migration)
+      // FIXED: Use correct column name 'target_id' (not target_listing_id)
       const { data, error } = await supabase
         .from('likes')
         .select(`
           id,
           created_at,
-          target_listing_id
+          target_id
         `)
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
@@ -56,7 +56,8 @@ export function useLikedProperties() {
       }
 
       // Get listing IDs from the likes
-      const listingIds = data.map((like: any) => like.target_listing_id).filter(Boolean);
+      // FIXED: Use correct column name 'target_id'
+      const listingIds = data.map((like: any) => like.target_id).filter(Boolean);
 
       if (listingIds.length === 0) {
         return [];

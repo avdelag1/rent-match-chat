@@ -174,10 +174,12 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
               });
               throw ownerLikeError;
             }
+          } else {
+            // FIXED: Only set like = ownerLike when there was NO error
+            // Previously this ran unconditionally and overwrote error-case values
+            logger.info('[useSwipeWithMatch] Successfully saved owner like:', ownerLike);
+            like = ownerLike;
           }
-
-          logger.info('[useSwipeWithMatch] Successfully saved owner like:', ownerLike);
-          like = ownerLike;
 
           // IMPORTANT: Send notification to the liked client
           // Get owner's profile info for the notification
@@ -233,27 +235,30 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
           like = { id: 'dismissed' };
         }
       } else {
-        // Client swiping on a listing - save to likes table
-        const { data: clientLike, error: likeError } = await supabase
-          .from('likes')
-          .upsert({
-            user_id: user.id,
-            target_listing_id: targetId
-          }, {
-            onConflict: 'user_id,target_listing_id',
-            ignoreDuplicates: false
-          })
-          .select()
-          .single();
-
-        if (likeError) {
-          logger.error('Error saving like:', likeError);
-          throw likeError;
-        }
-        like = clientLike;
-
-        // IMPORTANT: Notify listing owner when client likes their listing
+        // Client swiping on a listing
         if (direction === 'right') {
+          // Client likes a listing - save to likes table
+          // FIXED: Use correct column name 'target_id' and include required 'direction' field
+          const { data: clientLike, error: likeError } = await supabase
+            .from('likes')
+            .upsert({
+              user_id: user.id,
+              target_id: targetId,
+              direction: 'right'
+            }, {
+              onConflict: 'user_id,target_id',
+              ignoreDuplicates: false
+            })
+            .select()
+            .single();
+
+          if (likeError) {
+            logger.error('Error saving like:', likeError);
+            throw likeError;
+          }
+          like = clientLike;
+
+          // IMPORTANT: Notify listing owner when client likes their listing
           // Get listing owner and client info for notification
           const [listingResult, clientResult] = await Promise.all([
             supabase.from('listings').select('owner_id, title').eq('id', targetId).maybeSingle(),
@@ -286,6 +291,24 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
               }
             }).catch(err => logger.error('[useSwipeWithMatch] Push to owner failed:', err));
           }
+        } else {
+          // Client left swipe on listing - save dismissal
+          const { error: dismissError } = await supabase
+            .from('swipe_dismissals')
+            .upsert({
+              user_id: user.id,
+              target_id: targetId,
+              target_type: 'listing'
+            }, {
+              onConflict: 'user_id,target_id,target_type',
+              ignoreDuplicates: false
+            });
+
+          if (dismissError) {
+            logger.error('Error saving listing dislike:', dismissError);
+            throw dismissError;
+          }
+          like = { id: 'dismissed' };
         }
       }
 
@@ -399,17 +422,18 @@ async function detectAndCreateMatch({
       const listingIds = ownerListings.map(l => l.id);
 
       // Check if client liked any of the owner's listings
+      // FIXED: Use correct column name 'target_id'
       const { data: clientLike } = await supabase
         .from('likes')
         .select('*')
         .eq('user_id', targetId)
-        .in('target_listing_id', listingIds)
+        .in('target_id', listingIds)
         .limit(1)
         .maybeSingle();
 
       mutualLike = clientLike;
       // Use the listing that was liked for the match
-      matchListingId = clientLike?.target_listing_id || null;
+      matchListingId = clientLike?.target_id || null;
     } else {
       matchListingId = null;
       mutualLike = null;

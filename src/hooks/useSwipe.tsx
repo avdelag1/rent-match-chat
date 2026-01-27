@@ -48,13 +48,15 @@ export function useSwipe() {
       // SWIPE RIGHT = Save like
       if (targetType === 'listing') {
         // Client likes listing - use likes table
+        // FIXED: Use correct column name 'target_id' and include 'direction'
         const { error } = await supabase
           .from('likes')
           .upsert({
             user_id: user.id,
-            target_listing_id: targetId
+            target_id: targetId,
+            direction: 'right'
           }, {
-            onConflict: 'user_id,target_listing_id',
+            onConflict: 'user_id,target_id',
             ignoreDuplicates: false
           });
 
