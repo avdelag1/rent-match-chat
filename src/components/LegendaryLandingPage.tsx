@@ -56,13 +56,13 @@ function LegendaryLandingPage() {
 
   return (
     <div
-      className="min-h-screen min-h-dvh flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 relative overflow-hidden safe-area-p bg-background"
+      className="min-h-screen min-h-dvh flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 relative overflow-hidden safe-area-p"
     >
       {/* Live animated background - telescope star field */}
       <StarFieldBackground />
 
       {/* Main Content */}
-      <div className="relative z-10 text-center space-y-4 sm:space-y-6 max-w-2xl w-full px-2 sm:px-4">
+      <div className="relative z-20 text-center space-y-4 sm:space-y-6 max-w-2xl w-full px-2 sm:px-4">
         {/* Swipable Swipess Logo - Only the logo moves */}
         <div className="space-y-3 text-center">
           <motion.div

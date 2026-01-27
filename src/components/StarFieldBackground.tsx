@@ -133,8 +133,7 @@ const StarFieldBackgroundComponent = () => {
       className="fixed inset-0 w-full h-full overflow-hidden"
       style={{
         background: 'linear-gradient(to bottom, #0a0a1a 0%, #0d0d2b 50%, #1a1a3a 100%)',
-        zIndex: -1,
-        pointerEvents: 'none',
+        zIndex: 0,
       }}
     >
       {/* Click layer - captures taps anywhere to create shooting stars */}
