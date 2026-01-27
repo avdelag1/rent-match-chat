@@ -77,7 +77,7 @@ export function ProfilePhotoUpload({
 
       // Upload to Supabase Storage
       const { data, error } = await supabase.storage
-        .from('profile-photos')
+        .from('profile-images')
         .upload(fileName, file, {
           upsert: true
         });
@@ -88,7 +88,7 @@ export function ProfilePhotoUpload({
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
-        .from('profile-photos')
+        .from('profile-images')
         .getPublicUrl(fileName);
 
       // Update profile with new photo URL in both columns
