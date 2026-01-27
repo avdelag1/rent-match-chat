@@ -15,6 +15,7 @@ import { TopBar } from '@/components/TopBar'
 import { BottomNavigation } from '@/components/BottomNavigation'
 import { AdvancedFilters } from '@/components/AdvancedFilters'
 import { LiveHDBackground } from '@/components/LiveHDBackground'
+import { StarFieldBackground } from '@/components/StarFieldBackground'
 
 // Lazy-loaded Dialogs (improves bundle size and initial load)
 const SubscriptionPackages = lazy(() => import("@/components/SubscriptionPackages").then(m => ({ default: m.SubscriptionPackages })))
@@ -469,6 +470,12 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           - Respects reduced motion preferences
           - Zero battery impact */}
       <LiveHDBackground theme="default" showOrbs={true} intensity={0.7} />
+
+      {/* STAR FIELD BACKGROUND: Realistic telescope view with shooting stars
+          - Stars twinkle with time-lapse effect
+          - Random shooting stars
+          - Tap anywhere to create a shooting star */}
+      <StarFieldBackground />
 
       {/* REMOVED: NotificationSystem was causing duplicate realtime subscriptions.
           Global notification handling is now done exclusively by NotificationWrapper (useNotifications)
