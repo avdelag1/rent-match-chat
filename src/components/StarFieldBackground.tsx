@@ -31,18 +31,20 @@ interface ShootingStar {
   length: number;
   opacity: number;
   speed: number;
+  color: string;
 }
 
 const STAR_COUNT = 200;
 const SHOOTING_STAR_INTERVAL_MIN = 10000;
 const SHOOTING_STAR_INTERVAL_MAX = 20000;
 
-// Generate random stars - realistic distribution with slow drift
+// Generate random stars - time-lapse style movement (like Earth's rotation)
 const generateStars = (): Star[] => {
   return Array.from({ length: STAR_COUNT }, (_, i) => {
-    // Some stars move horizontally, some vertically, some diagonally
-    const angle = Math.random() * Math.PI * 2;
-    const speed = Math.random() * 0.008 + 0.002; // Very slow drift
+    // All stars drift slowly to the right (simulating Earth's rotation)
+    // with slight variations in speed for depth perception
+    const baseSpeed = 0.004; // Even slower, almost imperceptible
+    const speedVariation = Math.random() * 0.003; // Some stars move slightly faster/slower
 
     return {
       id: i,
@@ -52,8 +54,8 @@ const generateStars = (): Star[] => {
       opacity: Math.random() * 0.5 + 0.15, // More subtle, varying brightness
       twinkleSpeed: Math.random() * 3 + 2, // Slower twinkle
       twinkleOffset: Math.random() * 10,
-      velocityX: Math.cos(angle) * speed,
-      velocityY: Math.sin(angle) * speed,
+      velocityX: baseSpeed + speedVariation, // Horizontal drift (right)
+      velocityY: (Math.random() - 0.5) * 0.0005, // Tiny vertical drift for realism
     };
   });
 };
@@ -70,20 +72,31 @@ const StarFieldBackgroundComponent = () => {
     return Math.random() * (SHOOTING_STAR_INTERVAL_MAX - SHOOTING_STAR_INTERVAL_MIN) + SHOOTING_STAR_INTERVAL_MIN;
   }
 
-  // Create a new shooting star
+  // Create a new shooting star with random color
   const createShootingStar = useCallback((x?: number, y?: number): ShootingStar => {
     const startX = x ?? Math.random() * 100;
     const startY = y ?? Math.random() * 60;
     const angle = Math.random() * 30 + 25; // 25-55 degrees (diagonal down-right)
-    
+
+    // Random colors for shooting stars: white, blue, cyan, light blue
+    const colors = [
+      '255, 255, 255',    // White
+      '200, 220, 255',    // Light blue
+      '180, 200, 255',    // Pale blue
+      '150, 180, 255',    // Sky blue
+      '255, 245, 235',    // Warm white
+    ];
+    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+
     return {
-      id: Date.now(),
+      id: Date.now() + Math.random(), // Ensure unique ID
       startX,
       startY,
       angle,
       length: Math.random() * 15 + 10,
       opacity: 1,
       speed: Math.random() * 0.5 + 0.8,
+      color: randomColor,
     };
   }, []);
 
@@ -214,7 +227,7 @@ const StarFieldBackgroundComponent = () => {
         />
       ))}
 
-      {/* Shooting stars */}
+      {/* Shooting stars with random colors */}
       {shootingStarsRef.current.map((star) => (
         <div
           key={star.id}
@@ -223,12 +236,13 @@ const StarFieldBackgroundComponent = () => {
             left: `${star.startX}%`,
             top: `${star.startY}%`,
             width: `${star.length}%`,
-            height: '1.5px',
-            background: `linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,${star.opacity * 0.8}) 30%, rgba(200,220,255,${star.opacity}) 100%)`,
+            height: '2px',
+            background: `linear-gradient(to right, rgba(${star.color}, 0) 0%, rgba(${star.color}, ${star.opacity * 0.6}) 30%, rgba(${star.color}, ${star.opacity}) 100%)`,
             transform: `rotate(${star.angle}deg)`,
             transformOrigin: 'left center',
             pointerEvents: 'none',
-            boxShadow: `0 0 ${star.opacity * 3}px ${star.opacity}px rgba(200, 220, 255, ${star.opacity * 0.5})`,
+            boxShadow: `0 0 ${star.opacity * 4}px ${star.opacity * 2}px rgba(${star.color}, ${star.opacity * 0.6})`,
+            filter: `blur(0.3px)`,
           }}
         />
       ))}
