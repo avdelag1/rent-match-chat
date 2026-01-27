@@ -214,25 +214,23 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
             (err) => logger.error('[useSwipeWithMatch] Push notification failed:', err)
           );
         } else {
-          // For left swipes (dislikes), we use the likes table with direction='left'
-          const { data: dislike, error: dislikeError } = await supabase
-            .from('likes')
+          // For left swipes (dislikes), we use the swipe_dismissals table
+          const { error: dismissError } = await supabase
+            .from('swipe_dismissals')
             .upsert({
               user_id: user.id,
               target_id: targetId,
-              direction: 'left'
+              target_type: targetType === 'listing' ? 'listing' : 'client'
             }, {
-              onConflict: 'user_id,target_id',
+              onConflict: 'user_id,target_id,target_type',
               ignoreDuplicates: false
-            })
-            .select()
-            .single();
+            });
 
-          if (dislikeError) {
-            logger.error('Error saving dislike:', dislikeError);
-            throw dislikeError;
+          if (dismissError) {
+            logger.error('Error saving dislike:', dismissError);
+            throw dismissError;
           }
-          like = dislike;
+          like = { id: 'dismissed' };
         }
       } else {
         // Client swiping on a listing - save to likes table
@@ -240,10 +238,9 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
           .from('likes')
           .upsert({
             user_id: user.id,
-            target_id: targetId,
-            direction
+            target_listing_id: targetId
           }, {
-            onConflict: 'user_id,target_id',
+            onConflict: 'user_id,target_listing_id',
             ignoreDuplicates: false
           })
           .select()
@@ -406,14 +403,13 @@ async function detectAndCreateMatch({
         .from('likes')
         .select('*')
         .eq('user_id', targetId)
-        .in('target_id', listingIds)
-        .eq('direction', 'right')
+        .in('target_listing_id', listingIds)
         .limit(1)
         .maybeSingle();
 
       mutualLike = clientLike;
       // Use the listing that was liked for the match
-      matchListingId = clientLike?.target_id || null;
+      matchListingId = clientLike?.target_listing_id || null;
     } else {
       matchListingId = null;
       mutualLike = null;

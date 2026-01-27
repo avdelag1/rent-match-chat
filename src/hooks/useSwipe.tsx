@@ -10,16 +10,17 @@ import { isOffline, queueSwipe } from '@/utils/offlineSwipeQueue';
  *
  * Rules:
  * - Swipe deck = temporary UI
- * - Likes table = permanent truth (for all swipes)
- *   - direction='right' for likes
- *   - direction='left' for dislikes
+ * - Likes table = permanent truth for client->listing likes
+ *   - target_listing_id = listing ID
+ *   - No direction field (likes only, dislikes go to swipe_dismissals)
  * - owner_likes table = for owner -> client likes
+ * - swipe_dismissals table = for left swipes (dislikes)
  * - Matches = derived, not inferred
  *
  * This hook handles:
- * 1. Client swiping on listings -> INSERT into likes table (target_id = listing.id)
- * 2. Owner swiping on clients -> INSERT into owner_likes table
- * 3. Left swipes -> INSERT into likes table with direction='left'
+ * 1. Client swiping right on listings -> INSERT into likes table (target_listing_id)
+ * 2. Client swiping left -> INSERT into swipe_dismissals table
+ * 3. Owner swiping on clients -> INSERT into owner_likes table
  */
 export function useSwipe() {
   const queryClient = useQueryClient();
@@ -47,21 +48,21 @@ export function useSwipe() {
         throw new Error('User not authenticated. Please refresh the page.');
       }
 
-      // Handle LEFT swipes (dislikes) - goes to likes table with direction='left'
+      // Handle LEFT swipes (dislikes) - goes to swipe_dismissals table (direction removed from likes)
       if (direction === 'left') {
-        const { error: dislikeError } = await supabase
-          .from('likes')
+        const { error: dismissError } = await supabase
+          .from('swipe_dismissals')
           .upsert({
             user_id: user.id,
             target_id: targetId,
-            direction: 'left'
+            target_type: targetType === 'listing' ? 'listing' : 'client'
           }, {
-            onConflict: 'user_id,target_id',
+            onConflict: 'user_id,target_id,target_type',
             ignoreDuplicates: false
           });
 
-        if (dislikeError) {
-          logger.error('[useSwipe] Dislike error:', dislikeError);
+        if (dismissError) {
+          logger.error('[useSwipe] Dislike error:', dismissError);
           // Don't throw - dislikes failing shouldn't break the swipe experience
         }
 
@@ -70,15 +71,14 @@ export function useSwipe() {
 
       // Handle RIGHT swipes (likes)
       if (targetType === 'listing') {
-        // CLIENT -> LISTING like: Use the likes table with target_id
+        // CLIENT -> LISTING like: Use the likes table with target_listing_id
         const { error } = await supabase
           .from('likes')
           .upsert({
             user_id: user.id,
-            target_id: targetId,
-            direction: 'right'
+            target_listing_id: targetId
           }, {
-            onConflict: 'user_id,target_id',
+            onConflict: 'user_id,target_listing_id',
             ignoreDuplicates: false
           })
           .select();
@@ -171,11 +171,10 @@ export function useSwipe() {
             .from('likes')
             .select(`
               id,
-              target_id,
+              target_listing_id,
               created_at
             `)
-            .eq('user_id', targetId)
-            .eq('direction', 'right');
+            .eq('user_id', targetId);
 
           // Get owner's listings
           const { data: ownerListings } = await supabase
@@ -187,7 +186,7 @@ export function useSwipe() {
 
           // Find if client liked any listing owned by this user
           const mutualLike = clientLikes?.find(
-            (like: any) => ownerListingIds.has(like.target_id)
+            (like: any) => ownerListingIds.has(like.target_listing_id)
           );
 
           if (mutualLike) {
