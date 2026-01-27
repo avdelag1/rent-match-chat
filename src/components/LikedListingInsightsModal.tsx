@@ -71,7 +71,7 @@ function LikedListingInsightsModalComponent({ open, onOpenChange, listing }: Lik
         .from('likes')
         .delete()
         .eq('user_id', user.user.id)
-        .eq('target_id', listing.id);
+        .eq('target_listing_id', listing.id);
 
       if (error) throw error;
     },
@@ -112,12 +112,12 @@ function LikedListingInsightsModalComponent({ open, onOpenChange, listing }: Lik
       }
 
       // Also remove from likes
-      // FIXED: Use correct column name 'target_id'
+      // ACTUALLY FIXED: Use correct column name 'target_listing_id'
       await supabase
         .from('likes')
         .delete()
         .eq('user_id', user.user.id)
-        .eq('target_id', listing.id);
+        .eq('target_listing_id', listing.id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['liked-properties'] });

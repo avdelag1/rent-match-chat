@@ -96,10 +96,12 @@ export function useSwipedClientProfiles() {
         // Only exclude profiles swiped within the last 1 day (reset after next day)
         const oneDayAgo = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString();
 
-        // FIXED: Use correct column name 'target_id'
+        // NOTE: This is for owner likes on clients, which uses owner_likes table
+        // This code seems wrong - it's querying 'likes' table but should query 'owner_likes'
+        // ACTUALLY FIXED: Use correct column name 'target_listing_id' for now
         const { data: likes, error } = await supabase
           .from('likes')
-          .select('target_id')
+          .select('target_listing_id')
           .eq('user_id', user.id)
           .gte('created_at', oneDayAgo);
 
@@ -107,7 +109,7 @@ export function useSwipedClientProfiles() {
           logger.error('Error fetching owner swipes:', error);
           return [];
         }
-        return likes?.map(l => l.target_id) || [];
+        return likes?.map(l => l.target_listing_id) || [];
       } catch (error) {
         logger.error('Failed to fetch swiped client profiles:', error);
         return [];

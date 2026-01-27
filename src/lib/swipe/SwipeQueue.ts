@@ -196,10 +196,9 @@ class SwipeQueueProcessor {
       .from('likes')
       .upsert({
         user_id: userId,
-        target_id: swipe.targetId,
-        direction: swipe.direction,
+        target_listing_id: swipe.targetId,
       }, {
-        onConflict: 'user_id,target_id',
+        onConflict: 'user_id,target_listing_id',
         ignoreDuplicates: false,
       });
 
@@ -263,13 +262,12 @@ class SwipeQueueProcessor {
 
           if (!listing) return;
 
-          // Check if owner liked this client
+          // Check if owner liked this client (use owner_likes table)
           const { data: ownerLike } = await supabase
-            .from('likes')
+            .from('owner_likes')
             .select('*')
-            .eq('user_id', listing.owner_id)
-            .eq('target_id', userId)
-            .eq('direction', 'right')
+            .eq('owner_id', listing.owner_id)
+            .eq('client_id', userId)
             .maybeSingle();
 
           if (ownerLike) {
