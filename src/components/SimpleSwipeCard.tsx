@@ -536,7 +536,7 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
               isVerified={(listing as any).has_verified_documents}
               photoIndex={currentImageIndex}
             />
-          ) : listing.category === 'services' || (listing as any).service_type ? (
+          ) : listing.category === 'worker' || listing.category === 'services' || (listing as any).service_type ? (
             <ServiceCardInfo
               hourlyRate={(listing as any).hourly_rate}
               serviceName={(listing as any).service_type || listing.title || 'Service'}
