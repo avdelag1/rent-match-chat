@@ -4,13 +4,12 @@ import { toast } from '@/hooks/use-toast';
 import { logger } from '@/utils/logger';
 
 /**
- * SIMPLE SWIPE HANDLER
+ * SIMPLE SWIPE LIKE HANDLER
  * 
- * Rules:
- * - Swipe RIGHT = Save like immediately (no complex logic)
- * - Swipe LEFT = Save dismissal (for undo capability)
- * - Client -> listings uses 'likes' table
- * - Owner -> clients uses 'owner_likes' table
+ * Simple and reliable - no complex logic
+ * - Left swipe = save dismissal (for undo)
+ * - Right swipe = save like immediately
+ * - No .select() on upsert (prevents connection issues)
  */
 export function useSwipe() {
   const queryClient = useQueryClient();
@@ -48,7 +47,7 @@ export function useSwipe() {
 
       // SWIPE RIGHT = Save like
       if (targetType === 'listing') {
-        // Client likes listing
+        // Client likes listing - use likes table
         const { error } = await supabase
           .from('likes')
           .upsert({
@@ -64,7 +63,7 @@ export function useSwipe() {
           throw error;
         }
       } else {
-        // Owner likes client
+        // Owner likes client - use owner_likes table
         const { error } = await supabase
           .from('owner_likes')
           .upsert({
@@ -92,8 +91,8 @@ export function useSwipe() {
     onError: (error: any) => {
       logger.error('[useSwipe] Error:', error);
       toast({
-        title: 'Error',
-        description: 'Could not save. Please try again.',
+        title: 'Error Saving',
+        description: error?.message || 'Could not save. Please try again.',
         variant: 'destructive'
       });
     }

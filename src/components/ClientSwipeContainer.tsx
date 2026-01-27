@@ -7,7 +7,7 @@ import { ShareDialog } from './ShareDialog';
 import { MessageConfirmationDialog } from './MessageConfirmationDialog';
 import { useSmartClientMatching } from '@/hooks/useSmartMatching';
 import { useAuth } from '@/hooks/useAuth';
-import { useSwipeWithMatch } from '@/hooks/useSwipeWithMatch';
+import { useSwipe } from '@/hooks/useSwipe';
 import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { useSwipeUndo } from '@/hooks/useSwipeUndo';
 import { useRecordProfileView } from '@/hooks/useProfileRecycling';
@@ -277,15 +277,7 @@ const ClientSwipeContainerComponent = ({
   const isLoading = externalIsLoading !== undefined ? externalIsLoading : internalIsLoading;
   const error = externalError !== undefined ? externalError : internalError;
 
-  const swipeMutation = useSwipeWithMatch({
-    onMatch: (clientProfile, ownerProfile) => {
-      setMatchCelebration({
-        isOpen: true,
-        clientProfile,
-        ownerProfile
-      });
-    }
-  });
+  const swipeMutation = useSwipe();
   const { canAccess: hasPremiumMessaging, needsUpgrade } = useCanAccessMessaging();
   const { recordSwipe, undoLastSwipe, canUndo, isUndoing, undoSuccess, resetUndoState } = useSwipeUndo();
   const startConversation = useStartConversation();
