@@ -77,7 +77,7 @@ const CardImage = memo(({ src, alt }: { src: string; alt: string }) => {
 
   return (
     <div
-      className="absolute inset-0 w-full h-full"
+      className="absolute inset-0 w-full h-full rounded-[24px]"
       style={{
         // GPU acceleration for smooth rendering
         transform: 'translateZ(0)',
@@ -88,6 +88,8 @@ const CardImage = memo(({ src, alt }: { src: string; alt: string }) => {
         userSelect: 'none',
         // LOWEST z-layer - image sits behind everything
         zIndex: 1,
+        // Ensure corners are visible even when card is dragged
+        overflow: 'hidden',
       }}
     >
       {/* Skeleton - GPU-accelerated with smooth 150ms crossfade (skip if cached) */}
@@ -104,7 +106,7 @@ const CardImage = memo(({ src, alt }: { src: string; alt: string }) => {
       <img
         src={error ? FALLBACK_PLACEHOLDER : optimizedSrc}
         alt={alt}
-        className="absolute inset-0 w-full h-full"
+        className="absolute inset-0 w-full h-full rounded-[24px]"
         style={{
           // CRITICAL: object-fit: cover ensures no letterboxing/padding
           objectFit: 'cover',
@@ -431,12 +433,12 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
           WebkitTapHighlightColor: 'transparent',
           WebkitTouchCallout: 'none',
         } as any}
-        className="flex-1 cursor-grab active:cursor-grabbing select-none touch-none overflow-hidden relative"
+        className="flex-1 cursor-grab active:cursor-grabbing select-none touch-none relative rounded-[24px] overflow-hidden shadow-xl"
       >
         {/* Image area - FULL VIEWPORT with magnifier support */}
         <div
           ref={containerRef}
-          className="absolute inset-0 w-full h-full overflow-hidden"
+          className="absolute inset-0 w-full h-full overflow-hidden rounded-[24px]"
           onClick={handleImageTap}
           {...pointerHandlers}
           style={{
