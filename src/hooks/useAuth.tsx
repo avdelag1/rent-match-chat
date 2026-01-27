@@ -177,6 +177,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
           // Create profile if missing
           await createProfileIfMissing(user, finalRole);
+
+          // Invalidate role cache after OAuth setup
+          queryClient.invalidateQueries({ queryKey: ['user-role', user.id] });
         } else {
           logger.error('[Auth] OAuth account linking failed');
         }
@@ -185,6 +188,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const role = user.user_metadata?.role as 'client' | 'owner' | undefined;
         if (role) {
           await createProfileIfMissing(user, role);
+          // Invalidate role cache after profile creation
+          queryClient.invalidateQueries({ queryKey: ['user-role', user.id] });
         }
       }
     } catch (error) {
@@ -284,17 +289,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return { error: new Error('Failed to complete account setup') };
         }
 
-        // Brief wait for DB consistency
-        await new Promise(resolve => setTimeout(resolve, 300));
+        // Invalidate role query cache to ensure fresh data
+        queryClient.invalidateQueries({ queryKey: ['user-role', data.user.id] });
+
+        // Brief wait for cache invalidation to propagate
+        await new Promise(resolve => setTimeout(resolve, 200));
 
         toast({
           title: "Welcome to Zwipes!",
-          description: "Redirecting to your dashboard...",
+          description: "Loading your dashboard...",
         });
 
-        // CRITICAL FIX: Force navigation after successful signup
-        const targetPath = role === 'client' ? '/client/dashboard' : '/owner/dashboard';
-        navigate(targetPath, { replace: true });
+        // Navigation will be handled by Index.tsx using metadata role
+        // This ensures a single navigation point and prevents race conditions
       }
 
       return { error: null };
