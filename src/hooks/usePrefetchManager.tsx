@@ -168,6 +168,32 @@ export function usePrefetchManager() {
   }, [queryClient]);
 
   /**
+   * PERFORMANCE: Prefetch next client profile details when card becomes "next up"
+   * Called when owner is on card N, prefetch card N+1 details
+   */
+  const prefetchClientProfileDetails = useCallback(async (
+    userId: string
+  ) => {
+    const key = `client-profile-detail-${userId}`;
+    if (prefetchedKeys.current.has(key)) return;
+
+    prefetchedKeys.current.add(key);
+
+    await queryClient.prefetchQuery({
+      queryKey: ['client-profile-detail', userId],
+      queryFn: async () => {
+        const { data } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single();
+        return data;
+      },
+      staleTime: 5 * 60 * 1000,
+    });
+  }, [queryClient]);
+
+  /**
    * Clear prefetch cache when navigating away
    */
   const clearPrefetchCache = useCallback(() => {
@@ -180,6 +206,7 @@ export function usePrefetchManager() {
     prefetchNextNotificationsPage,
     prefetchTopConversations,
     prefetchListingDetails,
+    prefetchClientProfileDetails,
     clearPrefetchCache,
   };
 }
