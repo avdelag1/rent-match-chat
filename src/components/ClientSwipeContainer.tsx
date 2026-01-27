@@ -12,6 +12,7 @@ import { useCanAccessMessaging } from '@/hooks/useMessaging';
 import { useSwipeUndo } from '@/hooks/useSwipeUndo';
 import { useRecordProfileView } from '@/hooks/useProfileRecycling';
 import { usePrefetchImages } from '@/hooks/usePrefetchImages';
+import { usePrefetchManager } from '@/hooks/usePrefetchManager';
 import { useSwipeDeckStore, persistDeckToSession, getDeckFromSession } from '@/state/swipeDeckStore';
 import { useSwipeDismissal } from '@/hooks/useSwipeDismissal';
 import { shallow } from 'zustand/shallow';
@@ -24,6 +25,48 @@ import { useStartConversation } from '@/hooks/useConversations';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { logger } from '@/utils/prodLogger';
+
+/**
+ * PrefetchScheduler - Throttles prefetch operations to prevent competition with image decoding
+ * Uses requestIdleCallback to defer prefetch until browser is idle
+ */
+class PrefetchScheduler {
+  private scheduled = false;
+  private callback: (() => void) | null = null;
+  private idleHandle: number | null = null;
+
+  schedule(callback: () => void, delayMs = 300): void {
+    // Cancel any pending prefetch
+    this.cancel();
+
+    this.callback = callback;
+    this.scheduled = true;
+
+    // Wait for a brief delay to let current image decode complete
+    setTimeout(() => {
+      if (!this.scheduled || !this.callback) return;
+
+      if ('requestIdleCallback' in window) {
+        this.idleHandle = (window as any).requestIdleCallback(() => {
+          if (this.callback) this.callback();
+          this.scheduled = false;
+        }, { timeout: 2000 });
+      } else {
+        this.callback();
+        this.scheduled = false;
+      }
+    }, delayMs);
+  }
+
+  cancel(): void {
+    this.scheduled = false;
+    this.callback = null;
+    if (this.idleHandle !== null && 'cancelIdleCallback' in window) {
+      (window as any).cancelIdleCallback(this.idleHandle);
+      this.idleHandle = null;
+    }
+  }
+}
 
 interface ClientSwipeContainerProps {
   onClientTap: (clientId: string) => void;
@@ -193,6 +236,7 @@ const ClientSwipeContainerComponent = ({
   const [isRefreshMode, setIsRefreshMode] = useState(false);
   const [page, setPage] = useState(0);
   const isFetchingMore = useRef(false);
+  const prefetchSchedulerRef = useRef(new PrefetchScheduler());
 
   // HYDRATION SYNC: One-time sync on mount if not already initialized
   // PERF: Use getState() to check store without subscribing
@@ -250,6 +294,9 @@ const ClientSwipeContainerComponent = ({
   // Swipe dismissal tracking for client profiles
   const { dismissedIds, dismissTarget, filterDismissed } = useSwipeDismissal('client');
 
+  // Prefetch manager for client profile details
+  const { prefetchClientProfileDetails } = usePrefetchManager();
+
   // FIX: Sync local state when undo completes successfully
   useEffect(() => {
     if (undoSuccess) {
@@ -277,9 +324,32 @@ const ClientSwipeContainerComponent = ({
   usePrefetchImages({
     currentIndex: currentIndex,
     profiles: deckQueueRef.current,
-    prefetchCount: 2,
+    prefetchCount: 3,
     trigger: currentIndex
   });
+
+  // Cleanup prefetch scheduler on unmount
+  useEffect(() => {
+    return () => {
+      prefetchSchedulerRef.current.cancel();
+    };
+  }, []);
+
+  // Prefetch next client profile details when card becomes "next up"
+  // PERF: Use throttled scheduler - waits 300ms then uses requestIdleCallback
+  // This ensures prefetch doesn't compete with current image decoding
+  useEffect(() => {
+    const nextProfile = deckQueueRef.current[currentIndex + 1];
+    if (nextProfile?.user_id) {
+      prefetchSchedulerRef.current.schedule(() => {
+        prefetchClientProfileDetails(nextProfile.user_id);
+      }, 300);
+    }
+
+    return () => {
+      prefetchSchedulerRef.current.cancel();
+    };
+  }, [currentIndex, prefetchClientProfileDetails]);
 
   // CONSTANT-TIME: Append new unique profiles to queue AND persist to store
   useEffect(() => {
@@ -738,10 +808,11 @@ const ClientSwipeContainerComponent = ({
           <div
             key={`next-${nextCard.user_id}`}
             className="w-full h-full absolute inset-0"
-            style={{ 
+            style={{
               zIndex: 5,
               transform: 'scale(0.95)',
               opacity: 0.7,
+              pointerEvents: 'none',
             }}
           >
             <SimpleOwnerSwipeCard
