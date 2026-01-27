@@ -130,14 +130,21 @@ const StarFieldBackgroundComponent = () => {
   return (
     <div
       ref={containerRef}
-      onClick={handleClick}
-      onTouchStart={handleClick}
-      className="fixed inset-0 w-full h-full overflow-hidden pointer-events-auto"
+      className="fixed inset-0 w-full h-full overflow-hidden"
       style={{
         background: 'linear-gradient(to bottom, #0a0a1a 0%, #0d0d2b 50%, #1a1a3a 100%)',
-        zIndex: 0,
+        zIndex: -1,
+        pointerEvents: 'none',
       }}
     >
+      {/* Click layer - captures taps anywhere to create shooting stars */}
+      <div
+        className="absolute inset-0"
+        onClick={handleClick}
+        onTouchStart={handleClick}
+        style={{ pointerEvents: 'auto', cursor: 'pointer' }}
+      />
+
       {/* Static stars with twinkle effect */}
       {stars.map((star) => (
         <motion.div
@@ -148,6 +155,7 @@ const StarFieldBackgroundComponent = () => {
             top: `${star.y}%`,
             width: star.size,
             height: star.size,
+            pointerEvents: 'none',
           }}
           animate={{
             opacity: [
