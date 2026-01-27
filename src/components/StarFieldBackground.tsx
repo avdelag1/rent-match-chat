@@ -31,19 +31,19 @@ interface ShootingStar {
   speed: number;
 }
 
-const STAR_COUNT = 150;
-const SHOOTING_STAR_INTERVAL_MIN = 8000;
-const SHOOTING_STAR_INTERVAL_MAX = 15000;
+const STAR_COUNT = 200;
+const SHOOTING_STAR_INTERVAL_MIN = 10000;
+const SHOOTING_STAR_INTERVAL_MAX = 20000;
 
-// Generate random stars
+// Generate random stars - realistic distribution
 const generateStars = (): Star[] => {
   return Array.from({ length: STAR_COUNT }, (_, i) => ({
     id: i,
     x: Math.random() * 100,
     y: Math.random() * 100,
-    size: Math.random() * 2 + 0.5,
-    opacity: Math.random() * 0.7 + 0.3,
-    twinkleSpeed: Math.random() * 2 + 1,
+    size: Math.random() * 1.2 + 0.3, // Smaller, more realistic sizes
+    opacity: Math.random() * 0.5 + 0.15, // More subtle
+    twinkleSpeed: Math.random() * 3 + 2, // Slower twinkle
     twinkleOffset: Math.random() * 10,
   }));
 };
@@ -93,9 +93,9 @@ const StarFieldBackgroundComponent = () => {
       shootingStarsRef.current = shootingStarsRef.current
         .map(star => ({
           ...star,
-          opacity: star.opacity - 0.015 * star.speed,
-          startY: star.startY + 0.3 * star.speed,
-          startX: star.startX + 0.2 * star.speed,
+          opacity: star.opacity - 0.008 * star.speed,
+          startY: star.startY + 0.2 * star.speed,
+          startX: star.startX + 0.12 * star.speed,
         }))
         .filter(star => star.opacity > 0);
       
@@ -132,7 +132,7 @@ const StarFieldBackgroundComponent = () => {
       ref={containerRef}
       className="fixed inset-0 w-full h-full overflow-hidden"
       style={{
-        background: 'linear-gradient(to bottom, #0a0a1a 0%, #0d0d2b 50%, #1a1a3a 100%)',
+        background: 'linear-gradient(to bottom, #020205 0%, #050510 40%, #0a0a15 100%)',
         zIndex: 0,
       }}
     >
@@ -155,12 +155,13 @@ const StarFieldBackgroundComponent = () => {
             width: star.size,
             height: star.size,
             pointerEvents: 'none',
+            boxShadow: `0 0 ${star.size * 1.5}px rgba(255, 255, 255, ${star.opacity * 0.5})`,
           }}
           animate={{
             opacity: [
-              star.opacity * 0.5,
+              star.opacity * 0.4,
               star.opacity,
-              star.opacity * 0.3,
+              star.opacity * 0.2,
               star.opacity,
             ],
           }}
@@ -182,23 +183,24 @@ const StarFieldBackgroundComponent = () => {
             left: `${star.startX}%`,
             top: `${star.startY}%`,
             width: `${star.length}%`,
-            height: '2px',
-            background: `linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,${star.opacity}) 50%, rgba(200,220,255,${star.opacity}) 100%)`,
+            height: '1.5px',
+            background: `linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,${star.opacity * 0.8}) 30%, rgba(200,220,255,${star.opacity}) 100%)`,
             transform: `rotate(${star.angle}deg)`,
             transformOrigin: 'left center',
             pointerEvents: 'none',
+            boxShadow: `0 0 ${star.opacity * 3}px ${star.opacity}px rgba(200, 220, 255, ${star.opacity * 0.5})`,
           }}
         />
       ))}
 
-      {/* Subtle nebula glow */}
+      {/* Subtle nebula glow - more realistic, darker */}
       <div
-        className="absolute inset-0 opacity-20"
+        className="absolute inset-0 opacity-10"
         style={{
           background: `
-            radial-gradient(ellipse at 20% 20%, rgba(100, 50, 150, 0.3) 0%, transparent 50%),
-            radial-gradient(ellipse at 80% 80%, rgba(50, 100, 150, 0.3) 0%, transparent 50%),
-            radial-gradient(ellipse at 50% 50%, rgba(100, 100, 200, 0.1) 0%, transparent 70%)
+            radial-gradient(ellipse at 30% 20%, rgba(80, 40, 120, 0.15) 0%, transparent 40%),
+            radial-gradient(ellipse at 70% 70%, rgba(40, 80, 120, 0.1) 0%, transparent 40%),
+            radial-gradient(ellipse at 50% 50%, rgba(60, 60, 100, 0.08) 0%, transparent 50%)
           `,
         }}
       />
