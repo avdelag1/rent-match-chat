@@ -489,14 +489,11 @@ const ClientSwipeContainerComponent = ({
       }),
 
       // Track dismissal on left swipe (dislike)
-      direction === 'left' ? dismissTarget(profile.user_id).catch(() => {
-        // Non-critical error - already logged in hook
-      }) : Promise.resolve(),
+      direction === 'left' ? dismissTarget(profile.user_id).catch(() => {}) : Promise.resolve(),
 
       // Record for undo - pass category so deck can be properly restored
-      Promise.resolve(recordSwipe(profile.user_id, 'profile', direction === 'right' ? 'like' : 'pass', category))
+      Promise.resolve(recordSwipe(profile.user_id, 'profile', direction, category))
     ]).catch(err => {
-      // Non-critical - user already saw the swipe complete
       logger.error('[ClientSwipeContainer] Background swipe tasks failed:', err);
     });
 

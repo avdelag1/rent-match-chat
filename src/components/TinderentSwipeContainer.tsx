@@ -726,8 +726,8 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     // Zustand update - DEFERRED until animation complete
     markClientSwiped(listing.id);
 
-    // Record for undo
-    recordSwipe(listing.id, 'listing', direction === 'right' ? 'like' : 'pass');
+    // Record for undo (only left swipes are saved for undo)
+    recordSwipe(listing.id, 'listing', direction);
 
     // FIX #2: DEFERRED PERSISTENCE - use requestIdleCallback
     // This prevents sessionStorage from blocking the main thread
