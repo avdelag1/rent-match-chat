@@ -436,40 +436,46 @@ const ClientSwipeContainerComponent = ({
         targetId: profile.user_id,
         direction,
         targetType: 'profile'
+      }).then(() => {
+        // SUCCESS: Like saved successfully
+        logger.info('[ClientSwipeContainer] Swipe saved successfully:', { direction, profileId: profile.user_id });
       }).catch((err) => {
-        // Log all errors for debugging
+        // ERROR: Save failed - log and handle appropriately
         logger.error('[ClientSwipeContainer] Swipe save error:', err);
 
-        // Don't show error toast for expected/non-critical errors:
-        // - Self-likes (user trying to like their own profile)
-        // - Duplicate likes (23505 is Postgres unique constraint violation)
-        // - RLS policy violations (42501)
-        // - Already exists errors
+        // Check for specific error types
         const errorMessage = err?.message?.toLowerCase() || '';
         const errorCode = err?.code || '';
 
+        // Expected errors that we can safely ignore (already handled by the hook)
         const isExpectedError =
           errorMessage.includes('cannot like your own') ||
           errorMessage.includes('your own profile') ||
           errorMessage.includes('duplicate') ||
           errorMessage.includes('already exists') ||
           errorMessage.includes('violates unique constraint') ||
+          errorMessage.includes('profile not found') || // Stale cache data
+          errorMessage.includes('skipped') || // FK violation from stale data
           errorCode === '23505' || // Unique constraint violation
-          errorCode === '42501';   // RLS policy violation
+          errorCode === '42501' || // RLS policy violation
+          errorCode === '23503';   // FK violation
 
-        // Show friendly message for self-likes (shouldn't happen but just in case)
+        // Show friendly message for self-likes (shouldn't happen but defense in depth)
         if (errorMessage.includes('cannot like your own') || errorMessage.includes('your own profile')) {
           logger.warn('[ClientSwipeContainer] User attempted to like their own profile - this should have been filtered');
           sonnerToast.error('Oops!', {
             description: 'You cannot swipe on your own profile'
           });
         }
-        // Only show generic error for truly unexpected failures (network, auth, server errors)
+        // Show error for unexpected failures (network, auth, server errors)
+        // These need user attention as the like was NOT saved
         else if (!isExpectedError) {
-          sonnerToast.error('Failed to save your swipe', {
-            description: 'Please check your connection and try again'
+          sonnerToast.error('Failed to save your like', {
+            description: 'Your swipe was not saved. Please try again or check your connection.'
           });
         }
+        // For expected errors (duplicates, stale data), silently ignore
+        // The user experience is not affected as these are edge cases
       }),
 
       // Track dismissal on left swipe (dislike)
