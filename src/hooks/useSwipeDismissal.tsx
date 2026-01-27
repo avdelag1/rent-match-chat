@@ -35,12 +35,12 @@ export function useSwipeDismissal(targetType: DismissalTargetType) {
       if (!user?.id) return [];
 
       try {
-        // Query likes table for left-swiped (dismissed) items
+        // Query swipe_dismissals table for dismissed items
         const { data, error } = await supabase
-          .from('likes')
+          .from('swipe_dismissals')
           .select('target_id')
           .eq('user_id', user.id)
-          .eq('direction', 'left');
+          .eq('target_type', targetType);
 
         if (error) {
           logger.error('[useSwipeDismissal] Error fetching dismissals:', error);
@@ -68,15 +68,15 @@ export function useSwipeDismissal(targetType: DismissalTargetType) {
         throw new Error('User not authenticated');
       }
 
-      // Insert/update into likes table with direction='left'
+      // Insert into swipe_dismissals table
       const { error } = await supabase
-        .from('likes')
+        .from('swipe_dismissals')
         .upsert({
           user_id: user.id,
           target_id: targetId,
-          direction: 'left',
+          target_type: targetType,
         }, {
-          onConflict: 'user_id,target_id',
+          onConflict: 'user_id,target_id,target_type',
         });
 
       if (error) {

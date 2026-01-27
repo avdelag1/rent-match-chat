@@ -76,8 +76,7 @@ export function useOwnerStats() {
         const { count } = await supabase
           .from('likes')
           .select('*', { count: 'exact', head: true })
-          .in('target_id', listingIds)
-          .eq('direction', 'right');
+          .in('target_listing_id', listingIds);
         interestedClientsCount = count || 0;
       }
 

@@ -242,7 +242,7 @@ export function useSwipedListings() {
 
         const { data: likes, error } = await supabase
           .from('likes')
-          .select('target_id')
+          .select('target_listing_id')
           .eq('user_id', user.user.id)
           .gte('created_at', oneDayAgo);
 
@@ -251,7 +251,7 @@ export function useSwipedListings() {
           return [];
         }
 
-        return likes?.map(l => l.target_id) || [];
+        return likes?.map(l => l.target_listing_id) || [];
       } catch (error) {
         if (import.meta.env.DEV) logger.error('Error in useSwipedListings:', error);
         return [];

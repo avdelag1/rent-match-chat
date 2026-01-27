@@ -70,8 +70,7 @@ function LikedListingInsightsModalComponent({ open, onOpenChange, listing }: Lik
         .from('likes')
         .delete()
         .eq('user_id', user.user.id)
-        .eq('target_id', listing.id)
-        .eq('direction', 'right');
+        .eq('target_listing_id', listing.id);
 
       if (error) throw error;
     },
@@ -116,8 +115,7 @@ function LikedListingInsightsModalComponent({ open, onOpenChange, listing }: Lik
         .from('likes')
         .delete()
         .eq('user_id', user.user.id)
-        .eq('target_id', listing.id)
-        .eq('direction', 'right');
+        .eq('target_listing_id', listing.id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['liked-properties'] });

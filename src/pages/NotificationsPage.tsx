@@ -322,7 +322,7 @@ export default function NotificationsPage() {
         .from('likes')
         .delete()
         .eq('user_id', user.id)
-        .eq('target_id', listingId);
+        .eq('target_listing_id', listingId);
 
       if (error) throw error;
 

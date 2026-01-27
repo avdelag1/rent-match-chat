@@ -112,15 +112,16 @@ export function useSwipeUndo() {
         }
       }
 
-      // Remove the last swipe from the likes table (pass swipes use direction='left')
-      logger.info('[useSwipeUndo] Deleting swipe:', lastSwipe.targetId);
+      // Remove the last swipe from the swipe_dismissals table (if it was a dismissal)
+      logger.info('[useSwipeUndo] Deleting swipe from dismissals:', lastSwipe.targetId);
 
       const { error } = await supabase
-        .from('likes')
+        .from('swipe_dismissals')
         .delete()
         .match({
           user_id: user.id,
           target_id: lastSwipe.targetId,
+          target_type: lastSwipe.targetType === 'listing' ? 'listing' : 'client',
         });
 
       // Also remove from profile_views for consistent state

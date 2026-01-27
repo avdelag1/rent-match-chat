@@ -98,7 +98,7 @@ export function useSwipedClientProfiles() {
 
         const { data: likes, error } = await supabase
           .from('likes')
-          .select('target_id')
+          .select('target_listing_id')
           .eq('user_id', user.id)
           .gte('created_at', oneDayAgo);
 
@@ -106,7 +106,7 @@ export function useSwipedClientProfiles() {
           logger.error('Error fetching owner swipes:', error);
           return [];
         }
-        return likes?.map(l => l.target_id) || [];
+        return likes?.map(l => l.target_listing_id) || [];
       } catch (error) {
         logger.error('Failed to fetch swiped client profiles:', error);
         return [];
