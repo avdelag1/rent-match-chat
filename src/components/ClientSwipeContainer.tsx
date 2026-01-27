@@ -467,6 +467,16 @@ const ClientSwipeContainerComponent = ({
             description: 'You cannot swipe on your own profile'
           });
         }
+        // Show specific error messages for profile issues (not available, inactive, etc.)
+        else if (
+          errorMessage.includes('no longer available') ||
+          errorMessage.includes('no longer active') ||
+          errorMessage.includes('unable to save like')
+        ) {
+          sonnerToast.error('Unable to save like', {
+            description: err?.message || 'This profile is no longer available'
+          });
+        }
         // Show error for unexpected failures (network, auth, server errors)
         // These need user attention as the like was NOT saved
         else if (!isExpectedError) {

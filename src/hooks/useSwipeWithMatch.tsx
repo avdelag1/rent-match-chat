@@ -62,18 +62,37 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
           // This prevents FK violations from stale cached profile data
           const { data: clientExists, error: verifyError } = await supabase
             .from('profiles')
-            .select('id')
+            .select('id, full_name, is_active, city')
             .eq('id', targetId)
             .maybeSingle();
 
-          if (verifyError || !clientExists) {
-            logger.error('[useSwipeWithMatch] Client profile not found in database - likely stale cache data:', {
+          if (verifyError) {
+            logger.error('[useSwipeWithMatch] Error verifying client profile:', {
               clientId: targetId,
-              error: verifyError?.message
+              error: verifyError.message,
+              errorCode: verifyError.code,
+              hint: verifyError.hint
             });
-            // Don't throw - just skip this like and continue to prevent UI freeze
-            // The stale profile will be removed from cache on next refresh
-            return { id: 'invalid-profile', skipped: true, reason: 'Profile not found' };
+            // RLS or permission error - throw to show user
+            throw new Error(`Unable to save like: ${verifyError.message}`);
+          }
+
+          if (!clientExists) {
+            logger.error('[useSwipeWithMatch] Client profile not found in database:', {
+              clientId: targetId,
+              hint: 'Profile may have been deleted or deactivated'
+            });
+            // Profile doesn't exist - throw to notify user
+            throw new Error('This user profile is no longer available');
+          }
+
+          // Check if profile is active
+          if (clientExists.is_active === false) {
+            logger.warn('[useSwipeWithMatch] Attempted to like inactive profile:', {
+              clientId: targetId,
+              fullName: clientExists.full_name
+            });
+            throw new Error('This user is no longer active');
           }
 
           // CRITICAL FIX: Use proper conflict handling for partial unique indexes
