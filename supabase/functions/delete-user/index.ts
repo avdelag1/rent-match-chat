@@ -2,7 +2,7 @@ import { serve } from 'https://deno.land/std@0.224.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.43.4'
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': Deno.env.get('ALLOWED_ORIGIN') || 'http://localhost:5173',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, content-type',
 }
@@ -64,42 +64,67 @@ serve(async (req) => {
 
     const userIdToDelete = user.id
 
-    // First, delete files from storage buckets
-    const storageErrors = []
+    // SECURITY: Check rate limit (1 deletion per hour)
+    const { data: recentRequests } = await supabaseAdmin
+      .from('user_deletion_requests')
+      .select('id')
+      .eq('user_id', userIdToDelete)
+      .gte('requested_at', new Date(Date.now() - 60 * 60 * 1000).toISOString())
 
-    // Delete profile images
-    const { error: profileImgError } = await supabaseAdmin.storage
-      .from('profile-images')
-      .remove([`${userIdToDelete}`])
-    if (profileImgError) storageErrors.push(`Profile images: ${profileImgError.message}`)
-
-    // Delete listing images
-    const { data: listingFolders } = await supabaseAdmin.storage
-      .from('listing-images')
-      .list(userIdToDelete)
-    if (listingFolders && listingFolders.length > 0) {
-      const listingPaths = listingFolders.map(f => `${userIdToDelete}/${f.name}`)
-      const { error: listingImgError } = await supabaseAdmin.storage
-        .from('listing-images')
-        .remove(listingPaths)
-      if (listingImgError) storageErrors.push(`Listing images: ${listingImgError.message}`)
+    if (recentRequests && recentRequests.length > 0) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Rate limit exceeded',
+          message: 'You can only request account deletion once per hour'
+        }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
 
-    // Storage cleanup completed
+    // First, create a deletion request (for audit trail)
+    const { error: requestError } = await supabaseAdmin
+      .from('user_deletion_requests')
+      .insert({
+        user_id: userIdToDelete,
+        user_email: user.email || '',
+        status: 'pending'
+      })
 
-    // Delete all related user data using RPC
-    const { error: rpcError } = await supabaseAdmin.rpc('delete_user_account_data', {
+    if (requestError) {
+      console.error('Error creating deletion request:', requestError)
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Failed to create deletion request',
+          details: requestError.message
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Delete all related user data using RPC (now with ownership verification)
+    const { data: rpcResult, error: rpcError } = await supabaseAdmin.rpc('delete_user_account_data', {
       user_id_to_delete: userIdToDelete,
     })
 
     if (rpcError) {
       console.error('RPC error:', rpcError)
-      // CRITICAL: Abort if data cleanup fails to prevent orphaned data
       return new Response(
         JSON.stringify({
           success: false,
           error: 'Failed to delete user data',
           details: rpcError.message,
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Verify deletion was successful
+    if (!rpcResult || !rpcResult.success) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: rpcResult?.error || 'Data deletion failed',
         }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
