@@ -76,7 +76,7 @@ const createEmptyDeckState = (): DeckState => ({
 
 // CACHE INVALIDATION: Clear stale localStorage on app load to prevent FK errors
 // This runs once on module load and clears any stale mock data
-const CACHE_VERSION = 'v9'; // v9: Force clear after clearing all mock photos from database (Jan 2026)
+const CACHE_VERSION = 'v10'; // v10: Fixed image preloading for next cards
 const CACHE_KEY = 'swipe-deck-store';
 const CACHE_VERSION_KEY = 'swipe-deck-version';
 if (typeof window !== 'undefined') {
@@ -462,7 +462,7 @@ export const useSwipeDeckStore = create<SwipeDeckSlice>()(
             price: item.price,
             city: item.city,
             neighborhood: item.neighborhood,
-            images: item.images?.slice(0, 3), // First 3 images only
+            images: item.images, // Keep ALL images for carousel
             beds: item.beds,
             baths: item.baths,
             square_footage: item.square_footage,
@@ -495,8 +495,8 @@ export const useSwipeDeckStore = create<SwipeDeckSlice>()(
                 full_name: item.full_name,
                 age: item.age,
                 city: item.city,
-                images: item.images?.slice(0, 3), // First 3 images only
-                profile_images: item.profile_images?.slice(0, 3),
+                images: item.images, // Keep ALL images for carousel
+                profile_images: item.profile_images,
                 avatar_url: item.avatar_url,
                 verified: item.verified,
                 budget_max: item.budget_max,

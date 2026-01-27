@@ -120,6 +120,7 @@ const imageCache = new Map<string, boolean>();
  * - Uses position: absolute + inset: 0
  * - object-fit: cover ensures no letterboxing
  * - Sits at the LOWEST z-layer (z-index: 1)
+ * - Preloads image when rendered (for next card in stack)
  */
 const CardImage = memo(({ src, alt, name }: { src: string; alt: string; name?: string | null }) => {
   const [loaded, setLoaded] = useState(() => imageCache.has(src));
@@ -134,6 +135,18 @@ const CardImage = memo(({ src, alt, name }: { src: string; alt: string; name?: s
 
   // Use smooth transition only for uncached images
   const wasInCache = imageCache.has(src);
+
+  // Preload image when card renders (for non-top cards)
+  useEffect(() => {
+    if (!src || wasInCache || error) return;
+    const img = new Image();
+    img.onload = () => {
+      imageCache.set(src, true);
+      setLoaded(true);
+    };
+    img.onerror = () => setError(true);
+    img.src = src;
+  }, [src, wasInCache, error]);
 
   return (
     <div

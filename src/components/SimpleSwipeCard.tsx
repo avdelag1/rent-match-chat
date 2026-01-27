@@ -65,6 +65,7 @@ const ACTIVE_SPRING = SPRING_CONFIGS.NATIVE;
  * - Uses position: absolute + inset: 0
  * - object-fit: cover ensures no letterboxing
  * - Sits at the LOWEST z-layer (z-index: 1)
+ * - Preloads image when rendered
  */
 const CardImage = memo(({ src, alt }: { src: string; alt: string }) => {
   // Check if image was already cached - if so, show immediately (no skeleton)
@@ -74,6 +75,18 @@ const CardImage = memo(({ src, alt }: { src: string; alt: string }) => {
 
   // Use smooth transition only for uncached images
   const wasInCache = imageCache.has(src);
+
+  // Preload image when card renders (non-top cards need this)
+  useEffect(() => {
+    if (!src || wasInCache || error) return;
+    const img = new Image();
+    img.onload = () => {
+      imageCache.set(src, true);
+      setLoaded(true);
+    };
+    img.onerror = () => setError(true);
+    img.src = optimizedSrc;
+  }, [src, optimizedSrc, wasInCache, error]);
 
   return (
     <div
@@ -317,14 +330,11 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
   }, [listing.id, onSwipe, x, y, endParallaxDrag]);
 
   const handleCardTap = useCallback(() => {
-    if (!isDragging.current && onTap) {
-      onTap();
-    }
-  }, [onTap]);
+    // Card tap does nothing by default - image taps handle photo navigation
+    // This prevents conflict with handleImageTap
+  }, []);
 
   const handleImageTap = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-
     // Don't handle tap if magnifier is active - allows zoom to work
     if (isMagnifierActive()) {
       return;
@@ -335,17 +345,17 @@ const SimpleSwipeCardComponent = forwardRef<SimpleSwipeCardRef, SimpleSwipeCardP
     const width = rect.width;
 
     // Left third - previous image (only if multiple images)
-    if (clickX < width * 0.3 && imageCount > 1) {
+    if (clickX < width * 0.33 && imageCount > 1) {
       setCurrentImageIndex(prev => prev === 0 ? imageCount - 1 : prev - 1);
       triggerHaptic('light');
     }
     // Right third - next image (only if multiple images)
-    else if (clickX > width * 0.7 && imageCount > 1) {
+    else if (clickX > width * 0.67 && imageCount > 1) {
       setCurrentImageIndex(prev => prev === imageCount - 1 ? 0 : prev + 1);
       triggerHaptic('light');
     }
-    // Middle area - open insights
-    else if (onInsights) {
+    // Middle area - open insights (only if not magnifier and user tapped middle)
+    else if (onInsights && clickX >= width * 0.33 && clickX <= width * 0.67) {
       triggerHaptic('light');
       onInsights();
     }
