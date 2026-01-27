@@ -4,6 +4,7 @@ import { toast } from '@/hooks/use-toast';
 import { Listing } from './useListings';
 import { ClientFilterPreferences } from './useClientFilterPreferences';
 import { logger } from '@/utils/prodLogger';
+import { normalizeCategoryName } from '@/types/filters';
 
 // Fisher-Yates shuffle algorithm for randomizing array order
 function shuffleArray<T>(array: T[]): T[] {
@@ -414,12 +415,17 @@ export function useSmartListingMatching(
           });
 
           // Category filter - support multiple categories
+          // Apply normalizeCategoryName to convert 'services' -> 'worker' for database
           if (filters.categories && filters.categories.length > 0) {
             logger.info('[SmartMatching] Filtering by categories:', filters.categories);
-            query = query.in('category', filters.categories);
+            const dbCategories = filters.categories.map(c => normalizeCategoryName(c)).filter((c): c is string => c !== undefined);
+            query = query.in('category', dbCategories);
           } else if (filters.category) {
             logger.info('[SmartMatching] Filtering by single category:', filters.category);
-            query = query.eq('category', filters.category);
+            const dbCategory = normalizeCategoryName(filters.category);
+            if (dbCategory) {
+              query = query.eq('category', dbCategory);
+            }
           }
 
           // Listing type filter
