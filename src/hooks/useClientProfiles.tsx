@@ -33,11 +33,13 @@ export function useClientProfiles(excludeSwipedIds: string[] = [], options: { en
         // CRITICAL: Query profiles_public directly to ensure all profiles exist in auth system
         // The client_profiles table may have orphan records that cause FK violations in owner_likes
         // IMPORTANT: Filter by role='client' to only show clients, not owners
+        // FIXED: Add is_active filter to exclude suspended/blocked/inactive profiles
         const { data: profiles, error } = await supabase
           .from('profiles_public')
           .select('*')
           .neq('id', user.id)
           .eq('role', 'client') // ✅ Only show clients in owner swipe deck
+          .or('is_active.is.null,is_active.eq.true') // ✅ Only show active profiles (null = true by default)
           .order('created_at', { ascending: false })
           .limit(100);
 
@@ -93,23 +95,18 @@ export function useSwipedClientProfiles() {
       if (!user) return [];
 
       try {
-        // Only exclude profiles swiped within the last 1 day (reset after next day)
-        const oneDayAgo = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString();
-
-        // NOTE: This is for owner likes on clients, which uses owner_likes table
-        // This code seems wrong - it's querying 'likes' table but should query 'owner_likes'
-        // ACTUALLY FIXED: Use correct column name 'target_listing_id' for now
-        const { data: likes, error } = await supabase
-          .from('likes')
-          .select('target_listing_id')
-          .eq('user_id', user.id)
-          .gte('created_at', oneDayAgo);
+        // FIXED: Query owner_likes table for owner swipes on clients
+        // The previous code was querying 'likes' table which is for client→listing likes
+        const { data: ownerLikes, error } = await supabase
+          .from('owner_likes')
+          .select('client_id')
+          .eq('owner_id', user.id);
 
         if (error) {
           logger.error('Error fetching owner swipes:', error);
           return [];
         }
-        return likes?.map(l => l.target_listing_id) || [];
+        return ownerLikes?.map(l => l.client_id) || [];
       } catch (error) {
         logger.error('Failed to fetch swiped client profiles:', error);
         return [];
