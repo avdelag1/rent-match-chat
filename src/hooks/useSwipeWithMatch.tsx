@@ -238,15 +238,14 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
         // Client swiping on a listing
         if (direction === 'right') {
           // Client likes a listing - save to likes table
-          // FIXED: Use correct column name 'target_id' and include required 'direction' field
+          // FIXED: Use correct column name 'target_listing_id' (per migration 20260120000000)
           const { data: clientLike, error: likeError } = await supabase
             .from('likes')
             .upsert({
               user_id: user.id,
-              target_id: targetId,
-              direction: 'right'
+              target_listing_id: targetId
             }, {
-              onConflict: 'user_id,target_id',
+              onConflict: 'user_id,target_listing_id',
               ignoreDuplicates: false
             })
             .select()
@@ -422,18 +421,18 @@ async function detectAndCreateMatch({
       const listingIds = ownerListings.map(l => l.id);
 
       // Check if client liked any of the owner's listings
-      // FIXED: Use correct column name 'target_id'
+      // FIXED: Use correct column name 'target_listing_id' (per migration 20260120000000)
       const { data: clientLike } = await supabase
         .from('likes')
         .select('*')
         .eq('user_id', targetId)
-        .in('target_id', listingIds)
+        .in('target_listing_id', listingIds)
         .limit(1)
         .maybeSingle();
 
       mutualLike = clientLike;
       // Use the listing that was liked for the match
-      matchListingId = clientLike?.target_id || null;
+      matchListingId = clientLike?.target_listing_id || null;
     } else {
       matchListingId = null;
       mutualLike = null;
