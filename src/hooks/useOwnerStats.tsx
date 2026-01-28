@@ -73,6 +73,7 @@ export function useOwnerStats() {
       let interestedClientsCount = 0;
       if (interestedClientsResult.data && interestedClientsResult.data.length > 0) {
         const listingIds = interestedClientsResult.data.map(l => l.id);
+        // ACTUALLY FIXED: Use correct column name 'target_listing_id'
         const { count } = await supabase
           .from('likes')
           .select('*', { count: 'exact', head: true })

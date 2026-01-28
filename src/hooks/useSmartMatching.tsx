@@ -311,21 +311,20 @@ export function useSmartListingMatching(
         // Fetch liked items (right swipes) - these are NEVER shown again
         const { data: likedListings, error: likesError } = await supabase
           .from('likes')
-          .select('target_id')
-          .eq('user_id', userId)
-          .eq('direction', 'right');
+          .select('target_listing_id')
+          .eq('user_id', userId);
 
-        const likedIds = new Set(!likesError ? (likedListings?.map(like => like.target_id) || []) : []);
+        const likedIds = new Set(!likesError ? (likedListings?.map(like => like.target_listing_id) || []) : []);
 
         // Fetch left swipes with timestamps for 3-day expiry logic
         // After 3 days, dislikes become permanent and won't show even on refresh
         const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
 
         const { data: leftSwipes } = await supabase
-          .from('likes')
+          .from('dislikes')
           .select('target_id, created_at')
           .eq('user_id', userId)
-          .eq('direction', 'left');
+          .eq('target_type', 'listing');
 
         // Build sets for dislike handling:
         // - permanentlyHiddenIds: dislikes older than 3 days (NEVER show again)
@@ -403,8 +402,18 @@ export function useSmartListingMatching(
           .select(SWIPE_CARD_FIELDS)
           .eq('status', 'active')
           .eq('is_active', true)
-          .neq('owner_id', userId) // CRITICAL: Exclude own listings - user shouldn't see their own listings when browsing
-          .order('created_at', { ascending: false }); // Newest first
+          .neq('owner_id', userId); // CRITICAL: Exclude own listings
+
+        // CRITICAL FIX: Exclude swiped listings at SQL level (not JavaScript)
+        // This ensures pagination works correctly - without this, page 2 might return
+        // the same items as page 1 if they were filtered out in JS
+        if (swipedListingIds.size > 0) {
+          const idsToExclude = Array.from(swipedListingIds);
+          // Supabase supports NOT IN with array format
+          query = query.not('id', 'in', `(${idsToExclude.map(id => `"${id}"`).join(',')})`);
+        }
+
+        query = query.order('created_at', { ascending: false }); // Newest first
 
         // Apply filter-based query constraints
         if (filters) {
@@ -529,16 +538,15 @@ export function useSmartListingMatching(
           // Skip premium filtering for now - all listings shown
         }
 
-        // Filter out already-swiped listings (both likes and dislikes)
-        // CRITICAL: Also double-check that user never sees their own listings (defense in depth)
+        // DEFENSE IN DEPTH: Double-check that user never sees their own listings
+        // The SQL query already excludes these, but this catches any edge cases
+        // NOTE: Swiped listings are now excluded at SQL level (see query above)
         filteredListings = filteredListings.filter(listing => {
-          // Never show user their own listings
           if (listing.owner_id === userId) {
             logger.warn('[SmartMatching] CRITICAL: Own listing leaked through DB query, filtering it out:', listing.id);
             return false;
           }
-          // Filter out already-swiped listings
-          return !swipedListingIds.has(listing.id);
+          return true;
         });
 
         if (!preferences) {
@@ -987,10 +995,10 @@ export function useSmartClientMatching(
         const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
 
         const { data: leftSwipes } = await supabase
-          .from('likes')
+          .from('dislikes')
           .select('target_id, created_at')
           .eq('user_id', userId)
-          .eq('direction', 'left');
+          .eq('target_type', 'profile');
 
         // Build sets for dislike handling:
         // - permanentlyHiddenIds: dislikes older than 3 days (NEVER show again)
@@ -1060,15 +1068,24 @@ export function useSmartClientMatching(
           user_roles!inner(role)
         `;
 
-        const start = page * pageSize;
-        const end = start + pageSize - 1;
-        const { data: profiles, error: profileError } = await supabase
+        // Build the query with SQL-level exclusions
+        let profileQuery = supabase
           .from('profiles')
           .select(CLIENT_SWIPE_CARD_FIELDS)
           .neq('id', userId) // CRITICAL: Never show user their own profile
           .eq('user_roles.role', 'client')
-          .or('is_active.is.null,is_active.eq.true') // Only show active profiles (null or true)
-          .range(start, end);
+          .or('is_active.is.null,is_active.eq.true'); // Only show active profiles (null or true)
+
+        // CRITICAL FIX: Exclude swiped profiles at SQL level (not JavaScript)
+        // This ensures pagination works correctly
+        if (swipedProfileIds.size > 0) {
+          const idsToExclude = Array.from(swipedProfileIds);
+          profileQuery = profileQuery.not('id', 'in', `(${idsToExclude.map(id => `"${id}"`).join(',')})`);
+        }
+
+        const start = page * pageSize;
+        const end = start + pageSize - 1;
+        const { data: profiles, error: profileError } = await profileQuery.range(start, end);
 
         if (profileError) {
           // CRITICAL FIX: Don't throw error when paginating beyond available results
@@ -1084,18 +1101,18 @@ export function useSmartClientMatching(
 
         logger.info('[SmartMatching] Fetched profiles before filtering:', profiles.length);
 
-        // Map profiles with placeholder images - filter out already-swiped profiles
+        // Map profiles with placeholder images
+        // NOTE: Swiped profiles are now excluded at SQL level (see query above)
         // CRITICAL: Also filter out profiles with mock/fake images (unsplash, placeholder URLs, etc.)
         let filteredProfiles = (profiles as any[])
           .filter(profile => {
-            // CRITICAL: Double-check - never show user their own profile (defense in depth)
+            // DEFENSE IN DEPTH: Double-check - never show user their own profile
             if (profile.id === userId) {
               logger.warn('[SmartMatching] CRITICAL: Own profile leaked through DB query, filtering it out:', profile.id);
               return false;
             }
             return true;
           })
-          .filter(profile => !swipedProfileIds.has(profile.id))
           .filter(profile => !hasMockImages(profile.images)) // Remove profiles with fake/mock photos
           .map(profile => ({
             ...profile,

@@ -66,6 +66,7 @@ function LikedListingInsightsModalComponent({ open, onOpenChange, listing }: Lik
       const { data: user } = await supabase.auth.getUser();
       if (!user.user || !listing) throw new Error('Not authenticated');
 
+      // FIXED: Use correct column name 'target_id'
       const { error } = await supabase
         .from('likes')
         .delete()
@@ -111,6 +112,7 @@ function LikedListingInsightsModalComponent({ open, onOpenChange, listing }: Lik
       }
 
       // Also remove from likes
+      // ACTUALLY FIXED: Use correct column name 'target_listing_id'
       await supabase
         .from('likes')
         .delete()

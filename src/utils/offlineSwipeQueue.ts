@@ -2,9 +2,9 @@
  * Offline Swipe Queue - Queues swipes when offline and syncs when back online
  *
  * ARCHITECTURE:
- * - Right swipes on listings -> likes table (target_id, direction='right')
+ * - Right swipes on listings -> likes table (target_listing_id only, no direction)
  * - Right swipes on profiles -> owner_likes table (owner_id, client_id)
- * - Left swipes -> likes table (target_id, direction='left')
+ * - Left swipes -> dislikes table (target_id, target_type)
  *
  * PERFORMANCE BENEFIT:
  * - Users can continue swiping even when offline
@@ -114,16 +114,16 @@ async function syncSwipe(swipe: QueuedSwipe): Promise<boolean> {
       return false;
     }
 
-    // Handle LEFT swipes (dislikes) -> likes table with direction='left'
+    // Handle LEFT swipes (dislikes) -> dislikes table
     if (swipe.direction === 'left') {
       const { error } = await supabase
-        .from('likes')
+        .from('dislikes')
         .upsert({
           user_id: user.id,
           target_id: swipe.targetId,
-          direction: 'left'
+          target_type: swipe.targetType === 'listing' ? 'listing' : 'profile'
         }, {
-          onConflict: 'user_id,target_id',
+          onConflict: 'user_id,target_id,target_type',
           ignoreDuplicates: false,
         });
 
@@ -138,15 +138,14 @@ async function syncSwipe(swipe: QueuedSwipe): Promise<boolean> {
 
     // Handle RIGHT swipes (likes)
     if (swipe.targetType === 'listing') {
-      // Client liking a listing -> likes table with target_id and direction='right'
+      // Client liking a listing -> likes table with target_listing_id (no direction)
       const { error } = await supabase
         .from('likes')
         .upsert({
           user_id: user.id,
-          target_id: swipe.targetId,
-          direction: 'right'
+          target_listing_id: swipe.targetId
         }, {
-          onConflict: 'user_id,target_id',
+          onConflict: 'user_id,target_listing_id',
           ignoreDuplicates: false,
         });
 

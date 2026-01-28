@@ -142,7 +142,20 @@ export function NotificationSystem() {
             const newLike = payload.new;
 
             // Only show notifications for likes received (not given)
-            if (newLike.target_id === user.id && newLike.user_id !== user.id) {
+            // FIXED: Check if the liked listing belongs to the current user
+            if (newLike.target_listing_id && newLike.user_id !== user.id) {
+              // Check if this listing belongs to the current user
+              const { data: listing } = await supabase
+                .from('listings')
+                .select('owner_id, title')
+                .eq('id', newLike.target_listing_id)
+                .maybeSingle();
+
+              // Only notify if the current user owns the listing
+              if (listing?.owner_id !== user.id) {
+                return;
+              }
+
               // Get liker info
               const { data: likerProfile } = await supabase
                 .from('profiles')
@@ -154,7 +167,7 @@ export function NotificationSystem() {
 
               // Show toast notification
               toast.success(`🔥 New Flame`, {
-                description: `${likerName} liked your ${newLike.direction === 'client_to_listing' ? 'property' : 'profile'}!`
+                description: `${likerName} liked your property!`
               });
 
               // Save to notifications table (non-blocking, errors are non-critical)
@@ -162,7 +175,7 @@ export function NotificationSystem() {
                 id: crypto.randomUUID(),
                 user_id: user.id,
                 type: 'like',
-                message: `${likerName} liked your ${newLike.direction === 'client_to_listing' ? 'property' : 'profile'}!`,
+                message: `${likerName} liked your property!`,
                 read: false
               }]).then(
                 () => { /* Notification saved successfully */ },

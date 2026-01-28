@@ -20,7 +20,7 @@ export interface PhotoUploadResult {
 export const uploadPhoto = async ({
   userId,
   blob,
-  bucket = 'profile-photos',
+  bucket = 'profile-images',
   onProgress,
 }: PhotoUploadOptions): Promise<PhotoUploadResult> => {
   const timestamp = Date.now();
@@ -107,7 +107,7 @@ export const uploadProfilePhoto = async (
   const { publicUrl } = await uploadPhoto({
     userId,
     blob,
-    bucket: 'profile-photos',
+    bucket: 'profile-images',
     onProgress: (progress) => {
       if (onProgress) {
         onProgress(progress * 0.8);
@@ -131,7 +131,7 @@ export const uploadProfilePhoto = async (
 export const uploadPhotoBatch = async (
   userId: string,
   blobs: Blob[],
-  bucket = 'profile-photos',
+  bucket = 'profile-images',
   onProgress?: UploadProgressCallback
 ): Promise<string[]> => {
   if (blobs.length === 0) return [];

@@ -19,6 +19,8 @@ interface Star {
   opacity: number;
   twinkleSpeed: number;
   twinkleOffset: number;
+  velocityX: number;
+  velocityY: number;
 }
 
 interface ShootingStar {
@@ -29,23 +31,33 @@ interface ShootingStar {
   length: number;
   opacity: number;
   speed: number;
+  color: string;
 }
 
 const STAR_COUNT = 200;
 const SHOOTING_STAR_INTERVAL_MIN = 10000;
 const SHOOTING_STAR_INTERVAL_MAX = 20000;
 
-// Generate random stars - realistic distribution
+// Generate random stars - time-lapse style movement (like Earth's rotation)
 const generateStars = (): Star[] => {
-  return Array.from({ length: STAR_COUNT }, (_, i) => ({
-    id: i,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    size: Math.random() * 1.2 + 0.3, // Smaller, more realistic sizes
-    opacity: Math.random() * 0.5 + 0.15, // More subtle
-    twinkleSpeed: Math.random() * 3 + 2, // Slower twinkle
-    twinkleOffset: Math.random() * 10,
-  }));
+  return Array.from({ length: STAR_COUNT }, (_, i) => {
+    // All stars drift slowly to the right (simulating Earth's rotation)
+    // with slight variations in speed for depth perception
+    const baseSpeed = 0.004; // Even slower, almost imperceptible
+    const speedVariation = Math.random() * 0.003; // Some stars move slightly faster/slower
+
+    return {
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 1.2 + 0.3, // Smaller, more realistic sizes
+      opacity: Math.random() * 0.5 + 0.15, // More subtle, varying brightness
+      twinkleSpeed: Math.random() * 3 + 2, // Slower twinkle
+      twinkleOffset: Math.random() * 10,
+      velocityX: baseSpeed + speedVariation, // Horizontal drift (right)
+      velocityY: (Math.random() - 0.5) * 0.0005, // Tiny vertical drift for realism
+    };
+  });
 };
 
 const StarFieldBackgroundComponent = () => {
@@ -60,20 +72,31 @@ const StarFieldBackgroundComponent = () => {
     return Math.random() * (SHOOTING_STAR_INTERVAL_MAX - SHOOTING_STAR_INTERVAL_MIN) + SHOOTING_STAR_INTERVAL_MIN;
   }
 
-  // Create a new shooting star
+  // Create a new shooting star with random color
   const createShootingStar = useCallback((x?: number, y?: number): ShootingStar => {
     const startX = x ?? Math.random() * 100;
     const startY = y ?? Math.random() * 60;
     const angle = Math.random() * 30 + 25; // 25-55 degrees (diagonal down-right)
-    
+
+    // Random colors for shooting stars: white, blue, cyan, light blue
+    const colors = [
+      '255, 255, 255',    // White
+      '200, 220, 255',    // Light blue
+      '180, 200, 255',    // Pale blue
+      '150, 180, 255',    // Sky blue
+      '255, 245, 235',    // Warm white
+    ];
+    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+
     return {
-      id: Date.now(),
+      id: Date.now() + Math.random(), // Ensure unique ID
       startX,
       startY,
       angle,
       length: Math.random() * 15 + 10,
       opacity: 1,
       speed: Math.random() * 0.5 + 0.8,
+      color: randomColor,
     };
   }, []);
 
@@ -81,14 +104,43 @@ const StarFieldBackgroundComponent = () => {
   useEffect(() => {
     const animate = () => {
       const now = Date.now();
-      
+
+      // Update star positions and move them via direct DOM manipulation
+      if (containerRef.current) {
+        const starElements = containerRef.current.querySelectorAll('[data-star-id]');
+
+        starsRef.current = starsRef.current.map((star, index) => {
+          let newX = star.x + star.velocityX;
+          let newY = star.y + star.velocityY;
+
+          // Wrap around edges
+          if (newX > 100) newX = 0;
+          if (newX < 0) newX = 100;
+          if (newY > 100) newY = 0;
+          if (newY < 0) newY = 100;
+
+          // Update DOM directly for smooth performance
+          const element = starElements[index] as HTMLElement;
+          if (element) {
+            element.style.left = `${newX}%`;
+            element.style.top = `${newY}%`;
+          }
+
+          return {
+            ...star,
+            x: newX,
+            y: newY,
+          };
+        });
+      }
+
       // Check if it's time for a random shooting star
       if (now - lastShootingStarRef.current > nextShootingStarRef.current) {
         shootingStarsRef.current.push(createShootingStar());
         lastShootingStarRef.current = now;
         nextShootingStarRef.current = getNextShootingStarTime();
       }
-      
+
       // Update shooting stars
       shootingStarsRef.current = shootingStarsRef.current
         .map(star => ({
@@ -98,12 +150,12 @@ const StarFieldBackgroundComponent = () => {
           startX: star.startX + 0.12 * star.speed,
         }))
         .filter(star => star.opacity > 0);
-      
+
       animationRef.current = requestAnimationFrame(animate);
     };
-    
+
     animationRef.current = requestAnimationFrame(animate);
-    
+
     return () => {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
@@ -144,10 +196,11 @@ const StarFieldBackgroundComponent = () => {
         style={{ pointerEvents: 'auto', cursor: 'pointer' }}
       />
 
-      {/* Static stars with twinkle effect */}
+      {/* Moving stars with twinkle effect - varying brightness */}
       {stars.map((star) => (
         <motion.div
           key={star.id}
+          data-star-id={star.id}
           className="absolute rounded-full bg-white"
           style={{
             left: `${star.x}%`,
@@ -174,7 +227,7 @@ const StarFieldBackgroundComponent = () => {
         />
       ))}
 
-      {/* Shooting stars */}
+      {/* Shooting stars with random colors */}
       {shootingStarsRef.current.map((star) => (
         <div
           key={star.id}
@@ -183,12 +236,13 @@ const StarFieldBackgroundComponent = () => {
             left: `${star.startX}%`,
             top: `${star.startY}%`,
             width: `${star.length}%`,
-            height: '1.5px',
-            background: `linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,${star.opacity * 0.8}) 30%, rgba(200,220,255,${star.opacity}) 100%)`,
+            height: '2px',
+            background: `linear-gradient(to right, rgba(${star.color}, 0) 0%, rgba(${star.color}, ${star.opacity * 0.6}) 30%, rgba(${star.color}, ${star.opacity}) 100%)`,
             transform: `rotate(${star.angle}deg)`,
             transformOrigin: 'left center',
             pointerEvents: 'none',
-            boxShadow: `0 0 ${star.opacity * 3}px ${star.opacity}px rgba(200, 220, 255, ${star.opacity * 0.5})`,
+            boxShadow: `0 0 ${star.opacity * 4}px ${star.opacity * 2}px rgba(${star.color}, ${star.opacity * 0.6})`,
+            filter: `blur(0.3px)`,
           }}
         />
       ))}

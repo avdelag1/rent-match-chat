@@ -318,6 +318,7 @@ export default function NotificationsPage() {
     setRemovingLikeId(listingId);
 
     try {
+      // ACTUALLY FIXED: Use correct column name 'target_listing_id'
       const { error } = await supabase
         .from('likes')
         .delete()

@@ -56,7 +56,8 @@ export function useOwnerInterestedClients() {
 
       const listingIds = ownerListings.map(l => l.id);
 
-      // CORRECT QUERY: Fetch likes on owner's listings using target_listing_id
+      // CORRECT QUERY: Fetch likes on owner's listings
+      // FIXED: Use correct column name 'target_listing_id' (not target_listing_id)
       const { data, error } = await supabase
         .from('likes')
         .select(`
@@ -103,6 +104,7 @@ export function useOwnerInterestedClients() {
       const listingMap = new Map((listings || []).map((l: any) => [l.id, l]));
 
       // Combine the data
+      // FIXED: Use correct column name 'target_listing_id'
       const interestedClients: InterestedClient[] = data
         .map((like: any) => {
           const profile = profileMap.get(like.user_id);

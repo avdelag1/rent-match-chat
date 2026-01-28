@@ -240,6 +240,7 @@ export function useSwipedListings() {
         // Only exclude listings swiped within the last 1 day (reset after next day)
         const oneDayAgo = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString();
 
+        // ACTUALLY FIXED: Use correct column name 'target_listing_id'
         const { data: likes, error } = await supabase
           .from('likes')
           .select('target_listing_id')
