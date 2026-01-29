@@ -35,13 +35,14 @@ type CategoryOption = {
   icon: React.ReactNode;
   color: string;
   hasSubOptions: boolean;
+  subOptions: string[];
 };
 
 const categoryOptions: CategoryOption[] = [
-  { id: 'property', label: 'Property', icon: <Home className="w-4 h-4" />, color: 'from-orange-500 to-amber-500', hasSubOptions: true },
-  { id: 'motorcycle', label: 'Motorcycle', icon: <MotorcycleIcon className="w-4 h-4" />, color: 'from-red-500 to-orange-500', hasSubOptions: true },
-  { id: 'bicycle', label: 'Bicycle', icon: <Bike className="w-4 h-4" />, color: 'from-green-500 to-emerald-500', hasSubOptions: true },
-  { id: 'services', label: 'Workers', icon: <Wrench className="w-4 h-4" />, color: 'from-pink-500 to-rose-500', hasSubOptions: true },
+  { id: 'property', label: 'Property', icon: <Home className="w-4 h-4" />, color: 'from-orange-500 to-amber-500', hasSubOptions: true, subOptions: ['Apartments', 'Houses', 'Condos', 'Villas', 'Rooms'] },
+  { id: 'motorcycle', label: 'Motorcycle', icon: <MotorcycleIcon className="w-4 h-4" />, color: 'from-red-500 to-orange-500', hasSubOptions: true, subOptions: ['Motorcycles', 'Scooters', 'ATVs', 'Electric Bikes'] },
+  { id: 'bicycle', label: 'Bicycle', icon: <Bike className="w-4 h-4" />, color: 'from-green-500 to-emerald-500', hasSubOptions: true, subOptions: ['Mountain Bikes', 'E-Bikes', 'Road Bikes', 'Kids Bikes'] },
+  { id: 'services', label: 'Workers', icon: <Wrench className="w-4 h-4" />, color: 'from-pink-500 to-rose-500', hasSubOptions: true, subOptions: ['Cleaning', 'Childcare', 'Cooking', 'Tutoring', 'Handyman'] },
 ];
 
 const listingTypeOptions: { id: QuickFilterListingType; label: string }[] = [
@@ -296,7 +297,7 @@ function QuickFilterDropdownComponent({ userRole, className }: QuickFilterDropdo
                 )}
               </button>
 
-              {/* Sub-menu for listing type - MOBILE: appears below, DESKTOP: appears to the right */}
+              {/* Sub-menu for category types - MOBILE: appears below, DESKTOP: appears to the right */}
               <AnimatePresence>
                 {(hoveredCategory === category.id || clickedCategory === category.id) && category.hasSubOptions && (
                   <motion.div
@@ -313,24 +314,35 @@ function QuickFilterDropdownComponent({ userRole, className }: QuickFilterDropdo
                   >
                     <div className={cn(
                       "bg-background border border-white/10 rounded-xl shadow-lg overflow-hidden",
-                      isMobile ? "w-full" : "min-w-[160px]"
+                      isMobile ? "w-full" : "min-w-[180px] max-w-[220px]"
                     )}>
+                      {/* Category type options */}
                       <div className="py-1 sm:py-2">
-                        {listingTypeOptions.map((ltOption, ltIndex) => (
+                        <div className="px-4 py-1 text-[10px] uppercase tracking-wider text-muted-foreground">
+                          {category.label} Types
+                        </div>
+                        {category.subOptions.map((subOption, subIndex) => (
                           <motion.button
-                            key={ltOption.id}
+                            key={subOption}
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: ltIndex * 0.05 }}
-                            onClick={() => handleCategorySelect(category.id, ltOption.id)}
+                            transition={{ delay: subIndex * 0.03 }}
+                            onClick={() => {
+                              // Just select the category with default rent mode
+                              setCategories([category.id]);
+                              setListingType('rent');
+                              setIsOpen(false);
+                              setHoveredCategory(null);
+                              setClickedCategory(null);
+                            }}
                             className={cn(
-                              'w-full flex items-center px-4 sm:px-5 py-2.5 sm:py-3 text-sm transition-all duration-200 touch-manipulation min-h-[48px]',
-                              categories.includes(category.id) && listingType === ltOption.id
+                              'w-full flex items-center px-4 sm:px-5 py-2.5 sm:py-3 text-sm transition-all duration-200 touch-manipulation min-h-[44px]',
+                              categories.includes(category.id)
                                 ? `bg-gradient-to-r ${category.color} text-white`
                                 : 'text-foreground/80 hover:bg-white/5'
                             )}
                           >
-                            <span className="font-medium text-sm sm:text-base">{ltOption.label}</span>
+                            <span className="font-medium text-xs sm:text-sm">{subOption}</span>
                           </motion.button>
                         ))}
                       </div>

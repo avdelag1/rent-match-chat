@@ -19,10 +19,12 @@ interface Category {
   id: 'property' | 'motorcycle' | 'bicycle' | 'worker';
   name: string;
   description: string;
+  longDescription: string;
   icon: React.ReactNode;
   gradient: string;
   iconColor: string;
   popular?: boolean;
+  subOptions: string[];
 }
 
 const categories: Category[] = [
@@ -30,34 +32,42 @@ const categories: Category[] = [
     id: 'property',
     name: 'Property',
     description: 'Apartments, houses, condos, villas',
+    longDescription: 'Rent or sell residential and commercial properties including apartments, houses, condos, villas, and more.',
     icon: <Home className="w-7 h-7" />,
     gradient: 'from-emerald-500/20 via-emerald-500/5 to-transparent',
     iconColor: 'text-emerald-500 bg-emerald-500/10',
     popular: true,
+    subOptions: ['Apartments', 'Houses', 'Condos', 'Villas', 'Rooms', 'Commercial'],
   },
   {
     id: 'motorcycle',
     name: 'Motorcycle',
     description: 'Motorcycles, scooters, ATVs',
+    longDescription: 'List motorcycles, scooters, ATVs, and other powered two-wheelers for sale or rent.',
     icon: <CircleDot className="w-7 h-7" />,
     gradient: 'from-orange-500/20 via-orange-500/5 to-transparent',
     iconColor: 'text-orange-500 bg-orange-500/10',
+    subOptions: ['Motorcycles', 'Scooters', 'ATVs', 'Electric Bikes', 'Go-Karts'],
   },
   {
     id: 'bicycle',
     name: 'Bicycle',
     description: 'Bikes, e-bikes, mountain bikes',
+    longDescription: 'Rent or sell bicycles, e-bikes, mountain bikes, road bikes, and cycling gear.',
     icon: <Bike className="w-7 h-7" />,
     gradient: 'from-purple-500/20 via-purple-500/5 to-transparent',
     iconColor: 'text-purple-500 bg-purple-500/10',
+    subOptions: ['Mountain Bikes', 'Road Bikes', 'E-Bikes', 'Kids Bikes', 'BMX', 'Cycling Gear'],
   },
   {
     id: 'worker',
     name: 'Jobs & Services',
     description: 'Chef, cleaner, nanny, handyman, and more',
+    longDescription: 'Offer professional services including childcare, cleaning, cooking, tutoring, and skilled trades.',
     icon: <Briefcase className="w-7 h-7" />,
     gradient: 'from-amber-500/20 via-amber-500/5 to-transparent',
     iconColor: 'text-amber-500 bg-amber-500/10',
+    subOptions: ['Childcare (Nanny/Babysitter)', 'Cleaning Services', 'Chefs & Cooking', 'Tutors & Teachers', 'Handyman & Repairs', 'Beauty & Wellness', 'Drivers & Transportation', 'Gardening & Pool', 'Security', 'Pet Care', 'Other Services'],
   },
 ];
 
@@ -211,6 +221,19 @@ export function CategorySelectionDialog({
                         <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 line-clamp-1">
                           {category.description}
                         </p>
+                        {/* Show sub-options as small tags */}
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {category.subOptions.slice(0, 4).map((opt, i) => (
+                            <span key={i} className="text-[10px] px-1.5 py-0.5 bg-white/10 rounded text-muted-foreground">
+                              {opt}
+                            </span>
+                          ))}
+                          {category.subOptions.length > 4 && (
+                            <span className="text-[10px] px-1.5 py-0.5 bg-white/10 rounded text-muted-foreground">
+                              +{category.subOptions.length - 4} more
+                            </span>
+                          )}
+                        </div>
                       </div>
 
                       <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground/50 group-hover:text-primary group-hover:translate-x-1 transition-all self-center shrink-0" />
@@ -244,7 +267,7 @@ export function CategorySelectionDialog({
                       </div>
                       <div>
                         <h3 className="font-semibold text-foreground text-sm sm:text-base">{selectedCategory.name}</h3>
-                        <p className="text-xs sm:text-sm text-muted-foreground">{selectedCategory.description}</p>
+                        <p className="text-xs sm:text-sm text-muted-foreground">{selectedCategory.longDescription}</p>
                       </div>
                     </div>
                   )}
