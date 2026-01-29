@@ -158,9 +158,10 @@ export function MessageActivationPackages({
         await supabase.from('notifications').insert([{
           id: crypto.randomUUID(),
           user_id: user.id,
-          type: 'activation_purchase',
+          notification_type: 'activation_purchase',
+          title: 'Message Activations Selected!',
           message: `You selected the ${pkg.name} package with ${pkg.activations} message activations (${formatPriceMXN(pkg.price)}). Complete payment to activate!`,
-          read: false
+          is_read: false
         }]).then(
           () => { /* Notification saved successfully */ },
           () => { /* Notification save failed - non-critical */ }

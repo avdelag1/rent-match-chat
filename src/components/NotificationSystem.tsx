@@ -76,9 +76,10 @@ export function NotificationSystem() {
                 supabase.from('notifications').insert([{
                   id: crypto.randomUUID(),
                   user_id: user.id,
-                  type: 'message',
+                  notification_type: 'message',
+                  title: `New message from ${senderName}`,
                   message: `${senderName}: ${messageText.slice(0, 100)}${messageText.length > 100 ? '...' : ''}`,
-                  read: false
+                  is_read: false
                 }]).then(
                   () => { /* Notification saved successfully */ },
                   () => { /* Notification save failed - non-critical, user still sees toast */ }
@@ -174,9 +175,10 @@ export function NotificationSystem() {
               supabase.from('notifications').insert([{
                 id: crypto.randomUUID(),
                 user_id: user.id,
-                type: 'like',
+                notification_type: 'like',
+                title: '🔥 New Flame',
                 message: `${likerName} liked your property!`,
-                read: false
+                is_read: false
               }]).then(
                 () => { /* Notification saved successfully */ },
                 () => { /* Notification save failed - non-critical, user still sees toast */ }

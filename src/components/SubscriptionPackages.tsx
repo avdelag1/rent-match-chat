@@ -169,9 +169,10 @@ export function SubscriptionPackages({ isOpen = true, onClose, reason, userRole 
       await supabase.from('notifications').insert([{
         id: crypto.randomUUID(),
         user_id: user.id,
-        type: 'premium_purchase',
+        notification_type: 'premium_purchase',
+        title: 'Premium Package Selected!',
         message: `You selected the ${plan.name} package (${plan.price}). Complete payment to activate your premium benefits!`,
-        read: false
+        is_read: false
       }]).then(
         () => { /* Notification saved successfully */ },
         () => { /* Notification save failed - non-critical */ }

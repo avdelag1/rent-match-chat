@@ -611,7 +611,7 @@ export type Database = {
           longitude: number | null
           name: string | null
           nationality: string | null
-          neighborhood: string | null
+          neighborhood: string | null`n          occupation: string | null
           noise_tolerance: string | null
           personality_traits: string[] | null
           preferred_activities: string[] | null
@@ -1244,7 +1244,7 @@ export type Database = {
           likes: number | null
           listing_type: string | null
           longitude: number | null
-          neighborhood: string | null
+          neighborhood: string | null`n          occupation: string | null
           owner_id: string
           price: number | null
           property_type: string | null
@@ -1348,36 +1348,52 @@ export type Database = {
       }
       matches: {
         Row: {
+          client_id: string | null
           created_at: string | null
           id: string
-          user_1: string
-          user_2: string
+          listing_id: string | null
+          owner_id: string | null
+          status: string | null
+          updated_at: string | null
         }
         Insert: {
+          client_id?: string | null
           created_at?: string | null
           id?: string
-          user_1: string
-          user_2: string
+          listing_id?: string | null
+          owner_id?: string | null
+          status?: string | null
+          updated_at?: string | null
         }
         Update: {
+          client_id?: string | null
           created_at?: string | null
           id?: string
-          user_1?: string
-          user_2?: string
+          listing_id?: string | null
+          owner_id?: string | null
+          status?: string | null
+          updated_at?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "matches_user_1_fkey"
-            columns: ["user_1"]
+            foreignKeyName: "matches_client_id_fkey"
+            columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "matches_user_2_fkey"
-            columns: ["user_2"]
+            foreignKeyName: "matches_owner_id_fkey"
+            columns: ["owner_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
             referencedColumns: ["id"]
           },
         ]
@@ -1980,7 +1996,7 @@ export type Database = {
           languages_spoken: string[] | null
           lifestyle_tags: string[] | null
           nationality: string | null
-          neighborhood: string | null
+          neighborhood: string | null`n          occupation: string | null
           onboarding_completed: boolean | null
           package: string | null
           party_friendly: boolean | null
@@ -5293,3 +5309,4 @@ export const Constants = {
     },
   },
 } as const
+
