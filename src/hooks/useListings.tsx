@@ -107,7 +107,6 @@ export function useListings(excludeSwipedIds: string[] = [], options: { enabled?
           .from('listings')
           .select('*')
           .eq('status', 'active')
-          .eq('is_active', true)
           .order('created_at', { ascending: false }); // Newest first
 
         // CRITICAL: Exclude own listings - user shouldn't see their own listings when browsing
@@ -168,7 +167,7 @@ export function useOwnerListings() {
           .from('listings')
           .select('*')
           .eq('owner_id', user.user.id)
-          .eq('is_active', true)
+          .eq('status', 'active')
           .order('created_at', { ascending: false })
           .limit(100); // Prevent loading too many listings at once
 
@@ -240,11 +239,12 @@ export function useSwipedListings() {
         // Only exclude listings swiped within the last 1 day (reset after next day)
         const oneDayAgo = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString();
 
-        // ACTUALLY FIXED: Use correct column name 'target_listing_id'
+        // Use correct column name 'target_id' with target_type='listing'
         const { data: likes, error } = await supabase
           .from('likes')
-          .select('target_listing_id')
+          .select('target_id')
           .eq('user_id', user.user.id)
+          .eq('target_type', 'listing')
           .gte('created_at', oneDayAgo);
 
         if (error) {
@@ -252,7 +252,7 @@ export function useSwipedListings() {
           return [];
         }
 
-        return likes?.map(l => l.target_listing_id) || [];
+        return likes?.map(l => l.target_id) || [];
       } catch (error) {
         if (import.meta.env.DEV) logger.error('Error in useSwipedListings:', error);
         return [];

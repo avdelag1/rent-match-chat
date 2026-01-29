@@ -66,12 +66,12 @@ function LikedListingInsightsModalComponent({ open, onOpenChange, listing }: Lik
       const { data: user } = await supabase.auth.getUser();
       if (!user.user || !listing) throw new Error('Not authenticated');
 
-      // FIXED: Use correct column name 'target_id'
+      // Use correct column: target_id (not target_listing_id)
       const { error } = await supabase
         .from('likes')
         .delete()
         .eq('user_id', user.user.id)
-        .eq('target_listing_id', listing.id);
+        .eq('target_id', listing.id);
 
       if (error) throw error;
     },

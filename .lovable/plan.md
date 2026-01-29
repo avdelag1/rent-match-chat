@@ -1,183 +1,271 @@
 
-## Goal
-Make filters “always work” (client + owner) and make TopBar/BottomNavigation hide-on-scroll work permanently (never “stops after a while”).
 
-This will be done by removing duplicated filter state, fixing category naming mismatches, ensuring filter preference rows actually exist in Supabase, and making the scroll listener re-bind reliably even if the scroll container changes.
+# 🔥 CRITICAL AUDIT: Likes & Filters System — Complete Breakdown
 
----
+## Executive Summary
 
-## What I found (root causes)
-
-### A) Quick filter “not working” is mostly a data-flow + naming problem
-1) **Two different filter sources exist**:
-- `DashboardLayout` maintains **local** `quickFilters` state and passes it to `TopBar` → `QuickFilterDropdown`.
-- Separately, the app has a **global** Zustand filter store (`src/state/filterStore.ts`) and DB persistence (`useFilterPersistence`), but **DashboardLayout’s quick filters are not using the store**.
-
-Result: filters can appear to “randomly” not apply after navigations / mode switches / restores, because the UI is changing one state while the swipe queries use another.
-
-2) **Category naming mismatch** (critical bug):
-- The unified app type says **motorcycle** (never “moto”) (`src/types/filters.ts`).
-- `ClientFilters.tsx` uses local category id `'moto'` and then does:
-  `setStoreCategory(activeCategory as QuickFilterCategory)`
-  which means it can write invalid category values into the store.
-
-This can break downstream logic and make quick category switching look broken.
-
-3) **Owner category filtering is logically inconsistent with DB fields**
-- Owner quick category switching relies on checking `profile.preferred_listing_type?.includes('moto')` etc.
-- In your DB, `profiles.preferred_listing_type` is **text**, and current data shows it’s mostly `'rent'`, not `'moto'`/`'bicycle'`.
-So even if the UI changes category, the filtering logic can’t match.
-
-### B) Your “client/owner advanced filters” tables exist, but have no rows
-In Test DB right now:
-- `client_filter_preferences`: 0 rows
-- `owner_client_preferences`: 0 rows
-So “filters” can’t persist and matching logic that expects these preferences will behave like “no preferences set”.
-
-`saved_filters` has 2 rows, but that’s mostly “preset storage”, not the detailed per-category preferences you want.
-
-### C) Hide-on-scroll stops working because the listener may be attached to the wrong scroll container over time
-`useScrollDirection` attaches to a target once (with limited retries). If your active scrolling ends up happening in a different container later (nested scroll areas, dialogs, pages with their own scroll regions), the bars won’t respond.
-
-Even though you added baseline fixes, the “stop after a while” symptom strongly suggests **the listener is no longer observing the actual container that is being scrolled**.
+**VERDICT: The Likes system is fundamentally broken.** The application is currently completely non-functional for its core purpose. Multiple database tables referenced in code do not exist, column names are wrong, and there's a complete mismatch between what the code expects and what the database provides.
 
 ---
 
-## Implementation plan (what I will change)
+## 1️⃣ LIKES SYSTEM AUDIT — CATASTROPHIC FAILURES FOUND
 
-### 1) Unify quick filters into ONE source of truth (Zustand filter store)
-**Objective:** Top quick filters always immediately affect the swipe deck queries.
+### A. Database Schema vs Code Mismatch (CRITICAL)
 
-**Changes:**
-- Update `DashboardLayout.tsx` to **stop storing its own `quickFilters` state**.
-- Replace it with values read from `useFilterStore()`:
-  - categories, listingType (client)
-  - clientGender, clientType (owner)
-- `TopBar.tsx` will no longer receive `filters`/`onFiltersChange` from local state.
-  Instead, `TopBar` (and `QuickFilterDropdown`) will dispatch store actions:
-  - `setCategories`, `setListingType`, `setClientGender`, `setClientType`, `reset...`
+| Table | Code Expects | Database Reality |
+|-------|--------------|------------------|
+| `likes` | `target_listing_id` column | ❌ DOES NOT EXIST — only `target_id` exists |
+| `owner_likes` | Full table for owner→client likes | ❌ TABLE DOES NOT EXIST |
+| `swipe_dismissals` | Full table for left swipes | ❌ TABLE DOES NOT EXIST |
+| `dislikes` | Full table for dislike tracking | ❌ TABLE DOES NOT EXIST |
+| `matches` | `client_id`, `owner_id` columns | ❌ Only `user_1`, `user_2` exist |
+| `notifications` | `read` column | ❌ Only `is_read` exists |
+| `listings` | `is_active`, `tulum_location` columns | ❌ DO NOT EXIST |
 
-**Outcome:**
-- When you tap quick filter chips/dropdown, it updates the store immediately.
-- `useFilterPersistence` already listens to the store → it will persist correctly.
+### B. Persistence Status — BROKEN
 
----
+**Current State:**
+- Likes CANNOT be saved because code tries to insert into `target_listing_id` which doesn't exist
+- Owner likes CANNOT be saved because `owner_likes` table doesn't exist
+- Left swipes (dislikes) CANNOT be saved because `swipe_dismissals` table doesn't exist
+- The `likes` table is EMPTY (0 records) — confirms no likes are persisting
 
-### 2) Fix category naming everywhere (eliminate “moto” in UI state)
-**Objective:** No invalid category values get written anywhere.
+**Database Errors Observed (from Postgres logs):**
+```text
+column likes.target_listing_id does not exist
+relation "public.dislikes" does not exist
+relation "public.swipe_dismissals" does not exist
+column matches.client_id does not exist
+column listings.is_active does not exist
+column listings.tulum_location does not exist
+column notifications.read does not exist
+```
 
-**Changes:**
-- `src/pages/ClientFilters.tsx`
-  - Change the local category type from `'moto'` to `'motorcycle'`
-  - Update the categories array and UI labels accordingly
-  - Ensure `setStoreCategory(...)` receives a valid `QuickFilterCategory` every time
-- Check owner-side “category” handling too:
-  - Standardize to: `property | motorcycle | bicycle | services`
-  - Ensure DB mapping is consistently applied only where needed (`services` → `worker` for listings table only)
+### C. Visibility Status — CANNOT FUNCTION
 
-**Outcome:**
-- Quick category switching won’t silently fail due to mismatched strings.
+- **Client "Liked Properties" page**: Queries `likes.target_listing_id` which doesn't exist → empty/error
+- **Owner "Liked Clients" page**: Queries `owner_likes` table which doesn't exist → error thrown
+- Both sides are non-functional
 
----
+### D. Consistency — NOT APPLICABLE
 
-### 3) Make owner-side category filtering actually work (based on real DB fields)
-**Objective:** When owner switches category, it really shows clients interested in that category.
+Since likes cannot be saved, there's nothing to survive page reloads or app restarts.
 
-Given current DB reality:
-- `profiles.preferred_listing_type` is text like `'rent'`, not category-coded.
+### E. Swipe Exclusion Logic — BROKEN
 
-**Implementation approach (robust, minimal schema dependency):**
-- Use `client_filter_preferences` as the source for what categories a client wants (it has booleans like `interested_in_properties`, `interested_in_motorcycles`, `interested_in_bicycles`, etc.).
-- Update `useSmartClientMatching` to filter clients by:
-  - join/lookup client preferences (via a second query or a view) OR
-  - use existing columns in `profiles` if you already store category interests there (we’ll confirm in code and use the reliable one)
+- Code queries `swipe_dismissals` for left-swiped items → table doesn't exist
+- Code queries `dislikes` for excluded items → table doesn't exist
+- Liked items would show `target_listing_id` → column doesn't exist
+- **Result**: Previously swiped cards may reappear, or app crashes
 
-**Note:** If we need a performant single-query approach, we can add a lightweight view (security_invoker) that exposes: client_id + category_interest flags.
+### F. Client vs Owner Symmetry — BROKEN
 
-**Outcome:**
-- Owner category quick filter becomes deterministic and based on real data.
-
----
-
-### 4) Ensure preference rows exist so “filters” persist and apply
-**Objective:** The first time a user uses filters, the DB will have the needed rows.
-
-**Client side:**
-- When user opens/uses client filters, do an **upsert** to `client_filter_preferences` to ensure a row exists for that user.
-
-**Owner side:**
-- When owner opens/uses owner filters, do an **upsert** to `owner_client_preferences`.
-
-This can be done purely in application code (no schema change required).
-
-**Outcome:**
-- Your tables won’t be empty; filtering/matching logic can depend on them.
+- Client likes listing → tries `likes` with `target_listing_id` → FAILS
+- Owner likes client → tries `owner_likes` → TABLE DOESN'T EXIST
+- Match detection → tries `matches.client_id`, `owner_id` → COLUMNS DON'T EXIST
 
 ---
 
-### 5) Make quick filter switching show a correct “empty results” state (instead of “broken”)
-Right now your DB has only 2 active listings, both `category='property'`. So switching to bicycle/motorcycle/services should show 0 results.
+## 2️⃣ FILTERS SYSTEM AUDIT — PARTIAL FUNCTIONALITY
 
-**Changes:**
-- Ensure `TinderentSwipeContainer` reset flow immediately clears cards and shows the “All caught up / No results” state.
-- Add user-friendly message like:
-  “No results in Bicycle yet. Try Property or create your first Bicycle listing.”
+### A. Filter Architecture Status
 
-**Outcome:**
-- Users won’t interpret “no results” as “quick filter not working”.
+**Zustand Store (`filterStore.ts`)**: ✅ Well-structured
+- Centralized state management
+- Version tracking for cache invalidation
+- Category normalization (services → worker)
 
----
+### B. Filters Applied to Queries — PARTIALLY BROKEN
 
-### 6) Make hide-on-scroll permanent (never stops)
-**Objective:** TopBar + BottomNavigation always hide on scroll down and return on scroll up, forever.
+The `useSmartMatching.tsx` hook:
+- ✅ Correctly applies category, listingType, price filters
+- ❌ Uses `listings.is_active` — column doesn't exist
+- ❌ Uses `listings.tulum_location` — column doesn't exist
+- ❌ Queries `dislikes` table — table doesn't exist
+- ❌ Uses `likes.target_listing_id` — column doesn't exist
 
-**Fix strategy:**
-- Change `useScrollDirection` so it:
-  1) Attaches to the current scroll container
-  2) Detects if the container changed later (DOM replaced, route swap, overlay, etc.)
-  3) Automatically detaches + re-attaches
-- Also widen the behavior so it works even when the user is scrolling inside a nested scroll container:
-  - Listen in capture phase on `document` for scroll events, or
-  - Use a small rebind loop that always tracks `#dashboard-scroll-container` if present.
+### C. Composability — APPEARS CORRECT IN CODE
 
-**Outcome:**
-- Even if the scrollable element changes, the bars keep working.
-
----
-
-### 7) Verification checklist (what I’ll test after implementing)
-1) `/client/dashboard`
-   - Tap quick filter categories repeatedly: property → bicycle → motorcycle → services
-   - Confirm deck resets instantly and shows correct empty states
-2) `/owner/dashboard`
-   - Confirm you never see yourself (even if deck restored from cache before auth was ready)
-   - Switch quick filters and confirm it triggers deck reset and correct results
-3) Scroll behavior
-   - Scroll down inside dashboard → bars hide
-   - Scroll up → bars show
-   - Navigate to another dashboard page and back → still works
-   - Scroll inside a nested scroll view (where applicable) → still works
+Filters use AND logic via Supabase query chaining:
+```typescript
+query = query.eq('category', category);
+query = query.eq('listing_type', listingType);
+query = query.gte('price', minPrice);
+```
+However, query fails before filters apply due to non-existent columns.
 
 ---
 
-## Files I expect to change (high level)
-- `src/components/DashboardLayout.tsx` (remove local quickFilters, use store, build combinedFilters from store)
-- `src/components/TopBar.tsx` (wire QuickFilterDropdown to store actions)
-- `src/components/QuickFilterDropdown.tsx` (dispatch store actions; remove reliance on passed `filters` object if we fully centralize)
-- `src/pages/ClientFilters.tsx` (replace `'moto'` with `'motorcycle'`, store-safe category)
-- `src/hooks/useSmartMatching.tsx` (owner-side category filtering logic based on real data)
-- `src/hooks/useScrollDirection.tsx` (auto rebind to scroll container / capture nested scrolls)
-- Potential small updates to filter-related pages/components to ensure preference rows are created (upserts)
+## 3️⃣ ACTUAL DATABASE SCHEMA (Source of Truth)
+
+### `likes` table (EXISTS)
+```text
+id           | uuid
+user_id      | uuid
+target_type  | text ('listing' or 'profile')
+target_id    | uuid
+direction    | text ('left' or 'right')
+created_at   | timestamp
+```
+**Note**: This is a unified swipe table — both likes AND dislikes go here, differentiated by `direction`.
+
+### `swipes` table (EXISTS but EMPTY)
+Same schema as `likes` — likely a duplicate/legacy table.
+
+### `listings` table (EXISTS)
+```text
+id, owner_id, title, description, address, images, video_url,
+property_type, amenities, rules, price, beds, baths, square_footage,
+status, views, likes (integer counter), contacts, created_at,
+category, listing_type, city, neighborhood, latitude, longitude
+```
+**Missing from code expectations**: `is_active`, `tulum_location`, `has_verified_documents`, `furnished`, `pet_friendly`, `mileage`, `brand`, `model`, `year`
+
+### `matches` table (EXISTS)
+```text
+id        | uuid
+user_1    | uuid
+user_2    | uuid
+created_at| timestamp
+```
+**Missing**: `client_id`, `owner_id`, `listing_id`, `free_messaging`, `is_mutual`
 
 ---
 
-## Supabase tables/policies status (what’s already OK, what’s missing)
-- RLS policies exist for `saved_filters`, `client_filter_preferences`, `owner_client_preferences`.
-- The big missing piece is: **the app isn’t writing rows**, so the tables are empty and filtering can’t work “for real”.
+## 4️⃣ ROOT CAUSE ANALYSIS
 
-We’ll fix that in code first (no schema changes required).
+The codebase was developed against an **assumed database schema** that was never actually migrated to production. There are migrations in `supabase/migrations/` folder that reference:
+- `20260120000000` — adds `target_listing_id` to likes
+- Various fixes for `is_user_active()` function
+
+**These migrations were never applied to the live database.**
 
 ---
 
-## If you want me to continue
-Next request should be: “Continue and implement the filter + quick filter fixes and the permanent hide-on-scroll fix.”
+## 5️⃣ COMPREHENSIVE FIX PLAN
+
+### Phase 1: Database Schema Alignment (CRITICAL)
+
+**Option A: Align Code to Existing Schema** (Faster, Lower Risk)
+1. Update all hooks to use existing `likes` table columns:
+   - Change `target_listing_id` → `target_id`
+   - Use `direction = 'left'` for dislikes instead of separate table
+   - Use `direction = 'right'` for likes
+   - Use `target_type = 'listing'` or `target_type = 'profile'`
+
+2. Update match queries:
+   - Change `client_id`/`owner_id` → `user_1`/`user_2`
+   - Implement logic to determine which user is client vs owner
+
+3. Remove references to non-existent columns:
+   - `listings.is_active` → use `listings.status = 'active'`
+   - `listings.tulum_location` → use `listings.neighborhood`
+   - `notifications.read` → use `notifications.is_read`
+
+**Option B: Apply Missing Migrations** (Complete, Higher Risk)
+1. Create and apply migrations for:
+   - Add `owner_likes` table
+   - Add `swipe_dismissals` table
+   - Add `target_listing_id` to likes (or alter to use existing schema)
+   - Add missing columns to listings (`is_active`, `pet_friendly`, etc.)
+   - Add missing columns to matches (`client_id`, `owner_id`, etc.)
+
+### Phase 2: Code Fixes Required
+
+**Files requiring changes (High Priority):**
+
+| File | Issue | Fix Required |
+|------|-------|--------------|
+| `useSwipe.tsx` | Uses `swipe_dismissals`, wrong likes schema | Use `likes` with direction='left'/'right' |
+| `useSwipeWithMatch.tsx` | Uses `swipe_dismissals`, `owner_likes`, `target_listing_id` | Complete rewrite to match schema |
+| `useSmartMatching.tsx` | Uses `dislikes`, `target_listing_id`, `is_active`, `tulum_location` | Use `likes` with direction, fix column names |
+| `useLikedProperties.tsx` | Uses `target_listing_id` | Change to `target_id` |
+| `useListings.tsx` | Uses `target_listing_id` | Change to `target_id` |
+| `useSwipeDismissal.tsx` | Uses `swipe_dismissals` | Use `likes` with direction='left' |
+| `useSwipeUndo.tsx` | Uses `swipe_dismissals` | Use `likes` with direction='left' |
+| `useMessagingQuota.tsx` | Uses `matches.client_id`/`owner_id` | Use `user_1`/`user_2` |
+| `LikedClients.tsx` | Uses `owner_likes` | New approach needed |
+| `TinderentSwipeContainer.tsx` | Uses `undoSuccess`, `resetUndoState` from useSwipeUndo | Add missing return values |
+| `ClientSwipeContainer.tsx` | Uses `undoSuccess`, `resetUndoState` | Add missing return values |
+| `offlineSwipeQueue.ts` | Uses `dislikes`, wrong likes schema | Fix to use `likes` table |
+| `SwipeQueue.ts` | Wrong likes schema | Fix column names |
+
+### Phase 3: Verification Checklist
+
+After fixes, verify:
+- [ ] Swipe right → record created in `likes` with `direction='right'`
+- [ ] Swipe left → record created in `likes` with `direction='left'`
+- [ ] Liked items appear in "Liked Properties/Clients" page
+- [ ] Swiped items don't reappear in deck
+- [ ] Page reload preserves liked items
+- [ ] Filters narrow results (not just UI state)
+
+---
+
+## 6️⃣ TECHNICAL IMPLEMENTATION DETAILS
+
+### Canonical Likes Pattern (Using Existing Schema)
+
+```typescript
+// RIGHT SWIPE (Like a listing)
+await supabase.from('likes').upsert({
+  user_id: userId,
+  target_id: listingId,
+  target_type: 'listing',
+  direction: 'right'
+}, { onConflict: 'user_id,target_id,target_type' });
+
+// LEFT SWIPE (Dislike a listing)
+await supabase.from('likes').upsert({
+  user_id: userId,
+  target_id: listingId,
+  target_type: 'listing',
+  direction: 'left'
+}, { onConflict: 'user_id,target_id,target_type' });
+
+// FETCH LIKED LISTINGS
+const { data } = await supabase
+  .from('likes')
+  .select('target_id')
+  .eq('user_id', userId)
+  .eq('target_type', 'listing')
+  .eq('direction', 'right');
+```
+
+### Owner Likes Pattern (Using Existing Schema)
+
+```typescript
+// OWNER RIGHT SWIPE (Like a client profile)
+await supabase.from('likes').upsert({
+  user_id: ownerId,
+  target_id: clientId,
+  target_type: 'profile',
+  direction: 'right'
+}, { onConflict: 'user_id,target_id,target_type' });
+
+// FETCH OWNER'S LIKED CLIENTS
+const { data } = await supabase
+  .from('likes')
+  .select('target_id')
+  .eq('user_id', ownerId)
+  .eq('target_type', 'profile')
+  .eq('direction', 'right');
+```
+
+---
+
+## 7️⃣ SUMMARY
+
+| System | Status | Blocking Issues |
+|--------|--------|-----------------|
+| **Likes Persistence** | ❌ BROKEN | Wrong column names, missing tables |
+| **Likes Visibility** | ❌ BROKEN | Queries fail due to schema mismatch |
+| **Swipe Exclusion** | ❌ BROKEN | Missing dismissal tables |
+| **Client/Owner Symmetry** | ❌ BROKEN | owner_likes table doesn't exist |
+| **Filters Composability** | ⚠️ PARTIAL | Logic correct but queries fail |
+| **Filter Persistence** | ✅ WORKS | saved_filters table exists |
+
+**Estimated fix scope**: 15-20 files require changes
+**Recommended approach**: Align code to existing schema (Option A)
+**Risk if unfixed**: Application is completely non-functional for its core purpose
+

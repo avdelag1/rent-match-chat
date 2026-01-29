@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
@@ -13,18 +13,15 @@ interface DismissalResult {
 }
 
 /**
- * Hook to manage swipe dismissals (temporary and permanent)
- *
- * Logic:
- * - First 2 dislikes: Temporarily dismiss for 20 days
- * - 3rd dislike: Permanently dismiss
- * - After 20 days, temporary dismissals expire and item can appear again
+ * Hook to manage swipe dismissals using the unified likes table
+ * 
+ * Uses direction='left' in likes table for dismissals
  */
 export function useSwipeDismissal(targetType: DismissalTargetType) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  // Query to get active dismissals (non-expired temporary + permanent)
+  // Query to get active dismissals (left swipes)
   const {
     data: dismissedIds = [],
     isLoading,
@@ -35,12 +32,15 @@ export function useSwipeDismissal(targetType: DismissalTargetType) {
       if (!user?.id) return [];
 
       try {
-        // Query swipe_dismissals table for dismissed items
+        // Query likes table for left swipes (dismissals)
+        const dbTargetType = targetType === 'client' ? 'profile' : 'listing';
+        
         const { data, error } = await supabase
-          .from('swipe_dismissals')
+          .from('likes')
           .select('target_id')
           .eq('user_id', user.id)
-          .eq('target_type', targetType);
+          .eq('target_type', dbTargetType)
+          .eq('direction', 'left');
 
         if (error) {
           logger.error('[useSwipeDismissal] Error fetching dismissals:', error);
@@ -68,15 +68,18 @@ export function useSwipeDismissal(targetType: DismissalTargetType) {
         throw new Error('User not authenticated');
       }
 
-      // Insert into swipe_dismissals table
+      const dbTargetType = targetType === 'client' ? 'profile' : 'listing';
+
+      // Insert/update in likes table with direction='left'
       const { error } = await supabase
-        .from('swipe_dismissals')
+        .from('likes')
         .upsert({
           user_id: user.id,
           target_id: targetId,
-          target_type: targetType,
+          target_type: dbTargetType,
+          direction: 'left'
         }, {
-          onConflict: 'user_id,target_id,target_type',
+          onConflict: 'user_id,target_id',
         });
 
       if (error) {
@@ -84,7 +87,7 @@ export function useSwipeDismissal(targetType: DismissalTargetType) {
         throw error;
       }
 
-      // Return a simple result (RPC doesn't exist, so we simplify)
+      // Return a simple result
       return { is_permanent: false, dismiss_count: 1 };
     },
     onSuccess: (result, targetId) => {
@@ -92,22 +95,6 @@ export function useSwipeDismissal(targetType: DismissalTargetType) {
       queryClient.invalidateQueries({
         queryKey: ['swipe-dismissals', user?.id, targetType]
       });
-
-      // Show appropriate toast
-      if (result.is_permanent) {
-        toast({
-          title: 'Permanently hidden',
-          description: `This ${targetType} won't appear again. You've dismissed it 3 times.`,
-          variant: 'default',
-        });
-      } else {
-        const remaining = 3 - result.dismiss_count;
-        toast({
-          title: 'Temporarily hidden',
-          description: `This ${targetType} is hidden for 20 days. ${remaining} more ${remaining === 1 ? 'dismiss' : 'dismisses'} to hide permanently.`,
-          variant: 'default',
-        });
-      }
 
       logger.info(`[useSwipeDismissal] Dismissed ${targetType} ${targetId}:`, result);
     },

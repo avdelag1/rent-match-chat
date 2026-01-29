@@ -2,9 +2,10 @@
  * Offline Swipe Queue - Queues swipes when offline and syncs when back online
  *
  * ARCHITECTURE:
- * - Right swipes on listings -> likes table (target_listing_id only, no direction)
- * - Right swipes on profiles -> owner_likes table (owner_id, client_id)
- * - Left swipes -> dislikes table (target_id, target_type)
+ * - All swipes go to the unified `likes` table with direction column
+ * - direction='right' for likes
+ * - direction='left' for dislikes
+ * - target_type='listing' or 'profile'
  *
  * PERFORMANCE BENEFIT:
  * - Users can continue swiping even when offline
@@ -102,9 +103,7 @@ function markSwipeFailed(id: string): void {
 
 /**
  * Sync a single queued swipe to the server
- * Uses the correct architecture:
- * - All swipes go to likes table with direction column
- * - Right swipes on profiles go to owner_likes table
+ * Uses the unified likes table with direction column
  */
 async function syncSwipe(swipe: QueuedSwipe): Promise<boolean> {
   try {
@@ -114,92 +113,26 @@ async function syncSwipe(swipe: QueuedSwipe): Promise<boolean> {
       return false;
     }
 
-    // Handle LEFT swipes (dislikes) -> dislikes table
-    if (swipe.direction === 'left') {
-      const { error } = await supabase
-        .from('dislikes')
-        .upsert({
-          user_id: user.id,
-          target_id: swipe.targetId,
-          target_type: swipe.targetType === 'listing' ? 'listing' : 'profile'
-        }, {
-          onConflict: 'user_id,target_id,target_type',
-          ignoreDuplicates: false,
-        });
+    // All swipes go to the unified likes table
+    const { error } = await supabase
+      .from('likes')
+      .upsert({
+        user_id: user.id,
+        target_id: swipe.targetId,
+        target_type: swipe.targetType,
+        direction: swipe.direction
+      }, {
+        onConflict: 'user_id,target_id',
+        ignoreDuplicates: false,
+      });
 
-      if (error) {
-        logger.error('[OfflineQueue] Dislike sync failed:', swipe.targetId, error);
-        return false;
-      }
-
-      logger.info('[OfflineQueue] Synced dislike:', swipe.targetId);
-      return true;
+    if (error) {
+      logger.error('[OfflineQueue] Sync failed:', swipe.targetId, error);
+      return false;
     }
 
-    // Handle RIGHT swipes (likes)
-    if (swipe.targetType === 'listing') {
-      // Client liking a listing -> likes table with target_listing_id (no direction)
-      const { error } = await supabase
-        .from('likes')
-        .upsert({
-          user_id: user.id,
-          target_listing_id: swipe.targetId
-        }, {
-          onConflict: 'user_id,target_listing_id',
-          ignoreDuplicates: false,
-        });
-
-      if (error) {
-        logger.error('[OfflineQueue] Like sync failed:', swipe.targetId, error);
-        return false;
-      }
-
-      logger.info('[OfflineQueue] Synced listing like:', swipe.targetId);
-      return true;
-    } else if (swipe.targetType === 'profile') {
-      // Owner liking a client -> owner_likes table
-      // CRITICAL FIX: Handle partial unique index properly
-
-      // Check if like already exists
-      const { data: existingLike } = await supabase
-        .from('owner_likes')
-        .select('id')
-        .eq('owner_id', user.id)
-        .eq('client_id', swipe.targetId)
-        .is('listing_id', null)
-        .maybeSingle();
-
-      let error;
-      if (existingLike) {
-        // Already exists, update timestamp
-        const result = await supabase
-          .from('owner_likes')
-          .update({ created_at: new Date().toISOString() })
-          .eq('id', existingLike.id);
-        error = result.error;
-      } else {
-        // Insert new like
-        const result = await supabase
-          .from('owner_likes')
-          .insert({
-            owner_id: user.id,
-            client_id: swipe.targetId,
-            listing_id: null,
-            is_super_like: false
-          });
-        error = result.error;
-      }
-
-      if (error) {
-        logger.error('[OfflineQueue] Owner like sync failed:', swipe.targetId, error);
-        return false;
-      }
-
-      logger.info('[OfflineQueue] Synced profile like:', swipe.targetId);
-      return true;
-    }
-
-    return false;
+    logger.info('[OfflineQueue] Synced swipe:', swipe.targetId, swipe.direction);
+    return true;
   } catch (error) {
     logger.error('[OfflineQueue] Sync error:', error);
     return false;
