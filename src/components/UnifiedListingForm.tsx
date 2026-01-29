@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/hooks/use-toast';
-import { Upload, X, FileCheck } from 'lucide-react';
+import { Upload, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { validateNoContactInfo } from '@/utils/contactInfoValidation';
 import { CategorySelector, Category, Mode } from './CategorySelector';
@@ -17,6 +17,7 @@ import { BicycleListingForm, BicycleFormData } from './BicycleListingForm';
 import { PropertyListingForm } from './PropertyListingForm';
 import { WorkerListingForm, WorkerFormData } from './WorkerListingForm';
 import { validateImageFile } from '@/utils/fileValidation';
+import { uploadPhotoBatch } from '@/utils/photoUpload';
 
 interface EditingListing {
   id?: string;
@@ -38,8 +39,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
   const [selectedCategory, setSelectedCategory] = useState<Category>('property');
   const [selectedMode, setSelectedMode] = useState<Mode>('rent');
   const [images, setImages] = useState<string[]>([]);
-  // Note: location is only used for non-property listings (yachts, motorcycles, etc.)
-  // Properties use country/city/neighborhood instead of exact GPS coordinates for privacy
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [location, setLocation] = useState<{ lat?: number; lng?: number }>({});
   const [formData, setFormData] = useState<Record<string, unknown>>({});
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -50,36 +50,34 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
     if (!isOpen) return;
     
     if (editingProperty?.id) {
-      // Editing existing listing - load all data
       setEditingId(editingProperty.id);
       setSelectedCategory(editingProperty.category || 'property');
       setSelectedMode(editingProperty.mode || 'rent');
       setImages(editingProperty.images || []);
+      setImageFiles([]);
       setFormData(editingProperty);
       setLocation({
         lat: editingProperty.latitude,
         lng: editingProperty.longitude
       });
     } else if (editingProperty?.category) {
-      // New listing with pre-selected category (from CategoryDialog or AI Assistant)
       setEditingId(null);
       setSelectedCategory(editingProperty.category);
       setSelectedMode(editingProperty.mode || 'rent');
-      // Load images from AI assistant if present
       setImages(editingProperty.images || []);
-      // Load all form data from AI assistant or just mode
+      setImageFiles([]);
       setFormData(editingProperty.images ? editingProperty : { mode: editingProperty.mode || 'rent' });
       setLocation({
         lat: editingProperty.latitude,
         lng: editingProperty.longitude
       });
     } else {
-      // Completely new listing - reset everything
       setEditingId(null);
       setSelectedCategory('property');
       setSelectedMode('rent');
       setImages([]);
-      setFormData({ mode: 'rent' }); // Include default mode in formData!
+      setImageFiles([]);
+      setFormData({ mode: 'rent' });
       setLocation({});
     }
   }, [editingProperty, isOpen]);
@@ -89,32 +87,34 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) throw new Error('Not authenticated');
 
-      // All categories only need 1 photo minimum
-      if (images.length < 1) {
+      if (images.length + imageFiles.length < 1) {
         throw new Error('At least 1 photo required');
       }
 
-      // Map form data to database columns based on category
+      let uploadedImageUrls: string[] = [];
+      if (imageFiles.length > 0) {
+        uploadedImageUrls = await uploadPhotoBatch(user.user.id, imageFiles, 'listing-images');
+      }
+
+      const allImages = [...images, ...uploadedImageUrls];
+
       const listingData: Record<string, unknown> = {
         owner_id: user.user.id,
         category: selectedCategory,
         mode: selectedMode,
         status: 'active' as const,
         is_active: true,
-        images: images,
+        images: allImages,
         title: formData.title || '',
         price: formData.price,
         rental_rates: formData.rental_rates,
         city: formData.city,
-        country: formData.country, // Added: For properties, owners specify country
+        country: formData.country,
         neighborhood: formData.neighborhood,
-        // For properties: use NULL for latitude/longitude (privacy-focused)
-        // For other categories: use exact coordinates
         latitude: selectedCategory === 'property' ? null : location.lat,
         longitude: selectedCategory === 'property' ? null : location.lng,
       };
 
-      // Add category-specific fields
       if (selectedCategory === 'motorcycle') {
         Object.assign(listingData, {
           motorcycle_type: formData.motorcycle_type,
@@ -195,7 +195,6 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
       }
 
       if (editingId) {
-        // Optimistically update the cache
         queryClient.setQueryData(['owner-listings'], (oldData: unknown[] | undefined) => {
           if (!oldData) return oldData;
           return oldData.map((item: unknown) => {
@@ -204,7 +203,6 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
           });
         });
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data, error } = await supabase
           .from('listings')
           .update(listingData as any)
@@ -215,7 +213,6 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
         if (error) throw error;
         return data;
       } else {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data, error } = await supabase
           .from('listings')
           .insert(listingData as any)
@@ -224,7 +221,6 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
 
         if (error) throw error;
         
-        // Optimistically add to cache
         queryClient.setQueryData(['owner-listings'], (oldData: unknown[] | undefined) => {
           return oldData ? [data, ...oldData] : [data];
         });
@@ -238,13 +234,11 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
         description: "Your changes are now visible.",
         duration: 2000,
       });
-      // Still invalidate to ensure data consistency
       queryClient.invalidateQueries({ queryKey: ['owner-listings'] });
       queryClient.invalidateQueries({ queryKey: ['listings'] });
       handleClose();
     },
     onError: (error: Error) => {
-      // Revert optimistic update on error
       queryClient.invalidateQueries({ queryKey: ['owner-listings'] });
       queryClient.invalidateQueries({ queryKey: ['listings'] });
       toast({
@@ -257,6 +251,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
 
   const handleClose = () => {
     setImages([]);
+    setImageFiles([]);
     setFormData({});
     setSelectedCategory('property');
     setSelectedMode('rent');
@@ -264,41 +259,10 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
     onClose();
   };
 
-  const uploadImageToStorage = async (file: File, userId: string): Promise<string> => {
-    const fileExt = file.name.split('.').pop() || 'jpg';
-    const uniqueId = crypto.randomUUID();
-    const fileName = `${userId}/${uniqueId}.${fileExt}`;
-
-    const { error } = await supabase.storage
-      .from('listing-images')
-      .upload(fileName, file);
-
-    if (error) throw error;
-
-    const { data: { publicUrl } } = supabase.storage
-      .from('listing-images')
-      .getPublicUrl(fileName);
-
-    return publicUrl;
-  };
-
-  const handleImageAdd = async () => {
-    if (images.length >= 30) {
-      toast({
-        title: "Maximum Photos Reached",
-        description: "You can only upload up to 30 photos per listing.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    const { data: user } = await supabase.auth.getUser();
-    if (!user.user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please log in to upload images.",
-        variant: "destructive"
-      });
+  const handleImageAdd = () => {
+    const totalImages = images.length + imageFiles.length;
+    if (totalImages >= 30) {
+      toast({ title: "Maximum Photos Reached", description: "You can upload up to 30 photos.", variant: "destructive" });
       return;
     }
 
@@ -307,90 +271,51 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
     input.accept = 'image/*';
     input.multiple = true;
 
-    input.onchange = async (e) => {
+    input.onchange = (e) => {
       const files = Array.from((e.target as HTMLInputElement).files || []);
-      
       if (files.length === 0) return;
 
-      if (files.length + images.length > 30) {
-        toast({
-          title: "Too Many Photos",
-          description: `You can only have 30 photos total. You can add ${30 - images.length} more.`,
-          variant: "destructive"
-        });
-        return;
+      const availableSlots = 30 - totalImages;
+      if (files.length > availableSlots) {
+        toast({ title: "Too Many Photos", description: `You can only add ${availableSlots} more.`, variant: "destructive" });
+        files.splice(availableSlots);
       }
 
-      toast({
-        title: "Uploading Photos...",
-        description: `Uploading ${files.length} photo${files.length > 1 ? 's' : ''}`,
-      });
-
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-
-        // Use centralized validation
+      const validatedFiles = files.filter(file => {
         const validation = validateImageFile(file);
         if (!validation.isValid) {
-          toast({
-            title: "Invalid File",
-            description: `${file.name}: ${validation.error}`,
-            variant: "destructive"
-          });
-          continue;
+          toast({ title: "Invalid File", description: `${file.name}: ${validation.error}`, variant: "destructive" });
         }
+        return validation.isValid;
+      });
 
-        try {
-          const imageUrl = await uploadImageToStorage(file, user.user.id);
-          setImages(prev => [...prev, imageUrl]);
-          
-          toast({
-            title: `✓ ${i + 1}/${files.length}`,
-            description: `${file.name} uploaded`,
-          });
-        } catch (error: unknown) {
-          const err = error as { message?: string };
-          toast({
-            title: "Upload Failed",
-            description: `${file.name}: ${err?.message || 'Unknown error'}`,
-            variant: "destructive"
-          });
-        }
-      }
+      setImageFiles(prev => [...prev, ...validatedFiles]);
     };
 
     input.click();
   };
 
-  const handleImageRemove = (index: number) => {
-    setImages(prev => prev.filter((_, i) => i !== index));
+  const handleImageRemove = (index: number, type: 'existing' | 'new') => {
+    if (type === 'existing') {
+      setImages(prev => prev.filter((_, i) => i !== index));
+    } else {
+      setImageFiles(prev => prev.filter((_, i) => i !== index));
+    }
   };
 
   const handleSubmit = () => {
-    // All categories only need 1 photo minimum
-    if (images.length < 1) {
-      toast({
-        title: "Photo Required",
-        description: "Please upload at least 1 photo to publish your listing.",
-        variant: "destructive"
-      });
+    if (images.length + imageFiles.length < 1) {
+      toast({ title: "Photo Required", description: "Please upload at least 1 photo.", variant: "destructive" });
       return;
     }
     
-    // Validate title for contact info
     if (formData.title && typeof formData.title === 'string') {
       const titleError = validateNoContactInfo(formData.title as string);
       if (titleError) {
-        toast({
-          title: "Invalid Title",
-          description: titleError,
-          variant: "destructive"
-        });
+        toast({ title: "Invalid Title", description: titleError, variant: "destructive" });
         return;
       }
     }
-    
-    // All other fields are optional - owners can upload any listing with just 1 photo
 
     createListingMutation.mutate();
   };
@@ -408,121 +333,84 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
 
         <ScrollArea className="flex-1 min-h-0">
           <div className="px-4 sm:px-6 py-4 space-y-4 sm:space-y-6">
-            {/* Category & Mode Selector */}
             <CategorySelector
-            selectedCategory={selectedCategory}
-            selectedMode={selectedMode}
-            onCategoryChange={setSelectedCategory}
-            onModeChange={setSelectedMode}
-          />
-
-          {/* Category-Specific Forms */}
-          {selectedCategory === 'property' && (
-            <PropertyListingForm 
-              onDataChange={(data) => setFormData({ ...formData, ...data })}
-              initialData={formData}
+              selectedCategory={selectedCategory}
+              selectedMode={selectedMode}
+              onCategoryChange={setSelectedCategory}
+              onModeChange={setSelectedMode}
             />
-          )}
 
-          {selectedCategory === 'motorcycle' && (
-            <MotorcycleListingForm 
-              onDataChange={(data) => setFormData({ ...formData, ...data })}
-              initialData={formData as unknown as MotorcycleFormData}
-            />
-          )}
+            {selectedCategory === 'property' && <PropertyListingForm onDataChange={(data) => setFormData({ ...formData, ...data })} initialData={formData} />}
+            {selectedCategory === 'motorcycle' && <MotorcycleListingForm onDataChange={(data) => setFormData({ ...formData, ...data })} initialData={formData as unknown as MotorcycleFormData} />}
+            {selectedCategory === 'bicycle' && <BicycleListingForm onDataChange={(data) => setFormData({ ...formData, ...data })} initialData={formData as unknown as BicycleFormData} />}
+            {selectedCategory === 'worker' && <WorkerListingForm onDataChange={(data) => setFormData({ ...formData, ...data })} initialData={formData as unknown as WorkerFormData} />}
 
-          {selectedCategory === 'bicycle' && (
-            <BicycleListingForm
-              onDataChange={(data) => setFormData({ ...formData, ...data })}
-              initialData={formData as unknown as BicycleFormData}
-            />
-          )}
-
-          {selectedCategory === 'worker' && (
-            <WorkerListingForm
-              onDataChange={(data) => setFormData({ ...formData, ...data })}
-              initialData={formData as unknown as WorkerFormData}
-            />
-          )}
-
-          {/* Photos */}
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                Photos * (min 1, max 30)
-                {images.length < 1 && (
-                  <span className="text-destructive text-sm font-normal ml-2">
-                    - Need at least 1 photo
-                  </span>
-                )}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                {images.map((img, index) => (
-                  <div key={`img-${img}-${index}`} className="relative aspect-square">
-                    <img src={img} alt={`Upload ${index + 1}`} className="w-full h-full object-cover rounded-lg" />
-                    <Button
-                      variant="destructive"
-                      size="icon"
-                      className="absolute top-2 right-2 h-6 w-6"
-                      onClick={() => handleImageRemove(index)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-              
-              {images.length < 30 && (
-                <Button onClick={handleImageAdd} variant="outline" className="w-full">
-                  <Upload className="mr-2 h-4 w-4" />
-                  Add Photos ({images.length}/30)
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Legal Documents Section */}
-          <Card className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-blue-400/30">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <CardTitle className="text-base">Legal Documents</CardTitle>
-                  {selectedCategory !== 'bicycle' && (
-                    <Badge variant="outline" className="bg-blue-500/20 border-blue-400 text-blue-300">
-                      Get Verified Badge
-                    </Badge>
+            <Card>
+              <CardHeader>
+                <CardTitle>
+                  Photos * (min 1, max 30)
+                  {(images.length + imageFiles.length) < 1 && (
+                    <span className="text-destructive text-sm font-normal ml-2">- Need at least 1 photo</span>
                   )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                  {images.map((img, index) => (
+                    <div key={`existing-${index}`} className="relative aspect-square">
+                      <img src={img} alt={`Existing ${index + 1}`} className="w-full h-full object-cover rounded-lg" />
+                      <Button variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => handleImageRemove(index, 'existing')}>
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  {imageFiles.map((file, index) => (
+                    <div key={`new-${index}`} className="relative aspect-square">
+                      <img src={URL.createObjectURL(file)} alt={`New ${index + 1}`} className="w-full h-full object-cover rounded-lg" />
+                      <Button variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => handleImageRemove(index, 'new')}>
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
                 </div>
-              </div>
-              <p className="text-sm text-muted-foreground mt-2">
-                {selectedCategory === 'bicycle' 
-                  ? '📋 Optional: Upload purchase receipt to earn a blue verification checkmark'
-                  : '🛡️ Upload ownership documents to earn a blue verification star and build trust with clients'
-                }
-              </p>
-            </CardHeader>
-            <CardContent>
-              <p className="text-xs text-muted-foreground mb-3">
-                Note: You can upload documents now or after creating the listing.
-              </p>
-            </CardContent>
-          </Card>
+                
+                {(images.length + imageFiles.length) < 30 && (
+                  <Button onClick={handleImageAdd} variant="outline" className="w-full">
+                    <Upload className="mr-2 h-4 w-4" />
+                    Add Photos ({images.length + imageFiles.length}/30)
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-blue-400/30">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <CardTitle className="text-base">Legal Documents</CardTitle>
+                    {selectedCategory !== 'bicycle' && (
+                      <Badge variant="outline" className="bg-blue-500/20 border-blue-400 text-blue-300">Get Verified Badge</Badge>
+                    )}
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground mt-2">
+                  {selectedCategory === 'bicycle' 
+                    ? '📋 Optional: Upload purchase receipt to earn a blue verification checkmark'
+                    : '🛡️ Upload ownership documents to earn a blue verification star and build trust with clients'
+                  }
+                </p>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs text-muted-foreground mb-3">Note: You can upload documents now or after creating the listing.</p>
+              </CardContent>
+            </Card>
 
           </div>
         </ScrollArea>
 
-        {/* Submit */}
         <div className="shrink-0 flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 border-t bg-background">
-          <Button variant="outline" onClick={handleClose} className="h-10 sm:h-11 text-sm order-2 sm:order-1">
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={createListingMutation.isPending}
-            className="h-10 sm:h-11 text-sm order-1 sm:order-2 bg-red-500 hover:bg-red-600 text-white"
-          >
+          <Button variant="outline" onClick={handleClose} className="h-10 sm:h-11 text-sm order-2 sm:order-1">Cancel</Button>
+          <Button onClick={handleSubmit} disabled={createListingMutation.isPending} className="h-10 sm:h-11 text-sm order-1 sm:order-2 bg-red-500 hover:bg-red-600 text-white">
             {createListingMutation.isPending ? 'Saving...' : (editingId ? 'Save Listing' : 'Save Listing')}
           </Button>
         </div>
