@@ -277,12 +277,14 @@ class SwipeQueueProcessor {
             .maybeSingle();
 
           if (ownerLike) {
-            // Create match using user_1 and user_2 (actual schema)
+            // Create match using client_id and owner_id (actual schema)
             await supabase.from('matches').upsert({
-              user_1: userId,
-              user_2: listing.owner_id,
+              client_id: userId,
+              owner_id: listing.owner_id,
+              listing_id: swipe.targetId,
+              status: 'active',
             }, {
-              onConflict: 'user_1,user_2',
+              onConflict: 'client_id,owner_id,listing_id',
               ignoreDuplicates: true,
             });
 
