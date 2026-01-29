@@ -3,7 +3,8 @@ import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Shield, Sparkles, Users } from 'lucide-react';
 import { AuthDialog } from './AuthDialog';
 import { SwipessLogoWithOrb } from './SwipessLogoWithOrb';
-import StarFieldBackground from './StarFieldBackground';
+// StarFieldBackground temporarily removed due to setup error
+// import StarFieldBackground from './StarFieldBackground';
 
 const SWIPE_THRESHOLD = 120;
 
@@ -59,7 +60,8 @@ function LegendaryLandingPage() {
       className="min-h-screen min-h-dvh flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 relative overflow-hidden safe-area-p"
     >
       {/* Live Star Timelapse Background */}
-      <StarFieldBackground />
+      {/* StarFieldBackground temporarily removed */}
+      
       {/* Main Content */}
       <div className="relative z-20 text-center space-y-4 sm:space-y-6 max-w-2xl w-full px-2 sm:px-4">
         {/* Swipable Swipess Logo - Only the logo moves */}
