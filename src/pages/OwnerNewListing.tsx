@@ -1,52 +1,54 @@
-/** SPEED OF LIGHT: DashboardLayout is now rendered at route level */
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { UnifiedListingForm } from "@/components/UnifiedListingForm";
 import { useEffect, useState } from "react";
+import { CategorySelectionDialog } from "@/components/CategorySelectionDialog";
 
 const OwnerNewListing = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [isFormOpen, setIsFormOpen] = useState(true);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isCategorySelectorOpen, setIsCategorySelectorOpen] = useState(false);
   const [initialData, setInitialData] = useState<any>(null);
 
   useEffect(() => {
     const categoryParam = searchParams.get('category');
-    const modeParam = searchParams.get('mode');
-    
-    const category = categoryParam && ['property', 'motorcycle', 'bicycle', 'worker'].includes(categoryParam)
-      ? categoryParam
-      : 'property';
-    
-    const mode = modeParam && ['rent', 'sale', 'both'].includes(modeParam)
-      ? modeParam
-      : 'rent';
-    
-    setInitialData({ category, mode });
+    if (categoryParam) {
+      setInitialData({ category: categoryParam, mode: 'rent' });
+      setIsFormOpen(true);
+    } else {
+      setIsCategorySelectorOpen(true);
+    }
   }, [searchParams]);
 
-  const handleClose = () => {
-    setIsFormOpen(false);
-    // Navigate back to properties page
-    navigate('/owner/properties');
+  const handleCategorySelect = (category: string) => {
+    setIsCategorySelectorOpen(false);
+    setSearchParams({ category: category });
   };
 
-  if (!initialData) {
-    return (
-      <>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        </div>
-      </>
-    );
+  const handleCloseForm = () => {
+    setIsFormOpen(false);
+    navigate('/owner/properties');
+  };
+  
+  const handleCloseCategorySelector = () => {
+      setIsCategorySelectorOpen(false);
+      navigate('/owner/dashboard');
   }
 
   return (
     <>
-      <UnifiedListingForm
-        isOpen={isFormOpen}
-        onClose={handleClose}
-        editingProperty={initialData}
+      <CategorySelectionDialog
+        isOpen={isCategorySelectorOpen}
+        onClose={handleCloseCategorySelector}
+        onSelectCategory={handleCategorySelect}
       />
+      {initialData && (
+        <UnifiedListingForm
+          isOpen={isFormOpen}
+          onClose={handleCloseForm}
+          editingProperty={initialData}
+        />
+      )}
     </>
   );
 };

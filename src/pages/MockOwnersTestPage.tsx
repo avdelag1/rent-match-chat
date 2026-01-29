@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { 
   MapPin, DollarSign, Star, Heart, MessageCircle, 
   ChevronLeft, ChevronRight, Verified, Clock,
-  Motorcycle, Bike, Wrench, Briefcase
+  Bike, Wrench, Briefcase
 } from 'lucide-react';
 import { mockOwnerProfiles, MockListing } from '@/data/mockOwnerProfiles';
 import { triggerHaptic } from '@/utils/haptics';
@@ -13,7 +13,7 @@ const PLACEHOLDER_BASE = 'https://images.unsplash.com';
 
 function ListingBadge({ type }: { type: MockListing['type'] }) {
   const config = {
-    motorcycle: { icon: Motorcycle, color: 'text-orange-400', bg: 'bg-orange-500/20', label: 'Motocicleta' },
+    motorcycle: { icon: Bike, color: 'text-orange-400', bg: 'bg-orange-500/20', label: 'Motocicleta' },
     bicycle: { icon: Bike, color: 'text-green-400', bg: 'bg-green-500/20', label: 'Bicicleta' },
     worker: { icon: Wrench, color: 'text-blue-400', bg: 'bg-blue-500/20', label: 'Servicio' },
     job: { icon: Briefcase, color: 'text-purple-400', bg: 'bg-purple-500/20', label: 'Empleo' },
@@ -252,7 +252,7 @@ export default function MockOwnersTestPage() {
                   <span key={key} className="text-xs bg-white/5 px-2 py-1 rounded text-white/60">
                     {key}: {value}
                   </span>
-                ))}
+                ))}\
               </div>
             </div>
           </motion.div>
@@ -265,7 +265,7 @@ export default function MockOwnersTestPage() {
               <span key={tag} className="text-xs bg-white/5 px-2 py-1 rounded text-white/50">
                 #{tag}
               </span>
-            ))}
+            ))}\
           </div>
         </div>
       </div>
