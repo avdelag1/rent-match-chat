@@ -129,7 +129,7 @@ export function useNotificationSystem() {
     if (!user?.id) return;
 
     // Subscribe to notifications table - this receives all notification types
-    // Database triggers insert notifications for: likes, owner_likes, messages, matches
+    // Database triggers insert notifications for: likes, messages, matches
     const notificationsChannel = supabase
       .channel('user-notifications-realtime')
       .on(

@@ -31,7 +31,6 @@ export function useClientProfiles(excludeSwipedIds: string[] = [], options: { en
 
       try {
         // CRITICAL: Query profiles_public directly to ensure all profiles exist in auth system
-        // The client_profiles table may have orphan records that cause FK violations in owner_likes
         // IMPORTANT: Filter by role='client' to only show clients, not owners
         // FIXED: Add is_active filter to exclude suspended/blocked/inactive profiles
         const { data: profiles, error } = await supabase
