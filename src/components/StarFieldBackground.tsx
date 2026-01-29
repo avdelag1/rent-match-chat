@@ -3,7 +3,7 @@ import { memo, useMemo } from 'react';
 /**
  * Live Star Timelapse Background
  * 
- * Deep black sky with bright, glowing, alive stars
+ * Creates an animated star field effect
  */
 
 interface Star {
@@ -14,7 +14,6 @@ interface Star {
   duration: number;
   delay: number;
   opacity: number;
-  glow: string;
 }
 
 function generateStars(count: number): Star[] {
@@ -22,32 +21,43 @@ function generateStars(count: number): Star[] {
     id: i,
     x: Math.random() * 100,
     y: Math.random() * 100,
-    size: Math.random() * 2.5 + 1.5,
-    duration: Math.random() * 1.5 + 0.8,
-    delay: Math.random() * 2,
-    opacity: Math.random() * 0.5 + 0.5,
-    glow: Math.random() > 0.7 ? 'star-glow-strong' : 'star-glow',
+    size: Math.random() * 2 + 0.5,
+    duration: Math.random() * 3 + 2,
+    delay: Math.random() * 5,
+    opacity: Math.random() * 0.5 + 0.3,
   }));
 }
 
 function StarFieldBackground() {
-  const stars = useMemo(() => generateStars(200), []);
+  // Generate stars once with useMemo
+  const stars = useMemo(() => generateStars(100), []);
+  const stars2 = useMemo(() => generateStars(50), []);
+  const stars3 = useMemo(() => generateStars(30), []);
 
   return (
     <div
       className="fixed inset-0 w-full h-full overflow-hidden pointer-events-none"
-      style={{ backgroundColor: '#000005' }}
+      style={{
+        background: 'linear-gradient(to bottom, #0a0a1a 0%, #0d1b2a 50%, #1b263b 100%)',
+      }}
     >
-      {/* Nebula glow effects */}
-      <div className="nebula nebula-1" />
-      <div className="nebula nebula-2" />
-      <div className="nebula nebula-3" />
+      {/* Ambient nebula glow */}
+      <div
+        className="absolute inset-0 opacity-30"
+        style={{
+          background: `
+            radial-gradient(ellipse at 20% 20%, rgba(120, 0, 180, 0.3) 0%, transparent 50%),
+            radial-gradient(ellipse at 80% 80%, rgba(0, 100, 150, 0.2) 0%, transparent 50%),
+            radial-gradient(ellipse at 50% 50%, rgba(30, 60, 100, 0.2) 0%, transparent 70%)
+          `,
+        }}
+      />
 
-      {/* Bright stars with glow */}
+      {/* Stars with CSS animation */}
       {stars.map((star) => (
         <div
-          key={`star-${star.id}`}
-          className={`star ${star.glow}`}
+          key={`s1-${star.id}`}
+          className="absolute rounded-full bg-white animate-pulse"
           style={{
             left: `${star.x}%`,
             top: `${star.y}%`,
@@ -60,156 +70,84 @@ function StarFieldBackground() {
         />
       ))}
 
-      {/* Extra bright flare stars */}
-      {[...Array(20)].map((_, i) => (
+      {stars2.map((star) => (
         <div
-          key={`flare-${i}`}
-          className="star star-flare"
+          key={`s2-${star.id}`}
+          className="absolute rounded-full bg-white animate-pulse"
           style={{
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-            animationDelay: `${Math.random() * 3}s`,
+            left: `${star.x}%`,
+            top: `${star.y}%`,
+            width: `${star.size * 1.2}px`,
+            height: `${star.size * 1.2}px`,
+            opacity: star.opacity * 0.7,
+            animationDuration: `${star.duration * 1.2}s`,
+            animationDelay: `${star.delay}s`,
           }}
         />
       ))}
 
-      {/* Shooting stars - more frequent and brighter */}
-      <div className="shooting-star" style={{ top: '8%', left: '10%', animationDelay: '0s' }} />
-      <div className="shooting-star" style={{ top: '15%', left: '60%', animationDelay: '2.5s' }} />
-      <div className="shooting-star" style={{ top: '5%', left: '35%', animationDelay: '5s' }} />
-      <div className="shooting-star" style={{ top: '25%', left: '75%', animationDelay: '7.5s' }} />
-      <div className="shooting-star" style={{ top: '12%', left: '20%', animationDelay: '10s' }} />
-      <div className="shooting-star" style={{ top: '3%', left: '85%', animationDelay: '12.5s' }} />
+      {stars3.map((star) => (
+        <div
+          key={`s3-${star.id}`}
+          className="absolute rounded-full bg-white animate-pulse"
+          style={{
+            left: `${star.x}%`,
+            top: `${star.y}%`,
+            width: `${star.size * 1.5}px`,
+            height: `${star.size * 1.5}px`,
+            opacity: star.opacity * 0.5,
+            animationDuration: `${star.duration * 1.5}s`,
+            animationDelay: `${star.delay}s`,
+          }}
+        />
+      ))}
+
+      {/* Shooting star animation */}
+      <div className="shooting-star shooting-star-1" />
+      <div className="shooting-star shooting-star-2" />
+      <div className="shooting-star shooting-star-3" />
 
       <style>{`
-        /* Nebula background glows */
-        .nebula {
-          position: absolute;
-          border-radius: 50%;
-          filter: blur(80px);
-          opacity: 0.15;
+        @keyframes pulse {
+          0%, 100% { opacity: 0.3; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.2); }
         }
-        .nebula-1 {
-          width: 400px;
-          height: 400px;
-          background: radial-gradient(circle, rgba(100, 150, 255, 0.4) 0%, transparent 70%);
-          top: 10%;
-          left: 20%;
-          animation: nebula-move 20s ease-in-out infinite;
+        .animate-pulse {
+          animation-name: pulse;
+          animation-fill-mode: both;
+          animation-iteration-count: infinite;
         }
-        .nebula-2 {
-          width: 500px;
-          height: 500px;
-          background: radial-gradient(circle, rgba(150, 100, 255, 0.3) 0%, transparent 70%);
-          top: 50%;
-          right: 10%;
-          animation: nebula-move 25s ease-in-out infinite reverse;
-        }
-        .nebula-3 {
-          width: 300px;
-          height: 300px;
-          background: radial-gradient(circle, rgba(100, 200, 255, 0.25) 0%, transparent 70%);
-          bottom: 20%;
-          left: 30%;
-          animation: nebula-move 18s ease-in-out infinite;
-        }
-        @keyframes nebula-move {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          50% { transform: translate(30px, -30px) scale(1.1); }
-        }
-
-        /* Bright star styles */
-        .star {
-          position: absolute;
-          border-radius: 50%;
-          background: #ffffff;
-        }
-        .star-glow {
-          box-shadow: 
-            0 0 6px 2px rgba(255, 255, 255, 0.8),
-            0 0 12px 4px rgba(200, 220, 255, 0.4);
-          animation: star-pulse 2s ease-in-out infinite;
-        }
-        .star-glow-strong {
-          box-shadow: 
-            0 0 8px 3px rgba(255, 255, 255, 1),
-            0 0 16px 6px rgba(180, 200, 255, 0.6),
-            0 0 24px 8px rgba(150, 180, 255, 0.3);
-          animation: star-pulse-strong 1.5s ease-in-out infinite;
-        }
-        .star-flare {
-          width: 3px !important;
-          height: 3px !important;
-          box-shadow: 
-            0 0 10px 4px rgba(255, 255, 255, 1),
-            0 0 20px 8px rgba(200, 220, 255, 0.7);
-          animation: star-flare-anim 3s ease-in-out infinite;
-        }
-
-        @keyframes star-pulse {
-          0%, 100% { 
-            opacity: 0.4;
-            transform: scale(1);
-          }
-          50% { 
-            opacity: 1;
-            transform: scale(1.3);
-          }
-        }
-        @keyframes star-pulse-strong {
-          0%, 100% { 
-            opacity: 0.6;
-            transform: scale(1);
-            box-shadow: 
-              0 0 8px 3px rgba(255, 255, 255, 1),
-              0 0 16px 6px rgba(180, 200, 255, 0.6);
-          }
-          50% { 
-            opacity: 1;
-            transform: scale(1.4);
-            box-shadow: 
-              0 0 12px 4px rgba(255, 255, 255, 1),
-              0 0 24px 10px rgba(200, 220, 255, 0.8),
-              0 0 36px 14px rgba(180, 200, 255, 0.4);
-          }
-        }
-        @keyframes star-flare-anim {
-          0%, 100% { opacity: 0; transform: scale(0.5); }
-          50% { opacity: 1; transform: scale(1); box-shadow: 0 0 15px 6px rgba(255, 255, 255, 1), 0 0 30px 12px rgba(200, 220, 255, 0.8); }
-        }
-
-        /* Shooting stars */
         .shooting-star {
           position: absolute;
-          width: 200px;
+          width: 100px;
           height: 2px;
-          background: linear-gradient(to right, 
-            rgba(255,255,255,0) 0%, 
-            rgba(255,255,255,0.2) 20%, 
-            rgba(255,255,255,1) 50%,
-            rgba(255,255,255,0.9) 80%,
-            rgba(255,255,255,0) 100%
-          );
+          background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,1) 100%);
           border-radius: 50%;
           opacity: 0;
-          filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
-          animation: shoot 5s ease-out infinite;
+        }
+        .shooting-star-1 {
+          top: 10%;
+          left: 20%;
+          animation: shoot 3s ease-in-out infinite;
+          animation-delay: 2s;
+        }
+        .shooting-star-2 {
+          top: 25%;
+          left: 60%;
+          animation: shoot 4s ease-in-out infinite;
+          animation-delay: 5s;
+        }
+        .shooting-star-3 {
+          top: 15%;
+          left: 40%;
+          animation: shoot 3.5s ease-in-out infinite;
+          animation-delay: 8s;
         }
         @keyframes shoot {
-          0% {
-            transform: translateX(0) translateY(0) rotate(-30deg);
-            opacity: 0;
-          }
-          3% {
-            opacity: 1;
-          }
-          12% {
-            transform: translateX(500px) translateY(350px) rotate(-30deg);
-            opacity: 0;
-          }
-          100% {
-            opacity: 0;
-          }
+          0% { transform: translateX(0) translateY(0) rotate(-45deg); opacity: 0; }
+          5% { opacity: 1; }
+          20% { transform: translateX(300px) translateY(300px) rotate(-45deg); opacity: 0; }
+          100% { opacity: 0; }
         }
       `}</style>
     </div>
