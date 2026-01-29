@@ -1,9 +1,10 @@
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useEffect, useState } from 'react';
 
 /**
- * Live Star Timelapse Background
+ * Realistic Night Sky Starfield
  * 
- * Deep black sky with bright, glowing, alive stars
+ * Deep space with naturally twinkling stars, subtle movement,
+ * and realistic shooting stars - like watching the real night sky
  */
 
 interface Star {
@@ -11,200 +12,259 @@ interface Star {
   x: number;
   y: number;
   size: number;
-  duration: number;
-  delay: number;
-  opacity: number;
-  glow: string;
+  twinkleSpeed: number;
+  twinkleDelay: number;
+  baseOpacity: number;
+  color: 'white' | 'yellow' | 'blue-tint';
 }
 
 function generateStars(count: number): Star[] {
-  return Array.from({ length: count }, (_, i) => ({
-    id: i,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    size: Math.random() * 2.5 + 1.5,
-    duration: Math.random() * 1.5 + 0.8,
-    delay: Math.random() * 2,
-    opacity: Math.random() * 0.5 + 0.5,
-    glow: Math.random() > 0.7 ? 'star-glow-strong' : 'star-glow',
-  }));
+  return Array.from({ length: count }, (_, i) => {
+    const colorChoice = Math.random();
+    let color: 'white' | 'yellow' | 'blue-tint';
+    if (colorChoice > 0.9) color = 'yellow';
+    else if (colorChoice > 0.8) color = 'blue-tint';
+    else color = 'white';
+    
+    return {
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 2 + 1,
+      twinkleSpeed: Math.random() * 3 + 2,
+      twinkleDelay: Math.random() * 5,
+      baseOpacity: Math.random() * 0.4 + 0.3,
+      color,
+    };
+  });
 }
 
 function StarFieldBackground() {
-  const stars = useMemo(() => generateStars(200), []);
+  const stars = useMemo(() => generateStars(250), []);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Generate shooting star timings
+  const shootingStars = useMemo(() => {
+    return Array.from({ length: 8 }, (_, i) => ({
+      id: i,
+      delay: i * 4 + Math.random() * 3,
+      duration: Math.random() * 1 + 0.8,
+      startX: Math.random() * 100,
+      startY: Math.random() * 40,
+    }));
+  }, []);
 
   return (
     <div
-      className="fixed inset-0 w-full h-full overflow-hidden pointer-events-none"
-      style={{ backgroundColor: '#000005' }}
+      className="fixed inset-0 w-full h-full overflow-hidden pointer-events-none z-0"
+      style={{ background: 'linear-gradient(to bottom, #000008 0%, #0a0a18 50%, #050510 100%)' }}
     >
-      {/* Nebula glow effects */}
-      <div className="nebula nebula-1" />
-      <div className="nebula nebula-2" />
-      <div className="nebula nebula-3" />
+      {/* Milky Way effect - subtle band of light */}
+      <div className="milky-way" />
 
-      {/* Bright stars with glow */}
-      {stars.map((star) => (
+      {/* Stars */}
+      {mounted && stars.map((star) => (
         <div
-          key={`star-${star.id}`}
-          className={`star ${star.glow}`}
+          key={star.id}
+          className={`star star-${star.color}`}
           style={{
             left: `${star.x}%`,
             top: `${star.y}%`,
             width: `${star.size}px`,
             height: `${star.size}px`,
-            opacity: star.opacity,
-            animationDuration: `${star.duration}s`,
-            animationDelay: `${star.delay}s`,
+            animationDuration: `${star.twinkleSpeed}s`,
+            animationDelay: `${star.twinkleDelay}s`,
+            opacity: star.baseOpacity,
           }}
         />
       ))}
 
-      {/* Extra bright flare stars */}
-      {[...Array(20)].map((_, i) => (
+      {/* Extra bright stars (anchor stars) */}
+      {mounted && [...Array(15)].map((_, i) => (
         <div
-          key={`flare-${i}`}
-          className="star star-flare"
+          key={`bright-${i}`}
+          className="star star-bright"
           style={{
             left: `${Math.random() * 100}%`,
             top: `${Math.random() * 100}%`,
-            animationDelay: `${Math.random() * 3}s`,
+            animationDelay: `${Math.random() * 4}s`,
           }}
         />
       ))}
 
-      {/* Shooting stars - more frequent and brighter */}
-      <div className="shooting-star" style={{ top: '8%', left: '10%', animationDelay: '0s' }} />
-      <div className="shooting-star" style={{ top: '15%', left: '60%', animationDelay: '2.5s' }} />
-      <div className="shooting-star" style={{ top: '5%', left: '35%', animationDelay: '5s' }} />
-      <div className="shooting-star" style={{ top: '25%', left: '75%', animationDelay: '7.5s' }} />
-      <div className="shooting-star" style={{ top: '12%', left: '20%', animationDelay: '10s' }} />
-      <div className="shooting-star" style={{ top: '3%', left: '85%', animationDelay: '12.5s' }} />
+      {/* Shooting stars */}
+      {mounted && shootingStars.map((shooting) => (
+        <div
+          key={`shoot-${shooting.id}`}
+          className="shooting-star"
+          style={{
+            animationDelay: `${shooting.delay}s`,
+            animationDuration: `${shooting.duration}s`,
+          }}
+        />
+      ))}
 
       <style>{`
-        /* Nebula background glows */
-        .nebula {
+        /* Deep space gradient background is inline */
+        
+        /* Subtle Milky Way band */
+        .milky-way {
           position: absolute;
-          border-radius: 50%;
-          filter: blur(80px);
-          opacity: 0.15;
-        }
-        .nebula-1 {
-          width: 400px;
-          height: 400px;
-          background: radial-gradient(circle, rgba(100, 150, 255, 0.4) 0%, transparent 70%);
-          top: 10%;
-          left: 20%;
-          animation: nebula-move 20s ease-in-out infinite;
-        }
-        .nebula-2 {
-          width: 500px;
-          height: 500px;
-          background: radial-gradient(circle, rgba(150, 100, 255, 0.3) 0%, transparent 70%);
-          top: 50%;
-          right: 10%;
-          animation: nebula-move 25s ease-in-out infinite reverse;
-        }
-        .nebula-3 {
-          width: 300px;
-          height: 300px;
-          background: radial-gradient(circle, rgba(100, 200, 255, 0.25) 0%, transparent 70%);
-          bottom: 20%;
-          left: 30%;
-          animation: nebula-move 18s ease-in-out infinite;
-        }
-        @keyframes nebula-move {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          50% { transform: translate(30px, -30px) scale(1.1); }
+          top: -50%;
+          left: -50%;
+          width: 200%;
+          height: 200%;
+          background: 
+            radial-gradient(ellipse at 30% 20%, 
+              rgba(200, 200, 255, 0.03) 0%, 
+              transparent 50%
+            ),
+            radial-gradient(ellipse at 70% 60%, 
+              rgba(180, 170, 220, 0.02) 0%, 
+              transparent 40%
+            );
+          transform: rotate(-15deg);
+          pointer-events: none;
         }
 
-        /* Bright star styles */
+        /* Base star */
         .star {
           position: absolute;
           border-radius: 50%;
-          background: #ffffff;
+          background: #fff;
         }
-        .star-glow {
+
+        /* White stars (most common) */
+        .star-white {
+          box-shadow: 0 0 2px 1px rgba(255, 255, 255, 0.3);
+          animation: twinkle var(--twinkle-speed, 3s) ease-in-out infinite;
+          animation-delay: var(--twinkle-delay, 0s);
+        }
+
+        /* Yellow tint stars (some stars have warmth) */
+        .star-yellow {
+          background: #fffde7;
           box-shadow: 
-            0 0 6px 2px rgba(255, 255, 255, 0.8),
-            0 0 12px 4px rgba(200, 220, 255, 0.4);
-          animation: star-pulse 2s ease-in-out infinite;
+            0 0 2px 1px rgba(255, 253, 231, 0.4),
+            0 0 4px 1px rgba(255, 235, 59, 0.2);
+          animation: twinkle-yellow var(--twinkle-speed, 3s) ease-in-out infinite;
+          animation-delay: var(--twinkle-delay, 0s);
         }
-        .star-glow-strong {
+
+        /* Blue-tint stars (cooler stars) */
+        .star-blue-tint {
+          background: #e3f2fd;
           box-shadow: 
-            0 0 8px 3px rgba(255, 255, 255, 1),
-            0 0 16px 6px rgba(180, 200, 255, 0.6),
-            0 0 24px 8px rgba(150, 180, 255, 0.3);
-          animation: star-pulse-strong 1.5s ease-in-out infinite;
+            0 0 2px 1px rgba(227, 242, 253, 0.4),
+            0 0 3px 0.5px rgba(100, 181, 246, 0.3);
+          animation: twinkle-blue var(--twinkle-speed, 3s) ease-in-out infinite;
+          animation-delay: var(--twinkle-delay, 0s);
         }
-        .star-flare {
+
+        /* Bright anchor stars */
+        .star-bright {
           width: 3px !important;
           height: 3px !important;
+          background: #fff;
           box-shadow: 
-            0 0 10px 4px rgba(255, 255, 255, 1),
-            0 0 20px 8px rgba(200, 220, 255, 0.7);
-          animation: star-flare-anim 3s ease-in-out infinite;
+            0 0 4px 2px rgba(255, 255, 255, 0.8),
+            0 0 8px 4px rgba(200, 220, 255, 0.4),
+            0 0 12px 6px rgba(180, 200, 255, 0.2);
+          animation: twinkle-bright 2.5s ease-in-out infinite;
+          animation-delay: var(--twinkle-delay, 0s);
         }
 
-        @keyframes star-pulse {
+        @keyframes twinkle {
           0%, 100% { 
-            opacity: 0.4;
+            opacity: var(--base-opacity, 0.5); 
             transform: scale(1);
           }
           50% { 
-            opacity: 1;
+            opacity: 1; 
+            transform: scale(1.2);
+          }
+        }
+
+        @keyframes twinkle-yellow {
+          0%, 100% { 
+            opacity: var(--base-opacity, 0.4); 
+            transform: scale(1);
+            box-shadow: 0 0 2px 1px rgba(255, 253, 231, 0.4);
+          }
+          50% { 
+            opacity: 1; 
             transform: scale(1.3);
-          }
-        }
-        @keyframes star-pulse-strong {
-          0%, 100% { 
-            opacity: 0.6;
-            transform: scale(1);
             box-shadow: 
-              0 0 8px 3px rgba(255, 255, 255, 1),
-              0 0 16px 6px rgba(180, 200, 255, 0.6);
+              0 0 4px 2px rgba(255, 253, 231, 0.6),
+              0 0 8px 4px rgba(255, 235, 59, 0.3);
           }
-          50% { 
-            opacity: 1;
-            transform: scale(1.4);
-            box-shadow: 
-              0 0 12px 4px rgba(255, 255, 255, 1),
-              0 0 24px 10px rgba(200, 220, 255, 0.8),
-              0 0 36px 14px rgba(180, 200, 255, 0.4);
-          }
-        }
-        @keyframes star-flare-anim {
-          0%, 100% { opacity: 0; transform: scale(0.5); }
-          50% { opacity: 1; transform: scale(1); box-shadow: 0 0 15px 6px rgba(255, 255, 255, 1), 0 0 30px 12px rgba(200, 220, 255, 0.8); }
         }
 
-        /* Shooting stars */
+        @keyframes twinkle-blue {
+          0%, 100% { 
+            opacity: var(--base-opacity, 0.4); 
+            transform: scale(1);
+          }
+          50% { 
+            opacity: 1; 
+            transform: scale(1.2);
+            box-shadow: 
+              0 0 4px 2px rgba(227, 242, 253, 0.6),
+              0 0 8px 4px rgba(100, 181, 246, 0.3);
+          }
+        }
+
+        @keyframes twinkle-bright {
+          0%, 100% { 
+            opacity: 0.7;
+            transform: scale(1);
+            box-shadow: 
+              0 0 4px 2px rgba(255, 255, 255, 0.8),
+              0 0 8px 4px rgba(200, 220, 255, 0.4);
+          }
+          50% { 
+            opacity: 1; 
+            transform: scale(1.5);
+            box-shadow: 
+              0 0 6px 3px rgba(255, 255, 255, 1),
+              0 0 16px 8px rgba(200, 220, 255, 0.6),
+              0 0 24px 12px rgba(180, 200, 255, 0.3);
+          }
+        }
+
+        /* Shooting star */
         .shooting-star {
           position: absolute;
-          width: 200px;
+          width: 150px;
           height: 2px;
           background: linear-gradient(to right, 
-            rgba(255,255,255,0) 0%, 
-            rgba(255,255,255,0.2) 20%, 
-            rgba(255,255,255,1) 50%,
-            rgba(255,255,255,0.9) 80%,
-            rgba(255,255,255,0) 100%
+            transparent 0%,
+            rgba(255, 255, 255, 0.1) 20%,
+            rgba(255, 255, 255, 0.9) 50%,
+            rgba(255, 255, 255, 0.8) 70%,
+            transparent 100%
           );
-          border-radius: 50%;
+          border-radius: 100%;
           opacity: 0;
-          filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
-          animation: shoot 5s ease-out infinite;
+          filter: blur(0.5px);
+          transform-origin: left center;
+          animation: shoot linear infinite;
         }
+
         @keyframes shoot {
           0% {
-            transform: translateX(0) translateY(0) rotate(-30deg);
+            transform: translateX(0) translateY(0) rotate(-45deg);
             opacity: 0;
           }
-          3% {
+          5% {
             opacity: 1;
           }
-          12% {
-            transform: translateX(500px) translateY(350px) rotate(-30deg);
+          30% {
+            transform: translateX(400px) translateY(400px) rotate(-45deg);
             opacity: 0;
           }
           100% {

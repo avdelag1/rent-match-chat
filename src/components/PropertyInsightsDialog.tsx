@@ -4,7 +4,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { MapPin, Bed, Bath, Square, Calendar, DollarSign, MessageCircle, TrendingUp, Clock, Shield, Star, CheckCircle, Home, Sparkles, Anchor, Bike, Car, Zap, Fuel, Gauge, Users, Ruler, Settings, AlertCircle, ThumbsUp, Eye, Phone, Mail } from 'lucide-react';
+import { MapPin, Bed, Bath, Square, Calendar, DollarSign, MessageCircle, TrendingUp, Clock, Shield, Star, CheckCircle, Home, Sparkles, Briefcase, Bike, Car, Zap, Fuel, Gauge, Users, Ruler, Settings, AlertCircle, ThumbsUp, Eye, Phone, Mail } from 'lucide-react';
 import { Listing } from '@/hooks/useListings';
 import { PropertyImageGallery } from './PropertyImageGallery';
 import { useNavigate } from 'react-router-dom';
@@ -75,7 +75,8 @@ function PropertyInsightsSkeleton() {
 // Category icons and labels
 const CATEGORY_CONFIG: Record<string, { icon: React.ReactNode; label: string; color: string }> = {
   property: { icon: <Home className="w-4 h-4" />, label: 'Property', color: 'bg-blue-500/10 text-blue-600 border-blue-500/20' },
-  yacht: { icon: <Anchor className="w-4 h-4" />, label: 'Yacht', color: 'bg-cyan-500/10 text-cyan-600 border-cyan-500/20' },
+  worker: { icon: <Briefcase className="w-4 h-4" />, label: 'Service', color: 'bg-purple-500/10 text-purple-600 border-purple-500/20' },
+  services: { icon: <Briefcase className="w-4 h-4" />, label: 'Service', color: 'bg-purple-500/10 text-purple-600 border-purple-500/20' },
   motorcycle: { icon: <Car className="w-4 h-4" />, label: 'Motorcycle', color: 'bg-orange-500/10 text-orange-600 border-orange-500/20' },
   bicycle: { icon: <Bike className="w-4 h-4" />, label: 'Bicycle', color: 'bg-green-500/10 text-green-600 border-green-500/20' },
 };
@@ -117,7 +118,7 @@ function PropertyInsightsDialogComponent({ open, onOpenChange, listing }: Proper
     if (listing.pet_friendly) qualityScore += 10;
     if (listing.square_footage) qualityScore += 5;
     if (listing.beds && listing.baths) qualityScore += 10;
-    // Bonus for vehicles/yachts
+    // Bonus for vehicles
     if (listing.year) qualityScore += 5;
     if (listing.condition === 'excellent') qualityScore += 10;
     if (equipmentCount >= 5) qualityScore += 10;
@@ -133,11 +134,11 @@ function PropertyInsightsDialogComponent({ open, onOpenChange, listing }: Proper
 
     // Determine category
     const category = listing.category || 'property';
-    const isYacht = category === 'yacht';
+    const isWorker = category === 'worker' || category === 'services';
     const isMotorcycle = category === 'motorcycle';
     const isBicycle = category === 'bicycle';
-    const isVehicle = isYacht || isMotorcycle || isBicycle;
-    const isProperty = !isVehicle;
+    const isVehicle = isMotorcycle || isBicycle;
+    const isProperty = !isVehicle && !isWorker;
 
     // Calculate demand level
     const demandLevel = qualityScore >= 80 ? 'high' : qualityScore >= 50 ? 'medium' : 'low';
@@ -155,7 +156,7 @@ function PropertyInsightsDialogComponent({ open, onOpenChange, listing }: Proper
       responseRate: Math.min(95, 70 + amenityCount * 2 + equipmentCount),
       avgResponseTime: (amenityCount + equipmentCount) > 5 ? '< 1 hour' : '1-2 hours',
       category,
-      isYacht,
+      isWorker,
       isMotorcycle,
       isBicycle,
       isProperty,
@@ -370,20 +371,29 @@ function PropertyInsightsDialogComponent({ open, onOpenChange, listing }: Proper
                   )}
                 </>
               )}
-              {/* Yacht-specific */}
-              {propertyInsights?.isYacht && (
+              {/* Service-specific */}
+              {propertyInsights?.isWorker && (
                 <>
-                  {listing.length_m && (
+                  {listing.service_type && (
                     <div className="flex items-center gap-2">
-                      <Ruler className="w-4 h-4" />
-                      <span>{listing.length_m}m length</span>
+                      <Briefcase className="w-4 h-4" />
+                      <span>{listing.service_type}</span>
                     </div>
                   )}
-                  {listing.max_passengers && (
+                  {listing.hourly_rate && (
                     <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4" />
-                      <span>{listing.max_passengers} passengers</span>
+                      <DollarSign className="w-4 h-4" />
+                      <span>${listing.hourly_rate}/hour</span>
                     </div>
+                  )}
+                  {listing.experience_years && (
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4" />
+                      <span>{listing.experience_years} years experience</span>
+                    </div>
+                  )}
+                </>
+              )}
                   )}
                   {listing.berths && (
                     <div className="flex items-center gap-2">
@@ -495,14 +505,14 @@ function PropertyInsightsDialogComponent({ open, onOpenChange, listing }: Proper
               </div>
             )}
 
-            {/* Equipment (for yachts/vehicles) */}
+            {/* Equipment (for vehicles/services) */}
             {listing.equipment && listing.equipment.length > 0 && (
               <div>
                 <h4 className="font-semibold mb-2">Equipment Included</h4>
                 <div className="flex flex-wrap gap-2">
                   {listing.equipment.map((item) => (
-                    <Badge key={`equip-${item}`} variant="outline" className="bg-cyan-500/5 border-cyan-500/20">
-                      <CheckCircle className="w-3 h-3 mr-1 text-cyan-500" />
+                    <Badge key={`equip-${item}`} variant="outline" className="bg-purple-500/5 border-purple-500/20">
+                      <CheckCircle className="w-3 h-3 mr-1 text-purple-500" />
                       {item}
                     </Badge>
                   ))}
@@ -535,12 +545,12 @@ function PropertyInsightsDialogComponent({ open, onOpenChange, listing }: Proper
               </div>
             )}
 
-            {/* Rental Rates (for yachts with rental_rates) */}
+            {/* Service Rates (for workers/services) */}
             {listing.rental_rates && (
               <div>
                 <h4 className="font-semibold mb-3 flex items-center gap-2">
                   <DollarSign className="w-5 h-5 text-green-500" />
-                  Rental Options
+                  Service Rates
                 </h4>
                 <div className="grid grid-cols-2 gap-3">
                   {listing.rental_rates.hourly && (
@@ -578,9 +588,6 @@ function PropertyInsightsDialogComponent({ open, onOpenChange, listing }: Proper
                 <p className="text-sm">📊 {listing.listing_type === 'buy' ? 'Price' : 'Current rent'}: ${listing.price?.toLocaleString()}{listing.listing_type !== 'buy' && '/month'}</p>
                 {propertyInsights?.isProperty && (
                   <p className="text-sm">📏 Space: {listing.square_footage ? `${listing.square_footage} sqft` : 'Size not specified'}</p>
-                )}
-                {propertyInsights?.isYacht && listing.length_m && (
-                  <p className="text-sm">📏 Length: {listing.length_m} meters</p>
                 )}
                 <p className="text-sm">🏠 Type: {listing.property_type || listing.vehicle_type || 'Not specified'} {listing.neighborhood && `in ${listing.neighborhood}`}</p>
                 <p className="text-sm">✨ Features: {(listing.amenities?.length || 0) + (listing.equipment?.length || 0)} items listed</p>

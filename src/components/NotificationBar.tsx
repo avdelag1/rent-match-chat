@@ -97,24 +97,24 @@ export function NotificationBar({ notifications, onDismiss, onMarkAllRead, onNot
     switch (type) {
       case 'like':
         return role === 'client'
-          ? 'border-cyan-500/30 bg-gradient-to-r from-cyan-500/15 to-blue-500/10'
-          : 'border-orange-500/30 bg-gradient-to-r from-orange-500/15 to-red-500/10';
+          ? 'border-cyan-500/40 bg-gradient-to-r from-cyan-500/20 to-blue-500/15 shadow-lg shadow-cyan-500/10'
+          : 'border-orange-500/40 bg-gradient-to-r from-orange-500/20 to-red-500/15 shadow-lg shadow-orange-500/10';
       case 'message':
         return role === 'client'
-          ? 'border-blue-500/30 bg-gradient-to-r from-blue-500/15 to-cyan-500/10'
-          : 'border-amber-500/30 bg-gradient-to-r from-amber-500/15 to-yellow-500/10';
+          ? 'border-blue-500/40 bg-gradient-to-r from-blue-500/20 to-cyan-500/15 shadow-lg shadow-blue-500/10'
+          : 'border-amber-500/40 bg-gradient-to-r from-amber-500/20 to-yellow-500/15 shadow-lg shadow-amber-500/10';
       case 'super_like':
         return role === 'client'
-          ? 'border-purple-500/30 bg-gradient-to-r from-purple-500/15 to-pink-500/10'
-          : 'border-yellow-500/30 bg-gradient-to-r from-yellow-500/15 to-amber-500/10';
+          ? 'border-purple-500/40 bg-gradient-to-r from-purple-500/20 to-pink-500/15 shadow-lg shadow-purple-500/10'
+          : 'border-yellow-500/40 bg-gradient-to-r from-yellow-500/20 to-amber-500/15 shadow-lg shadow-yellow-500/10';
       case 'match':
         return role === 'client'
-          ? 'border-cyan-500/30 bg-gradient-to-r from-cyan-500/15 to-purple-500/10'
-          : 'border-pink-500/30 bg-gradient-to-r from-pink-500/15 to-purple-500/10';
+          ? 'border-cyan-500/40 bg-gradient-to-r from-cyan-500/20 to-purple-500/15 shadow-lg shadow-cyan-500/10'
+          : 'border-pink-500/40 bg-gradient-to-r from-pink-500/20 to-purple-500/15 shadow-lg shadow-pink-500/10';
       case 'new_user':
-        return 'border-green-500/30 bg-gradient-to-r from-green-500/15 to-emerald-500/10';
+        return 'border-green-500/40 bg-gradient-to-r from-green-500/20 to-emerald-500/15 shadow-lg shadow-green-500/10';
       default:
-        return 'border-gray-500/30 bg-gradient-to-r from-gray-500/15 to-gray-400/10';
+        return 'border-gray-500/40 bg-gradient-to-r from-gray-500/20 to-gray-400/15 shadow-lg shadow-gray-500/10';
     }
   };
 
@@ -146,10 +146,10 @@ export function NotificationBar({ notifications, onDismiss, onMarkAllRead, onNot
                       <Bell className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                      <span className="font-semibold text-base text-white">
+                      <span className="font-semibold text-base text-white drop-shadow-sm">
                         {unreadNotifications.length} new notification{unreadNotifications.length !== 1 ? 's' : ''}
                       </span>
-                      <p className="text-xs text-gray-400">Tap to expand</p>
+                      <p className="text-xs text-gray-300">Tap to expand</p>
                     </div>
                   </div>
                   {unreadNotifications.length > 0 && (
@@ -180,9 +180,9 @@ export function NotificationBar({ notifications, onDismiss, onMarkAllRead, onNot
                       setVisible(false);
                       setIsExpanded(false);
                     }}
-                    className="h-9 w-9 p-0 rounded-full hover:bg-white/10"
+                    className="h-9 w-9 p-0 rounded-full hover:bg-white/20"
                   >
-                    <X className="w-5 h-5 text-gray-400" />
+                    <X className="w-5 h-5 text-white" />
                   </Button>
                 </div>
               </div>
@@ -233,7 +233,7 @@ export function NotificationBar({ notifications, onDismiss, onMarkAllRead, onNot
                             <p className="text-sm text-gray-300 mt-1 line-clamp-2">
                               {notification.message}
                             </p>
-                            <p className="text-xs text-gray-500 mt-2 flex items-center gap-1">
+                            <p className="text-xs text-gray-400 mt-2 flex items-center gap-1">
                               <span className="w-1 h-1 rounded-full bg-primary"></span>
                               {notification.timestamp.toLocaleTimeString([], {
                                 hour: '2-digit',
@@ -249,9 +249,9 @@ export function NotificationBar({ notifications, onDismiss, onMarkAllRead, onNot
                               e.stopPropagation();
                               onDismiss(notification.id);
                             }}
-                            className="h-7 w-7 p-0 opacity-50 hover:opacity-100 hover:bg-white/10 rounded-full"
+                            className="h-7 w-7 p-0 opacity-70 hover:opacity-100 hover:bg-white/20 rounded-full"
                           >
-                            <X className="w-4 h-4 text-gray-400" />
+                            <X className="w-4 h-4 text-white" />
                           </Button>
                         </div>
                       </motion.div>
@@ -259,8 +259,8 @@ export function NotificationBar({ notifications, onDismiss, onMarkAllRead, onNot
                     })}
                     
                     {unreadNotifications.length > 5 && (
-                      <div className="p-4 text-center border-t border-white/5">
-                        <p className="text-sm text-gray-400 font-medium">
+                      <div className="p-4 text-center border-t border-white/10">
+                        <p className="text-sm text-gray-300 font-medium">
                           +{unreadNotifications.length - 5} more notifications
                         </p>
                       </div>

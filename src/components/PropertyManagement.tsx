@@ -11,7 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
-import { Home, Plus, Edit, Trash2, Eye, MapPin, DollarSign, ShieldCheck, CheckCircle, Search, Anchor, Bike, CircleDot, Car, LayoutGrid, Sparkles, ImageIcon, Share2, Wand2 } from 'lucide-react';
+import { Home, Plus, Edit, Trash2, Eye, MapPin, DollarSign, ShieldCheck, CheckCircle, Search, Bike, CircleDot, Car, LayoutGrid, Sparkles, ImageIcon, Share2, Wand2, Briefcase } from 'lucide-react';
 import { ListingPreviewDialog } from '@/components/ListingPreviewDialog';
 import { UnifiedListingForm } from '@/components/UnifiedListingForm';
 import { CategorySelectionDialog } from '@/components/CategorySelectionDialog';
@@ -30,7 +30,8 @@ interface PropertyManagementProps {
 
 const getCategoryIcon = (category: string) => {
   switch (category) {
-    case 'worker': return <Home className="w-3.5 h-3.5" />;
+    case 'worker': 
+    case 'services': return <Briefcase className="w-3.5 h-3.5" />;
     case 'motorcycle': return <CircleDot className="w-3.5 h-3.5" />;
     case 'bicycle': return <Bike className="w-3.5 h-3.5" />;
     default: return <Home className="w-3.5 h-3.5" />;
@@ -39,7 +40,8 @@ const getCategoryIcon = (category: string) => {
 
 const getCategoryColor = (category: string) => {
   switch (category) {
-    case 'worker': return 'bg-amber-500/20 text-amber-400 border-amber-500/30';
+    case 'worker': 
+    case 'services': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
     case 'motorcycle': return 'bg-orange-500/20 text-orange-400 border-orange-500/30';
     case 'bicycle': return 'bg-purple-500/20 text-purple-400 border-purple-500/30';
     default: return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
@@ -80,9 +82,9 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
     // Filter by category
     let matchesCategory = true;
     if (activeTab === 'property') matchesCategory = !listing.category || listing.category === 'property';
-    else if (activeTab === 'yacht') matchesCategory = listing.category === 'yacht';
     else if (activeTab === 'motorcycle') matchesCategory = listing.category === 'motorcycle';
     else if (activeTab === 'bicycle') matchesCategory = listing.category === 'bicycle';
+    else if (activeTab === 'worker') matchesCategory = listing.category === 'worker' || listing.category === 'services';
     else if (activeTab === 'active') matchesCategory = listing.status === 'active';
     else if (activeTab === 'rented') matchesCategory = listing.status === 'rented';
     else if (activeTab === 'maintenance') matchesCategory = listing.status === 'maintenance';
@@ -276,9 +278,9 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
   const tabItems = [
     { id: 'all', label: 'All', icon: LayoutGrid, count: listings.length },
     { id: 'property', label: 'Properties', icon: Home, count: listings.filter(l => !l.category || l.category === 'property').length },
-    { id: 'yacht', label: 'Yachts', icon: Anchor, count: listings.filter(l => l.category === 'yacht').length },
     { id: 'motorcycle', label: 'Motorcycles', icon: CircleDot, count: listings.filter(l => l.category === 'motorcycle').length },
     { id: 'bicycle', label: 'Bicycles', icon: Bike, count: listings.filter(l => l.category === 'bicycle').length },
+    { id: 'worker', label: 'Services', icon: Briefcase, count: listings.filter(l => l.category === 'worker' || l.category === 'services').length },
     { id: 'active', label: 'Active', icon: CheckCircle, count: listings.filter(l => l.status === 'active').length },
     { id: 'rented', label: 'Rented', icon: Home, count: listings.filter(l => l.status === 'rented').length },
   ];
@@ -431,7 +433,7 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
                             )}>
                               {getCategoryIcon(listing.category || 'property')}
                               <span className="hidden sm:inline">
-                                {listing.category === 'yacht' ? 'Yacht' :
+                                {listing.category === 'worker' || listing.category === 'services' ? 'Service' :
                                  listing.category === 'motorcycle' ? 'Moto' :
                                  listing.category === 'bicycle' ? 'Bike' :
                                  listing.category === 'vehicle' ? 'Vehicle' :
@@ -500,11 +502,10 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
                                 {listing.square_footage && ` • ${listing.square_footage} sq ft`}
                               </span>
                             )}
-                            {listing.category === 'yacht' && (
+                            {(listing.category === 'worker' || listing.category === 'services') && (
                               <span>
-                                {listing.length_m && `${listing.length_m}m`}
-                                {listing.berths && ` • ${listing.berths} berths`}
-                                {listing.max_passengers && ` • ${listing.max_passengers} guests`}
+                                {listing.service_type || 'Professional Service'}
+                                {listing.hourly_rate && ` • $${listing.hourly_rate}/hr`}
                               </span>
                             )}
                             {listing.category === 'motorcycle' && (

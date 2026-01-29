@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SuspenseFallback } from "@/components/ui/suspense-fallback";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -15,6 +15,9 @@ import SignupErrorBoundary from "@/components/SignupErrorBoundary";
 import GlobalErrorBoundary from "@/components/GlobalErrorBoundary";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+
+// Automatic update system
+import { useForceUpdateOnVersionChange, UpdateNotification } from "@/hooks/useAutomaticUpdates";
 
 // SPEED OF LIGHT: Persistent layout wrapper - mounted ONCE, never remounts
 import { PersistentDashboardLayout } from "@/components/PersistentDashboardLayout";
@@ -98,6 +101,9 @@ const OwnerProfileCamera = lazy(() => import("./pages/OwnerProfileCamera"));
 const PublicProfilePreview = lazy(() => import("./pages/PublicProfilePreview"));
 const PublicListingPreview = lazy(() => import("./pages/PublicListingPreview"));
 
+// Test pages
+import MockOwnersTestPage from "./pages/MockOwnersTestPage";
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -122,6 +128,13 @@ function NotificationWrapper({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+// Wrapper for automatic update system
+function UpdateWrapper({ children }: { children: React.ReactNode }) {
+  // Check for version changes and force update if needed
+  useForceUpdateOnVersionChange();
+  return <>{children}</>;
+}
+
 const App = () => (
   <GlobalErrorBoundary>
     <QueryClientProvider client={queryClient}>
@@ -137,15 +150,20 @@ const App = () => (
           <ThemeProvider>
             <PWAProvider>
             <ResponsiveProvider>
-            <NotificationWrapper>
-              {/* Global ambient parallax background - mounted once, persists across screens */}
-              <DepthParallaxBackground />
-              <AppLayout>
-                <TooltipProvider>
-                  <Sonner />
-                </TooltipProvider>
-                <Suspense fallback={<SuspenseFallback />}>
-                  <Routes>
+            <UpdateWrapper>
+              <NotificationWrapper>
+                {/* Global ambient parallax background - mounted once, persists across screens */}
+                <DepthParallaxBackground />
+                
+                {/* Update notification banner */}
+                <UpdateNotification />
+                
+                <AppLayout>
+                  <TooltipProvider>
+                    <Sonner />
+                  </TooltipProvider>
+                  <Suspense fallback={<SuspenseFallback />}>
+                    <Routes>
                     <Route path="/" element={
                       <SignupErrorBoundary>
                         <Index />
@@ -224,12 +242,16 @@ const App = () => (
                     <Route path="/profile/:id" element={<PublicProfilePreview />} />
                     <Route path="/listing/:id" element={<PublicListingPreview />} />
 
+                    {/* Test Pages */}
+                    <Route path="/test/mock-owners" element={<MockOwnersTestPage />} />
+
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>
               </AppLayout>
             </NotificationWrapper>
+            </UpdateWrapper>
             </ResponsiveProvider>
             </PWAProvider>
           </ThemeProvider>

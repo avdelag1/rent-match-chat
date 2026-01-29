@@ -56,8 +56,8 @@ export function MessageActivationBanner({
               <div className="relative p-4 sm:p-5">
                 <div className="flex items-start gap-3 sm:gap-4">
                   {/* Icon */}
-                  <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/20 backdrop-blur flex items-center justify-center">
-                    <bannerContent.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                  <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/30 backdrop-blur flex items-center justify-center shadow-lg shadow-white/10">
+                    <bannerContent.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white drop-shadow-sm" />
                   </div>
 
                   {/* Content */}
@@ -65,14 +65,14 @@ export function MessageActivationBanner({
                     <h3 className="text-base sm:text-lg font-bold text-white mb-1">
                       {bannerContent.title}
                     </h3>
-                    <p className="text-sm text-white/90 mb-3 sm:mb-4">
+                    <p className="text-sm text-white font-medium mb-3 sm:mb-4">
                       {bannerContent.description}
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                       <Button
                         onClick={handleGetActivations}
-                        className="bg-white hover:bg-white/90 text-[#007AFF] font-semibold shadow-lg transition-all duration-200 active:scale-95"
+                        className="bg-white hover:bg-white/95 text-[#007AFF] font-bold shadow-xl shadow-white/20 transition-all duration-200 active:scale-95"
                         size="sm"
                       >
                         {bannerContent.ctaText}
@@ -90,12 +90,12 @@ export function MessageActivationBanner({
 
                     {/* Premium hint */}
                     <div className="mt-3 pt-3 border-t border-white/20 space-y-2">
-                      <div className="flex items-center gap-2 text-xs text-white/80">
-                        <Crown className="w-3.5 h-3.5" />
+                      <div className="flex items-center gap-2 text-xs text-white/90">
+                        <Crown className="w-3.5 h-3.5 text-amber-300" />
                         <span>Premium plans include monthly message credits + visibility boost!</span>
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-white/90 font-medium">
-                        <MessageCircle className="w-3.5 h-3.5" />
+                      <div className="flex items-center gap-2 text-xs text-white font-medium">
+                        <MessageCircle className="w-3.5 h-3.5 text-cyan-300" />
                         <span>💬 Free messaging for motorcycles & bicycles!</span>
                       </div>
                     </div>
@@ -104,10 +104,10 @@ export function MessageActivationBanner({
                   {/* Close button */}
                   <button
                     onClick={onClose}
-                    className="flex-shrink-0 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur flex items-center justify-center transition-colors"
+                    className="flex-shrink-0 w-8 h-8 rounded-full bg-white/25 hover:bg-white/40 backdrop-blur flex items-center justify-center transition-colors shadow-lg"
                     aria-label="Close banner"
                   >
-                    <X className="w-4 h-4 text-white" />
+                    <X className="w-4 h-4 text-white drop-shadow-sm" />
                   </button>
                 </div>
               </div>

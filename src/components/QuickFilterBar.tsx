@@ -122,11 +122,11 @@ function FilterDropdown({
           setIsOpen(!isOpen);
         }}
         className={cn(
-          'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-150',
+          'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-150',
           'border will-change-transform active:scale-95',
           isActive
-            ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white border-orange-500 shadow-lg shadow-orange-500/25'
-            : 'bg-muted/50 text-muted-foreground border-white/10 hover:bg-muted hover:border-white/20'
+            ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white border-orange-500 shadow-lg shadow-orange-500/30'
+            : 'bg-white/10 text-white border-white/20 hover:bg-white/20 hover:border-white/30'
         )}
       >
         {icon}
@@ -142,7 +142,7 @@ function FilterDropdown({
             left: dropdownPosition.left,
             willChange: 'opacity, transform',
           }}
-          className="z-[9999] min-w-[120px] bg-popover border border-border rounded-lg shadow-xl overflow-hidden pointer-events-auto animate-in fade-in-0 zoom-in-95 duration-150"
+          className="z-[9999] min-w-[120px] bg-gray-900 border border-white/20 rounded-lg shadow-xl overflow-hidden pointer-events-auto animate-in fade-in-0 zoom-in-95 duration-150"
         >
           {options.map((option) => (
             <button
@@ -155,8 +155,8 @@ function FilterDropdown({
               className={cn(
                 'w-full flex items-center gap-2 px-3 py-2.5 text-xs text-left transition-colors duration-150',
                 value === option.id
-                  ? 'bg-primary/10 text-primary font-medium'
-                  : 'text-foreground hover:bg-muted'
+                  ? 'bg-orange-500/20 text-orange-400 font-bold'
+                  : 'text-white hover:bg-white/10'
               )}
             >
               {option.icon}
@@ -251,9 +251,9 @@ function QuickFilterBarComponent({ filters, onChange, className, userRole = 'cli
               <button
                 onClick={handleReset}
                 className={cn(
-                  'flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium',
-                  'bg-destructive/10 text-destructive border border-destructive/20',
-                  'hover:bg-destructive/20 transition-all duration-150 flex-shrink-0 active:scale-95 will-change-transform'
+                  'flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-bold',
+                  'bg-red-500/20 text-red-400 border border-red-500/30',
+                  'hover:bg-red-500/30 transition-all duration-150 flex-shrink-0 active:scale-95 will-change-transform'
                 )}
               >
                 <RotateCcw className="w-3 h-3" />
@@ -286,13 +286,13 @@ function QuickFilterBarComponent({ filters, onChange, className, userRole = 'cli
                   key={category.id}
                   onClick={() => handleCategoryToggle(category.id)}
                   className={cn(
-                    'flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium transition-all duration-150',
+                    'flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-bold transition-all duration-150',
                     'border active:scale-95 will-change-transform',
                     isActive
                       ? isServices
-                        ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-emerald-500 shadow-lg shadow-emerald-500/25'
-                        : 'bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/25'
-                      : 'bg-muted/50 text-muted-foreground border-white/10 hover:bg-muted hover:border-white/20'
+                        ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-emerald-500 shadow-lg shadow-emerald-500/30'
+                        : 'bg-orange-500 text-white border-orange-500 shadow-lg shadow-orange-500/30'
+                      : 'bg-white/10 text-white border-white/20 hover:bg-white/20 hover:border-white/30'
                   )}
                 >
                   {category.icon}
@@ -303,7 +303,7 @@ function QuickFilterBarComponent({ filters, onChange, className, userRole = 'cli
           </div>
 
           {/* Divider */}
-          <div className="w-px h-6 bg-white/10 flex-shrink-0" />
+          <div className="w-px h-6 bg-white/20 flex-shrink-0" />
 
           {/* Listing type dropdown - compact */}
           <FilterDropdown
@@ -319,9 +319,9 @@ function QuickFilterBarComponent({ filters, onChange, className, userRole = 'cli
             <button
               onClick={handleReset}
               className={cn(
-                'flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium',
-                'bg-destructive/10 text-destructive border border-destructive/20',
-                'hover:bg-destructive/20 transition-all duration-150 flex-shrink-0 active:scale-95 will-change-transform'
+                'flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-bold',
+                'bg-red-500/20 text-red-400 border border-red-500/30',
+                'hover:bg-red-500/30 transition-all duration-150 flex-shrink-0 active:scale-95 will-change-transform'
               )}
             >
               <RotateCcw className="w-3 h-3" />

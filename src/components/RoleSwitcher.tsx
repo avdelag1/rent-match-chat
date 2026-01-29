@@ -30,8 +30,8 @@ export function RoleSwitcher({ variant = 'card', className }: RoleSwitcherProps)
         disabled={isLoading}
         className={cn(
           "relative flex items-center gap-2 px-3 py-2 rounded-full",
-          "bg-muted/50 hover:bg-muted transition-colors",
-          "text-sm font-medium",
+          "bg-white/10 hover:bg-white/20 transition-colors border border-white/20",
+          "text-sm font-bold text-white",
           isLoading && "opacity-50 cursor-not-allowed",
           className
         )}
@@ -50,18 +50,18 @@ export function RoleSwitcher({ variant = 'card', className }: RoleSwitcherProps)
   }
 
   return (
-    <Card className={cn("bg-card border-border overflow-hidden", className)}>
+    <Card className={cn("bg-gray-900/90 border-white/20 overflow-hidden", className)}>
       <CardContent className="p-4">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="font-semibold text-foreground">Account Mode</h3>
-            <p className="text-sm text-muted-foreground">
+            <h3 className="font-bold text-white">Account Mode</h3>
+            <p className="text-sm text-gray-300">
               Switch between browsing and offering
             </p>
           </div>
           {isLoading && (
-            <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+            <Loader2 className="w-5 h-5 animate-spin text-white" />
           )}
         </div>
 
@@ -88,15 +88,15 @@ export function RoleSwitcher({ variant = 'card', className }: RoleSwitcherProps)
         </div>
 
         {/* Current Mode Indicator */}
-        <div className="mt-4 pt-4 border-t border-border">
+        <div className="mt-4 pt-4 border-t border-white/10">
           <div className="flex items-center gap-2 text-sm">
             <div className={cn(
-              "w-2 h-2 rounded-full",
-              activeMode === 'client' ? "bg-blue-500" : "bg-orange-500"
+              "w-2 h-2 rounded-full shadow-lg",
+              activeMode === 'client' ? "bg-blue-400 shadow-blue-400/50" : "bg-orange-400 shadow-orange-400/50"
             )} />
-            <span className="text-muted-foreground">
+            <span className="text-gray-300">
               Currently in{' '}
-              <span className="font-medium text-foreground">
+              <span className="font-bold text-white">
                 {activeMode === 'client' ? 'I\'m a Client' : 'I Own / I Can Do'}
               </span>
               {' '}mode
@@ -132,13 +132,13 @@ function ModeOption({
       onClick={onClick}
       disabled={disabled || isActive}
       className={cn(
-        "relative flex flex-col items-center gap-2 p-4 rounded-xl",
+        "relative flex flex-col items-center gap-2 p-4 rounded-xl border",
         "transition-all duration-200",
         isActive
           ? mode === 'client'
-            ? "bg-blue-500/15"
-            : "bg-orange-500/15"
-          : "bg-muted/30 hover:bg-muted/50",
+            ? "bg-blue-500/20 border-blue-500/30"
+            : "bg-orange-500/20 border-orange-500/30"
+          : "bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20",
         (disabled && !isActive) && "opacity-50 cursor-not-allowed"
       )}
       whileTap={!disabled && !isActive ? { scale: 0.98 } : undefined}
@@ -148,8 +148,8 @@ function ModeOption({
         <motion.div
           layoutId="active-mode-indicator"
           className={cn(
-            "absolute top-2 right-2 w-2 h-2 rounded-full",
-            mode === 'client' ? "bg-blue-500" : "bg-orange-500"
+            "absolute top-2 right-2 w-2 h-2 rounded-full shadow-lg shadow-blue-500/30",
+            mode === 'client' ? "bg-blue-400" : "bg-orange-400"
           )}
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
@@ -159,12 +159,12 @@ function ModeOption({
 
       {/* Icon */}
       <div className={cn(
-        "p-3 rounded-full",
+        "p-3 rounded-full shadow-lg",
         isActive
           ? mode === 'client'
-            ? "bg-blue-500/20 text-blue-500"
-            : "bg-orange-500/20 text-orange-500"
-          : "bg-muted text-muted-foreground"
+            ? "bg-blue-500/25 text-blue-400"
+            : "bg-orange-500/25 text-orange-400"
+          : "bg-white/10 text-white"
       )}>
         <Icon className="w-6 h-6" />
       </div>
@@ -172,12 +172,12 @@ function ModeOption({
       {/* Label */}
       <div className="text-center">
         <div className={cn(
-          "font-semibold",
-          isActive ? "text-foreground" : "text-muted-foreground"
+          "font-bold",
+          isActive ? "text-white" : "text-gray-300"
         )}>
           {label}
         </div>
-        <div className="text-xs text-muted-foreground">
+        <div className="text-xs text-gray-400">
           {description}
         </div>
       </div>
@@ -193,10 +193,10 @@ export function RoleIndicator({ className }: { className?: string }) {
 
   return (
     <div className={cn(
-      "flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium",
+      "flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-bold",
       activeMode === 'client'
-        ? "bg-blue-500/10 text-blue-500"
-        : "bg-orange-500/10 text-orange-500",
+        ? "bg-blue-500/20 text-blue-400 border border-blue-500/30"
+        : "bg-orange-500/20 text-orange-400 border border-orange-500/30",
       className
     )}>
       {activeMode === 'client' ? (

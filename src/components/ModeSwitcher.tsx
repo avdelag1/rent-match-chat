@@ -87,9 +87,9 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
               transition={{ type: 'spring', stiffness: 500, damping: 30 }}
             >
               {activeMode === 'client' ? (
-                <Search className="h-4 w-4 text-primary" />
+                <Search className="h-4 w-4 text-orange-400" />
               ) : (
-                <Briefcase className="h-4 w-4 text-emerald-500" />
+                <Briefcase className="h-4 w-4 text-emerald-400" />
               )}
             </motion.div>
           )}
@@ -130,19 +130,19 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
         {/* Client option - BRIGHTER text */}
         <div className={cn(
           'relative z-10 flex items-center gap-1.5 px-2 py-0.5 rounded-full transition-colors duration-200',
-          activeMode === 'client' ? 'text-white drop-shadow-sm' : 'text-white/60'
+          activeMode === 'client' ? 'text-white drop-shadow-sm font-bold' : 'text-white/60'
         )}>
           <Search className="h-3.5 w-3.5" />
-          <span className="font-medium">Client</span>
+          <span className="font-bold">Client</span>
         </div>
 
         {/* Owner option - BRIGHTER text */}
         <div className={cn(
           'relative z-10 flex items-center gap-1.5 px-2 py-0.5 rounded-full transition-colors duration-200',
-          activeMode === 'owner' ? 'text-emerald-400 drop-shadow-sm' : 'text-white/60'
+          activeMode === 'owner' ? 'text-emerald-400 drop-shadow-sm font-bold' : 'text-white/60'
         )}>
           <Briefcase className="h-3.5 w-3.5" />
-          <span className="font-medium">Owner</span>
+          <span className="font-bold">Owner</span>
         </div>
 
         {/* Loading overlay */}
@@ -190,23 +190,23 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
           className="flex items-center gap-1.5"
         >
           {isSwitching ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
+            <Loader2 className="h-3.5 w-3.5 animate-spin text-white" />
           ) : activeMode === 'client' ? (
             <>
-              <Search className="h-3.5 w-3.5 text-orange-400" />
-              <span className="font-bold text-orange-400">Client</span>
+              <Search className="h-3.5 w-3.5 text-white drop-shadow-sm" />
+              <span className="font-bold text-white drop-shadow-sm">Client</span>
             </>
           ) : (
             <>
-              <Briefcase className="h-3.5 w-3.5 text-emerald-400" />
-              <span className="font-bold text-emerald-400">Owner</span>
+              <Briefcase className="h-3.5 w-3.5 text-emerald-400 drop-shadow-sm" />
+              <span className="font-bold text-emerald-400 drop-shadow-sm">Owner</span>
             </>
           )}
         </motion.div>
       </AnimatePresence>
 
       {/* Switch icon */}
-      <ArrowLeftRight className="h-3 w-3 text-white/60" />
+      <ArrowLeftRight className="h-3 w-3 text-white/80" />
     </motion.button>
   );
 }

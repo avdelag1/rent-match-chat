@@ -97,7 +97,7 @@ export function NotificationsDialog({ isOpen, onClose }: NotificationsDialogProp
               </div>
               <div className="min-w-0">
                 <DialogTitle className="text-lg sm:text-xl font-bold">Notifications</DialogTitle>
-                <p className="text-xs sm:text-sm text-muted-foreground truncate">
+                <p className="text-xs sm:text-sm text-gray-300 truncate">
                   {unreadCount > 0 ? `${unreadCount} unread` : 'All caught up!'}
                 </p>
               </div>
@@ -163,15 +163,15 @@ export function NotificationsDialog({ isOpen, onClose }: NotificationsDialogProp
                     className="flex flex-col items-center justify-center py-10 sm:py-14 text-center"
                   >
                     <div className="relative mb-4">
-                      <div className="absolute inset-0 bg-primary/10 rounded-full blur-xl scale-150" />
-                      <div className="relative p-4 sm:p-5 rounded-full bg-gradient-to-br from-card to-muted/50 border border-border/50 shadow-lg">
-                        <Bell className="w-8 h-8 sm:w-9 sm:h-9 text-primary/50" />
+                      <div className="absolute inset-0 bg-orange-500/10 rounded-full blur-xl scale-150" />
+                      <div className="relative p-4 sm:p-5 rounded-full bg-gradient-to-br from-gray-800 to-gray-900 border border-white/10 shadow-lg">
+                        <Bell className="w-8 h-8 sm:w-9 sm:h-9 text-white/50" />
                       </div>
                     </div>
-                    <h3 className="text-sm sm:text-base font-semibold text-foreground mb-1">
+                    <h3 className="text-sm sm:text-base font-bold text-white mb-1">
                       {activeFilter === 'all' ? 'No notifications yet' : `No ${activeFilter} notifications`}
                     </h3>
-                    <p className="text-xs text-muted-foreground max-w-[200px]">
+                    <p className="text-xs text-gray-400 max-w-[200px]">
                       New activity will appear here
                     </p>
                   </motion.div>
@@ -244,12 +244,12 @@ export function NotificationsDialog({ isOpen, onClose }: NotificationsDialogProp
                                     </Button>
                                   </div>
                                   
-                                  <p className="text-xs text-muted-foreground line-clamp-2 mb-1.5">
+                                  <p className="text-xs text-gray-300 line-clamp-2 mb-1.5">
                                     {notification.message}
                                   </p>
                                   
                                   <div className="flex items-center gap-2">
-                                    <span className="text-[10px] text-muted-foreground/70">
+                                    <span className="text-[10px] text-gray-400">
                                       {formatDistanceToNow(notification.timestamp, { addSuffix: true })}
                                     </span>
                                     {!notification.read && (
