@@ -128,15 +128,15 @@ async function saveWelcomeNotification(userId: string) {
     }
 
     // Insert welcome notification with correct schema
-    // Use type assertion to bypass strict typing issues
     const notificationData = {
       user_id: userId,
-      type: 'system',
-      message: 'Welcome to Swipess! 🎉 Your journey to finding the perfect match starts now!',
-      read: false
-    } as any;
+      notification_type: 'system_announcement',
+      title: 'Welcome to Swipess! 🎉',
+      message: 'Your journey to finding the perfect match starts now!',
+      is_read: false
+    };
 
-    await supabase.from('notifications').insert(notificationData);
+    await supabase.from('notifications').insert([notificationData]);
 
     logger.log('[Welcome] Saved welcome notification to database');
   } catch (error) {

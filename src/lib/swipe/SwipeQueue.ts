@@ -236,11 +236,12 @@ class SwipeQueueProcessor {
         if (recipientId) {
           await supabase.from('notifications').insert([{
             user_id: recipientId,
-            type: 'like',
+            notification_type: 'new_like',
             title: '💚 Someone liked you!',
             message: 'You have a new like. Swipe to see if it\'s a match!',
-            data: { liker_id: userId, target_id: swipe.targetId, target_type: swipe.targetType },
-          }] as any);
+            is_read: false,
+            metadata: { liker_id: userId, target_id: swipe.targetId, target_type: swipe.targetType },
+          }]);
         }
       } catch {
         // Silent fail - notifications are non-critical

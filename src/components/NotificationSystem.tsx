@@ -74,9 +74,8 @@ export function NotificationSystem() {
 
                 // Save to notifications table (non-blocking, errors are non-critical)
                 supabase.from('notifications').insert([{
-                  id: crypto.randomUUID(),
                   user_id: user.id,
-                  notification_type: 'message',
+                  notification_type: 'new_message',
                   title: `New message from ${senderName}`,
                   message: `${senderName}: ${messageText.slice(0, 100)}${messageText.length > 100 ? '...' : ''}`,
                   is_read: false
@@ -173,9 +172,8 @@ export function NotificationSystem() {
 
               // Save to notifications table (non-blocking, errors are non-critical)
               supabase.from('notifications').insert([{
-                id: crypto.randomUUID(),
                 user_id: user.id,
-                notification_type: 'like',
+                notification_type: 'new_like',
                 title: '🔥 New Flame',
                 message: `${likerName} liked your property!`,
                 is_read: false

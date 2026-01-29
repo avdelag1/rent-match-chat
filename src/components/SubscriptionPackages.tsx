@@ -167,9 +167,8 @@ export function SubscriptionPackages({ isOpen = true, onClose, reason, userRole 
     // Save notification for premium package purchase
     if (user?.id) {
       await supabase.from('notifications').insert([{
-        id: crypto.randomUUID(),
         user_id: user.id,
-        notification_type: 'premium_purchase',
+        notification_type: 'payment_received',
         title: 'Premium Package Selected!',
         message: `You selected the ${plan.name} package (${plan.price}). Complete payment to activate your premium benefits!`,
         is_read: false

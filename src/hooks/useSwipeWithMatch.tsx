@@ -193,11 +193,11 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
 
           // Create in-app notification for the client
           supabase.from('notifications').insert([{
-            id: crypto.randomUUID(),
             user_id: targetId,
-            type: 'like',
-            message: `🔥 ${ownerName} liked your profile!`,
-            read: false
+            notification_type: 'new_like',
+            title: '🔥 New Flame!',
+            message: `${ownerName} liked your profile!`,
+            is_read: false
           }]).then(
             () => logger.info('[useSwipeWithMatch] Notification saved for client:', targetId),
             (err) => logger.error('[useSwipeWithMatch] Failed to save notification:', err)
@@ -272,11 +272,11 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
 
             // Create in-app notification for the owner
             supabase.from('notifications').insert([{
-              id: crypto.randomUUID(),
               user_id: listingResult.data.owner_id,
-              type: 'like',
-              message: `🔥 ${clientName} liked ${listingTitle}!`,
-              read: false
+              notification_type: 'new_like',
+              title: '🔥 New Flame!',
+              message: `${clientName} liked ${listingTitle}!`,
+              is_read: false
             }]).then(
               () => logger.info('[useSwipeWithMatch] Notification sent to owner:', listingResult.data.owner_id),
               (err) => logger.error('[useSwipeWithMatch] Failed to notify owner:', err)
