@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- TindeRent Brand Colors -->
+    <color name="colorPrimary">#FF0000</color>
+    <color name="colorPrimaryDark">#CC0000</color>
+    <color name="colorAccent">#FF0000</color>
+
+    <!-- Background Colors -->
+    <color name="backgroundColor">#FFFFFF</color>
+    <color name="backgroundDark">#000000</color>
+
+    <!-- Status and Navigation Bar -->
+    <color name="statusBarColor">#FF0000</color>
+    <color name="navigationBarColor">@android:color/transparent</color>
+</resources>

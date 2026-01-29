@@ -1,4 +1,3 @@
-// TEST: Jarvis sync check - 2026-01-28 23:45 EST
 import { lazy, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SuspenseFallback } from "@/components/ui/suspense-fallback";
