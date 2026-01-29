@@ -35,8 +35,7 @@ interface ClientFilters {
   // Property specific
   bedrooms?: number;
   bathrooms?: number;
-  furnished?: boolean;
-  petsAllowed?: boolean;
+  amenities?: string[];
   // Vehicle specific
   seats?: number;
   transmission?: 'automatic' | 'manual' | 'any';
@@ -60,11 +59,31 @@ const categories: { id: QuickFilterCategory; label: string; icon: typeof Home; c
   { id: 'services', label: 'Services', icon: Wrench, color: 'bg-purple-500' },
 ];
 
+const amenityOptions = [
+  { id: 'furnished', label: 'Furnished' },
+  { id: 'petsAllowed', label: 'Pets Allowed' },
+  { id: 'parking', label: 'Parking' },
+  { id: 'pool', label: 'Pool' },
+  { id: 'gym', label: 'Gym' },
+  { id: 'wifi', label: 'Wi-Fi' },
+];
+
 export function NewClientFilters({ open, onClose, onApply, currentFilters = {} }: NewClientFiltersProps) {
   const [filters, setFilters] = useState<ClientFilters>(currentFilters);
 
   const activeCategory = categories.find(c => c.id === filters.category);
+  const activeAmenities = new Set(filters.amenities || []);
 
+  const handleAmenityToggle = (amenity: string) => {
+    const newAmenities = new Set(filters.amenities || []);
+    if (newAmenities.has(amenity)) {
+      newAmenities.delete(amenity);
+    } else {
+      newAmenities.add(amenity);
+    }
+    setFilters({ ...filters, amenities: Array.from(newAmenities) });
+  };
+  
   const handleApply = () => {
     onApply(filters);
     onClose();
@@ -80,8 +99,7 @@ export function NewClientFilters({ open, onClose, onApply, currentFilters = {} }
     if (filters.location) count++;
     if (filters.bedrooms) count++;
     if (filters.bathrooms) count++;
-    if (filters.furnished !== undefined) count++;
-    if (filters.petsAllowed !== undefined) count++;
+    if (filters.amenities && filters.amenities.length > 0) count += filters.amenities.length;
     if (filters.seats) count++;
     if (filters.transmission && filters.transmission !== 'any') count++;
     return count;
@@ -248,33 +266,30 @@ export function NewClientFilters({ open, onClose, onApply, currentFilters = {} }
                         ))}
                       </div>
                     </div>
-
-                    {/* Toggle Options */}
+                    
+                    {/* Amenities */}
                     <div className="space-y-2">
-                      <button
-                        onClick={() => setFilters({ ...filters, furnished: !filters.furnished })}
-                        className={cn(
-                          "w-full py-3 px-4 rounded-lg border-2 text-left font-medium text-sm transition-all flex items-center justify-between",
-                          filters.furnished
-                            ? "border-primary bg-primary/10"
-                            : "border-border"
-                        )}
-                      >
-                        Furnished
-                        {filters.furnished && <Check className="h-4 w-4 text-primary" />}
-                      </button>
-                      <button
-                        onClick={() => setFilters({ ...filters, petsAllowed: !filters.petsAllowed })}
-                        className={cn(
-                          "w-full py-3 px-4 rounded-lg border-2 text-left font-medium text-sm transition-all flex items-center justify-between",
-                          filters.petsAllowed
-                            ? "border-primary bg-primary/10"
-                            : "border-border"
-                        )}
-                      >
-                        Pets Allowed
-                        {filters.petsAllowed && <Check className="h-4 w-4 text-primary" />}
-                      </button>
+                      <span className="text-xs text-muted-foreground">Amenities</span>
+                      <div className="flex flex-wrap gap-2">
+                        {amenityOptions.map((amenity) => {
+                          const isActive = activeAmenities.has(amenity.id);
+                          return (
+                            <button
+                              key={amenity.id}
+                              onClick={() => handleAmenityToggle(amenity.id)}
+                              className={cn(
+                                "py-2 px-4 rounded-full border-2 font-medium text-sm transition-all flex items-center gap-2",
+                                isActive
+                                  ? "border-primary bg-primary/10 text-primary"
+                                  : "border-border hover:border-primary/50"
+                              )}
+                            >
+                              {amenity.label}
+                              {isActive && <X className="h-3 w-3" />}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
                 </>
