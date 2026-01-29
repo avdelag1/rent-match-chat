@@ -19,6 +19,8 @@ export type ClientProfileLite = {
   neighborhood?: string | null;
   latitude?: number | null;
   longitude?: number | null;
+  // Intentions
+  intentions?: string[] | null;
 };
 
 // Type for database operations (excluding id)

@@ -5,13 +5,22 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { PhotoUploadManager } from '@/components/PhotoUploadManager';
 import { useOwnerProfile, useSaveOwnerProfile } from '@/hooks/useOwnerProfile';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/utils/prodLogger';
+import { Building2, Bike, CircleDot, Briefcase, Check } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-// Owner profile is for business information only
+// Preset service offerings - multi-option, no free text
+const SERVICE_OFFERING_OPTIONS = [
+  { id: 'property_rental', label: 'Property Rental', icon: Building2, description: 'Apartments, houses, condos' },
+  { id: 'motorcycle_rental', label: 'Motorcycle Rental', icon: CircleDot, description: 'Motorcycles, scooters, ATVs' },
+  { id: 'bicycle_rental', label: 'Bicycle Rental', icon: Bike, description: 'Bikes, e-bikes, mountain bikes' },
+  { id: 'professional_services', label: 'Professional Services', icon: Briefcase, description: 'Chef, cleaner, nanny, handyman' },
+];
 
 type Props = {
   open: boolean;
@@ -27,6 +36,7 @@ function OwnerProfileDialogComponent({ open, onOpenChange }: Props) {
   const [contactEmail, setContactEmail] = useState<string>('');
   const [contactPhone, setContactPhone] = useState<string>('');
   const [profileImages, setProfileImages] = useState<string[]>([]);
+  const [serviceOfferings, setServiceOfferings] = useState<string[]>([]);
 
   useEffect(() => {
     if (!data) return;
@@ -35,6 +45,7 @@ function OwnerProfileDialogComponent({ open, onOpenChange }: Props) {
     setContactEmail(data.contact_email ?? '');
     setContactPhone(data.contact_phone ?? '');
     setProfileImages(data.profile_images ?? []);
+    setServiceOfferings(data.service_offerings ?? []);
   }, [data]);
 
   const handleImageUpload = async (file: File): Promise<string> => {
@@ -71,6 +82,7 @@ function OwnerProfileDialogComponent({ open, onOpenChange }: Props) {
       contact_email: contactEmail || null,
       contact_phone: contactPhone || null,
       profile_images: profileImages,
+      service_offerings: serviceOfferings,
     };
 
     try {
@@ -87,10 +99,19 @@ function OwnerProfileDialogComponent({ open, onOpenChange }: Props) {
     }
   };
 
+  const toggleServiceOffering = (id: string) => {
+    setServiceOfferings(prev => 
+      prev.includes(id) 
+        ? prev.filter(item => item !== id)
+        : [...prev, id]
+    );
+  };
+
   const completionPercentage = Math.round(
-    ((businessName ? 35 : 0) +
-     (businessLocation ? 25 : 0) +
-     (contactEmail ? 20 : 0) +
+    ((businessName ? 20 : 0) +
+     (serviceOfferings.length > 0 ? 30 : 0) +
+     (businessLocation ? 15 : 0) +
+     (contactEmail ? 15 : 0) +
      (profileImages.length > 0 ? 20 : 0))
   );
 
@@ -115,7 +136,7 @@ function OwnerProfileDialogComponent({ open, onOpenChange }: Props) {
               <div className="flex items-center justify-between">
                 <div>
                   <Label className="text-white text-lg sm:text-xl font-bold">📸 Business Photos</Label>
-                  <p className="text-white/60 text-xs sm:text-sm mt-1">Add photos of your properties • Up to 10 photos</p>
+                  <p className="text-white/60 text-xs sm:text-sm mt-1">Add photos of your business • Up to 10 photos</p>
                 </div>
                 <Badge variant="secondary" className="bg-red-500/20 text-red-400 border-red-400">
                   {profileImages.length}/10
@@ -140,7 +161,7 @@ function OwnerProfileDialogComponent({ open, onOpenChange }: Props) {
                   id="business_name"
                   value={businessName}
                   onChange={(e) => setBusinessName(e.target.value)}
-                  placeholder="Your property business name"
+                  placeholder="Your business name"
                   className="h-12 text-base bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-red-400"
                 />
               </div>
@@ -155,6 +176,69 @@ function OwnerProfileDialogComponent({ open, onOpenChange }: Props) {
                   className="h-12 text-base bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-red-400"
                 />
               </div>
+            </div>
+
+            {/* Service Offerings Section - Multi-option presets */}
+            <div className="space-y-4">
+              <Label className="text-white text-lg sm:text-xl font-bold">💼 What Do You Offer?</Label>
+              <p className="text-white/60 text-sm">Select all services your business provides • No free text needed</p>
+              
+              <div className="grid grid-cols-1 gap-3">
+                {SERVICE_OFFERING_OPTIONS.map((option) => {
+                  const Icon = option.icon;
+                  const isSelected = serviceOfferings.includes(option.id);
+                  
+                  return (
+                    <button
+                      key={option.id}
+                      onClick={() => toggleServiceOffering(option.id)}
+                      className={cn(
+                        "flex items-center gap-3 p-4 rounded-xl border-2 transition-all text-left",
+                        isSelected 
+                          ? "bg-red-500/10 border-red-500/50 shadow-lg shadow-red-500/10" 
+                          : "bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20"
+                      )}
+                    >
+                      <div className={cn(
+                        "p-2 rounded-lg shrink-0",
+                        isSelected ? "bg-red-500/20 text-red-400" : "bg-white/10 text-white/70"
+                      )}>
+                        <Icon className="w-5 h-5" />
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-white">{option.label}</span>
+                          {isSelected && (
+                            <Badge className="bg-red-500 text-white text-xs">
+                              <Check className="w-3 h-3 mr-1" /> Selected
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-sm text-white/50 truncate">{option.description}</p>
+                      </div>
+
+                      <div className={cn(
+                        "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0",
+                        isSelected 
+                          ? "border-red-500 bg-red-500 text-white" 
+                          : "border-white/30"
+                      )}>
+                        {isSelected && <Check className="w-3 h-3" />}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+              
+              {serviceOfferings.length === 0 && (
+                <p className="text-orange-400 text-sm">Select at least one service to continue</p>
+              )}
+            </div>
+
+            {/* Contact Info Section */}
+            <div className="space-y-4">
+              <Label className="text-white text-lg sm:text-xl font-bold">📞 Contact Information</Label>
 
               <div className="space-y-2">
                 <Label htmlFor="contact_email" className="text-white/90 text-sm sm:text-base">Contact Email</Label>
@@ -194,8 +278,8 @@ function OwnerProfileDialogComponent({ open, onOpenChange }: Props) {
             </Button>
             <Button
               onClick={handleSave}
-              disabled={saveMutation.isPending}
-              className="flex-1 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white font-semibold shadow-lg"
+              disabled={saveMutation.isPending || serviceOfferings.length === 0}
+              className="flex-1 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white font-semibold shadow-lg disabled:opacity-50"
             >
               {saveMutation.isPending ? 'Saving...' : 'Save Profile'}
             </Button>
@@ -205,6 +289,5 @@ function OwnerProfileDialogComponent({ open, onOpenChange }: Props) {
     </Dialog>
   );
 }
-
 
 export const OwnerProfileDialog = memo(OwnerProfileDialogComponent);

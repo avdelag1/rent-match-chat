@@ -96,8 +96,7 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
   const handleAddProperty = () => {
     setEditingProperty(null);
     setShowCategoryDialog(true);
-    // Open form directly
-    setIsFormOpen(true);
+    // Don't open form yet - wait for category selection
   };
 
   const handleAIComplete = (data: { category: string; images: string[]; formData: Record<string, unknown> }) => {
@@ -115,7 +114,7 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
   const handleCategorySelect = (category: 'property' | 'motorcycle' | 'bicycle' | 'worker', mode: 'rent' | 'sale' | 'both') => {
     setEditingProperty({ category, mode });
     setShowCategoryDialog(false);
-    // Form is already open from handleAddProperty
+    setIsFormOpen(true);
   };
 
   const handleEditProperty = (listing: any) => {

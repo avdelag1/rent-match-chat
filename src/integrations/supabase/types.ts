@@ -611,7 +611,8 @@ export type Database = {
           longitude: number | null
           name: string | null
           nationality: string | null
-          neighborhood: string | null`n          occupation: string | null
+          neighborhood: string | null
+          occupation: string | null
           noise_tolerance: string | null
           personality_traits: string[] | null
           preferred_activities: string[] | null
@@ -621,6 +622,7 @@ export type Database = {
           updated_at: string | null
           user_id: string | null
           work_schedule: string | null
+          intentions: string[] | null
         }
         Insert: {
           age?: number | null
@@ -653,6 +655,7 @@ export type Database = {
           updated_at?: string | null
           user_id?: string | null
           work_schedule?: string | null
+          intentions?: string[] | null
         }
         Update: {
           age?: number | null
@@ -685,6 +688,7 @@ export type Database = {
           updated_at?: string | null
           user_id?: string | null
           work_schedule?: string | null
+          intentions?: string[] | null
         }
         Relationships: []
       }
@@ -1662,6 +1666,7 @@ export type Database = {
           created_at: string | null
           id: string
           profile_images: string[] | null
+          service_offerings: string[] | null
           updated_at: string | null
           user_id: string
           verified_owner: boolean | null
@@ -1675,6 +1680,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           profile_images?: string[] | null
+          service_offerings?: string[] | null
           updated_at?: string | null
           user_id: string
           verified_owner?: boolean | null
@@ -1688,6 +1694,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           profile_images?: string[] | null
+          service_offerings?: string[] | null
           updated_at?: string | null
           user_id?: string
           verified_owner?: boolean | null

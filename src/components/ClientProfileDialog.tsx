@@ -95,6 +95,14 @@ const INTEREST_OPTIONS = [
   'Yoga & Meditation', 'Entrepreneurship', 'Volunteering',
 ];
 
+// Client intentions - what they're looking for (multi-option presets)
+const INTENTION_OPTIONS = [
+  { id: 'rent_property', label: 'Looking to Rent', description: 'Apartments, houses, rooms' },
+  { id: 'buy_property', label: 'Looking to Buy', description: 'Interested in purchasing property' },
+  { id: 'rent_vehicle', label: 'Need Vehicle Rental', description: 'Motorcycle, bicycle, car' },
+  { id: 'hire_service', label: 'Looking to Hire', description: 'Find professionals for work' },
+];
+
 type Props = {
   open: boolean;
   onOpenChange: (v: boolean) => void;
@@ -138,6 +146,9 @@ function ClientProfileDialogComponent({ open, onOpenChange }: Props) {
   const [selectedRegion, setSelectedRegion] = useState<string>('');
   const [countrySearch, setCountrySearch] = useState('');
   const [citySearch, setCitySearch] = useState('');
+
+  // Client intentions - what they're looking for
+  const [intentions, setIntentions] = useState<string[]>([]);
 
   // Get all unique countries across all regions
   const allCountries = (() => {
@@ -248,6 +259,9 @@ function ClientProfileDialogComponent({ open, onOpenChange }: Props) {
     setLatitude((data as any).latitude ?? null);
     setLongitude((data as any).longitude ?? null);
 
+    // Load client intentions
+    setIntentions((data as any).intentions ?? []);
+
     // Find and set the region for the loaded country
     if (loadedCountry) {
       const region = findRegionForCountry(loadedCountry);
@@ -325,6 +339,9 @@ function ClientProfileDialogComponent({ open, onOpenChange }: Props) {
       neighborhood: neighborhood || null,
       latitude: latitude,
       longitude: longitude,
+
+      // Client intentions
+      intentions: intentions,
     };
 
     try {
@@ -393,9 +410,17 @@ function ClientProfileDialogComponent({ open, onOpenChange }: Props) {
     }
   };
 
+  const toggleIntention = (intentionId: string) => {
+    if (intentions.includes(intentionId)) {
+      setIntentions(intentions.filter(i => i !== intentionId));
+    } else {
+      setIntentions([...intentions, intentionId]);
+    }
+  };
+
   const totalTags = interests.length + activities.length;
   const completionPercentage = Math.round(
-    ((name ? 25 : 0) + (age ? 15 : 0) + (gender ? 10 : 0) + (profileImages.length > 0 ? 20 : 0) + (totalTags >= 5 ? 30 : totalTags * 6)) / 100 * 100
+    ((name ? 20 : 0) + (age ? 10 : 0) + (gender ? 5 : 0) + (profileImages.length > 0 ? 15 : 0) + (intentions.length > 0 ? 20 : 0) + (totalTags >= 5 ? 30 : totalTags * 6)) / 100 * 100
   );
 
   return (
@@ -479,6 +504,60 @@ function ClientProfileDialogComponent({ open, onOpenChange }: Props) {
                   </Select>
                 </div>
               </div>
+            </div>
+
+            {/* Intentions Section - What are you looking for? */}
+            <div className="space-y-4">
+              <Label className="text-white text-lg sm:text-xl font-bold">🎯 What Are You Looking For?</Label>
+              <p className="text-white/60 text-xs sm:text-sm -mt-2">Select all that apply • Helps owners understand your needs</p>
+
+              <div className="grid grid-cols-1 gap-3">
+                {INTENTION_OPTIONS.map((option) => {
+                  const isSelected = intentions.includes(option.id);
+                  
+                  return (
+                    <button
+                      key={option.id}
+                      onClick={() => toggleIntention(option.id)}
+                      className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all text-left ${
+                        isSelected 
+                          ? "bg-red-500/10 border-red-500/50 shadow-lg shadow-red-500/10" 
+                          : "bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20"
+                      }`}
+                    >
+                      <div className={`p-2 rounded-lg shrink-0 ${
+                        isSelected ? "bg-red-500/20 text-red-400" : "bg-white/10 text-white/70"
+                      }`}>
+                        <Search className="w-5 h-5" />
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-white">{option.label}</span>
+                          {isSelected && (
+                            <Badge className="bg-red-500 text-white text-xs">
+                              <Check className="w-3 h-3 mr-1" /> Selected
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-sm text-white/50 truncate">{option.description}</p>
+                      </div>
+
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                        isSelected 
+                          ? "border-red-500 bg-red-500 text-white" 
+                          : "border-white/30"
+                      }`}>
+                        {isSelected && <Check className="w-3 h-3" />}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {intentions.length === 0 && (
+                <p className="text-orange-400 text-sm">Select at least one option to continue</p>
+              )}
             </div>
 
             {/* Location Section */}

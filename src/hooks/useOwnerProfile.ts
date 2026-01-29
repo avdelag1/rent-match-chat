@@ -12,6 +12,7 @@ export type OwnerProfile = {
   contact_phone?: string | null;
   profile_images?: string[] | null;
   verified_owner?: boolean;
+  service_offerings?: string[] | null;
 };
 
 type OwnerProfileUpdate = Omit<OwnerProfile, 'id' | 'user_id'>;
