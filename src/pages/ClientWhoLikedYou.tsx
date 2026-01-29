@@ -62,11 +62,12 @@ const ClientWhoLikedYou = () => {
     queryFn: async () => {
       if (!user?.id) return [];
 
-      // Get all owner_likes where client_id is current user
+      // Get all likes where client was liked (target_type='profile')
       const { data: likes, error: likesError } = await supabase
-        .from('owner_likes')
-        .select('id, owner_id, listing_id, is_super_like, created_at')
-        .eq('client_id', user.id)
+        .from('likes')
+        .select('id, user_id, created_at')
+        .eq('target_id', user.id)
+        .eq('target_type', 'profile')
         .order('created_at', { ascending: false });
 
       if (likesError) {
@@ -77,8 +78,7 @@ const ClientWhoLikedYou = () => {
       if (!likes || likes.length === 0) return [];
 
       // Get unique owner IDs
-      const ownerIds = [...new Set(likes.map(l => l.owner_id))];
-      const listingIds = likes.filter(l => l.listing_id).map(l => l.listing_id);
+      const ownerIds = [...new Set(likes.map(l => l.user_id))];
 
       // Fetch owner profiles
       const { data: ownerProfiles, error: profilesError } = await supabase
@@ -90,31 +90,19 @@ const ClientWhoLikedYou = () => {
         logger.error('[ClientWhoLikedYou] Error fetching profiles:', profilesError);
       }
 
-      // Fetch listings if any
-      let listings: any[] = [];
-      if (listingIds.length > 0) {
-        const { data: listingsData } = await supabase
-          .from('listings')
-          .select('id, title')
-          .in('id', listingIds);
-        listings = listingsData || [];
-      }
-
       const profileMap = new Map((ownerProfiles || []).map((p: { id: string; full_name: string | null }) => [p.id, p]));
-      const listingMap = new Map(listings.map(l => [l.id, l]));
 
       return likes.map(like => {
-        const profile = profileMap.get(like.owner_id);
-        const listing = like.listing_id ? listingMap.get(like.listing_id) : null;
+        const profile = profileMap.get(like.user_id);
         return {
           id: like.id,
-          owner_id: like.owner_id,
+          owner_id: like.user_id,
           owner_name: profile?.full_name || 'Property Owner',
-          business_name: null, // Field doesn't exist on profiles table
-          listing_title: listing?.title || null,
-          listing_id: like.listing_id,
+          business_name: null,
+          listing_title: null,
+          listing_id: null,
           created_at: like.created_at,
-          is_super_like: like.is_super_like || false,
+          is_super_like: false,
         };
       });
     },
@@ -127,7 +115,7 @@ const ClientWhoLikedYou = () => {
   const deleteLikeMutation = useMutation({
     mutationFn: async (likeId: string) => {
       const { error } = await supabase
-        .from('owner_likes')
+        .from('likes')
         .delete()
         .eq('id', likeId);
 

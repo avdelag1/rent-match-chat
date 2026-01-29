@@ -394,12 +394,13 @@ async function detectAndCreateMatch({
     matchOwnerId = listing.owner_id;  // Listing owner
     matchListingId = targetId;  // The listing
 
-    // Check if owner liked this client (in owner_likes table)
+    // Check if owner liked this client (in likes table with target_type='profile')
     const { data: ownerLike } = await supabase
-      .from('owner_likes')
+      .from('likes')
       .select('*')
-      .eq('owner_id', listing.owner_id)
-      .eq('client_id', userId)
+      .eq('user_id', listing.owner_id)
+      .eq('target_id', userId)
+      .eq('target_type', 'profile')
       .maybeSingle();
 
     mutualLike = ownerLike;

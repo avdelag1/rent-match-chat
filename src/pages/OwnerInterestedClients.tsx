@@ -84,14 +84,15 @@ const OwnerInterestedClients = () => {
 
       const profileMap = new Map((profiles || []).map(p => [p.id, p]));
 
-      // Check for mutual likes (if owner also liked these clients)
+      // Check for mutual likes (if owner also liked these clients using likes table)
       const { data: ownerLikes } = await supabase
-        .from('owner_likes')
-        .select('client_id')
-        .eq('owner_id', user?.id)
-        .in('client_id', userIds);
+        .from('likes')
+        .select('target_id')
+        .eq('user_id', user?.id)
+        .eq('target_type', 'profile')
+        .in('target_id', userIds);
 
-      const mutualSet = new Set((ownerLikes || []).map(ol => ol.client_id));
+      const mutualSet = new Set((ownerLikes || []).map(ol => ol.target_id));
 
       return interestedClients.map(client => {
         const profile = profileMap.get(client.user.id);
