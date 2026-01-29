@@ -395,10 +395,7 @@ export function useStartConversation() {
               client_id: clientId,
               owner_id: ownerId,
               listing_id: listingId,
-              is_mutual: true,
-              status: 'accepted',
-              client_liked_at: new Date().toISOString(),
-              owner_liked_at: new Date().toISOString()
+              status: 'active'
             });
         } catch (matchError) {
           // Match creation failed, but conversation was created successfully

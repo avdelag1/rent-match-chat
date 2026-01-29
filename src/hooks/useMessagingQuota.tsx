@@ -35,15 +35,14 @@ export function useMessagingQuota() {
     queryFn: async () => {
       if (!user?.id) return [];
       
+      // Check if user has any matches (for free messaging eligibility)
       const { data, error } = await supabase
         .from('matches')
         .select('*')
-        .or(`client_id.eq.${user.id},owner_id.eq.${user.id}`)
-        .eq('free_messaging', true)
-        .eq('is_mutual', true);
+        .or(`client_id.eq.${user.id},owner_id.eq.${user.id}`);
       
       if (error) {
-        logger.error('[useMessagingQuota] Error fetching free messaging matches:', error);
+        logger.error('[useMessagingQuota] Error fetching matches:', error);
         return [];
       }
       

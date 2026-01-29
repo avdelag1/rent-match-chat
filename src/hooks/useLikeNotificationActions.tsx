@@ -41,7 +41,7 @@ export function useLikeNotificationActions() {
       // Create or update match
       const { data: existingMatch } = await supabase
         .from('matches')
-        .select('id, is_mutual, status')
+        .select('id, status')
         .eq('client_id', clientId)
         .eq('owner_id', ownerId)
         .maybeSingle();
@@ -51,10 +51,8 @@ export function useLikeNotificationActions() {
         const { error: updateError } = await supabase
           .from('matches')
           .update({
-            is_mutual: true,
-            status: 'accepted',
-            updated_at: new Date().toISOString(),
-            ...(targetType === 'listing' ? { owner_liked_at: new Date().toISOString() } : { client_liked_at: new Date().toISOString() })
+            status: 'active',
+            updated_at: new Date().toISOString()
           })
           .eq('id', existingMatch.id);
 
@@ -67,11 +65,9 @@ export function useLikeNotificationActions() {
             client_id: clientId,
             owner_id: ownerId,
             listing_id: listingId || null,
-            is_mutual: true,
-            status: 'accepted',
+            status: 'active',
             created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            ...(targetType === 'listing' ? { owner_liked_at: new Date().toISOString() } : { client_liked_at: new Date().toISOString() })
+            updated_at: new Date().toISOString()
           }]);
 
         if (insertError) throw insertError;

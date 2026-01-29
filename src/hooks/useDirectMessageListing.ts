@@ -86,7 +86,7 @@ export function useDirectMessageListing() {
         throw new Error(`Failed to create conversation: ${conversationError.message}`);
       }
 
-      // Create match record with free_messaging flag for tracking
+      // Create match record for tracking
       try {
         await supabase
           .from('matches')
@@ -94,11 +94,7 @@ export function useDirectMessageListing() {
             client_id: user.id,
             owner_id: ownerId,
             listing_id: listingId,
-            is_mutual: true,
-            status: 'accepted',
-            free_messaging: true,
-            client_liked_at: new Date().toISOString(),
-            owner_liked_at: new Date().toISOString()
+            status: 'active'
           });
       } catch (matchError) {
         // Match creation failed but conversation was created - continue
