@@ -26,19 +26,17 @@ export function useClientStats() {
         return { likesReceived: 0, matchesCount: 0, activeChats: 0 };
       }
 
-      // Count likes received from owners (using unified likes table)
+      // Count likes received from owners (using owner_likes table)
       const { count: likesReceived } = await supabase
-        .from('likes')
+        .from('owner_likes')
         .select('*', { count: 'exact', head: true })
-        .eq('target_id', user.id)
-        .eq('target_type', 'profile')
-        .eq('direction', 'right');
+        .eq('client_id', user.id);
 
-      // Count mutual matches (using user_1/user_2 columns)
+      // Count mutual matches (client_id/owner_id columns)
       const { count: matchesCount } = await supabase
         .from('matches')
         .select('*', { count: 'exact', head: true })
-        .or(`user_1.eq.${user.id},user_2.eq.${user.id}`);
+        .or(`client_id.eq.${user.id},owner_id.eq.${user.id}`);
 
       // Count active conversations
       const { count: activeChats } = await supabase
