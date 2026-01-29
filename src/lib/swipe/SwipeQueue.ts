@@ -5,10 +5,9 @@
  * Swipe animations NEVER wait for this - it runs completely detached.
  *
  * Architecture:
- * 1. UI calls queueSwipe() - returns instantly (< 1ms)
- * 2. Queue processes in background using requestIdleCallback
- * 3. Failed swipes are retried with exponential backoff
- * 4. Offline swipes are persisted to localStorage for later sync
+ * - All swipes go to the unified `likes` table
+ * - Uses direction column ('left' or 'right')
+ * - Uses target_type column ('listing' or 'profile')
  */
 
 import { supabase } from '@/integrations/supabase/client';
@@ -186,19 +185,22 @@ class SwipeQueueProcessor {
 
   /**
    * Process a single swipe - writes to Supabase
+   * Uses unified likes table with direction column
    */
   private async processSwipe(swipe: QueuedSwipe): Promise<void> {
     const userId = swipe.userId || this.cachedUserId;
     if (!userId) throw new Error('No user ID');
 
-    // Upsert like - atomic operation
+    // Upsert to likes table with direction
     const { error } = await supabase
       .from('likes')
       .upsert({
         user_id: userId,
-        target_listing_id: swipe.targetId,
+        target_id: swipe.targetId,
+        target_type: swipe.targetType,
+        direction: swipe.direction
       }, {
-        onConflict: 'user_id,target_listing_id',
+        onConflict: 'user_id,target_id',
         ignoreDuplicates: false,
       });
 
@@ -248,6 +250,7 @@ class SwipeQueueProcessor {
 
   /**
    * Check for match in background - completely fire-and-forget
+   * Uses unified likes table to check for mutual likes
    */
   private checkMatchAsync(userId: string, swipe: QueuedSwipe): void {
     queueMicrotask(async () => {
@@ -262,27 +265,23 @@ class SwipeQueueProcessor {
 
           if (!listing) return;
 
-          // Check if owner liked this client (use owner_likes table)
+          // Check if owner liked this client (check likes table for profile like)
           const { data: ownerLike } = await supabase
-            .from('owner_likes')
+            .from('likes')
             .select('*')
-            .eq('owner_id', listing.owner_id)
-            .eq('client_id', userId)
+            .eq('user_id', listing.owner_id)
+            .eq('target_id', userId)
+            .eq('target_type', 'profile')
+            .eq('direction', 'right')
             .maybeSingle();
 
           if (ownerLike) {
-            // Create match
+            // Create match using user_1 and user_2 (actual schema)
             await supabase.from('matches').upsert({
-              client_id: userId,
-              owner_id: listing.owner_id,
-              listing_id: swipe.targetId,
-              client_liked_at: new Date().toISOString(),
-              owner_liked_at: ownerLike.created_at,
-              is_mutual: true,
-              status: 'accepted',
-              free_messaging: true,
+              user_1: userId,
+              user_2: listing.owner_id,
             }, {
-              onConflict: 'client_id,owner_id,listing_id',
+              onConflict: 'user_1,user_2',
               ignoreDuplicates: true,
             });
 

@@ -6,10 +6,11 @@ import { logger } from '@/utils/logger';
 /**
  * SIMPLE SWIPE LIKE HANDLER
  * 
- * Simple and reliable - no complex logic
- * - Left swipe = save dismissal (for undo)
- * - Right swipe = save like immediately
- * - No .select() on upsert (prevents connection issues)
+ * Uses the unified `likes` table with direction column:
+ * - Left swipe = direction: 'left' (dislike)
+ * - Right swipe = direction: 'right' (like)
+ * 
+ * Schema: likes(id, user_id, target_id, target_type, direction, created_at)
  */
 export function useSwipe() {
   const queryClient = useQueryClient();
@@ -26,62 +27,25 @@ export function useSwipe() {
         throw new Error('Not authenticated');
       }
 
-      // SWIPE LEFT = Save dismissal for undo
-      if (direction === 'left') {
-        const { error } = await supabase
-          .from('swipe_dismissals')
-          .upsert({
-            user_id: user.id,
-            target_id: targetId,
-            target_type: targetType === 'listing' ? 'listing' : 'client'
-          }, {
-            onConflict: 'user_id,target_id,target_type',
-            ignoreDuplicates: false
-          });
+      // Save swipe to likes table with direction
+      const { error } = await supabase
+        .from('likes')
+        .upsert({
+          user_id: user.id,
+          target_id: targetId,
+          target_type: targetType,
+          direction: direction
+        }, {
+          onConflict: 'user_id,target_id',
+          ignoreDuplicates: false
+        });
 
-        if (error) {
-          logger.error('[useSwipe] Dismissal error:', error);
-        }
-        return { success: true, direction: 'left', targetId };
+      if (error) {
+        logger.error('[useSwipe] Error saving swipe:', error);
+        throw error;
       }
 
-      // SWIPE RIGHT = Save like
-      if (targetType === 'listing') {
-        // Client likes listing - use likes table
-        // ACTUALLY FIXED: Use correct column name 'target_listing_id' (not target_id)
-        const { error } = await supabase
-          .from('likes')
-          .upsert({
-            user_id: user.id,
-            target_listing_id: targetId
-          }, {
-            onConflict: 'user_id,target_listing_id',
-            ignoreDuplicates: false
-          });
-
-        if (error) {
-          logger.error('[useSwipe] Like error:', error);
-          throw error;
-        }
-      } else {
-        // Owner likes client - use owner_likes table
-        const { error } = await supabase
-          .from('owner_likes')
-          .upsert({
-            owner_id: user.id,
-            client_id: targetId
-          }, {
-            onConflict: 'owner_id,client_id',
-            ignoreDuplicates: false
-          });
-
-        if (error) {
-          logger.error('[useSwipe] Owner like error:', error);
-          throw error;
-        }
-      }
-
-      return { success: true, direction: 'right', targetId };
+      return { success: true, direction, targetId };
     },
     onSuccess: (data) => {
       // Invalidate likes cache so saved list updates

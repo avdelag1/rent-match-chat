@@ -8,16 +8,13 @@ import { getCardImageUrl, getThumbnailUrl } from '@/utils/imageOptimization';
 import { useAuth } from '@/hooks/useAuth';
 
 /**
- * Fetch liked properties using the CORRECT query pattern.
+ * Fetch liked properties using the unified likes table.
  *
  * ARCHITECTURE:
+ * - Uses likes table with direction='right' and target_type='listing'
  * - This hook fetches ONLY from Supabase (single source of truth)
  * - Never derives likes from swipe state
- * - Never infers likes from cards
  * - PRELOADS images immediately for instant carousel/gallery
- *
- * The query uses Supabase's relation syntax to join likes with listings
- * in a single query, preventing race conditions and flicker.
  */
 export function useLikedProperties() {
   const { user, initialized } = useAuth();
@@ -27,22 +24,17 @@ export function useLikedProperties() {
     // INSTANT NAVIGATION: Keep previous data during refetch to prevent UI blanking
     placeholderData: (prev) => prev,
     // CRITICAL: Prevent caching an empty list before auth is initialized.
-    // Without this, the query can run with no user, cache [], and (due to staleTime: Infinity)
-    // never refetch, making likes “disappear” until a hard refresh.
     enabled: initialized && !!user?.id,
     queryFn: async () => {
       if (!user?.id) return [];
 
-      // CORRECT QUERY: Single fetch using Supabase relation syntax
-      // ACTUALLY FIXED: Use correct column name 'target_listing_id' (not target_id)
+      // Fetch likes where direction='right' and target_type='listing'
       const { data, error } = await supabase
         .from('likes')
-        .select(`
-          id,
-          created_at,
-          target_listing_id
-        `)
+        .select('id, created_at, target_id')
         .eq('user_id', user.id)
+        .eq('target_type', 'listing')
+        .eq('direction', 'right')
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -56,8 +48,7 @@ export function useLikedProperties() {
       }
 
       // Get listing IDs from the likes
-      // ACTUALLY FIXED: Use correct column name 'target_listing_id'
-      const listingIds = data.map((like: any) => like.target_listing_id).filter(Boolean);
+      const listingIds = data.map((like: any) => like.target_id).filter(Boolean);
 
       if (listingIds.length === 0) {
         return [];
@@ -68,7 +59,7 @@ export function useLikedProperties() {
         .from('listings')
         .select('*')
         .in('id', listingIds)
-        .eq('is_active', true);
+        .eq('status', 'active');
 
       if (listingsError) {
         logger.error('[useLikedProperties] Error fetching listings:', listingsError);
@@ -82,7 +73,6 @@ export function useLikedProperties() {
         .filter((listing): listing is Listing => listing !== null && listing !== undefined);
 
       // PERFORMANCE: Preload images for ALL liked properties immediately
-      // This ensures the carousel and gallery load instantly
       preloadLikedImages(orderedListings);
 
       return orderedListings;
@@ -92,7 +82,6 @@ export function useLikedProperties() {
     refetchOnWindowFocus: false, // Don't refetch when user returns to tab
     refetchOnMount: false, // Don't refetch when component mounts
     refetchOnReconnect: false, // Don't refetch when internet reconnects
-    // NO refetchInterval - rely purely on optimistic updates and manual invalidations
   });
 }
 
