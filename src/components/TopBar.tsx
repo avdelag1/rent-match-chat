@@ -10,13 +10,13 @@ import { QuickFilterDropdown } from './QuickFilterDropdown';
 import { ModeSwitcher } from './ModeSwitcher';
 import { useScrollDirection } from '@/hooks/useScrollDirection';
 
-// Clean bright text for "Message Activation" button - no glow, pure color
+// UPGRADED BRIGHTNESS: Text is now a brighter, more vibrant gradient
 const MessageActivationText = () => (
   <>
-    <span className="hidden sm:inline font-bold text-sm tracking-tight bg-gradient-to-r from-amber-400 via-orange-500 to-yellow-400 bg-clip-text text-transparent whitespace-nowrap">
+    <span className="hidden sm:inline font-bold text-sm tracking-tight bg-gradient-to-r from-yellow-300 via-orange-400 to-yellow-300 bg-clip-text text-transparent whitespace-nowrap">
       Message Activation
     </span>
-    <Zap className="sm:hidden h-5 w-5 text-amber-400" />
+    <Zap className="sm:hidden h-5 w-5 text-yellow-400" />
   </>
 );
 
@@ -24,12 +24,9 @@ interface TopBarProps {
   onNotificationsClick?: () => void;
   onMessageActivationsClick?: () => void;
   className?: string;
-  // Filter props - simplified, dropdown reads from store directly
   showFilters?: boolean;
   userRole?: 'client' | 'owner';
-  // Immersive mode - transparent header for full-bleed swipe cards
   transparent?: boolean;
-  // Scroll-aware hiding - set to true to enable hide on scroll
   hideOnScroll?: boolean;
 }
 
@@ -42,8 +39,6 @@ function TopBarComponent({
   transparent = false,
   hideOnScroll = false,
 }: TopBarProps) {
-  // Scroll-aware hide/show behavior
-  // IMPORTANT: Target the dashboard scroll container, not window (content scrolls inside the container)
   const { isVisible } = useScrollDirection({ 
     threshold: 15, 
     showAtTop: true,
@@ -60,22 +55,18 @@ function TopBarComponent({
     }
   };
 
-  // Determine if header should be hidden
   const shouldHide = hideOnScroll && !isVisible;
 
   return (
     <header
       className={cn(
         'app-header',
-        // Always transparent - gradient overlays provide contrast
         'bg-transparent border-transparent backdrop-blur-none',
-        // Scroll-aware hiding
         shouldHide && 'header-hidden',
         className
       )}
     >
       <div className="flex items-center justify-between h-12 max-w-screen-xl mx-auto gap-2">
-        {/* Left side: Logo + Mode Switch + Filters - properly aligned */}
         <div className="flex items-center gap-3 min-w-0 flex-shrink">
           <motion.div
             className="flex items-center gap-0.5 select-none cursor-pointer flex-shrink-0"
@@ -86,13 +77,11 @@ function TopBarComponent({
             <SwipessLogo size="xs" />
           </motion.div>
 
-          {/* Mode Switcher - Switch between Client and Owner modes */}
           <div className="flex-shrink-0">
             <ModeSwitcher variant="pill" size="sm" className="md:hidden" />
             <ModeSwitcher variant="pill" size="md" className="hidden md:flex" />
           </div>
 
-          {/* Quick Filter Dropdown - now reads/writes directly to store */}
           {showFilters && userRole && (
             <div className="flex-shrink-0">
               <QuickFilterDropdown userRole={userRole} />
@@ -100,23 +89,21 @@ function TopBarComponent({
           )}
         </div>
 
-        {/* Right side: Actions - Always visible */}
         <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-          {/* Message Activations Button - ULTRA BRIGHT with glow effect */}
+          {/* UPGRADED BRIGHTNESS: Added a subtle background glow on hover */}
           <Button
             variant="ghost"
-            className="relative h-9 sm:h-10 md:h-11 px-2 sm:px-3 md:px-4 hover:bg-transparent rounded-xl transition-all duration-200 flex items-center"
+            className="relative h-9 sm:h-10 md:h-11 px-2 sm:px-3 md:px-4 hover:bg-white/5 rounded-xl transition-all duration-200 flex items-center"
             onClick={onMessageActivationsClick}
             aria-label="Message activations"
           >
             <MessageActivationText />
           </Button>
 
-          {/* Notifications - ULTRA BRIGHT with glow styling */}
           <Button
             variant="ghost"
             size="icon"
-            className="relative h-9 w-9 sm:h-10 sm:w-10 md:h-11 md:w-11 hover:bg-transparent rounded-xl transition-all duration-200 group flex-shrink-0"
+            className="relative h-9 w-9 sm:h-10 sm:w-10 md:h-11 md:w-11 hover:bg-white/5 rounded-xl transition-all duration-200 group flex-shrink-0"
             onClick={onNotificationsClick}
             aria-label={`Notifications${notificationCount > 0 ? ` (${notificationCount} unread)` : ''}`}
           >
@@ -126,16 +113,15 @@ function TopBarComponent({
               whileTap={{ scale: 0.95 }}
               transition={{ type: 'spring', stiffness: 400, damping: 17 }}
             >
-              {/* Bell icon - clean bright color */}
+              {/* UPGRADED BRIGHTNESS: Icon is now brighter and more visible */}
               <Bell
                 className={cn(
                   "h-5 w-5 sm:h-6 sm:w-6 transition-colors duration-200",
                   notificationCount > 0
                     ? "text-amber-400 group-hover:text-amber-300"
-                    : "text-white/90 group-hover:text-white"
+                    : "text-gray-200 group-hover:text-white"
                 )}
               />
-              {/* Animated ring effect when there are notifications */}
               <AnimatePresence>
                 {notificationCount > 0 && (
                   <motion.div
