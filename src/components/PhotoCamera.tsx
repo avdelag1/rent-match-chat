@@ -16,7 +16,7 @@ interface PhotoCameraProps {
 }
 
 const PhotoCamera: React.FC<PhotoCameraProps> = ({
-  mode = 'front',
+  mode = 'rear',
   onCapture,
   onClose,
   autoStart = true,

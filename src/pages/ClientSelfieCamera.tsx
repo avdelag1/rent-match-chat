@@ -44,7 +44,7 @@ export default function ClientSelfieCamera() {
   return (
     <>
       <PhotoCamera
-        mode="front"
+        mode="rear"
         onCapture={onCapture}
         onClose={onClose}
         autoStart={true}
