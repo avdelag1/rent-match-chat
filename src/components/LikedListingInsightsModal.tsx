@@ -66,12 +66,13 @@ function LikedListingInsightsModalComponent({ open, onOpenChange, listing }: Lik
       const { data: user } = await supabase.auth.getUser();
       if (!user.user || !listing) throw new Error('Not authenticated');
 
-      // Use correct column: target_id (not target_listing_id)
+      // SCHEMA: target_id = listing ID, target_type = 'listing'
       const { error } = await supabase
         .from('likes')
         .delete()
         .eq('user_id', user.user.id)
-        .eq('target_id', listing.id);
+        .eq('target_id', listing.id)
+        .eq('target_type', 'listing');
 
       if (error) throw error;
     },
@@ -111,13 +112,13 @@ function LikedListingInsightsModalComponent({ open, onOpenChange, listing }: Lik
         throw blockError;
       }
 
-      // Also remove from likes
-      // ACTUALLY FIXED: Use correct column name 'target_listing_id'
+      // Also remove from likes - SCHEMA: target_id, target_type
       await supabase
         .from('likes')
         .delete()
         .eq('user_id', user.user.id)
-        .eq('target_listing_id', listing.id);
+        .eq('target_id', listing.id)
+        .eq('target_type', 'listing');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['liked-properties'] });

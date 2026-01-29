@@ -43,12 +43,13 @@ export function LikedPropertiesDialog({ isOpen, onClose, onPropertySelect }: Lik
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) throw new Error('Not authenticated');
 
-      // Use correct column: target_id (not target_listing_id)
+      // SCHEMA: target_id = listing ID, target_type = 'listing'
       const { error } = await supabase
         .from('likes')
         .delete()
         .eq('user_id', user.user.id)
-        .eq('target_id', listingId);
+        .eq('target_id', listingId)
+        .eq('target_type', 'listing');
 
       if (error) throw error;
     },

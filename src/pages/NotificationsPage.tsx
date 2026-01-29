@@ -318,12 +318,13 @@ export default function NotificationsPage() {
     setRemovingLikeId(listingId);
 
     try {
-      // ACTUALLY FIXED: Use correct column name 'target_listing_id'
+      // SCHEMA: target_id = listing ID, target_type = 'listing'
       const { error } = await supabase
         .from('likes')
         .delete()
         .eq('user_id', user.id)
-        .eq('target_listing_id', listingId);
+        .eq('target_id', listingId)
+        .eq('target_type', 'listing');
 
       if (error) throw error;
 

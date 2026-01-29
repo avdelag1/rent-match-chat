@@ -25,7 +25,7 @@ export interface InterestedClient {
  *
  * ARCHITECTURE:
  * - Single source of truth from likes table
- * - Uses target_listing_id to reference listings
+ * - Uses target_id with target_type='listing' to reference listings
  * - Joins with profiles and listings for display data
  */
 export function useOwnerInterestedClients() {
@@ -57,16 +57,18 @@ export function useOwnerInterestedClients() {
       const listingIds = ownerListings.map(l => l.id);
 
       // CORRECT QUERY: Fetch likes on owner's listings
-      // FIXED: Use correct column name 'target_listing_id' (not target_listing_id)
+      // Schema: target_id = listing ID, target_type = 'listing', direction = 'right'
       const { data, error } = await supabase
         .from('likes')
         .select(`
           id,
           created_at,
           user_id,
-          target_listing_id
+          target_id
         `)
-        .in('target_listing_id', listingIds)
+        .in('target_id', listingIds)
+        .eq('target_type', 'listing')
+        .eq('direction', 'right')
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -104,11 +106,10 @@ export function useOwnerInterestedClients() {
       const listingMap = new Map((listings || []).map((l: any) => [l.id, l]));
 
       // Combine the data
-      // FIXED: Use correct column name 'target_listing_id'
       const interestedClients: InterestedClient[] = data
         .map((like: any) => {
           const profile = profileMap.get(like.user_id);
-          const listing = listingMap.get(like.target_listing_id);
+          const listing = listingMap.get(like.target_id);
 
           if (!profile || !listing) {
             return null;

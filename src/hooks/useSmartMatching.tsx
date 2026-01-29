@@ -309,12 +309,15 @@ export function useSmartListingMatching(
           .maybeSingle();
 
         // Fetch liked items (right swipes) - these are NEVER shown again
+        // SCHEMA: target_id = listing ID, target_type = 'listing'
         const { data: likedListings, error: likesError } = await supabase
           .from('likes')
-          .select('target_listing_id')
-          .eq('user_id', userId);
+          .select('target_id')
+          .eq('user_id', userId)
+          .eq('target_type', 'listing')
+          .eq('direction', 'right');
 
-        const likedIds = new Set(!likesError ? (likedListings?.map(like => like.target_listing_id) || []) : []);
+        const likedIds = new Set(!likesError ? (likedListings?.map(like => like.target_id) || []) : []);
 
         // Fetch left swipes with timestamps for 3-day expiry logic
         // After 3 days, dislikes become permanent and won't show even on refresh

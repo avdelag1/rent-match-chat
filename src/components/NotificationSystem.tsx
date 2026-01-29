@@ -143,13 +143,13 @@ export function NotificationSystem() {
             const newLike = payload.new;
 
             // Only show notifications for likes received (not given)
-            // FIXED: Check if the liked listing belongs to the current user
-            if (newLike.target_listing_id && newLike.user_id !== user.id) {
+            // SCHEMA: target_id = listing ID when target_type = 'listing'
+            if (newLike.target_type === 'listing' && newLike.target_id && newLike.user_id !== user.id) {
               // Check if this listing belongs to the current user
               const { data: listing } = await supabase
                 .from('listings')
                 .select('owner_id, title')
-                .eq('id', newLike.target_listing_id)
+                .eq('id', newLike.target_id)
                 .maybeSingle();
 
               // Only notify if the current user owns the listing
