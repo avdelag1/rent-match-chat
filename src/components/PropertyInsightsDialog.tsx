@@ -394,15 +394,6 @@ function PropertyInsightsDialogComponent({ open, onOpenChange, listing }: Proper
                   )}
                 </>
               )}
-                  )}
-                  {listing.berths && (
-                    <div className="flex items-center gap-2">
-                      <Bed className="w-4 h-4" />
-                      <span>{listing.berths} berths</span>
-                    </div>
-                  )}
-                </>
-              )}
               {/* Motorcycle-specific */}
               {propertyInsights?.isMotorcycle && (
                 <>
