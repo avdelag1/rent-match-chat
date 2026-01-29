@@ -64,14 +64,24 @@ const clientTypeOptions: { id: OwnerClientType; label: string; icon: React.React
   { id: 'buy', label: 'Buying', icon: <Briefcase className="w-4 h-4" />, color: 'from-green-500 to-emerald-500' },
 ];
 
-// Clean bright Pink text for "Quick Filter" button - no glow
-const QuickFilterText = () => (
+// UPGRADED BRIGHTNESS: Text is a bright, glowing gradient
+const QuickFilterText = ({ hasActiveFilters }: { hasActiveFilters: boolean }) => (
   <>
-    <span className="sm:hidden font-bold text-xs tracking-tight whitespace-nowrap text-pink-400">
-      Filter
-    </span>
-    <span className="hidden sm:inline font-bold text-sm tracking-tight whitespace-nowrap text-pink-400">
+    <span className={cn(
+      "hidden sm:inline font-bold text-sm tracking-tight whitespace-nowrap bg-clip-text text-transparent",
+      hasActiveFilters
+        ? "bg-gradient-to-r from-pink-400 to-rose-400"
+        : "bg-gradient-to-r from-gray-200 to-gray-400"
+    )}>
       Quick Filter
+    </span>
+    <span className={cn(
+      "sm:hidden font-bold text-xs tracking-tight whitespace-nowrap bg-clip-text text-transparent",
+      hasActiveFilters
+        ? "bg-gradient-to-r from-pink-400 to-rose-400"
+        : "bg-gradient-to-r from-gray-200 to-gray-400"
+    )}>
+      Filter
     </span>
   </>
 );
@@ -345,9 +355,11 @@ function QuickFilterDropdownComponent({ userRole, className }: QuickFilterDropdo
     );
   };
 
+  const hasActiveFilters = activeFilterCount > 0;
+
   return (
     <div className={cn('relative', className)}>
-      {/* Quick Filter Button - ULTRA BRIGHT with glow effect */}
+      {/* UPGRADED BRIGHTNESS: Button now has a conditional glow and brighter text */}
       <motion.button
         ref={buttonRef}
         whileHover={{ scale: 1.02 }}
@@ -355,13 +367,14 @@ function QuickFilterDropdownComponent({ userRole, className }: QuickFilterDropdo
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
           'relative flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 md:px-5 h-9 sm:h-10 md:h-11 rounded-xl transition-all duration-200 touch-manipulation',
-          'hover:bg-transparent'
+          'hover:bg-white/5',
+          hasActiveFilters && 'bg-white/5'
         )}
       >
-        <QuickFilterText />
+        <QuickFilterText hasActiveFilters={hasActiveFilters} />
         {/* Badge */}
         <AnimatePresence>
-          {activeFilterCount > 0 && (
+          {hasActiveFilters && (
             <motion.span
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}

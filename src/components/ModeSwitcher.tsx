@@ -11,24 +11,13 @@ interface ModeSwitcherProps {
   variant?: 'toggle' | 'pill' | 'icon';
 }
 
-/**
- * ModeSwitcher - Premium mode toggle for switching between "Client" and "Owner" modes
- *
- * Features:
- * - Instant visual feedback with optimistic updates
- * - Smooth animations without layout thrashing
- * - Haptic feedback on mobile
- * - GPU-accelerated transforms only
- * - Micro-animations on mode switch (scale/rotate)
- */
 function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: ModeSwitcherProps) {
   const { activeMode, isSwitching, switchMode, canSwitchMode } = useActiveMode();
   const lastClickTime = useRef(0);
 
-  // Debounce rapid clicks (prevent accidental double-taps)
   const handleModeSwitch = useCallback(async (newMode: ActiveMode) => {
     const now = Date.now();
-    if (now - lastClickTime.current < 300) return; // 300ms debounce
+    if (now - lastClickTime.current < 300) return;
     lastClickTime.current = now;
 
     if (isSwitching || newMode === activeMode || !canSwitchMode) return;
@@ -37,7 +26,6 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
   }, [isSwitching, activeMode, canSwitchMode, switchMode]);
 
   const handleToggle = useCallback((event: React.MouseEvent) => {
-    // Prevent event propagation to avoid accidental triggers
     event.stopPropagation();
     event.preventDefault();
 
@@ -51,7 +39,6 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
     lg: 'h-10 text-base',
   };
 
-  // Icon-only variant - minimal footprint
   if (variant === 'icon') {
     return (
       <motion.button
@@ -86,10 +73,11 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
               exit={{ opacity: 0, scale: 0.8, rotate: 180 }}
               transition={{ type: 'spring', stiffness: 500, damping: 30 }}
             >
+              {/* UPGRADED BRIGHTNESS: Brighter icon colors */}
               {activeMode === 'client' ? (
                 <Search className="h-4 w-4 text-orange-400" />
               ) : (
-                <Briefcase className="h-4 w-4 text-emerald-400" />
+                <Briefcase className="h-4 w-4 text-teal-400" />
               )}
             </motion.div>
           )}
@@ -98,7 +86,6 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
     );
   }
 
-  // Toggle variant - iOS-style switch
   if (variant === 'toggle') {
     return (
       <motion.button
@@ -115,7 +102,6 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
         whileTap={{ scale: 0.97 }}
         aria-label={`Switch to ${activeMode === 'client' ? 'Owner' : 'Client'} mode`}
       >
-        {/* Sliding indicator */}
         <motion.div
           className="absolute inset-y-1 rounded-full bg-gradient-to-r from-primary/30 to-primary/20"
           initial={false}
@@ -127,25 +113,23 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
           style={{ willChange: 'left, right' }}
         />
 
-        {/* Client option - BRIGHTER text */}
+        {/* UPGRADED BRIGHTNESS: Brighter text and active state */}
         <div className={cn(
           'relative z-10 flex items-center gap-1.5 px-2 py-0.5 rounded-full transition-colors duration-200',
-          activeMode === 'client' ? 'text-white drop-shadow-sm font-bold' : 'text-white/60'
+          activeMode === 'client' ? 'text-white font-semibold' : 'text-gray-400'
         )}>
           <Search className="h-3.5 w-3.5" />
           <span className="font-bold">Client</span>
         </div>
 
-        {/* Owner option - BRIGHTER text */}
         <div className={cn(
           'relative z-10 flex items-center gap-1.5 px-2 py-0.5 rounded-full transition-colors duration-200',
-          activeMode === 'owner' ? 'text-emerald-400 drop-shadow-sm font-bold' : 'text-white/60'
+          activeMode === 'owner' ? 'text-teal-300 font-semibold' : 'text-gray-400'
         )}>
           <Briefcase className="h-3.5 w-3.5" />
           <span className="font-bold">Owner</span>
         </div>
 
-        {/* Loading overlay */}
         <AnimatePresence>
           {isSwitching && (
             <motion.div
@@ -162,14 +146,13 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
     );
   }
 
-  // Pill variant (default) - Compact with mode indicator - clean bright colors
   return (
     <motion.button
       onClick={(e) => handleToggle(e)}
       disabled={isSwitching || !canSwitchMode}
       className={cn(
         'relative flex items-center gap-1.5 rounded-xl px-2.5',
-        'hover:bg-transparent',
+        'hover:bg-white/10',
         'active:scale-[0.97] transition-all duration-200',
         'disabled:opacity-50 disabled:cursor-not-allowed',
         sizeClasses[size],
@@ -179,7 +162,6 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
       transition={{ type: 'spring', stiffness: 500, damping: 30, mass: 0.5 }}
       aria-label={`Switch to ${activeMode === 'client' ? 'Owner' : 'Client'} mode`}
     >
-      {/* Mode icon with animation */}
       <AnimatePresence mode="wait">
         <motion.div
           key={activeMode}
@@ -189,29 +171,28 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
           transition={{ type: 'spring', stiffness: 500, damping: 30 }}
           className="flex items-center gap-1.5"
         >
+          {/* UPGRADED BRIGHTNESS: Brighter text and icons with glow effect */}
           {isSwitching ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin text-white" />
           ) : activeMode === 'client' ? (
             <>
-              <Search className="h-3.5 w-3.5 text-white drop-shadow-sm" />
-              <span className="font-bold text-white drop-shadow-sm">Client</span>
+              <Search className="h-3.5 w-3.5 text-orange-400 drop-shadow-[0_0_8px_rgba(251,146,60,0.5)]" />
+              <span className="font-bold text-orange-400 drop-shadow-[0_0_8px_rgba(251,146,60,0.5)]">Client</span>
             </>
           ) : (
             <>
-              <Briefcase className="h-3.5 w-3.5 text-emerald-400 drop-shadow-sm" />
-              <span className="font-bold text-emerald-400 drop-shadow-sm">Owner</span>
+              <Briefcase className="h-3.5 w-3.5 text-teal-400 drop-shadow-[0_0_8px_rgba(45,212,191,0.5)]" />
+              <span className="font-bold text-teal-400 drop-shadow-[0_0_8px_rgba(45,212,191,0.5)]">Owner</span>
             </>
           )}
         </motion.div>
       </AnimatePresence>
 
-      {/* Switch icon */}
-      <ArrowLeftRight className="h-3 w-3 text-white/80" />
+      <ArrowLeftRight className="h-3 w-3 text-gray-400" />
     </motion.button>
   );
 }
 
-// Memoize with shallow props comparison for better performance
 export const ModeSwitcher = memo(ModeSwitcherComponent, (prevProps, nextProps) => {
   return (
     prevProps.className === nextProps.className &&
@@ -220,12 +201,10 @@ export const ModeSwitcher = memo(ModeSwitcherComponent, (prevProps, nextProps) =
   );
 });
 
-// Compact version for tight spaces
 export const ModeSwitcherCompact = memo(function ModeSwitcherCompact({ className }: { className?: string }) {
   return <ModeSwitcher variant="icon" size="sm" className={className} />;
 });
 
-// Full toggle version
 export const ModeSwitcherToggle = memo(function ModeSwitcherToggle({ className }: { className?: string }) {
   return <ModeSwitcher variant="toggle" size="sm" className={className} />;
 });
