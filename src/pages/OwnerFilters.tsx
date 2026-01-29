@@ -12,6 +12,8 @@ import {
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useFilterStore } from '@/state/filterStore';
+import { useOwnerClientPreferences } from '@/hooks/useOwnerClientPreferences';
+import { toast } from '@/hooks/use-toast';
 import type { ClientGender, ClientType as FilterClientType } from '@/types/filters';
 
 // Use types that match the filter store
@@ -89,12 +91,35 @@ export default function OwnerFilters() {
     setLocalClientType(storeClientType as ClientType);
   }, [storeGender, storeClientType]);
 
-  const handleApply = useCallback(() => {
+  const { updatePreferences } = useOwnerClientPreferences();
+
+  const handleApply = useCallback(async () => {
+    // Save to database
+    try {
+      await updatePreferences({
+        // Map gender preference
+        allows_pets: undefined, // Keep existing
+        allows_smoking: localGender === 'any' ? undefined : false,
+        // Store client type preference in category_filters
+        interest_type: localClientType,
+      });
+      toast({
+        title: 'Filters applied!',
+        description: 'Your client preferences have been saved.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to save preferences.',
+        variant: 'destructive',
+      });
+    }
+    
     // Apply filters to store
     setClientGender(localGender);
     setClientType(localClientType);
     navigate(-1);
-  }, [navigate, localGender, localClientType, setClientGender, setClientType]);
+  }, [navigate, localGender, localClientType, setClientGender, setClientType, updatePreferences]);
 
   const handleBack = useCallback(() => {
     navigate(-1);

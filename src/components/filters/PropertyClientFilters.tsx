@@ -116,10 +116,40 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
     { value: 'penthouse', label: 'Penthouse' }
   ];
 
-  const handleApply = () => {
+  const handleApply = async () => {
     const budgetValues = getBudgetValues();
     const durationValues = getRentalDurationValues();
 
+    // First, save to database
+    try {
+      await savePreferencesMutation.mutateAsync({
+        interested_in_properties: true,
+        min_price: budgetValues.min,
+        max_price: budgetValues.max,
+        min_bedrooms: bedrooms,
+        max_bedrooms: bedrooms + 3, // Allow some flexibility
+        min_bathrooms: bathrooms,
+        property_types: propertyTypes.length > 0 ? propertyTypes : null,
+        amenities_required: amenities.length > 0 ? amenities : null,
+        pet_friendly_required: petFriendly,
+        furnished_required: furnished,
+        preferred_listing_types: interestType === 'both' ? ['rent', 'buy'] : [interestType],
+        rental_duration: rentalDuration || null,
+        location_zones: locationNeighborhoods.length > 0 ? locationNeighborhoods : null,
+      });
+      toast({
+        title: 'Filters applied!',
+        description: 'Your preferences have been saved.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to save preferences.',
+        variant: 'destructive',
+      });
+    }
+
+    // Then notify parent
     onApply({
       category: 'property',
       interest_type: interestType,

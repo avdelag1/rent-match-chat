@@ -121,8 +121,39 @@ export function MotoClientFilters({ onApply, initialFilters = {}, activeCount }:
   ];
   const featureOptions = ['GPS Navigation', 'Heated Grips', 'Cruise Control', 'Traction Control', 'Quick Shifter', 'Riding Modes'];
 
-  const handleApply = () => {
+  const handleApply = async () => {
     const budgetValues = getBudgetValues();
+    
+    // Save to database
+    try {
+      await savePreferencesMutation.mutateAsync({
+        interested_in_motorcycles: true,
+        moto_types: motoTypes.length > 0 ? motoTypes : null,
+        moto_engine_size_min: engineRange[0],
+        moto_engine_size_max: engineRange[1],
+        moto_year_min: yearRange[0],
+        moto_price_min: budgetValues.min,
+        moto_price_max: budgetValues.max,
+        moto_mileage_max: mileageRange[1],
+        moto_transmission: transmission !== 'any' ? [transmission] : null,
+        moto_condition: condition !== 'any' ? [condition] : null,
+        moto_fuel_types: fuelTypes.length > 0 ? fuelTypes : null,
+        moto_has_abs: hasABS || null,
+        moto_features: features.length > 0 ? features : null,
+        moto_is_electric: isElectricOnly || null,
+      });
+      toast({
+        title: 'Filters applied!',
+        description: 'Your motorcycle preferences have been saved.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to save preferences.',
+        variant: 'destructive',
+      });
+    }
+
     onApply({
       category: 'moto',
       interest_type: interestType,

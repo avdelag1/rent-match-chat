@@ -90,7 +90,7 @@ export function WorkerClientFilters({ onApply, initialFilters = {}, activeCount 
     }
   };
 
-  const handleApply = () => {
+  const handleApply = async () => {
     const rateValues = getRateValues();
     const filters = {
       service_categories: serviceCategories,
@@ -127,6 +127,22 @@ export function WorkerClientFilters({ onApply, initialFilters = {}, activeCount 
       location_cities: locationCities,
       location_neighborhoods: locationNeighborhoods,
     };
+    
+    // Save to localStorage for worker preferences
+    try {
+      localStorage.setItem('worker_filter_preferences', JSON.stringify(filters));
+      toast({
+        title: 'Filters applied!',
+        description: 'Your worker preferences have been saved.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to save preferences.',
+        variant: 'destructive',
+      });
+    }
+    
     onApply(filters);
   };
 

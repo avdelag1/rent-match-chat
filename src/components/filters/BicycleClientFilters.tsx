@@ -111,8 +111,38 @@ export function BicycleClientFilters({ onApply, initialFilters = {}, activeCount
     { value: 'titanium', label: 'Titanium' }
   ];
 
-  const handleApply = () => {
+  const handleApply = async () => {
     const budgetValues = getBudgetValues();
+    
+    // Save to database
+    try {
+      await savePreferencesMutation.mutateAsync({
+        interested_in_bicycles: true,
+        bicycle_types: bicycleTypes.length > 0 ? bicycleTypes : null,
+        bicycle_price_min: budgetValues.min,
+        bicycle_price_max: budgetValues.max,
+        bicycle_wheel_sizes: wheelSizes.length > 0 ? wheelSizes : null,
+        bicycle_suspension_type: suspensionType !== 'any' ? [suspensionType] : null,
+        bicycle_material: material !== 'any' ? [material] : null,
+        bicycle_gears_min: gearRange[0],
+        bicycle_gears_max: gearRange[1],
+        bicycle_year_min: yearRange[0],
+        bicycle_condition: condition !== 'any' ? [condition] : null,
+        bicycle_is_electric: isElectricOnly || null,
+        bicycle_battery_range_min: batteryRange || null,
+      });
+      toast({
+        title: 'Filters applied!',
+        description: 'Your bicycle preferences have been saved.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to save preferences.',
+        variant: 'destructive',
+      });
+    }
+
     onApply({
       category: 'bicycle',
       interest_type: interestType,
