@@ -47,13 +47,6 @@ export type Database = {
             referencedRelation: "message_activations"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "activation_usage_log_conversation_id_fkey"
-            columns: ["conversation_id"]
-            isOneToOne: false
-            referencedRelation: "conversations"
-            referencedColumns: ["id"]
-          },
         ]
       }
       admin_actions_log: {
@@ -84,22 +77,7 @@ export type Database = {
           ip_address?: unknown
           target_user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "admin_actions_log_target_user_id_fkey"
-            columns: ["target_user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "admin_actions_log_target_user_id_fkey"
-            columns: ["target_user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       admin_activity_logs: {
         Row: {
@@ -230,6 +208,21 @@ export type Database = {
           role?: string
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      app_cache_control: {
+        Row: {
+          id: boolean
+          version: number | null
+        }
+        Insert: {
+          id?: boolean
+          version?: number | null
+        }
+        Update: {
+          id?: boolean
+          version?: number | null
         }
         Relationships: []
       }
@@ -594,22 +587,7 @@ export type Database = {
           updated_at?: string | null
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "client_preferences_detailed_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_preferences_detailed_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       client_profiles: {
         Row: {
@@ -628,6 +606,7 @@ export type Database = {
           interests: string[] | null
           languages: string[] | null
           latitude: number | null
+          lifestyle_tags: string[] | null
           location: Json | null
           longitude: number | null
           name: string | null
@@ -654,11 +633,12 @@ export type Database = {
           drinking_habit?: string | null
           gender?: string | null
           has_children?: boolean | null
-          id?: never
+          id?: number
           interest_categories?: string[] | null
           interests?: string[] | null
           languages?: string[] | null
           latitude?: number | null
+          lifestyle_tags?: string[] | null
           location?: Json | null
           longitude?: number | null
           name?: string | null
@@ -685,11 +665,12 @@ export type Database = {
           drinking_habit?: string | null
           gender?: string | null
           has_children?: boolean | null
-          id?: never
+          id?: number
           interest_categories?: string[] | null
           interests?: string[] | null
           languages?: string[] | null
           latitude?: number | null
+          lifestyle_tags?: string[] | null
           location?: Json | null
           longitude?: number | null
           name?: string | null
@@ -827,29 +808,7 @@ export type Database = {
           receiver_id?: string | null
           sender_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "conversation_messages_conversation_id_fkey"
-            columns: ["conversation_id"]
-            isOneToOne: false
-            referencedRelation: "conversations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "conversation_messages_sender_id_fkey"
-            columns: ["sender_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "conversation_messages_sender_id_fkey"
-            columns: ["sender_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       conversation_starters: {
         Row: {
@@ -881,7 +840,8 @@ export type Database = {
       conversations: {
         Row: {
           client_id: string
-          created_at: string
+          created_at: string | null
+          deleted_at: string | null
           free_messaging: boolean | null
           id: string
           last_message: string | null
@@ -891,11 +851,12 @@ export type Database = {
           match_id: string | null
           owner_id: string
           status: string | null
-          updated_at: string
+          updated_at: string | null
         }
         Insert: {
           client_id: string
-          created_at?: string
+          created_at?: string | null
+          deleted_at?: string | null
           free_messaging?: boolean | null
           id?: string
           last_message?: string | null
@@ -905,11 +866,12 @@ export type Database = {
           match_id?: string | null
           owner_id: string
           status?: string | null
-          updated_at?: string
+          updated_at?: string | null
         }
         Update: {
           client_id?: string
-          created_at?: string
+          created_at?: string | null
+          deleted_at?: string | null
           free_messaging?: boolean | null
           id?: string
           last_message?: string | null
@@ -919,147 +881,14 @@ export type Database = {
           match_id?: string | null
           owner_id?: string
           status?: string | null
-          updated_at?: string
+          updated_at?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "conversations_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "conversations_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "conversations_last_message_sender_id_fkey"
-            columns: ["last_message_sender_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "conversations_last_message_sender_id_fkey"
-            columns: ["last_message_sender_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "conversations_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "conversations_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings_browse"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "conversations_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "conversations_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "recommended_listings"
-            referencedColumns: ["listing_id"]
-          },
           {
             foreignKeyName: "conversations_match_id_fkey"
             columns: ["match_id"]
             isOneToOne: false
             referencedRelation: "matches"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "conversations_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "conversations_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_conversations_client_id"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_conversations_client_id"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_conversations_listing_id"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_conversations_listing_id"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings_browse"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_conversations_listing_id"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_conversations_listing_id"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "recommended_listings"
-            referencedColumns: ["listing_id"]
-          },
-          {
-            foreignKeyName: "fk_conversations_match_id"
-            columns: ["match_id"]
-            isOneToOne: false
-            referencedRelation: "matches"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_conversations_owner_id"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_conversations_owner_id"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1275,70 +1104,6 @@ export type Database = {
           },
         ]
       }
-      favorites: {
-        Row: {
-          created_at: string | null
-          id: string
-          listing_id: string | null
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id: string
-          listing_id?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          listing_id?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "favorites_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "favorites_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings_browse"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "favorites_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "favorites_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "recommended_listings"
-            referencedColumns: ["listing_id"]
-          },
-          {
-            foreignKeyName: "favorites_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "favorites_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       legal_document_quota: {
         Row: {
           created_at: string | null
@@ -1418,472 +1183,131 @@ export type Database = {
           user_id?: string
           verification_notes?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "legal_documents_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "legal_documents_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings_browse"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "legal_documents_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "legal_documents_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "recommended_listings"
-            referencedColumns: ["listing_id"]
-          },
-        ]
+        Relationships: []
       }
       likes: {
         Row: {
-          created_at: string
+          created_at: string | null
           direction: string
           id: string
           target_id: string
+          target_type: string
           user_id: string
         }
         Insert: {
-          created_at?: string
+          created_at?: string | null
           direction: string
           id?: string
           target_id: string
+          target_type: string
           user_id: string
         }
         Update: {
-          created_at?: string
+          created_at?: string | null
           direction?: string
           id?: string
           target_id?: string
+          target_type?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "likes_target_id_fkey"
+            columns: ["target_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       listings: {
         Row: {
-          additional_rules: string | null
           address: string | null
           amenities: string[] | null
-          availability_calendar: Json | null
-          availability_date: string | null
-          availability_status: string | null
-          balcony_count: number | null
           baths: number | null
-          battery_range: number | null
           beds: number | null
-          berths: number | null
-          bicycle_type: string | null
-          brake_type: string | null
-          brand: string | null
           category: string | null
           city: string | null
-          color: string | null
-          common_areas: boolean | null
-          condition: string | null
           contacts: number | null
-          coworking_space: boolean | null
           created_at: string | null
-          crew_option: string | null
-          deposit_amount: number | null
           description: string | null
-          description_full: string | null
-          description_short: string | null
-          distance_to_beach: number | null
-          distance_to_cowork: number | null
-          electric_assist: boolean | null
-          elevator: boolean | null
-          engine_cc: number | null
-          engine_type: string | null
-          engines: string | null
-          equipment: Json | null
-          featured_image_url: string | null
-          floor_level: number | null
-          floorplan_url: string | null
-          frame_material: string | null
-          frame_size: string | null
-          fuel_type: string | null
-          furnished: boolean | null
-          gear_type: string | null
-          gym: boolean | null
-          has_abs: boolean | null
-          has_heated_grips: boolean | null
-          has_luggage_rack: boolean | null
-          has_traction_control: boolean | null
-          has_verified_documents: boolean | null
-          heating: boolean | null
-          hoa_fees: number | null
-          house_rules: string[] | null
-          hull_material: string | null
           id: string
-          ideal_tenant_description: string | null
           images: string[] | null
-          included_utilities: string[] | null
-          includes_basket: boolean | null
-          includes_gear: boolean | null
-          includes_helmet: boolean | null
-          includes_lights: boolean | null
-          includes_lock: boolean | null
-          includes_pump: boolean | null
-          internet_speed: string | null
-          is_active: boolean | null
-          is_featured: boolean | null
-          jacuzzi: boolean | null
           latitude: number | null
-          lease_end_date: string | null
-          lease_start_date: string | null
-          lease_terms: string | null
-          length_m: number | null
-          levels: number | null
-          license_required: string | null
-          lifestyle_compatible: string[] | null
           likes: number | null
-          listing_category: string | null
-          listing_for: string | null
           listing_type: string | null
-          location_accuracy: number | null
-          location_zone: string | null
-          lockoff_unit: boolean | null
           longitude: number | null
-          max_occupants: number | null
-          max_passengers: number | null
-          mileage: number | null
-          min_rental_term_months: number | null
-          mode: string | null
-          model: string | null
-          motorcycle_type: string | null
-          move_in_date: string | null
-          nearby_attractions: string[] | null
           neighborhood: string | null
-          neighborhood_description: string | null
-          number_of_gears: number | null
-          open_house_dates: string[] | null
           owner_id: string
-          parking_spaces: number | null
-          pet_friendly: boolean | null
-          pool_type: string | null
           price: number | null
-          private_rooftop: boolean | null
-          property_description: string | null
           property_type: string | null
-          rental_duration_type: string | null
-          rental_rates: Json | null
           rules: string[] | null
-          sea_mountain_view: boolean | null
-          security_onsite: boolean | null
-          services_included: string[] | null
-          smart_home: boolean | null
-          solar_panels: boolean | null
           square_footage: number | null
-          status: Database["public"]["Enums"]["listing_status"] | null
-          subletting_allowed: boolean | null
-          suspension_type: string | null
+          status: string | null
           title: string | null
-          transmission: string | null
-          transmission_type: string | null
-          transportation_access: string[] | null
-          tulum_location: string | null
-          unit_type: string | null
-          updated_at: string | null
-          vehicle_brand: string | null
-          vehicle_condition: string | null
-          vehicle_model: string | null
-          vehicle_type: string | null
           video_url: string | null
-          view_count: number | null
           views: number | null
-          washer_dryer: boolean | null
-          wheel_size: number | null
-          yacht_type: string | null
-          year: number | null
-          year_built: number | null
         }
         Insert: {
-          additional_rules?: string | null
           address?: string | null
           amenities?: string[] | null
-          availability_calendar?: Json | null
-          availability_date?: string | null
-          availability_status?: string | null
-          balcony_count?: number | null
           baths?: number | null
-          battery_range?: number | null
           beds?: number | null
-          berths?: number | null
-          bicycle_type?: string | null
-          brake_type?: string | null
-          brand?: string | null
           category?: string | null
           city?: string | null
-          color?: string | null
-          common_areas?: boolean | null
-          condition?: string | null
           contacts?: number | null
-          coworking_space?: boolean | null
           created_at?: string | null
-          crew_option?: string | null
-          deposit_amount?: number | null
           description?: string | null
-          description_full?: string | null
-          description_short?: string | null
-          distance_to_beach?: number | null
-          distance_to_cowork?: number | null
-          electric_assist?: boolean | null
-          elevator?: boolean | null
-          engine_cc?: number | null
-          engine_type?: string | null
-          engines?: string | null
-          equipment?: Json | null
-          featured_image_url?: string | null
-          floor_level?: number | null
-          floorplan_url?: string | null
-          frame_material?: string | null
-          frame_size?: string | null
-          fuel_type?: string | null
-          furnished?: boolean | null
-          gear_type?: string | null
-          gym?: boolean | null
-          has_abs?: boolean | null
-          has_heated_grips?: boolean | null
-          has_luggage_rack?: boolean | null
-          has_traction_control?: boolean | null
-          has_verified_documents?: boolean | null
-          heating?: boolean | null
-          hoa_fees?: number | null
-          house_rules?: string[] | null
-          hull_material?: string | null
           id?: string
-          ideal_tenant_description?: string | null
           images?: string[] | null
-          included_utilities?: string[] | null
-          includes_basket?: boolean | null
-          includes_gear?: boolean | null
-          includes_helmet?: boolean | null
-          includes_lights?: boolean | null
-          includes_lock?: boolean | null
-          includes_pump?: boolean | null
-          internet_speed?: string | null
-          is_active?: boolean | null
-          is_featured?: boolean | null
-          jacuzzi?: boolean | null
           latitude?: number | null
-          lease_end_date?: string | null
-          lease_start_date?: string | null
-          lease_terms?: string | null
-          length_m?: number | null
-          levels?: number | null
-          license_required?: string | null
-          lifestyle_compatible?: string[] | null
           likes?: number | null
-          listing_category?: string | null
-          listing_for?: string | null
           listing_type?: string | null
-          location_accuracy?: number | null
-          location_zone?: string | null
-          lockoff_unit?: boolean | null
           longitude?: number | null
-          max_occupants?: number | null
-          max_passengers?: number | null
-          mileage?: number | null
-          min_rental_term_months?: number | null
-          mode?: string | null
-          model?: string | null
-          motorcycle_type?: string | null
-          move_in_date?: string | null
-          nearby_attractions?: string[] | null
           neighborhood?: string | null
-          neighborhood_description?: string | null
-          number_of_gears?: number | null
-          open_house_dates?: string[] | null
           owner_id: string
-          parking_spaces?: number | null
-          pet_friendly?: boolean | null
-          pool_type?: string | null
           price?: number | null
-          private_rooftop?: boolean | null
-          property_description?: string | null
           property_type?: string | null
-          rental_duration_type?: string | null
-          rental_rates?: Json | null
           rules?: string[] | null
-          sea_mountain_view?: boolean | null
-          security_onsite?: boolean | null
-          services_included?: string[] | null
-          smart_home?: boolean | null
-          solar_panels?: boolean | null
           square_footage?: number | null
-          status?: Database["public"]["Enums"]["listing_status"] | null
-          subletting_allowed?: boolean | null
-          suspension_type?: string | null
+          status?: string | null
           title?: string | null
-          transmission?: string | null
-          transmission_type?: string | null
-          transportation_access?: string[] | null
-          tulum_location?: string | null
-          unit_type?: string | null
-          updated_at?: string | null
-          vehicle_brand?: string | null
-          vehicle_condition?: string | null
-          vehicle_model?: string | null
-          vehicle_type?: string | null
           video_url?: string | null
-          view_count?: number | null
           views?: number | null
-          washer_dryer?: boolean | null
-          wheel_size?: number | null
-          yacht_type?: string | null
-          year?: number | null
-          year_built?: number | null
         }
         Update: {
-          additional_rules?: string | null
           address?: string | null
           amenities?: string[] | null
-          availability_calendar?: Json | null
-          availability_date?: string | null
-          availability_status?: string | null
-          balcony_count?: number | null
           baths?: number | null
-          battery_range?: number | null
           beds?: number | null
-          berths?: number | null
-          bicycle_type?: string | null
-          brake_type?: string | null
-          brand?: string | null
           category?: string | null
           city?: string | null
-          color?: string | null
-          common_areas?: boolean | null
-          condition?: string | null
           contacts?: number | null
-          coworking_space?: boolean | null
           created_at?: string | null
-          crew_option?: string | null
-          deposit_amount?: number | null
           description?: string | null
-          description_full?: string | null
-          description_short?: string | null
-          distance_to_beach?: number | null
-          distance_to_cowork?: number | null
-          electric_assist?: boolean | null
-          elevator?: boolean | null
-          engine_cc?: number | null
-          engine_type?: string | null
-          engines?: string | null
-          equipment?: Json | null
-          featured_image_url?: string | null
-          floor_level?: number | null
-          floorplan_url?: string | null
-          frame_material?: string | null
-          frame_size?: string | null
-          fuel_type?: string | null
-          furnished?: boolean | null
-          gear_type?: string | null
-          gym?: boolean | null
-          has_abs?: boolean | null
-          has_heated_grips?: boolean | null
-          has_luggage_rack?: boolean | null
-          has_traction_control?: boolean | null
-          has_verified_documents?: boolean | null
-          heating?: boolean | null
-          hoa_fees?: number | null
-          house_rules?: string[] | null
-          hull_material?: string | null
           id?: string
-          ideal_tenant_description?: string | null
           images?: string[] | null
-          included_utilities?: string[] | null
-          includes_basket?: boolean | null
-          includes_gear?: boolean | null
-          includes_helmet?: boolean | null
-          includes_lights?: boolean | null
-          includes_lock?: boolean | null
-          includes_pump?: boolean | null
-          internet_speed?: string | null
-          is_active?: boolean | null
-          is_featured?: boolean | null
-          jacuzzi?: boolean | null
           latitude?: number | null
-          lease_end_date?: string | null
-          lease_start_date?: string | null
-          lease_terms?: string | null
-          length_m?: number | null
-          levels?: number | null
-          license_required?: string | null
-          lifestyle_compatible?: string[] | null
           likes?: number | null
-          listing_category?: string | null
-          listing_for?: string | null
           listing_type?: string | null
-          location_accuracy?: number | null
-          location_zone?: string | null
-          lockoff_unit?: boolean | null
           longitude?: number | null
-          max_occupants?: number | null
-          max_passengers?: number | null
-          mileage?: number | null
-          min_rental_term_months?: number | null
-          mode?: string | null
-          model?: string | null
-          motorcycle_type?: string | null
-          move_in_date?: string | null
-          nearby_attractions?: string[] | null
           neighborhood?: string | null
-          neighborhood_description?: string | null
-          number_of_gears?: number | null
-          open_house_dates?: string[] | null
           owner_id?: string
-          parking_spaces?: number | null
-          pet_friendly?: boolean | null
-          pool_type?: string | null
           price?: number | null
-          private_rooftop?: boolean | null
-          property_description?: string | null
           property_type?: string | null
-          rental_duration_type?: string | null
-          rental_rates?: Json | null
           rules?: string[] | null
-          sea_mountain_view?: boolean | null
-          security_onsite?: boolean | null
-          services_included?: string[] | null
-          smart_home?: boolean | null
-          solar_panels?: boolean | null
           square_footage?: number | null
-          status?: Database["public"]["Enums"]["listing_status"] | null
-          subletting_allowed?: boolean | null
-          suspension_type?: string | null
+          status?: string | null
           title?: string | null
-          transmission?: string | null
-          transmission_type?: string | null
-          transportation_access?: string[] | null
-          tulum_location?: string | null
-          unit_type?: string | null
-          updated_at?: string | null
-          vehicle_brand?: string | null
-          vehicle_condition?: string | null
-          vehicle_model?: string | null
-          vehicle_type?: string | null
           video_url?: string | null
-          view_count?: number | null
           views?: number | null
-          washer_dryer?: boolean | null
-          wheel_size?: number | null
-          yacht_type?: string | null
-          year?: number | null
-          year_built?: number | null
         }
         Relationships: [
           {
@@ -1891,27 +1315,6 @@ export type Database = {
             columns: ["owner_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_listings_owner_profiles"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "listings_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "listings_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1945,161 +1348,36 @@ export type Database = {
       }
       matches: {
         Row: {
-          client_id: string
-          client_liked_at: string | null
-          conversation_started: boolean | null
-          created_at: string
-          free_messaging: boolean | null
+          created_at: string | null
           id: string
-          is_mutual: boolean | null
-          listing_id: string | null
-          match_score: number | null
-          owner_id: string
-          owner_liked_at: string | null
-          status: string | null
-          updated_at: string
+          user_1: string
+          user_2: string
         }
         Insert: {
-          client_id: string
-          client_liked_at?: string | null
-          conversation_started?: boolean | null
-          created_at?: string
-          free_messaging?: boolean | null
+          created_at?: string | null
           id?: string
-          is_mutual?: boolean | null
-          listing_id?: string | null
-          match_score?: number | null
-          owner_id: string
-          owner_liked_at?: string | null
-          status?: string | null
-          updated_at?: string
+          user_1: string
+          user_2: string
         }
         Update: {
-          client_id?: string
-          client_liked_at?: string | null
-          conversation_started?: boolean | null
-          created_at?: string
-          free_messaging?: boolean | null
+          created_at?: string | null
           id?: string
-          is_mutual?: boolean | null
-          listing_id?: string | null
-          match_score?: number | null
-          owner_id?: string
-          owner_liked_at?: string | null
-          status?: string | null
-          updated_at?: string
+          user_1?: string
+          user_2?: string
         }
         Relationships: [
           {
-            foreignKeyName: "fk_matches_client_id"
-            columns: ["client_id"]
+            foreignKeyName: "matches_user_1_fkey"
+            columns: ["user_1"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "fk_matches_client_id"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_matches_listing_id"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_matches_listing_id"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings_browse"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_matches_listing_id"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_matches_listing_id"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "recommended_listings"
-            referencedColumns: ["listing_id"]
-          },
-          {
-            foreignKeyName: "fk_matches_owner_id"
-            columns: ["owner_id"]
+            foreignKeyName: "matches_user_2_fkey"
+            columns: ["user_2"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_matches_owner_id"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "matches_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "matches_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "matches_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "matches_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings_browse"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "matches_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "matches_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "recommended_listings"
-            referencedColumns: ["listing_id"]
-          },
-          {
-            foreignKeyName: "matches_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "matches_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -2194,152 +1472,64 @@ export type Database = {
       notifications: {
         Row: {
           created_at: string | null
+          expires_at: string | null
           id: string
-          message: string | null
-          read: boolean | null
-          type: string | null
-          user_id: string | null
+          is_archived: boolean | null
+          is_read: boolean | null
+          link_url: string | null
+          message: string
+          metadata: Json | null
+          notification_type: Database["public"]["Enums"]["notification_type"]
+          read_at: string | null
+          related_match_id: string | null
+          related_message_id: string | null
+          related_property_id: string | null
+          related_user_id: string | null
+          title: string
+          user_id: string
         }
         Insert: {
           created_at?: string | null
-          id: string
-          message?: string | null
-          read?: boolean | null
-          type?: string | null
-          user_id?: string | null
+          expires_at?: string | null
+          id?: string
+          is_archived?: boolean | null
+          is_read?: boolean | null
+          link_url?: string | null
+          message: string
+          metadata?: Json | null
+          notification_type: Database["public"]["Enums"]["notification_type"]
+          read_at?: string | null
+          related_match_id?: string | null
+          related_message_id?: string | null
+          related_property_id?: string | null
+          related_user_id?: string | null
+          title: string
+          user_id: string
         }
         Update: {
           created_at?: string | null
+          expires_at?: string | null
           id?: string
-          message?: string | null
-          read?: boolean | null
-          type?: string | null
-          user_id?: string | null
+          is_archived?: boolean | null
+          is_read?: boolean | null
+          link_url?: string | null
+          message?: string
+          metadata?: Json | null
+          notification_type?: Database["public"]["Enums"]["notification_type"]
+          read_at?: string | null
+          related_match_id?: string | null
+          related_message_id?: string | null
+          related_property_id?: string | null
+          related_user_id?: string | null
+          title?: string
+          user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "notifications_user_id_fkey"
-            columns: ["user_id"]
+            foreignKeyName: "notifications_related_user_id_fkey"
+            columns: ["related_user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "notifications_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      owner_client_matches: {
-        Row: {
-          client_id: string | null
-          client_notes: string | null
-          communication_log: Json | null
-          compatibility_factors: Json | null
-          created_at: string | null
-          id: string
-          last_contact_date: string | null
-          listing_id: string | null
-          match_score: number | null
-          next_follow_up_date: string | null
-          owner_id: string | null
-          owner_notes: string | null
-          priority_level: string | null
-          status: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          client_id?: string | null
-          client_notes?: string | null
-          communication_log?: Json | null
-          compatibility_factors?: Json | null
-          created_at?: string | null
-          id?: string
-          last_contact_date?: string | null
-          listing_id?: string | null
-          match_score?: number | null
-          next_follow_up_date?: string | null
-          owner_id?: string | null
-          owner_notes?: string | null
-          priority_level?: string | null
-          status?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          client_id?: string | null
-          client_notes?: string | null
-          communication_log?: Json | null
-          compatibility_factors?: Json | null
-          created_at?: string | null
-          id?: string
-          last_contact_date?: string | null
-          listing_id?: string | null
-          match_score?: number | null
-          next_follow_up_date?: string | null
-          owner_id?: string | null
-          owner_notes?: string | null
-          priority_level?: string | null
-          status?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "owner_client_matches_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "owner_client_matches_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "owner_client_matches_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "owner_client_matches_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings_browse"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "owner_client_matches_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "owner_client_matches_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "recommended_listings"
-            referencedColumns: ["listing_id"]
-          },
-          {
-            foreignKeyName: "owner_client_matches_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "owner_client_matches_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -2444,161 +1634,6 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "owner_client_preferences_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "owner_client_preferences_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings_browse"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "owner_client_preferences_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "owner_client_preferences_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "recommended_listings"
-            referencedColumns: ["listing_id"]
-          },
-        ]
-      }
-      owner_likes: {
-        Row: {
-          client_id: string
-          created_at: string
-          direction: string
-          id: string
-          is_super_like: boolean | null
-          listing_id: string | null
-          metadata: Json | null
-          owner_id: string
-        }
-        Insert: {
-          client_id: string
-          created_at?: string
-          direction?: string
-          id?: string
-          is_super_like?: boolean | null
-          listing_id?: string | null
-          metadata?: Json | null
-          owner_id: string
-        }
-        Update: {
-          client_id?: string
-          created_at?: string
-          direction?: string
-          id?: string
-          is_super_like?: boolean | null
-          listing_id?: string | null
-          metadata?: Json | null
-          owner_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "owner_likes_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "owner_likes_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "owner_likes_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "owner_likes_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings_browse"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "owner_likes_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "owner_likes_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "recommended_listings"
-            referencedColumns: ["listing_id"]
-          },
-          {
-            foreignKeyName: "owner_likes_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "owner_likes_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      owner_likes_deleted_backups: {
-        Row: {
-          client_id: string
-          created_at: string
-          deleted_at: string | null
-          direction: string
-          id: string
-          is_super_like: boolean | null
-          listing_id: string | null
-          metadata: Json | null
-          owner_id: string
-        }
-        Insert: {
-          client_id: string
-          created_at?: string
-          deleted_at?: string | null
-          direction?: string
-          id?: string
-          is_super_like?: boolean | null
-          listing_id?: string | null
-          metadata?: Json | null
-          owner_id: string
-        }
-        Update: {
-          client_id?: string
-          created_at?: string
-          deleted_at?: string | null
-          direction?: string
-          id?: string
-          is_super_like?: boolean | null
-          listing_id?: string | null
-          metadata?: Json | null
-          owner_id?: string
-        }
         Relationships: []
       }
       owner_profiles: {
@@ -2680,22 +1715,7 @@ export type Database = {
           user_id?: string
           week_start_date?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "package_usage_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "package_usage_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       payment_activations: {
         Row: {
@@ -2832,22 +1852,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "paypal_credentials_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "paypal_credentials_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       paypal_transactions: {
         Row: {
@@ -2880,22 +1885,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "paypal_transactions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "paypal_transactions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       performance_logs: {
         Row: {
@@ -2937,22 +1927,7 @@ export type Database = {
           photo_url?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "profile_photos_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "profile_photos_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       profile_update_logs: {
         Row: {
@@ -2975,480 +1950,135 @@ export type Database = {
         }
         Relationships: []
       }
-      profile_views: {
-        Row: {
-          action: string
-          created_at: string
-          id: string
-          user_id: string
-          view_type: string
-          viewed_profile_id: string
-        }
-        Insert: {
-          action: string
-          created_at?: string
-          id?: string
-          user_id: string
-          view_type: string
-          viewed_profile_id: string
-        }
-        Update: {
-          action?: string
-          created_at?: string
-          id?: string
-          user_id?: string
-          view_type?: string
-          viewed_profile_id?: string
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
-          about_me: string | null
           active_mode: string | null
-          additional_notes: string | null
           age: number | null
-          amenities_wanted: string[] | null
           avatar_url: string | null
           average_rating: number | null
-          background_check_available: boolean | null
-          background_check_required: boolean | null
           bio: string | null
-          broker_showcase_photos: string[] | null
           broker_tier: string | null
           broker_verified: boolean | null
-          budget: number | null
           budget_max: number | null
           budget_min: number | null
-          business_type: string | null
-          buy_budget_max: number | null
-          buy_budget_min: number | null
-          buyer_intent: string | null
+          cache_version: number | null
           city: string | null
-          client_age_max: number | null
-          client_age_min: number | null
-          client_budget_max: number | null
-          client_budget_min: number | null
-          client_description: string | null
-          contact_phone: string | null
-          cooking_skills: string | null
-          country_of_residence: string | null
+          country: string | null
           created_at: string | null
-          credit_score_range: string | null
-          data_sensitivity_level: string | null
-          drinking: string | null
-          drinking_policy: string | null
-          education: string | null
+          deleted_at: string | null
           email: string | null
-          email_verified: boolean | null
-          emergency_contact: string | null
-          employment_status: string | null
-          employment_type: string | null
-          ethnicity: string | null
-          exercise_frequency: string | null
-          financing_preference: string[] | null
-          flexible_dates: boolean | null
           full_name: string | null
-          furnished_preference: string | null
           gender: string | null
-          guest_policy: string | null
-          has_kids: boolean | null
           has_pets: boolean | null
-          has_references: boolean | null
-          has_seen_welcome: boolean | null
-          height: number | null
-          hobbies_interests: string[] | null
           id: string
-          ideal_move_in_date: string | null
           images: string[] | null
-          income_range: string | null
-          interested_in_buying: boolean | null
           interests: string[] | null
           is_active: boolean
           is_banned: boolean | null
-          is_public: boolean | null
+          is_blocked: boolean | null
+          is_suspended: boolean | null
           languages_spoken: string[] | null
-          last_security_audit: string | null
-          latitude: number | null
-          lease_duration: string | null
-          license_number: string | null
-          lifestyle_description: string | null
           lifestyle_tags: string[] | null
-          location: string | null
-          location_accuracy: number | null
-          location_preference: string | null
-          location_updated_at: string | null
-          longitude: number | null
-          looking_for: string | null
-          max_bathrooms: number | null
-          max_bedrooms: number | null
-          max_budget: number | null
-          max_occupants_preference: number | null
-          max_stay_preference: number | null
-          min_bathrooms: number | null
-          min_bedrooms: number | null
-          minimum_credit_score: string | null
-          monthly_income: string | null
-          monthly_income_range: string | null
-          move_in_date: string | null
           nationality: string | null
-          oauth_pending_role: string | null
-          oauth_provider: string | null
-          occupation: string | null
+          neighborhood: string | null
           onboarding_completed: boolean | null
-          owner_looking_for: string | null
           package: string | null
           party_friendly: boolean | null
-          party_policy: string | null
-          password_complexity_score: number | null
-          pet_policy_owner: string | null
-          pet_preference: boolean | null
-          pet_types: string[] | null
           phone: string | null
-          preferences: string[] | null
-          preferred_activities: string[] | null
-          preferred_bathrooms: number | null
-          preferred_bedrooms: number | null
-          preferred_buy_city: string | null
-          preferred_buy_country: string | null
-          preferred_buy_neighborhood: string | null
-          preferred_listing_type: string | null
-          preferred_locations: string[] | null
-          preferred_occupations: string[] | null
-          preferred_property_types: string[] | null
-          previous_rental_history: string | null
-          privacy_settings: Json | null
-          profession: string | null
           profile_photo_url: string | null
-          property_description: string | null
-          property_location: string | null
-          property_photos: string[] | null
-          property_preferences: Json | null
-          property_specialties: string[] | null
-          property_type_want: string | null
-          reason_for_moving: string | null
-          references_text: string | null
-          relationship_status: string | null
-          rental_duration_preference: string | null
-          rental_philosophy: string | null
-          required_amenities: string[] | null
           role: string | null
-          sexual_orientation: string | null
-          size_preference: string | null
           smoking: boolean | null
-          smoking_policy: string | null
-          smoking_policy_owner: string | null
-          social_level: string | null
-          social_media_verification: string | null
-          specializations: string[] | null
           theme_preference: string | null
           total_reviews: number | null
-          travel_frequency: string | null
           updated_at: string | null
-          usage_intent: string | null
           verified: boolean | null
-          work_location: string | null
           work_schedule: string | null
-          years_experience: number | null
-          years_of_experience: number | null
         }
         Insert: {
-          about_me?: string | null
           active_mode?: string | null
-          additional_notes?: string | null
           age?: number | null
-          amenities_wanted?: string[] | null
           avatar_url?: string | null
           average_rating?: number | null
-          background_check_available?: boolean | null
-          background_check_required?: boolean | null
           bio?: string | null
-          broker_showcase_photos?: string[] | null
           broker_tier?: string | null
           broker_verified?: boolean | null
-          budget?: number | null
           budget_max?: number | null
           budget_min?: number | null
-          business_type?: string | null
-          buy_budget_max?: number | null
-          buy_budget_min?: number | null
-          buyer_intent?: string | null
+          cache_version?: number | null
           city?: string | null
-          client_age_max?: number | null
-          client_age_min?: number | null
-          client_budget_max?: number | null
-          client_budget_min?: number | null
-          client_description?: string | null
-          contact_phone?: string | null
-          cooking_skills?: string | null
-          country_of_residence?: string | null
+          country?: string | null
           created_at?: string | null
-          credit_score_range?: string | null
-          data_sensitivity_level?: string | null
-          drinking?: string | null
-          drinking_policy?: string | null
-          education?: string | null
+          deleted_at?: string | null
           email?: string | null
-          email_verified?: boolean | null
-          emergency_contact?: string | null
-          employment_status?: string | null
-          employment_type?: string | null
-          ethnicity?: string | null
-          exercise_frequency?: string | null
-          financing_preference?: string[] | null
-          flexible_dates?: boolean | null
           full_name?: string | null
-          furnished_preference?: string | null
           gender?: string | null
-          guest_policy?: string | null
-          has_kids?: boolean | null
           has_pets?: boolean | null
-          has_references?: boolean | null
-          has_seen_welcome?: boolean | null
-          height?: number | null
-          hobbies_interests?: string[] | null
           id: string
-          ideal_move_in_date?: string | null
           images?: string[] | null
-          income_range?: string | null
-          interested_in_buying?: boolean | null
           interests?: string[] | null
           is_active?: boolean
           is_banned?: boolean | null
-          is_public?: boolean | null
+          is_blocked?: boolean | null
+          is_suspended?: boolean | null
           languages_spoken?: string[] | null
-          last_security_audit?: string | null
-          latitude?: number | null
-          lease_duration?: string | null
-          license_number?: string | null
-          lifestyle_description?: string | null
           lifestyle_tags?: string[] | null
-          location?: string | null
-          location_accuracy?: number | null
-          location_preference?: string | null
-          location_updated_at?: string | null
-          longitude?: number | null
-          looking_for?: string | null
-          max_bathrooms?: number | null
-          max_bedrooms?: number | null
-          max_budget?: number | null
-          max_occupants_preference?: number | null
-          max_stay_preference?: number | null
-          min_bathrooms?: number | null
-          min_bedrooms?: number | null
-          minimum_credit_score?: string | null
-          monthly_income?: string | null
-          monthly_income_range?: string | null
-          move_in_date?: string | null
           nationality?: string | null
-          oauth_pending_role?: string | null
-          oauth_provider?: string | null
-          occupation?: string | null
+          neighborhood?: string | null
           onboarding_completed?: boolean | null
-          owner_looking_for?: string | null
           package?: string | null
           party_friendly?: boolean | null
-          party_policy?: string | null
-          password_complexity_score?: number | null
-          pet_policy_owner?: string | null
-          pet_preference?: boolean | null
-          pet_types?: string[] | null
           phone?: string | null
-          preferences?: string[] | null
-          preferred_activities?: string[] | null
-          preferred_bathrooms?: number | null
-          preferred_bedrooms?: number | null
-          preferred_buy_city?: string | null
-          preferred_buy_country?: string | null
-          preferred_buy_neighborhood?: string | null
-          preferred_listing_type?: string | null
-          preferred_locations?: string[] | null
-          preferred_occupations?: string[] | null
-          preferred_property_types?: string[] | null
-          previous_rental_history?: string | null
-          privacy_settings?: Json | null
-          profession?: string | null
           profile_photo_url?: string | null
-          property_description?: string | null
-          property_location?: string | null
-          property_photos?: string[] | null
-          property_preferences?: Json | null
-          property_specialties?: string[] | null
-          property_type_want?: string | null
-          reason_for_moving?: string | null
-          references_text?: string | null
-          relationship_status?: string | null
-          rental_duration_preference?: string | null
-          rental_philosophy?: string | null
-          required_amenities?: string[] | null
           role?: string | null
-          sexual_orientation?: string | null
-          size_preference?: string | null
           smoking?: boolean | null
-          smoking_policy?: string | null
-          smoking_policy_owner?: string | null
-          social_level?: string | null
-          social_media_verification?: string | null
-          specializations?: string[] | null
           theme_preference?: string | null
           total_reviews?: number | null
-          travel_frequency?: string | null
           updated_at?: string | null
-          usage_intent?: string | null
           verified?: boolean | null
-          work_location?: string | null
           work_schedule?: string | null
-          years_experience?: number | null
-          years_of_experience?: number | null
         }
         Update: {
-          about_me?: string | null
           active_mode?: string | null
-          additional_notes?: string | null
           age?: number | null
-          amenities_wanted?: string[] | null
           avatar_url?: string | null
           average_rating?: number | null
-          background_check_available?: boolean | null
-          background_check_required?: boolean | null
           bio?: string | null
-          broker_showcase_photos?: string[] | null
           broker_tier?: string | null
           broker_verified?: boolean | null
-          budget?: number | null
           budget_max?: number | null
           budget_min?: number | null
-          business_type?: string | null
-          buy_budget_max?: number | null
-          buy_budget_min?: number | null
-          buyer_intent?: string | null
+          cache_version?: number | null
           city?: string | null
-          client_age_max?: number | null
-          client_age_min?: number | null
-          client_budget_max?: number | null
-          client_budget_min?: number | null
-          client_description?: string | null
-          contact_phone?: string | null
-          cooking_skills?: string | null
-          country_of_residence?: string | null
+          country?: string | null
           created_at?: string | null
-          credit_score_range?: string | null
-          data_sensitivity_level?: string | null
-          drinking?: string | null
-          drinking_policy?: string | null
-          education?: string | null
+          deleted_at?: string | null
           email?: string | null
-          email_verified?: boolean | null
-          emergency_contact?: string | null
-          employment_status?: string | null
-          employment_type?: string | null
-          ethnicity?: string | null
-          exercise_frequency?: string | null
-          financing_preference?: string[] | null
-          flexible_dates?: boolean | null
           full_name?: string | null
-          furnished_preference?: string | null
           gender?: string | null
-          guest_policy?: string | null
-          has_kids?: boolean | null
           has_pets?: boolean | null
-          has_references?: boolean | null
-          has_seen_welcome?: boolean | null
-          height?: number | null
-          hobbies_interests?: string[] | null
           id?: string
-          ideal_move_in_date?: string | null
           images?: string[] | null
-          income_range?: string | null
-          interested_in_buying?: boolean | null
           interests?: string[] | null
           is_active?: boolean
           is_banned?: boolean | null
-          is_public?: boolean | null
+          is_blocked?: boolean | null
+          is_suspended?: boolean | null
           languages_spoken?: string[] | null
-          last_security_audit?: string | null
-          latitude?: number | null
-          lease_duration?: string | null
-          license_number?: string | null
-          lifestyle_description?: string | null
           lifestyle_tags?: string[] | null
-          location?: string | null
-          location_accuracy?: number | null
-          location_preference?: string | null
-          location_updated_at?: string | null
-          longitude?: number | null
-          looking_for?: string | null
-          max_bathrooms?: number | null
-          max_bedrooms?: number | null
-          max_budget?: number | null
-          max_occupants_preference?: number | null
-          max_stay_preference?: number | null
-          min_bathrooms?: number | null
-          min_bedrooms?: number | null
-          minimum_credit_score?: string | null
-          monthly_income?: string | null
-          monthly_income_range?: string | null
-          move_in_date?: string | null
           nationality?: string | null
-          oauth_pending_role?: string | null
-          oauth_provider?: string | null
-          occupation?: string | null
+          neighborhood?: string | null
           onboarding_completed?: boolean | null
-          owner_looking_for?: string | null
           package?: string | null
           party_friendly?: boolean | null
-          party_policy?: string | null
-          password_complexity_score?: number | null
-          pet_policy_owner?: string | null
-          pet_preference?: boolean | null
-          pet_types?: string[] | null
           phone?: string | null
-          preferences?: string[] | null
-          preferred_activities?: string[] | null
-          preferred_bathrooms?: number | null
-          preferred_bedrooms?: number | null
-          preferred_buy_city?: string | null
-          preferred_buy_country?: string | null
-          preferred_buy_neighborhood?: string | null
-          preferred_listing_type?: string | null
-          preferred_locations?: string[] | null
-          preferred_occupations?: string[] | null
-          preferred_property_types?: string[] | null
-          previous_rental_history?: string | null
-          privacy_settings?: Json | null
-          profession?: string | null
           profile_photo_url?: string | null
-          property_description?: string | null
-          property_location?: string | null
-          property_photos?: string[] | null
-          property_preferences?: Json | null
-          property_specialties?: string[] | null
-          property_type_want?: string | null
-          reason_for_moving?: string | null
-          references_text?: string | null
-          relationship_status?: string | null
-          rental_duration_preference?: string | null
-          rental_philosophy?: string | null
-          required_amenities?: string[] | null
           role?: string | null
-          sexual_orientation?: string | null
-          size_preference?: string | null
           smoking?: boolean | null
-          smoking_policy?: string | null
-          smoking_policy_owner?: string | null
-          social_level?: string | null
-          social_media_verification?: string | null
-          specializations?: string[] | null
           theme_preference?: string | null
           total_reviews?: number | null
-          travel_frequency?: string | null
           updated_at?: string | null
-          usage_intent?: string | null
           verified?: boolean | null
-          work_location?: string | null
           work_schedule?: string | null
-          years_experience?: number | null
-          years_of_experience?: number | null
         }
         Relationships: []
       }
@@ -3596,20 +2226,6 @@ export type Database = {
             referencedRelation: "reviews"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "review_helpful_votes_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "review_helpful_votes_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
         ]
       }
       reviews: {
@@ -3682,64 +2298,7 @@ export type Database = {
           updated_at?: string | null
           value_rating?: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "reviews_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "reviews_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings_browse"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "reviews_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "reviews_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "recommended_listings"
-            referencedColumns: ["listing_id"]
-          },
-          {
-            foreignKeyName: "reviews_reviewed_id_fkey"
-            columns: ["reviewed_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "reviews_reviewed_id_fkey"
-            columns: ["reviewed_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "reviews_reviewer_id_fkey"
-            columns: ["reviewer_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "reviews_reviewer_id_fkey"
-            columns: ["reviewer_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       saved_filters: {
         Row: {
@@ -4158,110 +2717,32 @@ export type Database = {
         }
         Relationships: []
       }
-      swipe_analytics: {
-        Row: {
-          average_time_per_profile: number | null
-          conversations_started: number | null
-          created_at: string | null
-          date: string | null
-          filter_usage_count: number | null
-          id: string
-          likes_given: number | null
-          matches_created: number | null
-          passes_given: number | null
-          super_likes_given: number | null
-          total_swipes: number | null
-          user_id: string | null
-          user_role: string
-        }
-        Insert: {
-          average_time_per_profile?: number | null
-          conversations_started?: number | null
-          created_at?: string | null
-          date?: string | null
-          filter_usage_count?: number | null
-          id?: string
-          likes_given?: number | null
-          matches_created?: number | null
-          passes_given?: number | null
-          super_likes_given?: number | null
-          total_swipes?: number | null
-          user_id?: string | null
-          user_role: string
-        }
-        Update: {
-          average_time_per_profile?: number | null
-          conversations_started?: number | null
-          created_at?: string | null
-          date?: string | null
-          filter_usage_count?: number | null
-          id?: string
-          likes_given?: number | null
-          matches_created?: number | null
-          passes_given?: number | null
-          super_likes_given?: number | null
-          total_swipes?: number | null
-          user_id?: string | null
-          user_role?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "swipe_analytics_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "swipe_analytics_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       swipes: {
         Row: {
-          action: string
-          created_at: string
+          created_at: string | null
+          direction: string
           id: string
           target_id: string
           target_type: string
           user_id: string
         }
         Insert: {
-          action: string
-          created_at?: string
+          created_at?: string | null
+          direction: string
           id?: string
           target_id: string
           target_type: string
           user_id: string
         }
         Update: {
-          action?: string
-          created_at?: string
+          created_at?: string | null
+          direction?: string
           id?: string
           target_id?: string
           target_type?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "fk_swipes_user_id"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_swipes_user_id"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       system_trace_logs: {
         Row: {
@@ -4354,22 +2835,7 @@ export type Database = {
           id?: string
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "user_activity_logs_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_activity_logs_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       user_activity_tracking: {
         Row: {
@@ -4390,22 +2856,7 @@ export type Database = {
           id?: string
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "user_activity_tracking_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_activity_tracking_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       user_block_list: {
         Row: {
@@ -4426,36 +2877,7 @@ export type Database = {
           id?: string
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "user_block_list_blocked_user_id_fkey"
-            columns: ["blocked_user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_block_list_blocked_user_id_fkey"
-            columns: ["blocked_user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_block_list_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_block_list_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       user_blocks: {
         Row: {
@@ -4524,43 +2946,7 @@ export type Database = {
           resolved_at?: string | null
           status?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "user_complaints_complainant_id_fkey"
-            columns: ["complainant_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_complaints_complainant_id_fkey"
-            columns: ["complainant_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_complaints_conversation_id_fkey"
-            columns: ["conversation_id"]
-            isOneToOne: false
-            referencedRelation: "conversations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_complaints_reported_user_id_fkey"
-            columns: ["reported_user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_complaints_reported_user_id_fkey"
-            columns: ["reported_user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       user_consent_logs: {
         Row: {
@@ -4620,22 +3006,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "user_documents_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_documents_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       user_feedback: {
         Row: {
@@ -4658,78 +3029,6 @@ export type Database = {
           feedback?: string | null
           id?: string
           user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_feedback_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_feedback_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      user_interactions: {
-        Row: {
-          created_at: string | null
-          id: number
-          initiator_id: string | null
-          interaction_type: string | null
-          property_id: number | null
-          target_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: never
-          initiator_id?: string | null
-          interaction_type?: string | null
-          property_id?: number | null
-          target_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: never
-          initiator_id?: string | null
-          interaction_type?: string | null
-          property_id?: number | null
-          target_id?: string | null
-        }
-        Relationships: []
-      }
-      user_likes: {
-        Row: {
-          category: string | null
-          id: number
-          is_liked: boolean | null
-          liked_at: string | null
-          liked_id: string | null
-          liker_id: string | null
-          metadata: Json | null
-        }
-        Insert: {
-          category?: string | null
-          id?: never
-          is_liked?: boolean | null
-          liked_at?: string | null
-          liked_id?: string | null
-          liker_id?: string | null
-          metadata?: Json | null
-        }
-        Update: {
-          category?: string | null
-          id?: never
-          is_liked?: boolean | null
-          liked_at?: string | null
-          liked_id?: string | null
-          liker_id?: string | null
-          metadata?: Json | null
         }
         Relationships: []
       }
@@ -4758,22 +3057,7 @@ export type Database = {
           sms_notifications?: boolean | null
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "user_notification_preferences_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_notification_preferences_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       user_package_overrides: {
         Row: {
@@ -4809,22 +3093,7 @@ export type Database = {
           override_reason?: string | null
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "user_package_overrides_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_package_overrides_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       user_payment_methods: {
         Row: {
@@ -4851,22 +3120,7 @@ export type Database = {
           subscription_package_id?: string | null
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "user_payment_methods_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_payment_methods_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       user_preferences: {
         Row: {
@@ -4893,22 +3147,7 @@ export type Database = {
           preferred_property_type?: string[] | null
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "user_preferences_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_preferences_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       user_privacy_settings: {
         Row: {
@@ -4932,22 +3171,7 @@ export type Database = {
           profile_visibility?: string | null
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "user_privacy_settings_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_privacy_settings_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       user_push_subscriptions: {
         Row: {
@@ -5031,22 +3255,7 @@ export type Database = {
           restriction_type?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "user_restrictions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_restrictions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       user_roles: {
         Row: {
@@ -5073,13 +3282,6 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: true
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_roles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -5145,22 +3347,7 @@ export type Database = {
           theme?: string | null
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "user_settings_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_settings_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       user_subscriptions: {
         Row: {
@@ -5237,22 +3424,7 @@ export type Database = {
           user_id?: string
           warning_type?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "user_warnings_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_warnings_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       vendors: {
         Row: {
@@ -5288,22 +3460,7 @@ export type Database = {
           owner_id?: string
           price?: number
         }
-        Relationships: [
-          {
-            foreignKeyName: "vendors_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "vendors_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Views: {
@@ -5348,230 +3505,6 @@ export type Database = {
           type?: string | null
         }
         Relationships: []
-      }
-      listings_browse: {
-        Row: {
-          amenities: string[] | null
-          baths: number | null
-          beds: number | null
-          category: string | null
-          city: string | null
-          created_at: string | null
-          description: string | null
-          furnished: boolean | null
-          id: string | null
-          images: string[] | null
-          is_active: boolean | null
-          listing_type: string | null
-          neighborhood: string | null
-          owner_id: string | null
-          pet_friendly: boolean | null
-          price: number | null
-          property_type: string | null
-          square_footage: number | null
-          status: Database["public"]["Enums"]["listing_status"] | null
-          title: string | null
-        }
-        Insert: {
-          amenities?: string[] | null
-          baths?: number | null
-          beds?: number | null
-          category?: string | null
-          city?: string | null
-          created_at?: string | null
-          description?: string | null
-          furnished?: boolean | null
-          id?: string | null
-          images?: string[] | null
-          is_active?: boolean | null
-          listing_type?: string | null
-          neighborhood?: string | null
-          owner_id?: string | null
-          pet_friendly?: boolean | null
-          price?: number | null
-          property_type?: string | null
-          square_footage?: number | null
-          status?: Database["public"]["Enums"]["listing_status"] | null
-          title?: string | null
-        }
-        Update: {
-          amenities?: string[] | null
-          baths?: number | null
-          beds?: number | null
-          category?: string | null
-          city?: string | null
-          created_at?: string | null
-          description?: string | null
-          furnished?: boolean | null
-          id?: string | null
-          images?: string[] | null
-          is_active?: boolean | null
-          listing_type?: string | null
-          neighborhood?: string | null
-          owner_id?: string | null
-          pet_friendly?: boolean | null
-          price?: number | null
-          property_type?: string | null
-          square_footage?: number | null
-          status?: Database["public"]["Enums"]["listing_status"] | null
-          title?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "fk_listings_owner_profiles"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_listings_owner_profiles"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "listings_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "listings_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      listings_public: {
-        Row: {
-          amenities: string[] | null
-          baths: number | null
-          beds: number | null
-          category: string | null
-          city: string | null
-          created_at: string | null
-          description: string | null
-          id: string | null
-          images: string[] | null
-          is_active: boolean | null
-          listing_type: string | null
-          neighborhood: string | null
-          price: number | null
-          property_type: string | null
-          status: Database["public"]["Enums"]["listing_status"] | null
-          title: string | null
-        }
-        Insert: {
-          amenities?: string[] | null
-          baths?: number | null
-          beds?: number | null
-          category?: string | null
-          city?: string | null
-          created_at?: string | null
-          description?: string | null
-          id?: string | null
-          images?: string[] | null
-          is_active?: boolean | null
-          listing_type?: string | null
-          neighborhood?: string | null
-          price?: number | null
-          property_type?: string | null
-          status?: Database["public"]["Enums"]["listing_status"] | null
-          title?: string | null
-        }
-        Update: {
-          amenities?: string[] | null
-          baths?: number | null
-          beds?: number | null
-          category?: string | null
-          city?: string | null
-          created_at?: string | null
-          description?: string | null
-          id?: string | null
-          images?: string[] | null
-          is_active?: boolean | null
-          listing_type?: string | null
-          neighborhood?: string | null
-          price?: number | null
-          property_type?: string | null
-          status?: Database["public"]["Enums"]["listing_status"] | null
-          title?: string | null
-        }
-        Relationships: []
-      }
-      profiles_public: {
-        Row: {
-          age: number | null
-          avatar_url: string | null
-          bio: string | null
-          budget_max: number | null
-          budget_min: number | null
-          city: string | null
-          created_at: string | null
-          full_name: string | null
-          gender: string | null
-          id: string | null
-          images: string[] | null
-          interests: string[] | null
-          is_active: boolean | null
-          lifestyle_tags: string[] | null
-          monthly_income: string | null
-          occupation: string | null
-          onboarding_completed: boolean | null
-          preferred_activities: string[] | null
-          role: string | null
-          verified: boolean | null
-        }
-        Relationships: []
-      }
-      recommended_listings: {
-        Row: {
-          city: string | null
-          client_id: string | null
-          listing_id: string | null
-          listing_type: string | null
-          match_score: number | null
-          owner_avg_rating: number | null
-          owner_id: string | null
-          owner_review_count: number | null
-          price: number | null
-          title: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "fk_listings_owner_profiles"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_listings_owner_profiles"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "listings_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "listings_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       vw_push_outbox_failures: {
         Row: {
@@ -5875,6 +3808,7 @@ export type Database = {
         Args: { onboarding_data?: Json; user_id: string }
         Returns: undefined
       }
+      current_auth_uid: { Args: never; Returns: string }
       current_window_start: {
         Args: { window_seconds: number }
         Returns: string
@@ -6193,6 +4127,58 @@ export type Database = {
           title: string
         }[]
       }
+      get_swipe_feed: {
+        Args: { p_category?: string; p_limit?: number; p_user_id: string }
+        Returns: {
+          already_liked: boolean
+          baths: number
+          beds: number
+          city: string
+          description: string
+          distance_km: number
+          id: string
+          images: string[]
+          latitude: number
+          listing_type: string
+          longitude: number
+          neighborhood: string
+          owner_id: string
+          price: number
+          property_type: string
+          square_footage: number
+          title: string
+        }[]
+      }
+      get_swipe_feed_listings: {
+        Args: { p_limit?: number; p_offset?: number; p_user_id: string }
+        Returns: {
+          city: string
+          created_at: string
+          id: string
+          image: string
+          neighborhood: string
+          price: number
+          title: string
+        }[]
+      }
+      get_swipe_feed_profiles: {
+        Args: { p_limit?: number; p_offset?: number; p_user_id: string }
+        Returns: {
+          avatar_url: string
+          created_at: string
+          full_name: string
+          id: string
+        }[]
+      }
+      get_swipe_feed_users: {
+        Args: { p_limit?: number; p_offset?: number; p_user_id: string }
+        Returns: {
+          avatar_url: string
+          created_at: string
+          full_name: string
+          id: string
+        }[]
+      }
       get_user_like_history: {
         Args: { target_user_id: string }
         Returns: {
@@ -6241,6 +4227,7 @@ export type Database = {
         Returns: number
       }
       gettransactionid: { Args: never; Returns: unknown }
+      hook_create_profile_on_signup: { Args: { event: Json }; Returns: Json }
       increment_conversation_count: {
         Args: { p_user_id: string }
         Returns: boolean
@@ -6259,6 +4246,11 @@ export type Database = {
       }
       is_current_user_active: { Args: never; Returns: boolean }
       is_profile_owner: { Args: { profile_user_id: string }; Returns: boolean }
+      is_row_active: {
+        Args: { deleted_at: string; is_active: boolean }
+        Returns: boolean
+      }
+      is_user_active: { Args: { user_uuid: string }; Returns: boolean }
       is_user_blocked: {
         Args: { potential_blocked_id: string; potential_blocker_id: string }
         Returns: boolean
@@ -7120,6 +5112,19 @@ export type Database = {
       document_status: "pending" | "approved" | "rejected"
       document_type: "property_deed" | "broker_license" | "id_card" | "other"
       listing_status: "active" | "pending" | "inactive" | "suspended"
+      notification_type:
+        | "new_match"
+        | "new_message"
+        | "new_like"
+        | "new_review"
+        | "property_inquiry"
+        | "contract_signed"
+        | "contract_pending"
+        | "payment_received"
+        | "profile_viewed"
+        | "system_announcement"
+        | "verification_approved"
+        | "subscription_expiring"
       signature_type: "drawn" | "typed" | "uploaded"
       user_role: "client" | "owner" | "admin"
     }
@@ -7269,6 +5274,20 @@ export const Constants = {
       document_status: ["pending", "approved", "rejected"],
       document_type: ["property_deed", "broker_license", "id_card", "other"],
       listing_status: ["active", "pending", "inactive", "suspended"],
+      notification_type: [
+        "new_match",
+        "new_message",
+        "new_like",
+        "new_review",
+        "property_inquiry",
+        "contract_signed",
+        "contract_pending",
+        "payment_received",
+        "profile_viewed",
+        "system_announcement",
+        "verification_approved",
+        "subscription_expiring",
+      ],
       signature_type: ["drawn", "typed", "uploaded"],
       user_role: ["client", "owner", "admin"],
     },

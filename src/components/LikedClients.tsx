@@ -126,11 +126,13 @@ export function LikedClients() {
 
       logger.info('[LikedClients] Fetching liked clients for owner:', user.id);
 
-      // Get likes where the owner liked clients from owner_likes table
+      // Get likes where the owner liked clients (using unified likes table)
       const { data: ownerLikes, error: likesError } = await supabase
-        .from('owner_likes')
-        .select('client_id, created_at')
-        .eq('owner_id', user.id)
+        .from('likes')
+        .select('target_id, created_at')
+        .eq('user_id', user.id)
+        .eq('target_type', 'profile')
+        .eq('direction', 'right')
         .order('created_at', { ascending: false });
 
       if (likesError) {
@@ -150,7 +152,7 @@ export function LikedClients() {
         return [];
       }
 
-      const targetIds = ownerLikes.map(like => like.client_id);
+      const targetIds = ownerLikes.map(like => like.target_id);
 
       // First try with inner join to get only clients
       let profiles: any[] = [];
@@ -201,7 +203,7 @@ export function LikedClients() {
 
       // Return the client profiles with like data
       const likedClientsList = profiles.map(profile => {
-        const like = ownerLikes.find(l => l.client_id === profile.id);
+        const like = ownerLikes.find((l: any) => l.target_id === profile.id);
         return {
           id: profile.id,
           user_id: profile.id,
@@ -300,10 +302,11 @@ export function LikedClients() {
   const removeLikeMutation = useMutation({
     mutationFn: async (clientId: string) => {
       const { error } = await supabase
-        .from('owner_likes')
+        .from('likes')
         .delete()
-        .eq('owner_id', user?.id)
-        .eq('client_id', clientId);
+        .eq('user_id', user?.id)
+        .eq('target_id', clientId)
+        .eq('target_type', 'profile');
 
       if (error) throw error;
     },
@@ -348,7 +351,7 @@ export function LikedClients() {
 
   const blockClientMutation = useMutation({
     mutationFn: async (clientId: string) => {
-      // Insert block record into user_blocks table (correct schema table name)
+      // Insert block record into user_blocks table
       const { error: blockError } = await supabase
         .from('user_blocks')
         .insert({
@@ -361,12 +364,13 @@ export function LikedClients() {
         throw blockError;
       }
 
-      // Also remove from owner_likes
+      // Also remove from likes table
       await supabase
-        .from('owner_likes')
+        .from('likes')
         .delete()
-        .eq('owner_id', user?.id)
-        .eq('client_id', clientId);
+        .eq('user_id', user?.id)
+        .eq('target_id', clientId)
+        .eq('target_type', 'profile');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['liked-clients'] });

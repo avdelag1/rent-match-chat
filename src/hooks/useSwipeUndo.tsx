@@ -5,7 +5,7 @@ import { toast } from '@/hooks/use-toast';
 import { logger } from '@/utils/prodLogger';
 import { useSwipeDeckStore } from '@/state/swipeDeckStore';
 
-interface LastSwipe {
+export interface LastSwipe {
   targetId: string;
   targetType: 'listing' | 'profile';
   direction: 'left' | 'right';
@@ -28,10 +28,18 @@ export function useSwipeUndo() {
     }
     return null;
   });
+
+  // Track if the undo was successful for components to react
+  const [undoSuccess, setUndoSuccess] = useState(false);
   
   const queryClient = useQueryClient();
   const undoClientSwipe = useSwipeDeckStore((state) => state.undoClientSwipe);
   const undoOwnerSwipe = useSwipeDeckStore((state) => state.undoOwnerSwipe);
+
+  // Reset undo success state
+  const resetUndoState = useCallback(() => {
+    setUndoSuccess(false);
+  }, []);
 
   // Save last swipe to localStorage
   const saveLastSwipe = useCallback((swipe: LastSwipe | null) => {
@@ -59,7 +67,7 @@ export function useSwipeUndo() {
     }
   }, [saveLastSwipe]);
 
-  // Undo mutation - removes the swipe/dismissal from database
+  // Undo mutation - removes the swipe from the likes table
   const undoMutation = useMutation({
     mutationFn: async () => {
       if (!lastSwipe) {
@@ -69,14 +77,13 @@ export function useSwipeUndo() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      // Remove from swipe_dismissals
+      // Remove from likes table (unified swipe storage)
       const { error } = await supabase
-        .from('swipe_dismissals')
+        .from('likes')
         .delete()
         .match({
           user_id: user.id,
-          target_id: lastSwipe.targetId,
-          target_type: lastSwipe.targetType
+          target_id: lastSwipe.targetId
         });
 
       if (error) {
@@ -94,12 +101,16 @@ export function useSwipeUndo() {
         undoOwnerSwipe();
       }
 
+      // Mark undo as successful
+      setUndoSuccess(true);
+
       // Clear undo state
       saveLastSwipe(null);
 
       // Refresh queries
       queryClient.invalidateQueries({ queryKey: ['swipe-dismissals'] }).catch(() => {});
       queryClient.invalidateQueries({ queryKey: ['listings'] }).catch(() => {});
+      queryClient.invalidateQueries({ queryKey: ['liked-properties'] }).catch(() => {});
 
       toast({
         title: '↩️ Card Returned',
@@ -124,6 +135,8 @@ export function useSwipeUndo() {
     undoLastSwipe: undoMutation.mutate,
     canUndo,
     isUndoing,
-    lastSwipe
+    lastSwipe,
+    undoSuccess,
+    resetUndoState
   };
 }

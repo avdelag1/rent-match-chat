@@ -95,18 +95,18 @@ export function useSwipedClientProfiles() {
       if (!user) return [];
 
       try {
-        // FIXED: Query owner_likes table for owner swipes on clients
-        // The previous code was querying 'likes' table which is for client→listing likes
+        // Query likes table for owner swipes on profiles (clients)
         const { data: ownerLikes, error } = await supabase
-          .from('owner_likes')
-          .select('client_id')
-          .eq('owner_id', user.id);
+          .from('likes')
+          .select('target_id')
+          .eq('user_id', user.id)
+          .eq('target_type', 'profile');
 
         if (error) {
           logger.error('Error fetching owner swipes:', error);
           return [];
         }
-        return ownerLikes?.map(l => l.client_id) || [];
+        return ownerLikes?.map((l: any) => l.target_id) || [];
       } catch (error) {
         logger.error('Failed to fetch swiped client profiles:', error);
         return [];
