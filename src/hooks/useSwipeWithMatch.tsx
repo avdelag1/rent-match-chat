@@ -211,13 +211,14 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
             (err) => logger.error('[useSwipeWithMatch] Push notification failed:', err)
           );
         } else {
-          // For left swipes (dislikes), we use the swipe_dismissals table
+          // For left swipes (dislikes), use likes table with direction='left'
           const { error: dismissError } = await supabase
-            .from('swipe_dismissals')
+            .from('likes')
             .upsert({
               user_id: user.id,
               target_id: targetId,
-              target_type: targetType === 'listing' ? 'listing' : 'client'
+              target_type: targetType === 'listing' ? 'listing' : 'profile',
+              direction: 'left'
             }, {
               onConflict: 'user_id,target_id,target_type',
               ignoreDuplicates: false
@@ -288,13 +289,14 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
             }).catch(err => logger.error('[useSwipeWithMatch] Push to owner failed:', err));
           }
         } else {
-          // Client left swipe on listing - save dismissal
+          // Client left swipe on listing - save dismissal using likes table
           const { error: dismissError } = await supabase
-            .from('swipe_dismissals')
+            .from('likes')
             .upsert({
               user_id: user.id,
               target_id: targetId,
-              target_type: 'listing'
+              target_type: 'listing',
+              direction: 'left'
             }, {
               onConflict: 'user_id,target_id,target_type',
               ignoreDuplicates: false
