@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { FaGoogle } from 'react-icons/fa';
 import { loginSchema, signupSchema, forgotPasswordSchema } from '@/schemas/auth';
 import { Capacitor } from '@capacitor/core';
+import StarFieldBackground from './StarFieldBackground';
 
 interface AuthDialogProps {
   isOpen: boolean;
@@ -262,6 +263,9 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm animate-fade-in" />
         <DialogPrimitive.Content className="fixed inset-0 z-50 w-full h-full overflow-hidden bg-black">
+
+          {/* Star field background */}
+          <StarFieldBackground />
 
           {/* Animated smoky background effect */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
