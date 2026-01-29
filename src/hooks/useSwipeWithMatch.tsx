@@ -95,19 +95,14 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
             throw new Error('This user is no longer active');
           }
 
-          // CRITICAL FIX: Use proper conflict handling for partial unique indexes
-          // We have two partial unique indexes on owner_likes:
-          // 1. owner_likes_profile_only_unique (owner_id, client_id) WHERE listing_id IS NULL
-          // 2. owner_likes_listing_specific_unique (owner_id, client_id, listing_id) WHERE listing_id IS NOT NULL
-          // For profile likes, we must handle the partial index by checking for existing record first
-
+          // For owner → client likes, use likes table with target_type='profile'
           // First, check if like already exists
           const { data: existingLike } = await supabase
-            .from('owner_likes')
+            .from('likes')
             .select('id')
-            .eq('owner_id', user.id)
-            .eq('client_id', targetId)
-            .is('listing_id', null)
+            .eq('user_id', user.id)
+            .eq('target_id', targetId)
+            .eq('target_type', 'profile')
             .maybeSingle();
 
           let ownerLike;
@@ -116,7 +111,7 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
           if (existingLike) {
             // Update existing like (just update the timestamp)
             const result = await supabase
-              .from('owner_likes')
+              .from('likes')
               .update({ created_at: new Date().toISOString() })
               .eq('id', existingLike.id)
               .select()
@@ -126,12 +121,12 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
           } else {
             // Insert new like
             const result = await supabase
-              .from('owner_likes')
+              .from('likes')
               .insert({
-                owner_id: user.id,
-                client_id: targetId,
-                listing_id: null, // Explicit null for general profile likes
-                is_super_like: false
+                user_id: user.id,
+                target_id: targetId,
+                target_type: 'profile',
+                direction: 'right'
               })
               .select()
               .single();
@@ -150,19 +145,19 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
               // This is fine - user already liked this client, just log and continue
               logger.info('[useSwipeWithMatch] Like already exists (unique constraint), treating as success');
               // Return existing like data or create minimal response
-              like = { id: 'existing', owner_id: user.id, client_id: targetId };
+              like = { id: 'existing', user_id: user.id, target_id: targetId };
             } else if (isRLSViolation) {
               // RLS policy violation - log but don't crash the swipe flow
               logger.warn('[useSwipeWithMatch] RLS policy blocked like insert, continuing without save:', ownerLikeError.message);
-              like = { id: 'rls-blocked', owner_id: user.id, client_id: targetId };
+              like = { id: 'rls-blocked', user_id: user.id, target_id: targetId };
             } else if (isFKViolation) {
-              // FK violation means the client_id doesn't exist in profiles table
+              // FK violation means the target_id doesn't exist in profiles table
               // This happens with stale cached data - skip without error
               logger.warn('[useSwipeWithMatch] FK violation - client profile not in database (stale cache):', {
                 clientId: targetId,
                 error: ownerLikeError.message
               });
-              like = { id: 'fk-violation', owner_id: user.id, client_id: targetId, skipped: true };
+              like = { id: 'fk-violation', user_id: user.id, target_id: targetId, skipped: true };
             } else {
               // Unexpected error - log and throw
               logger.error('[useSwipeWithMatch] Failed to save owner like:', {

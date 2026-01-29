@@ -48,11 +48,12 @@ export function useOwnerStats() {
           .from('listings')
           .select('view_count, likes')
           .eq('owner_id', user.id),
-        // Count clients the owner has liked
+        // Count clients the owner has liked (using likes table with target_type='profile')
         supabase
-          .from('owner_likes')
+          .from('likes')
           .select('*', { count: 'exact', head: true })
-          .eq('owner_id', user.id),
+          .eq('user_id', user.id)
+          .eq('target_type', 'profile'),
         // Count clients who liked the owner's listings (get listing IDs first)
         supabase
           .from('listings')

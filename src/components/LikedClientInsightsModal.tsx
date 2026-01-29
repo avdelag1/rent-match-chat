@@ -80,18 +80,19 @@ function LikedClientInsightsModalComponent({ open, onOpenChange, client }: Liked
     }
   }, [open]);
 
-  // Delete mutation - Remove from liked clients (using owner_likes table)
+  // Delete mutation - Remove from liked clients
   const deleteMutation = useMutation({
     mutationFn: async () => {
       const { data: user } = await supabase.auth.getUser();
       if (!user.user || !client) throw new Error('Not authenticated');
 
-      // Use owner_likes table for owner → client likes
+      // Use likes table for owner → client likes (target_type = profile)
       const { error } = await supabase
-        .from('owner_likes')
+        .from('likes')
         .delete()
-        .eq('owner_id', user.user.id)
-        .eq('client_id', client.user_id);
+        .eq('user_id', user.user.id)
+        .eq('target_id', client.user_id)
+        .eq('target_type', 'profile');
 
       if (error) throw error;
     },
@@ -130,12 +131,13 @@ function LikedClientInsightsModalComponent({ open, onOpenChange, client }: Liked
         throw blockError;
       }
 
-      // Also remove from owner_likes table
+      // Also remove from likes table
       await supabase
-        .from('owner_likes')
+        .from('likes')
         .delete()
-        .eq('owner_id', user.user.id)
-        .eq('client_id', client.user_id);
+        .eq('user_id', user.user.id)
+        .eq('target_id', client.user_id)
+        .eq('target_type', 'profile');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['liked-clients'] });

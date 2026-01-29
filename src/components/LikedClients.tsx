@@ -126,11 +126,12 @@ export function LikedClients() {
 
       logger.info('[LikedClients] Fetching liked clients for owner:', user.id);
 
-      // Get likes from owner_likes table (owner → client likes)
+      // Get likes from likes table (owner → client likes using target_type='profile')
       const { data: ownerLikes, error: likesError } = await supabase
-        .from('owner_likes')
-        .select('client_id, created_at')
-        .eq('owner_id', user.id)
+        .from('likes')
+        .select('target_id, created_at')
+        .eq('user_id', user.id)
+        .eq('target_type', 'profile')
         .order('created_at', { ascending: false });
 
       if (likesError) {
@@ -150,7 +151,7 @@ export function LikedClients() {
         return [];
       }
 
-      const targetIds = ownerLikes.map(like => like.client_id);
+      const targetIds = ownerLikes.map(like => like.target_id);
 
       // First try with inner join to get only clients
       let profiles: any[] = [];
@@ -300,10 +301,11 @@ export function LikedClients() {
   const removeLikeMutation = useMutation({
     mutationFn: async (clientId: string) => {
       const { error } = await supabase
-        .from('owner_likes')
+        .from('likes')
         .delete()
-        .eq('owner_id', user?.id)
-        .eq('client_id', clientId);
+        .eq('user_id', user?.id)
+        .eq('target_id', clientId)
+        .eq('target_type', 'profile');
 
       if (error) throw error;
     },
@@ -361,12 +363,13 @@ export function LikedClients() {
         throw blockError;
       }
 
-      // Also remove from owner_likes table
+      // Also remove from likes table
       await supabase
-        .from('owner_likes')
+        .from('likes')
         .delete()
-        .eq('owner_id', user?.id)
-        .eq('client_id', clientId);
+        .eq('user_id', user?.id)
+        .eq('target_id', clientId)
+        .eq('target_type', 'profile');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['liked-clients'] });

@@ -977,18 +977,18 @@ export function useSmartClientMatching(
       try {
         logger.info('[SmartMatching] Fetching client profiles for owner:', userId);
 
-        // CRITICAL FIX: For owners, fetch liked clients from owner_likes table
-        // Owner swipes on clients are stored in owner_likes, not likes table
+        // For owners, fetch liked clients from likes table (target_type='profile')
         const { data: ownerLikedClients, error: ownerLikesError } = await supabase
-          .from('owner_likes')
-          .select('client_id')
-          .eq('owner_id', userId);
+          .from('likes')
+          .select('target_id')
+          .eq('user_id', userId)
+          .eq('target_type', 'profile');
 
         const likedIds = new Set<string>();
         if (!ownerLikesError && ownerLikedClients) {
           for (const row of ownerLikedClients) {
-            if (row.client_id) {
-              likedIds.add(row.client_id);
+            if (row.target_id) {
+              likedIds.add(row.target_id);
             }
           }
         }
