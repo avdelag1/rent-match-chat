@@ -3611,6 +3611,44 @@ export type Database = {
         }
         Relationships: []
       }
+      likes: {
+        Row: {
+          id: string
+          user_id: string
+          target_id: string | null
+          target_type: string | null
+          direction: string | null
+          source: string | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          target_id?: string | null
+          target_type?: string | null
+          direction?: string | null
+          source?: string | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          target_id?: string | null
+          target_type?: string | null
+          direction?: string | null
+          source?: string | null
+          created_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vw_push_outbox_failures: {
         Row: {
           attempt_count: number | null
