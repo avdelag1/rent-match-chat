@@ -28,14 +28,13 @@ export function useLikedProperties() {
     queryFn: async () => {
       if (!user?.id) return [];
 
-      // Fetch likes where direction='like' and target_type='listing'
-      // Database uses 'like'/'dismiss' not 'right'/'left'
+      // Fetch likes where direction='right' and target_type='listing'
       const { data, error } = await supabase
         .from('likes')
         .select('id, created_at, target_id')
         .eq('user_id', user.id)
         .eq('target_type', 'listing')
-        .eq('direction', 'like')
+        .eq('direction', 'right')
         .order('created_at', { ascending: false });
 
       if (error) {
