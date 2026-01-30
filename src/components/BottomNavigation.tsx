@@ -164,27 +164,30 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
     return location.pathname === item.path;
   };
 
-  // Get icon color class - clean bright colors, no glow
+  // Get icon color class - bright and vibrant
   const getIconColorClass = (item: NavItem, active: boolean) => {
-    if (!active) return 'text-white/70';
+    if (!active) {
+      // Inactive icons - much brighter (85% opacity instead of 70%)
+      return 'text-white/85';
+    }
 
     switch (item.id) {
       case 'browse':
         return 'text-white';
       case 'likes':
       case 'liked':
-        return 'text-orange-400';
+        return 'text-amber-300'; // Brighter orange
       case 'messages':
-        return 'text-blue-400';
+        return 'text-cyan-300'; // Brighter blue
       case 'listings':
         return 'text-white';
       case 'profile':
         return 'text-white';
       case 'hire':
       case 'services':
-        return 'text-emerald-400';
+        return 'text-emerald-300'; // Brighter green
       case 'filter':
-        return 'text-purple-400';
+        return 'text-violet-300'; // Brighter purple
       default:
         return 'text-white';
     }
