@@ -20,16 +20,17 @@ export function useOwnerListingLikes() {
         return [];
       }
 
-      // Fetch listings owned by this user that have likes
+      // Fetch listings owned by this user
       const { data: listings, error } = await supabase
         .from('listings')
         .select('id, title, price, images, category, status, created_at')
         .eq('owner_id', user.id)
-        .eq('status', 'active');
+        .eq('status', 'active')
+        .order('created_at', { ascending: false });
 
       if (error) {
         logger.error('[useOwnerListingLikes] Error fetching listings:', error);
-        throw error;
+        return [];
       }
 
       if (!listings || listings.length === 0) {
@@ -48,14 +49,15 @@ export function useOwnerListingLikes() {
 
       if (likesError) {
         logger.error('[useOwnerListingLikes] Error fetching likes:', likesError);
-        throw likesError;
+        return [];
       }
 
-      // Group likes by listing and get likers info
+      // Group likes by listing
       const likeCounts: Record<string, number> = {};
       const likeData: Record<string, { date: string; userId: string }[]> = {};
       
       (likes || []).forEach((like: any) => {
+        if (!like.target_id) return;
         if (!likeCounts[like.target_id]) {
           likeCounts[like.target_id] = 0;
           likeData[like.target_id] = [];
@@ -78,6 +80,7 @@ export function useOwnerListingLikes() {
     },
     staleTime: 60000, // 1 minute
     gcTime: 5 * 60 * 1000, // 5 minutes
+    retry: 1
   });
 }
 
@@ -95,7 +98,7 @@ export function useListingLikers(listingId: string | null) {
         .select(`
           created_at,
           user_id,
-          profiles!likes_user_id_fkey (
+          profiles:user_id (
             full_name,
             avatar_url
           )
@@ -107,15 +110,15 @@ export function useListingLikers(listingId: string | null) {
 
       if (error) {
         logger.error('[useListingLikers] Error fetching likers:', error);
-        throw error;
+        return [];
       }
 
-      return likes?.map((like: any) => ({
+      return (likes || []).map((like: any) => ({
         id: like.user_id,
         fullName: like.profiles?.full_name || 'Anonymous',
         avatarUrl: like.profiles?.avatar_url,
         likedAt: like.created_at
-      })) || [];
+      }));
     },
     enabled: !!listingId,
     staleTime: 30000,

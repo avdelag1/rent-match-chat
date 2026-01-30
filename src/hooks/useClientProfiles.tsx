@@ -16,6 +16,14 @@ export interface ClientProfile {
   city?: string;
   avatar_url?: string;
   verified?: boolean;
+  client_type?: string[];
+  lifestyle_tags?: string[];
+  has_pets?: boolean;
+  smoking_preference?: string;
+  party_friendly?: boolean;
+  budget_min?: number;
+  budget_max?: number;
+  move_in_date?: string;
 }
 
 export function useClientProfiles(excludeSwipedIds: string[] = [], options: { enabled?: boolean } = {}) {
@@ -30,16 +38,36 @@ export function useClientProfiles(excludeSwipedIds: string[] = [], options: { en
       }
 
       try {
-        // CRITICAL: Query profiles_public directly to ensure all profiles exist in auth system
-        // IMPORTANT: Filter by role='client' to only show clients, not owners
-        // FIXED: Add is_active filter to exclude suspended/blocked/inactive profiles
-        // NOTE: Using 'as any' because profiles_public view is not in auto-generated types
-        const { data: profiles, error } = await (supabase as any)
-          .from('profiles_public')
-          .select('*')
+        // Query profiles table directly - filter by role='client'
+        // Only show active profiles
+        const { data: profiles, error } = await supabase
+          .from('profiles')
+          .select(`
+            id,
+            full_name,
+            avatar_url,
+            role,
+            age,
+            gender,
+            profile_images,
+            interests,
+            preferred_activities,
+            client_type,
+            lifestyle_tags,
+            has_pets,
+            smoking_preference,
+            party_friendly,
+            budget_min,
+            budget_max,
+            move_in_date,
+            city,
+            is_verified,
+            is_active,
+            created_at
+          `)
+          .eq('role', 'client')
+          .eq('is_active', true)
           .neq('id', user.id)
-          .eq('role', 'client') // ✅ Only show clients in owner swipe deck
-          .or('is_active.is.null,is_active.eq.true') // ✅ Only show active profiles (null = true by default)
           .order('created_at', { ascending: false })
           .limit(100);
 
@@ -56,16 +84,24 @@ export function useClientProfiles(excludeSwipedIds: string[] = [], options: { en
         const transformed: ClientProfile[] = profiles.map((profile: any, index: number) => ({
           id: index + 1,
           user_id: profile.id,
-          name: profile.full_name || 'User',
+          name: profile.full_name || 'Anonymous',
           age: profile.age || 25,
           gender: profile.gender || '',
           interests: profile.interests || [],
           preferred_activities: profile.preferred_activities || [],
-          profile_images: profile.images || [],
+          profile_images: profile.profile_images || profile.images || [],
           location: profile.city ? { city: profile.city } : null,
           city: profile.city || undefined,
-          avatar_url: profile.avatar_url || profile.images?.[0] || undefined,
-          verified: profile.verified || false
+          avatar_url: profile.avatar_url || profile.profile_images?.[0] || undefined,
+          verified: profile.is_verified || false,
+          client_type: profile.client_type || [],
+          lifestyle_tags: profile.lifestyle_tags || [],
+          has_pets: profile.has_pets || false,
+          smoking_preference: profile.smoking_preference || 'any',
+          party_friendly: profile.party_friendly || false,
+          budget_min: profile.budget_min || undefined,
+          budget_max: profile.budget_max || undefined,
+          move_in_date: profile.move_in_date || undefined
         }));
 
         // Filter out swiped profiles
@@ -77,10 +113,9 @@ export function useClientProfiles(excludeSwipedIds: string[] = [], options: { en
       }
     },
     // PERF: Longer stale time for profiles since they don't change frequently
-    staleTime: 10 * 60 * 1000, // 10 minutes - profiles are stable
-    gcTime: 15 * 60 * 1000, // 15 minutes cache time
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 15 * 60 * 1000, // 15 minutes cache
     refetchOnWindowFocus: false,
-    // PERF: Keep previous data while fetching new data to prevent UI flash
     placeholderData: (prev) => prev,
     retry: 2
   });

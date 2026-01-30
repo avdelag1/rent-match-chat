@@ -28,60 +28,72 @@ export function useLikedProperties() {
     queryFn: async () => {
       if (!user?.id) return [];
 
-      // Fetch likes where direction='right' and target_type='listing'
-      const { data, error } = await supabase
-        .from('likes')
-        .select('id, created_at, target_id')
-        .eq('user_id', user.id)
-        .eq('target_type', 'listing')
-        .eq('direction', 'right')
-        .order('created_at', { ascending: false });
+      try {
+        // Fetch likes where direction='right' and target_type='listing'
+        const { data: likes, error } = await supabase
+          .from('likes')
+          .select('id, created_at, target_id')
+          .eq('user_id', user.id)
+          .eq('target_type', 'listing')
+          .eq('direction', 'right')
+          .order('created_at', { ascending: false });
 
-      if (error) {
-        logger.error('[useLikedProperties] Error fetching likes:', error);
-        throw error;
-      }
+        if (error) {
+          logger.error('[useLikedProperties] Error fetching likes:', error);
+          throw error;
+        }
 
-      // If no likes found, return empty array
-      if (!data || data.length === 0) {
+        // If no likes found, return empty array
+        if (!likes || likes.length === 0) {
+          return [];
+        }
+
+        // Get listing IDs from the likes (filter out nulls)
+        const listingIds = likes
+          .map((like: any) => like.target_id)
+          .filter((id: any): id is string => id !== null && id !== undefined);
+
+        if (listingIds.length === 0) {
+          return [];
+        }
+
+        // Remove duplicates
+        const uniqueListingIds = [...new Set(listingIds)];
+
+        // Fetch the actual listings
+        const { data: listings, error: listingsError } = await supabase
+          .from('listings')
+          .select('*')
+          .in('id', uniqueListingIds)
+          .eq('status', 'active');
+
+        if (listingsError) {
+          logger.error('[useLikedProperties] Error fetching listings:', listingsError);
+          throw listingsError;
+        }
+
+        // Map listings to maintain the order of likes
+        const listingMap = new Map((listings || []).map((l: any) => [l.id, l]));
+        const orderedListings = listingIds
+          .map((id: string) => listingMap.get(id))
+          .filter((listing): listing is Listing => listing !== null && listing !== undefined);
+
+        // PERFORMANCE: Preload images for ALL liked properties immediately
+        preloadLikedImages(orderedListings);
+
+        return orderedListings;
+      } catch (error) {
+        logger.error('[useLikedProperties] Fatal error:', error);
+        // Return empty array instead of throwing to prevent UI crash
         return [];
       }
-
-      // Get listing IDs from the likes
-      const listingIds = data.map((like: any) => like.target_id).filter(Boolean);
-
-      if (listingIds.length === 0) {
-        return [];
-      }
-
-      // Fetch the actual listings
-      const { data: listings, error: listingsError } = await supabase
-        .from('listings')
-        .select('*')
-        .in('id', listingIds)
-        .eq('status', 'active');
-
-      if (listingsError) {
-        logger.error('[useLikedProperties] Error fetching listings:', listingsError);
-        throw listingsError;
-      }
-
-      // Map listings to maintain the order of likes
-      const listingMap = new Map((listings || []).map((l: any) => [l.id, l]));
-      const orderedListings = listingIds
-        .map((id: string) => listingMap.get(id))
-        .filter((listing): listing is Listing => listing !== null && listing !== undefined);
-
-      // PERFORMANCE: Preload images for ALL liked properties immediately
-      preloadLikedImages(orderedListings);
-
-      return orderedListings;
     },
     staleTime: Infinity, // Never mark as stale - rely on optimistic updates
     gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
-    refetchOnWindowFocus: false, // Don't refetch when user returns to tab
-    refetchOnMount: false, // Don't refetch when component mounts
-    refetchOnReconnect: false, // Don't refetch when internet reconnects
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    retry: 1
   });
 }
 
