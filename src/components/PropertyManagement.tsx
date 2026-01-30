@@ -9,7 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
-import { Home, Plus, Edit, Trash2, Eye, MapPin, Search, Bike, CircleDot, LayoutGrid, Sparkles, ImageIcon, Share2, Briefcase } from 'lucide-react';
+import { Home, Plus, Edit, Trash2, Eye, MapPin, Search, Bike, CircleDot, LayoutGrid, Sparkles, ImageIcon, Share2, Briefcase, CheckCircle } from 'lucide-react';
 import { ListingPreviewDialog } from '@/components/ListingPreviewDialog';
 import { UnifiedListingForm } from '@/components/UnifiedListingForm';
 import { CategorySelectionDialog } from '@/components/CategorySelectionDialog';
