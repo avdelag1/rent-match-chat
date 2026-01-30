@@ -83,7 +83,7 @@ export function MotorcycleListingForm({ onDataChange, initialData }: MotorcycleL
               control={control}
               rules={{ required: 'Motorcycle type is required' }}
               render={({ field }) => (
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value || ''}>
                   <SelectTrigger id="motorcycle_type"><SelectValue placeholder="Select type" /></SelectTrigger>
                   <SelectContent>
                     {MOTORCYCLE_TYPES.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
@@ -142,7 +142,7 @@ export function MotorcycleListingForm({ onDataChange, initialData }: MotorcycleL
               control={control}
               rules={{ required: 'Transmission type is required' }}
               render={({ field }) => (
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value || ''}>
                   <SelectTrigger id="transmission"><SelectValue placeholder="Select transmission" /></SelectTrigger>
                   <SelectContent>
                     {TRANSMISSIONS.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
@@ -160,7 +160,7 @@ export function MotorcycleListingForm({ onDataChange, initialData }: MotorcycleL
               control={control}
               rules={{ required: 'Fuel type is required' }}
               render={({ field }) => (
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value || ''}>
                   <SelectTrigger id="fuel_type"><SelectValue placeholder="Select fuel type" /></SelectTrigger>
                   <SelectContent>
                     {FUEL_TYPES.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
@@ -178,7 +178,7 @@ export function MotorcycleListingForm({ onDataChange, initialData }: MotorcycleL
               control={control}
               rules={{ required: 'Condition is required' }}
               render={({ field }) => (
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value || ''}>
                   <SelectTrigger id="condition"><SelectValue placeholder="Select condition" /></SelectTrigger>
                   <SelectContent>
                     {CONDITIONS.map(cond => <SelectItem key={cond} value={cond}>{cond}</SelectItem>)}

@@ -201,7 +201,7 @@ export function WorkerListingForm({ onDataChange, initialData = {} }: WorkerList
                             control={control}
                             rules={{ required: 'Service category is required' }}
                             render={({ field }) => (
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <Select onValueChange={field.onChange} value={field.value || ''}>
                                     <SelectTrigger><SelectValue placeholder="Select service category" /></SelectTrigger>
                                     <SelectContent>
                                         {SERVICE_CATEGORIES.map(c => <SelectItem key={c.value} value={c.value}>{c.icon} {c.label}</SelectItem>)}
@@ -268,7 +268,7 @@ export function WorkerListingForm({ onDataChange, initialData = {} }: WorkerList
                             control={control}
                             rules={{ required: 'Pricing unit is required' }}
                             render={({ field }) => (
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <Select onValueChange={field.onChange} value={field.value || ''}>
                                     <SelectTrigger><SelectValue placeholder="Select unit" /></SelectTrigger>
                                     <SelectContent>
                                         {PRICING_UNITS.map(unit => <SelectItem key={unit.value} value={unit.value}>{unit.label}</SelectItem>)}
@@ -291,7 +291,7 @@ export function WorkerListingForm({ onDataChange, initialData = {} }: WorkerList
                             control={control}
                             rules={{ required: 'Experience level is required' }}
                             render={({ field }) => (
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <Select onValueChange={field.onChange} value={field.value || ''}>
                                     <SelectTrigger><SelectValue placeholder="Select level" /></SelectTrigger>
                                     <SelectContent>
                                         {EXPERIENCE_LEVELS.map(level => <SelectItem key={level.value} value={level.value}>{level.label}</SelectItem>)}
