@@ -24,18 +24,21 @@ This guide explains how migrations are automatically deployed to your Supabase d
 
 1. Go to your GitHub repository → **Settings** → **Secrets and variables** → **Actions**
 
-2. Add these three secrets by clicking **"New repository secret"**:
+2. Add these two secrets by clicking **"New repository secret"** (then add them to the **production environment**):
 
    | Secret Name | Value | Where to Get |
    |---|---|---|
-   | `SUPABASE_ACCESS_TOKEN` | Your Supabase service_role API key | [Get it here →](https://app.supabase.com/project/vplgtcguxujxwrgguxqq/settings/api) |
+   | `SUPABASE_ACCESS_TOKEN` | Your Supabase personal access token | [Get it here →](https://app.supabase.com/account/tokens) |
    | `SUPABASE_PROJECT_REF` | Your project ID | Supabase Dashboard → Settings → API → Project ID |
-   | `SUPABASE_PASSWORD` | Your database password | Supabase Dashboard → Settings → Database → Password |
 
-3. **How to get each secret:**
-   - **SUPABASE_ACCESS_TOKEN**: Go to Supabase → Settings → API → Under "Project API keys", find `service_role` key (⚠️ NOT the anon key)
-   - **SUPABASE_PROJECT_REF**: Same page, copy the "Project ID" field
-   - **SUPABASE_PASSWORD**: Go to Settings → Database → Copy the password field
+3. **Important:** Add these secrets to the **production environment**, not repository:
+   - Go to **Settings** → **Environments** → **production**
+   - Click **"Add secret"** for each one
+   - Or add to **Repository** secrets if you prefer (both work)
+
+4. **How to get each secret:**
+   - **SUPABASE_ACCESS_TOKEN**: Go to your Supabase profile → [Account → Tokens](https://app.supabase.com/account/tokens) → Copy the personal access token you see
+   - **SUPABASE_PROJECT_REF**: Go to Supabase Dashboard → Settings → API → Copy the "Project ID"
 
 ### **That's it!** Now whenever you:
 - Create/modify migration files in `supabase/migrations/`
@@ -69,12 +72,15 @@ If automatic deployment doesn't work or you need to manually trigger:
    npm install -g supabase
    ```
 
-2. Link your project:
+2. Create a personal access token:
+   - Go to [Supabase Account → Tokens](https://app.supabase.com/account/tokens)
+   - Copy your personal access token
+
+3. Link your project:
    ```bash
    supabase link --project-ref vplgtcguxujxwrgguxqq
    ```
-
-3. When prompted for password, enter your Supabase database password (from Settings → Database)
+   When prompted, paste your personal access token (from step 2)
 
 4. Push migrations:
    ```bash
@@ -137,11 +143,10 @@ Your migration files are in: `supabase/migrations/`
 ### **Problem: "Secrets not configured" error in GitHub Actions**
 
 **Solution:**
-1. Go to GitHub repo → **Settings** → **Secrets and variables** → **Actions**
-2. Make sure you have all three secrets:
+1. Go to GitHub repo → **Settings** → **Environments** → **production**
+2. Make sure you have both secrets in the **production environment**:
    - `SUPABASE_ACCESS_TOKEN` ✓
    - `SUPABASE_PROJECT_REF` ✓
-   - `SUPABASE_PASSWORD` ✓
 3. If missing, add them following the setup steps above
 
 ### **Problem: "column already exists" error**
@@ -152,10 +157,10 @@ Your migration files are in: `supabase/migrations/`
 
 ### **Problem: "permission denied" error**
 
-- Your `SUPABASE_ACCESS_TOKEN` or password is incorrect
-- Go to Supabase → Settings → API
-- Generate a **new** `service_role` API key
-- Update the `SUPABASE_ACCESS_TOKEN` secret in GitHub
+- Your `SUPABASE_ACCESS_TOKEN` is incorrect or expired
+- Go to Supabase → [Account → Tokens](https://app.supabase.com/account/tokens)
+- Create a **new** personal access token
+- Update the `SUPABASE_ACCESS_TOKEN` secret in GitHub or production environment
 
 ### **Problem: Workflow says "Failed" but no error message**
 
@@ -163,15 +168,16 @@ Your migration files are in: `supabase/migrations/`
 2. Click on the "deploy-migrations" job
 3. Look for the red error text
 4. Common issues:
-   - Invalid database password
-   - Invalid API token
+   - Invalid API token (expired or wrong)
+   - Missing secrets in production environment
    - Migration syntax error in your `.sql` files
 
-### **Problem: Anon key vs Service Role key confusion**
+### **Problem: Different keys confusion**
 
-- **Anon key** (VITE_SUPABASE_PUBLISHABLE_KEY) = For frontend, limited permissions
-- **Service role key** (SUPABASE_ACCESS_TOKEN) = For backend/CLI, full permissions
-- **Always use service role key for migrations!**
+- **Anon key** (VITE_SUPABASE_PUBLISHABLE_KEY) = For frontend, limited permissions ✗ Don't use for migrations
+- **Personal access token** (SUPABASE_ACCESS_TOKEN) = For CLI and GitHub Actions ✓ Use this for migrations
+- **API keys** = Old method, not recommended
+- **Always use personal access token for migrations!**
 
 ---
 
