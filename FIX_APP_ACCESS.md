@@ -22,7 +22,7 @@ Migration `20260118000000_fix_all_security_issues.sql` removed all permissive RL
 - ❌ Without this query working, app cannot route users correctly
 
 ## Solution
-A comprehensive migration has been created: `supabase/migrations/20260124_fix_all_app_access_blockers.sql`
+A comprehensive migration has been created: `supabase/migrations/20260130_fix_all_app_access_blockers.sql`
 
 This migration adds **ALL** necessary policies for normal app functionality:
 - ✅ INSERT policy for profile creation
@@ -30,6 +30,13 @@ This migration adds **ALL** necessary policies for normal app functionality:
 - ✅ SELECT policy for viewing own profile
 - ✅ SELECT policy for browsing active profiles
 - ✅ SELECT policy for viewing own role
+- ✅ Policies for client/owner profiles
+- ✅ Policies for listings management
+- ✅ Policies for conversations and messages
+- ✅ Policies for notifications
+- ✅ Policies for likes and matches
+- ✅ Policies for saved searches
+- ✅ Policies for subscriptions
 
 ## How to Apply the Fix
 
@@ -87,7 +94,7 @@ GRANT SELECT ON public.user_roles TO authenticated;
 If you have the Supabase service role key:
 
 ```bash
-SUPABASE_SERVICE_ROLE_KEY=your_service_key_here node apply-profile-access-fix.js
+SUPABASE_SERVICE_ROLE_KEY=your_service_key_here node apply-access-fix.js
 ```
 
 ### Option 3: Via Supabase CLI (if installed)
@@ -119,7 +126,6 @@ After applying the fix:
 - ✅ **App Access** - App is no longer blocked!
 
 ## Files Changed
-- `supabase/migrations/20260124_fix_all_app_access_blockers.sql` - **Comprehensive RLS fix**
-- `supabase/migrations/20260124_fix_profile_browsing_access.sql` - Initial browsing fix (superseded)
-- `apply-profile-access-fix.js` - Helper script to apply migration
+- `supabase/migrations/20260130_fix_all_app_access_blockers.sql` - **Comprehensive RLS fix**
+- `apply-access-fix.js` - Helper script to apply migration
 - `FIX_APP_ACCESS.md` - This documentation
