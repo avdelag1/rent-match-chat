@@ -217,7 +217,7 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
             .upsert({
               user_id: user.id,
               target_id: targetId,
-              target_type: targetType === 'listing' ? 'listing' : 'profile',
+              target_type: targetType as 'listing' | 'profile',
               direction: 'left'
             }, {
               onConflict: 'user_id,target_id,target_type',

@@ -54,7 +54,12 @@ export function PropertyDetails({ listingId, isOpen, onClose, onMessageClick }: 
         .single();
 
       if (error) throw error;
-      return data as Listing & { profiles: { full_name: string; avatar_url: string } };
+      // Handle profiles as array or single object from join
+      const result = data as any;
+      if (result?.profiles && Array.isArray(result.profiles)) {
+        result.profiles = result.profiles[0] || { full_name: '', avatar_url: '' };
+      }
+      return result as Listing & { profiles: { full_name: string; avatar_url: string } };
     },
     enabled: !!listingId && isOpen,
   });

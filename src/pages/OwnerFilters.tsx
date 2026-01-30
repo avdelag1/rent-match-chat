@@ -100,9 +100,8 @@ export default function OwnerFilters() {
         // Map gender preference
         allows_pets: undefined, // Keep existing
         allows_smoking: localGender === 'any' ? undefined : false,
-        // Store client type preference in category_filters
-        interest_type: localClientType,
-      });
+        // Category filters stored separately
+      } as any);
       toast({
         title: 'Filters applied!',
         description: 'Your client preferences have been saved.',

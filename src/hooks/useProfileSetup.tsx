@@ -98,14 +98,13 @@ export function useProfileSetup() {
         });
 
         // Create notification for referrer (silent, non-blocking)
-        supabase
+        (supabase as any)
           .from('notifications')
           .insert([{
-            id: crypto.randomUUID(),
             user_id: referrerId,
-            type: 'referral_reward',
+            notification_type: 'system_announcement',
             message: 'You earned 1 free message for inviting a new user!',
-            read: false,
+            is_read: false,
           }])
           .then(() => {});
 

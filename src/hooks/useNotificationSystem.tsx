@@ -25,14 +25,18 @@ interface Notification {
   };
 }
 
-// DBNotification matches actual Supabase schema: id, user_id, type, message, read, created_at
+// DBNotification matches actual Supabase schema
 interface DBNotification {
   id: string;
   user_id: string;
-  type: string;           // Maps to notification_type in frontend
-  message: string;        // Main content
-  read: boolean;          // Read status
+  notification_type: string;  // Actual column name
+  message: string;
+  is_read: boolean;           // Actual column name
   created_at: string;
+  title?: string;
+  link_url?: string;
+  related_user_id?: string;
+  metadata?: any;
 }
 
 export function useNotificationSystem() {
@@ -89,8 +93,8 @@ export function useNotificationSystem() {
           'subscription_expiring': 'premium_purchase',
         };
 
-        const formattedNotifications: Notification[] = data.map((notif: DBNotification) => {
-          const frontendType = notificationTypeMap[notif.type] || 'like';
+        const formattedNotifications: Notification[] = (data as DBNotification[]).map((notif) => {
+          const frontendType = notificationTypeMap[notif.notification_type] || 'like';
           // Generate title from type since DB schema doesn't have title column
           const titleMap: Record<string, string> = {
             'new_like': 'New Like',
@@ -106,14 +110,14 @@ export function useNotificationSystem() {
           return {
             id: notif.id,
             type: frontendType,
-            title: titleMap[notif.type] || 'Notification',
+            title: notif.title || titleMap[notif.notification_type] || 'Notification',
             message: notif.message || '',
             timestamp: new Date(notif.created_at),
-            read: notif.read || false,
-            actionUrl: undefined,
-            relatedUserId: undefined,
+            read: notif.is_read || false,
+            actionUrl: notif.link_url,
+            relatedUserId: notif.related_user_id,
             avatar: undefined,
-            metadata: {},
+            metadata: notif.metadata || {},
           };
         });
         setNotifications(formattedNotifications);

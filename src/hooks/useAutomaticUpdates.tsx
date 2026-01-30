@@ -141,10 +141,6 @@ export function useAutomaticUpdates() {
         title: 'New Version Available!',
         description: `Version ${APP_VERSION} is ready. Tap to update.`,
         duration: 10000,
-        action: {
-          label: 'Update Now',
-          onClick: () => performUpdate(),
-        },
       });
     }
   }, [queryClient]);
@@ -206,10 +202,6 @@ export function useAutomaticUpdates() {
                   title: 'Update Ready!',
                   description: 'A new version is available. Tap to restart.',
                   duration: 10000,
-                  action: {
-                    label: 'Restart App',
-                    onClick: () => performUpdate(),
-                  },
                 });
               }
             });

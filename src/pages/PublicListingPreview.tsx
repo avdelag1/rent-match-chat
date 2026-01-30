@@ -62,15 +62,15 @@ export default function PublicListingPreview() {
     enabled: !!id,
   });
 
-  // Increment view count
+  // Increment view count - use 'views' column which exists
   useQuery({
     queryKey: ['listing-view', id],
     queryFn: async () => {
       if (!id) return null;
       try {
-        await supabase
+        await (supabase as any)
           .from('listings')
-          .update({ view_count: (listing?.view_count || 0) + 1 })
+          .update({ views: ((listing as any)?.views || 0) + 1 })
           .eq('id', id);
       } catch (e) {
         // Silently fail - view count is not critical
@@ -150,7 +150,7 @@ export default function PublicListingPreview() {
   }
 
   const category = listing.category || 'property';
-  const mode = listing.mode || 'rent';
+  const mode = (listing as any).listing_type || 'rent';
   const hasImages = listing.images && listing.images.length > 0;
   const isFreeMessagingCategory = FREE_MESSAGING_CATEGORIES.includes(category);
   const canDirectMessage = user && isFreeMessagingCategory && user.id !== listing.owner_id;
@@ -233,8 +233,8 @@ export default function PublicListingPreview() {
                   )}
                   {(category === 'yacht' || category === 'motorcycle' || category === 'bicycle' || category === 'vehicle') && (
                     <div className="text-gray-400">
-                      {listing.brand || listing.vehicle_brand} {listing.model || listing.vehicle_model}
-                      {listing.year && ` • ${listing.year}`}
+                      {(listing as any).brand || (listing as any).vehicle_brand || listing.title}
+                      {(listing as any).year && ` • ${(listing as any).year}`}
                     </div>
                   )}
                 </div>
@@ -279,11 +279,11 @@ export default function PublicListingPreview() {
                       </div>
                     </div>
                   )}
-                  {listing.parking_spaces !== undefined && listing.parking_spaces !== null && (
+                  {(listing as any).parking_spaces !== undefined && (listing as any).parking_spaces !== null && (
                     <div className="flex items-center gap-2 p-3 bg-gray-700/30 rounded-lg">
                       <Car className="w-5 h-5 text-primary" />
                       <div>
-                        <div className="font-semibold text-white">{listing.parking_spaces}</div>
+                        <div className="font-semibold text-white">{(listing as any).parking_spaces}</div>
                         <div className="text-xs text-gray-400">Parking</div>
                       </div>
                     </div>
@@ -293,29 +293,29 @@ export default function PublicListingPreview() {
 
               {category === 'yacht' && (
                 <div className="grid grid-cols-3 gap-3">
-                  {listing.length_m && (
+                  {(listing as any).length_m && (
                     <div className="flex items-center gap-2 p-3 bg-gray-700/30 rounded-lg">
                       <Anchor className="w-5 h-5 text-primary" />
                       <div>
-                        <div className="font-semibold text-white">{listing.length_m}m</div>
+                        <div className="font-semibold text-white">{(listing as any).length_m}m</div>
                         <div className="text-xs text-gray-400">Length</div>
                       </div>
                     </div>
                   )}
-                  {listing.berths && (
+                  {(listing as any).berths && (
                     <div className="flex items-center gap-2 p-3 bg-gray-700/30 rounded-lg">
                       <Bed className="w-5 h-5 text-primary" />
                       <div>
-                        <div className="font-semibold text-white">{listing.berths}</div>
+                        <div className="font-semibold text-white">{(listing as any).berths}</div>
                         <div className="text-xs text-gray-400">Berths</div>
                       </div>
                     </div>
                   )}
-                  {listing.max_passengers && (
+                  {(listing as any).max_passengers && (
                     <div className="flex items-center gap-2 p-3 bg-gray-700/30 rounded-lg">
                       <Users className="w-5 h-5 text-primary" />
                       <div>
-                        <div className="font-semibold text-white">{listing.max_passengers}</div>
+                        <div className="font-semibold text-white">{(listing as any).max_passengers}</div>
                         <div className="text-xs text-gray-400">Passengers</div>
                       </div>
                     </div>
@@ -325,39 +325,39 @@ export default function PublicListingPreview() {
 
               {(category === 'motorcycle' || category === 'bicycle' || category === 'vehicle') && (
                 <div className="grid grid-cols-3 gap-3">
-                  {listing.engine_cc && (
+                  {(listing as any).engine_cc && (
                     <div className="flex items-center gap-2 p-3 bg-gray-700/30 rounded-lg">
                       <CircleDot className="w-5 h-5 text-primary" />
                       <div>
-                        <div className="font-semibold text-white">{listing.engine_cc}cc</div>
+                        <div className="font-semibold text-white">{(listing as any).engine_cc}cc</div>
                         <div className="text-xs text-gray-400">Engine</div>
                       </div>
                     </div>
                   )}
-                  {listing.mileage && (
+                  {(listing as any).mileage && (
                     <div className="flex items-center gap-2 p-3 bg-gray-700/30 rounded-lg">
                       <Car className="w-5 h-5 text-primary" />
                       <div>
-                        <div className="font-semibold text-white">{listing.mileage?.toLocaleString()}</div>
+                        <div className="font-semibold text-white">{(listing as any).mileage?.toLocaleString()}</div>
                         <div className="text-xs text-gray-400">Miles</div>
                       </div>
                     </div>
                   )}
-                  {(listing.condition || listing.vehicle_condition) && (
+                  {((listing as any).condition || (listing as any).vehicle_condition) && (
                     <div className="p-3 bg-gray-700/30 rounded-lg">
                       <div className="font-semibold text-white capitalize">
-                        {listing.condition || listing.vehicle_condition}
+                        {(listing as any).condition || (listing as any).vehicle_condition}
                       </div>
                       <div className="text-xs text-gray-400">Condition</div>
                     </div>
                   )}
-                  {listing.electric_assist && (
+                  {(listing as any).electric_assist && (
                     <div className="flex items-center gap-2 p-3 bg-gray-700/30 rounded-lg">
                       <span className="text-xl">⚡</span>
                       <div>
                         <div className="font-semibold text-white">Electric</div>
                         <div className="text-xs text-gray-400">
-                          {listing.battery_range ? `${listing.battery_range}km` : 'Assist'}
+                          {(listing as any).battery_range ? `${(listing as any).battery_range}km` : 'Assist'}
                         </div>
                       </div>
                     </div>
@@ -372,20 +372,20 @@ export default function PublicListingPreview() {
                     {listing.property_type}
                   </Badge>
                 )}
-                {listing.furnished && (
+                {(listing as any).furnished && (
                   <Badge variant="outline" className="border-gray-600 text-gray-300">
                     Furnished
                   </Badge>
                 )}
-                {listing.pet_friendly && (
+                {(listing as any).pet_friendly && (
                   <Badge variant="outline" className="border-gray-600 text-gray-300">
                     Pet Friendly
                   </Badge>
                 )}
-                {listing.availability_date && (
+                {(listing as any).availability_date && (
                   <Badge variant="outline" className="border-gray-600 text-gray-300 flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
-                    Available {new Date(listing.availability_date).toLocaleDateString()}
+                    Available {new Date((listing as any).availability_date).toLocaleDateString()}
                   </Badge>
                 )}
               </div>

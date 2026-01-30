@@ -71,10 +71,10 @@ const OwnerInterestedClients = () => {
 
       const userIds = [...new Set(interestedClients.map(c => c.user.id))];
 
-      // Fetch profile details
-      const { data: profiles, error } = await supabase
+      // Fetch profile details - use columns that exist
+      const { data: profiles, error } = await (supabase as any)
         .from('profiles')
-        .select('id, age, occupation, bio, location')
+        .select('id, full_name, city, avatar_url')
         .in('id', userIds);
 
       if (error) {
@@ -82,7 +82,7 @@ const OwnerInterestedClients = () => {
         return interestedClients;
       }
 
-      const profileMap = new Map((profiles || []).map(p => [p.id, p]));
+      const profileMap = new Map((profiles || []).map((p: any) => [p.id, p]));
 
       // Check for mutual likes (if owner also liked these clients using likes table)
       const { data: ownerLikes } = await supabase
@@ -95,14 +95,13 @@ const OwnerInterestedClients = () => {
       const mutualSet = new Set((ownerLikes || []).map(ol => ol.target_id));
 
       return interestedClients.map(client => {
-        const profile = profileMap.get(client.user.id);
+        const profile = profileMap.get(client.user.id) as any;
         return {
           ...client,
           user_details: profile ? {
-            age: profile.age,
-            occupation: profile.occupation,
-            bio: profile.bio,
-            location: profile.location,
+            full_name: profile.full_name,
+            city: profile.city,
+            avatar_url: profile.avatar_url,
           } : undefined,
           mutual: mutualSet.has(client.user.id),
         };

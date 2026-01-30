@@ -205,11 +205,11 @@ export default function NotificationsPage() {
   const markAllAsReadSilently = async () => {
     if (!user?.id) return;
     try {
-      await supabase
+      await (supabase as any)
         .from('notifications')
-        .update({ read: true } as any)
+        .update({ is_read: true })
         .eq('user_id', user.id)
-        .eq('read', false);
+        .eq('is_read', false);
     } catch (error) {
       logger.error('Error auto-marking as read:', error);
     }
