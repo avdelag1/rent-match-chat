@@ -57,7 +57,7 @@ export function useOwnerInterestedClients() {
       const listingIds = ownerListings.map(l => l.id);
 
       // CORRECT QUERY: Fetch likes on owner's listings
-      // Schema: target_id = listing ID, target_type = 'listing', direction = 'right'
+      // Schema: target_id = listing ID, target_type = 'listing', direction = 'like'
       const { data, error } = await supabase
         .from('likes')
         .select(`
@@ -68,7 +68,7 @@ export function useOwnerInterestedClients() {
         `)
         .in('target_id', listingIds)
         .eq('target_type', 'listing')
-        .eq('direction', 'right')
+        .eq('direction', 'like')
         .order('created_at', { ascending: false });
 
       if (error) {

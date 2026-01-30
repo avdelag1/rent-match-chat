@@ -126,7 +126,7 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
                 user_id: user.id,
                 target_id: targetId,
                 target_type: 'profile',
-                direction: 'right'
+                direction: 'like'
               })
               .select()
               .single();
@@ -211,14 +211,14 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
             (err) => logger.error('[useSwipeWithMatch] Push notification failed:', err)
           );
         } else {
-          // For left swipes (dislikes), use likes table with direction='left'
+          // For left swipes (dislikes), use likes table with direction='dismiss'
           const { error: dismissError } = await supabase
             .from('likes')
             .upsert({
               user_id: user.id,
               target_id: targetId,
               target_type: targetType as 'listing' | 'profile',
-              direction: 'left'
+              direction: 'dismiss'
             }, {
               onConflict: 'user_id,target_id,target_type',
               ignoreDuplicates: false
@@ -234,14 +234,14 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
         // Client swiping on a listing
         if (direction === 'right') {
           // Client likes a listing - save to likes table
-          // SCHEMA: target_id = listing ID, target_type = 'listing', direction = 'right'
+          // SCHEMA: target_id = listing ID, target_type = 'listing', direction = 'like'
           const { data: clientLike, error: likeError } = await supabase
             .from('likes')
             .upsert({
               user_id: user.id,
               target_id: targetId,
               target_type: 'listing',
-              direction: 'right'
+              direction: 'like'
             }, {
               onConflict: 'user_id,target_id,target_type',
               ignoreDuplicates: false
@@ -296,7 +296,7 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
               user_id: user.id,
               target_id: targetId,
               target_type: 'listing',
-              direction: 'left'
+              direction: 'dismiss'
             }, {
               onConflict: 'user_id,target_id,target_type',
               ignoreDuplicates: false
@@ -421,13 +421,13 @@ async function detectAndCreateMatch({
       const listingIds = ownerListings.map(l => l.id);
 
       // Check if client liked any of the owner's listings
-      // SCHEMA: target_id = listing ID, target_type = 'listing'
+      // SCHEMA: target_id = listing ID, target_type = 'listing', direction = 'like'
       const { data: clientLike } = await supabase
         .from('likes')
         .select('*')
         .eq('user_id', targetId)
         .eq('target_type', 'listing')
-        .eq('direction', 'right')
+        .eq('direction', 'like')
         .in('target_id', listingIds)
         .limit(1)
         .maybeSingle();

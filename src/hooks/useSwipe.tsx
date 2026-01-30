@@ -7,10 +7,11 @@ import { logger } from '@/utils/logger';
  * SIMPLE SWIPE LIKE HANDLER
  * 
  * Uses the unified `likes` table with direction column:
- * - Left swipe = direction: 'left' (dislike)
- * - Right swipe = direction: 'right' (like)
+ * - Left swipe = direction: 'dismiss' (dislike)
+ * - Right swipe = direction: 'like' (like)
  * 
  * Schema: likes(id, user_id, target_id, target_type, direction, created_at)
+ * Unique constraint: (user_id, target_id, target_type)
  */
 export function useSwipe() {
   const queryClient = useQueryClient();
@@ -27,16 +28,20 @@ export function useSwipe() {
         throw new Error('Not authenticated');
       }
 
+      // Map direction to database values: left=dismiss, right=like
+      const dbDirection = direction === 'right' ? 'like' : 'dismiss';
+
       // Save swipe to likes table with direction
+      // Unique constraint is on (user_id, target_id, target_type)
       const { error } = await supabase
         .from('likes')
         .upsert({
           user_id: user.id,
           target_id: targetId,
           target_type: targetType,
-          direction: direction
+          direction: dbDirection
         }, {
-          onConflict: 'user_id,target_id',
+          onConflict: 'user_id,target_id,target_type',
           ignoreDuplicates: false
         });
 

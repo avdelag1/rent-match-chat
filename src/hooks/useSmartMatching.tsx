@@ -308,20 +308,20 @@ export function useSmartListingMatching(
           .eq('user_id', userId)
           .maybeSingle();
 
-        // Fetch liked items (right swipes) - these are NEVER shown again
-        // SCHEMA: target_id = listing ID, target_type = 'listing'
+        // Fetch liked items (like swipes) - these are NEVER shown again
+        // SCHEMA: target_id = listing ID, target_type = 'listing', direction = 'like'
         const { data: likedListings, error: likesError } = await supabase
           .from('likes')
           .select('target_id')
           .eq('user_id', userId)
           .eq('target_type', 'listing')
-          .eq('direction', 'right');
+          .eq('direction', 'like');
 
         const likedIds = new Set(!likesError ? (likedListings?.map(like => like.target_id) || []) : []);
 
-        // Fetch left swipes with timestamps for 3-day expiry logic
+        // Fetch dismiss swipes with timestamps for 3-day expiry logic
         // After 3 days, dislikes become permanent and won't show even on refresh
-        // Uses likes table with direction='left' instead of separate dislikes table
+        // Uses likes table with direction='dismiss' instead of separate dislikes table
         const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
 
         const { data: leftSwipes } = await supabase
@@ -329,7 +329,7 @@ export function useSmartListingMatching(
           .select('target_id, created_at')
           .eq('user_id', userId)
           .eq('target_type', 'listing')
-          .eq('direction', 'left');
+          .eq('direction', 'dismiss');
 
         // Build sets for dislike handling:
         // - permanentlyHiddenIds: dislikes older than 3 days (NEVER show again)
@@ -994,9 +994,9 @@ export function useSmartClientMatching(
           }
         }
 
-        // Fetch left swipes with timestamps for 3-day expiry logic
+        // Fetch dismiss swipes with timestamps for 3-day expiry logic
         // After 3 days, dislikes become permanent and won't show even on refresh
-        // Uses likes table with direction='left' instead of separate dislikes table
+        // Uses likes table with direction='dismiss' instead of separate dislikes table
         const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
 
         const { data: leftSwipes } = await supabase
@@ -1004,7 +1004,7 @@ export function useSmartClientMatching(
           .select('target_id, created_at')
           .eq('user_id', userId)
           .eq('target_type', 'profile')
-          .eq('direction', 'left');
+          .eq('direction', 'dismiss');
 
         // Build sets for dislike handling:
         // - permanentlyHiddenIds: dislikes older than 3 days (NEVER show again)

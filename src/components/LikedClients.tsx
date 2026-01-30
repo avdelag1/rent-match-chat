@@ -126,12 +126,13 @@ export function LikedClients() {
 
       logger.info('[LikedClients] Fetching liked clients for owner:', user.id);
 
-      // Get likes from likes table (owner → client likes using target_type='profile')
+      // Get likes from likes table (owner → client likes using target_type='profile', direction='like')
       const { data: ownerLikes, error: likesError } = await supabase
         .from('likes')
         .select('target_id, created_at')
         .eq('user_id', user.id)
         .eq('target_type', 'profile')
+        .eq('direction', 'like')
         .order('created_at', { ascending: false });
 
       if (likesError) {

@@ -78,12 +78,14 @@ export function useSwipeUndo() {
       if (!user) throw new Error('Not authenticated');
 
       // Remove from likes table (unified swipe storage)
+      // Include target_type to match the unique constraint
       const { error } = await supabase
         .from('likes')
         .delete()
         .match({
           user_id: user.id,
-          target_id: lastSwipe.targetId
+          target_id: lastSwipe.targetId,
+          target_type: lastSwipe.targetType
         });
 
       if (error) {
