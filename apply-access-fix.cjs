@@ -33,7 +33,7 @@ if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
 }
 
 async function applyMigration() {
-  const migrationPath = path.join(__dirname, 'supabase', 'migrations', '20260130_fix_all_app_access_blockers.sql');
+  const migrationPath = path.join(__dirname, 'supabase', 'migrations', '20260130_fix_all_page_access_v2.sql');
 
   if (!fs.existsSync(migrationPath)) {
     console.error('❌ Migration file not found:', migrationPath);
@@ -98,7 +98,7 @@ async function applyMigration() {
     console.error('\n💡 Alternative: Apply manually via Supabase Dashboard:');
     console.error('   1. Go to https://supabase.com/dashboard/project/YOUR_PROJECT/sql');
     console.error('   2. Copy the contents of:');
-    console.error('      supabase/migrations/20260130_fix_all_app_access_blockers.sql');
+    console.error('      supabase/migrations/20260130_fix_all_page_access_v2.sql');
     console.error('   3. Paste and run in SQL Editor');
     process.exit(1);
   }

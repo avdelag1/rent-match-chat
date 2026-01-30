@@ -1,72 +1,68 @@
-# 🚨 QUICK FIX - Restore Lovable App Access
+# Quick Fix for Page Access Issues
 
-## The Problem
-Your app on Lovable is blocked because database security policies prevent:
-- Creating profiles during signup (INSERT blocked)
-- Updating profiles (UPDATE blocked)
-- Browsing other profiles for matching (SELECT blocked)
-- Viewing user roles for dashboard routing (SELECT blocked)
+## 🚨 The Problem
 
-## The Solution (2 minutes)
+Your pages are not accessible because the database is missing Row-Level Security (RLS) policies. Without these policies, users can't read or write data, which makes all pages appear broken or blank.
 
-### Step 1: Go to Supabase SQL Editor
-Open this link: https://supabase.com/dashboard/project/vplgtcguxujxwrgguxqq/sql/new
+## ✅ The Solution (5 minutes)
 
-### Step 2: Copy and paste this SQL (from below)
+Follow these steps **exactly**:
 
-```sql
--- PROFILES TABLE POLICIES
-DROP POLICY IF EXISTS "users_insert_own_profile" ON public.profiles;
-CREATE POLICY "users_insert_own_profile"
-  ON public.profiles FOR INSERT
-  TO authenticated
-  WITH CHECK (auth.uid() = id);
+### Step 1: Open Supabase SQL Editor
 
-DROP POLICY IF EXISTS "users_update_own_profile" ON public.profiles;
-CREATE POLICY "users_update_own_profile"
-  ON public.profiles FOR UPDATE
-  TO authenticated
-  USING (auth.uid() = id)
-  WITH CHECK (auth.uid() = id);
+1. Go to your Supabase Dashboard
+2. Click on your project
+3. Go to "SQL Editor" in the left sidebar
+   OR visit: https://supabase.com/dashboard/project/YOUR_PROJECT_ID/sql
 
-DROP POLICY IF EXISTS "users_select_own_profile" ON public.profiles;
-CREATE POLICY "users_select_own_profile"
-  ON public.profiles FOR SELECT
-  USING (auth.uid() = id);
+### Step 2: Copy the Migration SQL
 
-DROP POLICY IF EXISTS "authenticated_users_can_browse_active_profiles" ON public.profiles;
-CREATE POLICY "authenticated_users_can_browse_active_profiles"
-  ON public.profiles FOR SELECT
-  TO authenticated
-  USING (
-    is_active = true
-    AND onboarding_completed = true
-  );
+1. Open the file: supabase/migrations/20260130_fix_all_page_access_v2.sql
+2. Copy ALL the contents (Ctrl+A, Ctrl+C)
 
--- USER_ROLES TABLE POLICIES
-DROP POLICY IF EXISTS "Users can view own role" ON public.user_roles;
-DROP POLICY IF EXISTS "users_view_own_role" ON public.user_roles;
-CREATE POLICY "users_view_own_role"
-  ON public.user_roles FOR SELECT
-  TO authenticated
-  USING (auth.uid() = user_id);
+### Step 3: Run the Migration
 
--- GRANT PERMISSIONS
-GRANT SELECT, INSERT, UPDATE ON public.profiles TO authenticated;
-GRANT SELECT ON public.user_roles TO authenticated;
+1. Paste the SQL into the SQL Editor
+2. Click the "Run" button (or press Ctrl+Enter)
+3. Wait for "Success" message (should appear in ~2-3 seconds)
+
+### Step 4: Clear Browser Cache
+
+1. Open your app in the browser
+2. Press F12 to open Developer Tools
+3. Go to Console tab
+4. Type these commands and press Enter after each:
+   ```
+   localStorage.clear();
+   sessionStorage.clear();
+   location.reload();
+   ```
+
+### Step 5: Test
+
+1. Log in to your app
+2. Try navigating to different pages
+3. Check that data loads correctly
+
+## ✨ What This Fixes
+
+- Profile viewing and editing
+- Property/listing browsing
+- Messaging system
+- Notifications
+- Likes and matches
+- All client pages (/client/*)
+- All owner pages (/owner/*)
+- Shared pages (/messages, /notifications)
+
+## 🔍 Still Having Issues?
+
+Run the diagnostic tool:
+```
+node diagnose-access.cjs
 ```
 
-### Step 3: Click "Run"
-
-### Step 4: Done! ✅
-Your app should now be accessible immediately. Try refreshing your Lovable app.
-
-## What This Fixes
-- ✅ User signup (profile creation)
-- ✅ Profile editing
-- ✅ Profile browsing/swiping
-- ✅ Dashboard routing
-- ✅ Complete app functionality
-
-## Security Note
-This fix maintains security - users can only modify their own data and can only browse active, completed profiles. Sensitive data remains protected.
+Check browser console:
+- Press F12
+- Go to Console tab
+- Look for red errors
