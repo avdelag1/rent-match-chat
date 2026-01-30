@@ -291,17 +291,17 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
 
       {/* Client Demographics */}
       <Card className="bg-card/50 backdrop-blur-sm border-border/50 overflow-hidden">
-        <Collapsible>
+        <Collapsible defaultOpen={false}>
           <CollapsibleTrigger className="w-full">
             <CardHeader className="pb-3 flex flex-row items-center justify-between">
               <CardTitle className="flex items-center gap-2 text-base">
                 <Sparkles className="w-4 h-4 text-primary" />
                 Client Profile
               </CardTitle>
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 data-[state=open]:rotate-180" />
             </CardHeader>
           </CollapsibleTrigger>
-          <CollapsibleContent>
+          <CollapsibleContent className="animate-accordion-down">
             <CardContent className="pt-0">
               <ClientDemographicFilters
                 genderPreference={genderPreference}
@@ -458,17 +458,17 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
 
       {/* Amenities Card */}
       <Card className="bg-card/50 backdrop-blur-sm border-border/50 overflow-hidden">
-        <Collapsible>
+        <Collapsible defaultOpen={false}>
           <CollapsibleTrigger className="w-full">
             <CardHeader className="pb-3 flex flex-row items-center justify-between">
               <CardTitle className="flex items-center gap-2 text-base">
                 <Sparkles className="w-4 h-4 text-primary" />
                 Amenities
               </CardTitle>
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 data-[state=open]:rotate-180" />
             </CardHeader>
           </CollapsibleTrigger>
-          <CollapsibleContent>
+          <CollapsibleContent className="animate-accordion-down">
             <CardContent className="pt-0">
               <div className="flex flex-wrap gap-2">
                 {amenityOptions.map((amenity) => (
@@ -493,17 +493,17 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
 
       {/* Preferences Card */}
       <Card className="bg-card/50 backdrop-blur-sm border-border/50 overflow-hidden">
-        <Collapsible>
+        <Collapsible defaultOpen={false}>
           <CollapsibleTrigger className="w-full">
             <CardHeader className="pb-3 flex flex-row items-center justify-between">
               <CardTitle className="flex items-center gap-2 text-base">
                 <Sofa className="w-4 h-4 text-primary" />
                 Preferences
               </CardTitle>
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 data-[state=open]:rotate-180" />
             </CardHeader>
           </CollapsibleTrigger>
-          <CollapsibleContent>
+          <CollapsibleContent className="animate-accordion-down">
             <CardContent className="pt-0 space-y-4">
               <div className="flex items-center justify-between py-2">
                 <div className="flex items-center gap-2">
@@ -533,17 +533,17 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
 
       {/* View & Location Card */}
       <Card className="bg-card/50 backdrop-blur-sm border-border/50 overflow-hidden">
-        <Collapsible>
+        <Collapsible defaultOpen={false}>
           <CollapsibleTrigger className="w-full">
             <CardHeader className="pb-3 flex flex-row items-center justify-between">
               <CardTitle className="flex items-center gap-2 text-base">
                 <Eye className="w-4 h-4 text-primary" />
                 View & Location
               </CardTitle>
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 data-[state=open]:rotate-180" />
             </CardHeader>
           </CollapsibleTrigger>
-          <CollapsibleContent>
+          <CollapsibleContent className="animate-accordion-down">
             <CardContent className="pt-0 space-y-4">
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Floor Level</Label>
@@ -605,17 +605,17 @@ export function PropertyClientFilters({ onApply, initialFilters = {}, activeCoun
 
       {/* Parking Card */}
       <Card className="bg-card/50 backdrop-blur-sm border-border/50 overflow-hidden">
-        <Collapsible>
+        <Collapsible defaultOpen={false}>
           <CollapsibleTrigger className="w-full">
             <CardHeader className="pb-3 flex flex-row items-center justify-between">
               <CardTitle className="flex items-center gap-2 text-base">
                 <Car className="w-4 h-4 text-primary" />
                 Parking
               </CardTitle>
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 data-[state=open]:rotate-180" />
             </CardHeader>
           </CollapsibleTrigger>
-          <CollapsibleContent>
+          <CollapsibleContent className="animate-accordion-down">
             <CardContent className="pt-0 space-y-4">
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
