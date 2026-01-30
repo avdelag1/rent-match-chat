@@ -116,20 +116,24 @@ The migration `20260130_fix_all_app_access_blockers.sql` adds comprehensive Row-
 ## How to Apply the Fix
 
 ### Option 1: Via Supabase Dashboard (Recommended)
-1. Go to your Supabase project's SQL Editor
-2. Copy the contents of `supabase/migrations/20260130_fix_all_app_access_blockers.sql`
+1. Go to your Supabase project's SQL Editor: `https://supabase.com/dashboard/project/YOUR_PROJECT/sql`
+2. Copy the contents of `supabase/migrations/20260130_fix_all_page_access_v2.sql`
 3. Paste into SQL Editor
-4. Click "Run"
+4. Click "Run" button
+5. Wait for "Success" message
 
 ### Option 2: Via Node.js Script
 ```bash
-SUPABASE_SERVICE_ROLE_KEY=your_key node apply-access-fix.js
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key node apply-access-fix.cjs
 ```
 
 ### Option 3: Via Supabase CLI
 ```bash
+# If you have Supabase CLI installed locally
 supabase db push
 ```
+
+**⚠️ IMPORTANT:** You MUST apply one of these options to your Supabase database for the pages to work!
 
 ## Verification
 
