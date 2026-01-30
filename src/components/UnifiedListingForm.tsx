@@ -239,11 +239,9 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
       handleClose();
     },
     onError: (error: Error) => {
-      queryClient.invalidateQueries({ queryKey: ['owner-listings'] });
-      queryClient.invalidateQueries({ queryKey: ['listings'] });
       toast({
-        title: "Error",
-        description: error.message || "Failed to save listing.",
+        title: "Error Saving Listing",
+        description: error.message || "Failed to save listing. Please check all required fields.",
         variant: "destructive"
       });
     }
@@ -304,15 +302,142 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
   };
 
   const handleSubmit = () => {
+    // Photo validation
     if (images.length + imageFiles.length < 1) {
       toast({ title: "Photo Required", description: "Please upload at least 1 photo.", variant: "destructive" });
       return;
     }
-    
-    if (formData.title && typeof formData.title === 'string') {
-      const titleError = validateNoContactInfo(formData.title as string);
+
+    // Common required fields validation
+    if (!formData.title) {
+      toast({ title: "Title Required", description: "Please enter a listing title.", variant: "destructive" });
+      return;
+    }
+
+    if (typeof formData.title === 'string') {
+      const titleError = validateNoContactInfo(formData.title);
       if (titleError) {
         toast({ title: "Invalid Title", description: titleError, variant: "destructive" });
+        return;
+      }
+    }
+
+    if (!formData.city) {
+      toast({ title: "Location Required", description: "Please enter a city/location.", variant: "destructive" });
+      return;
+    }
+
+    // Category-specific validation
+    if (selectedCategory === 'property') {
+      if (!formData.country) {
+        toast({ title: "Country Required", description: "Please select a country.", variant: "destructive" });
+        return;
+      }
+      if (!formData.property_type) {
+        toast({ title: "Property Type Required", description: "Please select a property type.", variant: "destructive" });
+        return;
+      }
+      if (!formData.beds && formData.beds !== 0) {
+        toast({ title: "Bedrooms Required", description: "Please enter number of bedrooms.", variant: "destructive" });
+        return;
+      }
+      if (!formData.baths && formData.baths !== 0) {
+        toast({ title: "Bathrooms Required", description: "Please enter number of bathrooms.", variant: "destructive" });
+        return;
+      }
+      if (!formData.price && formData.price !== 0) {
+        toast({ title: "Price Required", description: "Please enter a price.", variant: "destructive" });
+        return;
+      }
+      if (!formData.rental_duration_type) {
+        toast({ title: "Minimum Stay Required", description: "Please select minimum stay duration.", variant: "destructive" });
+        return;
+      }
+    } else if (selectedCategory === 'motorcycle') {
+      if (!formData.motorcycle_type) {
+        toast({ title: "Motorcycle Type Required", description: "Please select motorcycle type.", variant: "destructive" });
+        return;
+      }
+      if (!formData.brand) {
+        toast({ title: "Brand Required", description: "Please enter the brand.", variant: "destructive" });
+        return;
+      }
+      if (!formData.model) {
+        toast({ title: "Model Required", description: "Please enter the model.", variant: "destructive" });
+        return;
+      }
+      if (!formData.year) {
+        toast({ title: "Year Required", description: "Please enter the year.", variant: "destructive" });
+        return;
+      }
+      if (!formData.mileage && formData.mileage !== 0) {
+        toast({ title: "Mileage Required", description: "Please enter the mileage.", variant: "destructive" });
+        return;
+      }
+      if (!formData.engine_cc) {
+        toast({ title: "Engine Size Required", description: "Please enter engine size (cc).", variant: "destructive" });
+        return;
+      }
+      if (!formData.transmission) {
+        toast({ title: "Transmission Required", description: "Please select transmission type.", variant: "destructive" });
+        return;
+      }
+      if (!formData.fuel_type) {
+        toast({ title: "Fuel Type Required", description: "Please select fuel type.", variant: "destructive" });
+        return;
+      }
+      if (!formData.condition) {
+        toast({ title: "Condition Required", description: "Please select condition.", variant: "destructive" });
+        return;
+      }
+    } else if (selectedCategory === 'bicycle') {
+      if (!formData.bicycle_type) {
+        toast({ title: "Bicycle Type Required", description: "Please select bicycle type.", variant: "destructive" });
+        return;
+      }
+      if (!formData.brand) {
+        toast({ title: "Brand Required", description: "Please enter the brand.", variant: "destructive" });
+        return;
+      }
+      if (!formData.model) {
+        toast({ title: "Model Required", description: "Please enter the model.", variant: "destructive" });
+        return;
+      }
+      if (!formData.frame_size) {
+        toast({ title: "Frame Size Required", description: "Please select frame size.", variant: "destructive" });
+        return;
+      }
+      if (!formData.frame_material) {
+        toast({ title: "Frame Material Required", description: "Please select frame material.", variant: "destructive" });
+        return;
+      }
+      if (!formData.wheel_size) {
+        toast({ title: "Wheel Size Required", description: "Please select wheel size.", variant: "destructive" });
+        return;
+      }
+      if (!formData.brake_type) {
+        toast({ title: "Brake Type Required", description: "Please select brake type.", variant: "destructive" });
+        return;
+      }
+      if (!formData.condition) {
+        toast({ title: "Condition Required", description: "Please select condition.", variant: "destructive" });
+        return;
+      }
+    } else if (selectedCategory === 'worker') {
+      if (!formData.description) {
+        toast({ title: "Description Required", description: "Please enter a service description.", variant: "destructive" });
+        return;
+      }
+      if (!formData.service_category) {
+        toast({ title: "Service Category Required", description: "Please select a service category.", variant: "destructive" });
+        return;
+      }
+      if (!formData.pricing_unit) {
+        toast({ title: "Pricing Unit Required", description: "Please select pricing unit.", variant: "destructive" });
+        return;
+      }
+      if (!formData.price && formData.price !== 0) {
+        toast({ title: "Price Required", description: "Please enter a price.", variant: "destructive" });
         return;
       }
     }
