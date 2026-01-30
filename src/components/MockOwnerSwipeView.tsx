@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MapPin, DollarSign, Briefcase, Star, 
   MessageCircle, Heart, Share2, ChevronLeft, ChevronRight,
-  Motorcycle, Bike, Wrench, Briefcase as JobIcon
+  CircleDot, Bike, Wrench, Briefcase as JobIcon
 } from 'lucide-react';
 import { triggerHaptic } from '@/utils/haptics';
 import { mockOwnerProfiles, MockListing } from '@/data/mockOwnerProfiles';
@@ -138,7 +138,7 @@ export function MockOwnerSwipeView({ onLike, onPass, onMessage }: MockOwnerSwipe
         <div className="bg-gray-800 rounded-xl p-4 mb-4">
           {/* Listing type badge */}
           <div className="flex items-center gap-2 mb-3">
-            {currentListing?.type === 'motorcycle' && <Motorcycle className="w-5 h-5 text-orange-400" />}
+            {currentListing?.type === 'motorcycle' && <CircleDot className="w-5 h-5 text-orange-400" />}
             {currentListing?.type === 'bicycle' && <Bike className="w-5 h-5 text-green-400" />}
             {currentListing?.type === 'worker' && <Wrench className="w-5 h-5 text-blue-400" />}
             {currentListing?.type === 'job' && <JobIcon className="w-5 h-5 text-purple-400" />}

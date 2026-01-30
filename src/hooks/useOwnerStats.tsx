@@ -44,9 +44,10 @@ export function useOwnerStats() {
           .select('*', { count: 'exact', head: true })
           .eq('owner_id', user.id)
           .eq('status', 'active'),
+        // Query listings with views and likes columns (use views not view_count)
         supabase
           .from('listings')
-          .select('view_count, likes')
+          .select('views, likes')
           .eq('owner_id', user.id),
         // Count clients the owner has liked (using likes table with target_type='profile')
         supabase
@@ -65,8 +66,8 @@ export function useOwnerStats() {
       const totalMatches = matchesResult.count || 0;
       const activeConversations = conversationsResult.count || 0;
 
-      const totalViews = listingsResult.data?.reduce((sum, listing) => sum + (listing.view_count || 0), 0) || 0;
-      const totalLikes = listingsResult.data?.reduce((sum, listing) => sum + (listing.likes || 0), 0) || 0;
+      const totalViews = (listingsResult.data as any[])?.reduce((sum, listing) => sum + (listing.views || 0), 0) || 0;
+      const totalLikes = (listingsResult.data as any[])?.reduce((sum, listing) => sum + (listing.likes || 0), 0) || 0;
 
       const likedClientsCount = likedClientsResult.count || 0;
 
