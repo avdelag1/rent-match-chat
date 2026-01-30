@@ -33,11 +33,21 @@ UPDATE public.likes SET target_type = 'listing' WHERE target_type IS NULL;
 UPDATE public.likes SET direction = 'right' WHERE direction IS NULL;
 UPDATE public.likes SET source = 'web' WHERE source IS NULL;
 
--- Migrate existing target_listing_id data to target_id
--- This ensures backward compatibility
-UPDATE public.likes 
-SET target_id = target_listing_id 
-WHERE target_id IS NULL AND target_listing_id IS NOT NULL;
+-- Migrate existing target_listing_id data to target_id (if legacy column exists)
+-- This ensures backward compatibility - guarded to prevent errors
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'likes' 
+    AND column_name = 'target_listing_id'
+  ) THEN
+    UPDATE public.likes 
+    SET target_id = target_listing_id 
+    WHERE target_id IS NULL AND target_listing_id IS NOT NULL;
+  END IF;
+END $$;
 
 -- ============================================
 -- CLEANUP: Remove old unused columns (optional - safe to skip)
