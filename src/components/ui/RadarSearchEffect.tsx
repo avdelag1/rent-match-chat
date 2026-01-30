@@ -1,15 +1,15 @@
 /**
  * RADAR SEARCH EFFECT
  *
- * Futuristic radar sweep animation for refresh/search states.
- * Replaces the old house/lupa icons with a calm, premium animation.
+ * Animated sonar/lidar ripple effect for search states.
+ * Creates the illusion of active scanning and thinking.
  *
  * Features:
- * - Circular radar sweep
- * - Soft pulse rings
- * - Slow rotating beam
+ * - Multiple expanding ripple waves
+ * - Pulsing center point
+ * - Continuous animation conveying "searching"
+ * - Alive and responsive feeling
  * - GPU-accelerated
- * - Calm, futuristic feel (not gamified)
  */
 
 import { memo, CSSProperties } from 'react';
@@ -118,42 +118,71 @@ export const RadarSearchEffect = memo(function RadarSearchEffect({
           }}
         />
 
-        {/* Rotating radar beam / sweep */}
+        {/* Ripple wave 1 - fast wave */}
         <motion.div
-          animate={isActive ? { rotate: 360 } : {}}
+          animate={isActive ? {
+            scale: [0.2, 1.8],
+            opacity: [0.8, 0],
+          } : {}}
           transition={{
-            duration: 4,
+            duration: 2,
             repeat: Infinity,
-            ease: 'linear',
+            ease: 'easeOut',
+            delay: 0,
           }}
           style={{
             position: 'absolute',
-            width: size,
-            height: size,
-            willChange: 'transform',
+            width: size * 0.3,
+            height: size * 0.3,
+            borderRadius: '50%',
+            border: `2px solid ${color}`,
+            willChange: 'transform, opacity',
           }}
-        >
-          {/* Radar beam - conic gradient for sweep effect */}
-          <div
-            style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              width: '50%',
-              height: '50%',
-              transformOrigin: 'left center',
-              background: `conic-gradient(
-                from 0deg at 0% 50%,
-                transparent 0deg,
-                ${color}30 30deg,
-                ${color}50 60deg,
-                ${color}30 90deg,
-                transparent 120deg
-              )`,
-              borderRadius: '0 100% 100% 0',
-            }}
-          />
-        </motion.div>
+        />
+
+        {/* Ripple wave 2 - medium wave with delay */}
+        <motion.div
+          animate={isActive ? {
+            scale: [0.2, 1.8],
+            opacity: [0.8, 0],
+          } : {}}
+          transition={{
+            duration: 2.2,
+            repeat: Infinity,
+            ease: 'easeOut',
+            delay: 0.4,
+          }}
+          style={{
+            position: 'absolute',
+            width: size * 0.3,
+            height: size * 0.3,
+            borderRadius: '50%',
+            border: `2px solid ${color}`,
+            willChange: 'transform, opacity',
+          }}
+        />
+
+        {/* Ripple wave 3 - slow wave with longer delay */}
+        <motion.div
+          animate={isActive ? {
+            scale: [0.2, 1.8],
+            opacity: [0.8, 0],
+          } : {}}
+          transition={{
+            duration: 2.4,
+            repeat: Infinity,
+            ease: 'easeOut',
+            delay: 0.8,
+          }}
+          style={{
+            position: 'absolute',
+            width: size * 0.3,
+            height: size * 0.3,
+            borderRadius: '50%',
+            border: `2px solid ${color}`,
+            willChange: 'transform, opacity',
+          }}
+        />
 
         {/* Center dot with subtle pulse */}
         <motion.div
@@ -221,57 +250,87 @@ export const RadarSearchIcon = memo(function RadarSearchIcon({
   className = '',
 }: Omit<RadarSearchEffectProps, 'label'>) {
   return (
-    <motion.svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      className={className}
-      animate={isActive ? { rotate: 360 } : {}}
-      transition={{
-        duration: 3,
-        repeat: Infinity,
-        ease: 'linear',
-      }}
-      style={{ willChange: 'transform' }}
-    >
-      {/* Outer ring */}
-      <circle
-        cx="12"
-        cy="12"
-        r="10"
-        fill="none"
-        stroke={color}
-        strokeWidth="1.5"
-        opacity="0.3"
-      />
-      {/* Middle ring */}
-      <circle
-        cx="12"
-        cy="12"
-        r="6"
-        fill="none"
-        stroke={color}
-        strokeWidth="1"
-        opacity="0.4"
-      />
-      {/* Center dot */}
-      <circle
-        cx="12"
-        cy="12"
-        r="2"
-        fill={color}
-      />
-      {/* Radar beam line */}
-      <line
-        x1="12"
-        y1="12"
-        x2="22"
-        y2="12"
-        stroke={color}
-        strokeWidth="2"
-        strokeLinecap="round"
-        opacity="0.7"
-      />
-    </motion.svg>
+    <div style={{ position: 'relative', width: size, height: size, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} className={className}>
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        style={{ position: 'absolute' }}
+      >
+        {/* Outer ring */}
+        <circle
+          cx="12"
+          cy="12"
+          r="10"
+          fill="none"
+          stroke={color}
+          strokeWidth="1.5"
+          opacity="0.3"
+        />
+        {/* Middle ring */}
+        <circle
+          cx="12"
+          cy="12"
+          r="6"
+          fill="none"
+          stroke={color}
+          strokeWidth="1"
+          opacity="0.4"
+        />
+        {/* Center dot */}
+        <circle
+          cx="12"
+          cy="12"
+          r="2"
+          fill={color}
+        />
+      </svg>
+
+      {/* Ripple wave 1 */}
+      {isActive && (
+        <motion.div
+          animate={{
+            scale: [0.3, 2],
+            opacity: [0.7, 0],
+          }}
+          transition={{
+            duration: 1.5,
+            repeat: Infinity,
+            ease: 'easeOut',
+            delay: 0,
+          }}
+          style={{
+            position: 'absolute',
+            width: size * 0.6,
+            height: size * 0.6,
+            borderRadius: '50%',
+            border: `1px solid ${color}`,
+          }}
+        />
+      )}
+
+      {/* Ripple wave 2 */}
+      {isActive && (
+        <motion.div
+          animate={{
+            scale: [0.3, 2],
+            opacity: [0.7, 0],
+          }}
+          transition={{
+            duration: 1.5,
+            repeat: Infinity,
+            ease: 'easeOut',
+            delay: 0.5,
+          }}
+          style={{
+            position: 'absolute',
+            width: size * 0.6,
+            height: size * 0.6,
+            borderRadius: '50%',
+            border: `1px solid ${color}`,
+          }}
+        />
+      )}
+    </div>
   );
 });
