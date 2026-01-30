@@ -40,7 +40,7 @@ export function useSwipeDismissal(targetType: DismissalTargetType) {
           .select('target_id')
           .eq('user_id', user.id)
           .eq('target_type', dbTargetType)
-          .eq('direction', 'left');
+          .eq('direction', 'dismiss');
 
         if (error) {
           logger.error('[useSwipeDismissal] Error fetching dismissals:', error);
@@ -70,16 +70,17 @@ export function useSwipeDismissal(targetType: DismissalTargetType) {
 
       const dbTargetType = targetType === 'client' ? 'profile' : 'listing';
 
-      // Insert/update in likes table with direction='left'
+      // Insert/update in likes table with direction='dismiss'
+      // Unique constraint is on (user_id, target_id, target_type)
       const { error } = await supabase
         .from('likes')
         .upsert({
           user_id: user.id,
           target_id: targetId,
           target_type: dbTargetType,
-          direction: 'left'
+          direction: 'dismiss'
         }, {
-          onConflict: 'user_id,target_id',
+          onConflict: 'user_id,target_id,target_type',
         });
 
       if (error) {

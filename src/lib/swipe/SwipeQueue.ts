@@ -6,8 +6,9 @@
  *
  * Architecture:
  * - All swipes go to the unified `likes` table
- * - Uses direction column ('left' or 'right')
+ * - Uses direction column ('like' or 'dismiss')
  * - Uses target_type column ('listing' or 'profile')
+ * - Unique constraint: (user_id, target_id, target_type)
  */
 
 import { supabase } from '@/integrations/supabase/client';
@@ -186,21 +187,26 @@ class SwipeQueueProcessor {
   /**
    * Process a single swipe - writes to Supabase
    * Uses unified likes table with direction column
+   * Maps 'left'/'right' to 'dismiss'/'like' for database
    */
   private async processSwipe(swipe: QueuedSwipe): Promise<void> {
     const userId = swipe.userId || this.cachedUserId;
     if (!userId) throw new Error('No user ID');
 
+    // Map direction to database values: left=dismiss, right=like
+    const dbDirection = swipe.direction === 'right' ? 'like' : 'dismiss';
+
     // Upsert to likes table with direction
+    // Unique constraint is on (user_id, target_id, target_type)
     const { error } = await supabase
       .from('likes')
       .upsert({
         user_id: userId,
         target_id: swipe.targetId,
         target_type: swipe.targetType,
-        direction: swipe.direction
+        direction: dbDirection
       }, {
-        onConflict: 'user_id,target_id',
+        onConflict: 'user_id,target_id,target_type',
         ignoreDuplicates: false,
       });
 
@@ -267,13 +273,14 @@ class SwipeQueueProcessor {
           if (!listing) return;
 
           // Check if owner liked this client (check likes table for profile like)
+          // Database uses 'like' not 'right' for direction
           const { data: ownerLike } = await supabase
             .from('likes')
             .select('*')
             .eq('user_id', listing.owner_id)
             .eq('target_id', userId)
             .eq('target_type', 'profile')
-            .eq('direction', 'right')
+            .eq('direction', 'like')
             .maybeSingle();
 
           if (ownerLike) {

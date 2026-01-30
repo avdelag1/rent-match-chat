@@ -62,12 +62,13 @@ const ClientWhoLikedYou = () => {
     queryFn: async () => {
       if (!user?.id) return [];
 
-      // Get all likes where client was liked (target_type='profile')
+      // Get all likes where client was liked (target_type='profile', direction='like')
       const { data: likes, error: likesError } = await supabase
         .from('likes')
         .select('id, user_id, created_at')
         .eq('target_id', user.id)
         .eq('target_type', 'profile')
+        .eq('direction', 'like')
         .order('created_at', { ascending: false });
 
       if (likesError) {

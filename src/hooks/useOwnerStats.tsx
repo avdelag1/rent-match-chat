@@ -75,13 +75,13 @@ export function useOwnerStats() {
       let interestedClientsCount = 0;
       if (interestedClientsResult.data && interestedClientsResult.data.length > 0) {
         const listingIds = interestedClientsResult.data.map(l => l.id);
-        // SCHEMA: target_id = listing ID, target_type = 'listing'
+        // SCHEMA: target_id = listing ID, target_type = 'listing', direction = 'like'
         const { count } = await supabase
           .from('likes')
           .select('*', { count: 'exact', head: true })
           .in('target_id', listingIds)
           .eq('target_type', 'listing')
-          .eq('direction', 'right');
+          .eq('direction', 'like');
         interestedClientsCount = count || 0;
       }
 

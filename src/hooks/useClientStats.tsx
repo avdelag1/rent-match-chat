@@ -27,11 +27,13 @@ export function useClientStats() {
       }
 
       // Count likes received from owners (using unified likes table)
+      // Must filter by direction='like' to exclude dismissals
       const { count: likesReceived } = await supabase
         .from('likes')
         .select('*', { count: 'exact', head: true })
         .eq('target_id', user.id)
-        .eq('target_type', 'profile');
+        .eq('target_type', 'profile')
+        .eq('direction', 'like');
 
       // Count mutual matches (using client_id/owner_id columns)
       const { count: matchesCount } = await supabase

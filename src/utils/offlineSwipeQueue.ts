@@ -3,9 +3,10 @@
  *
  * ARCHITECTURE:
  * - All swipes go to the unified `likes` table with direction column
- * - direction='right' for likes
- * - direction='left' for dislikes
+ * - direction='like' for likes (UI uses 'right')
+ * - direction='dismiss' for dislikes (UI uses 'left')
  * - target_type='listing' or 'profile'
+ * - Unique constraint: (user_id, target_id, target_type)
  *
  * PERFORMANCE BENEFIT:
  * - Users can continue swiping even when offline
@@ -104,6 +105,7 @@ function markSwipeFailed(id: string): void {
 /**
  * Sync a single queued swipe to the server
  * Uses the unified likes table with direction column
+ * Maps 'left'/'right' to 'dismiss'/'like' for database
  */
 async function syncSwipe(swipe: QueuedSwipe): Promise<boolean> {
   try {
@@ -113,16 +115,20 @@ async function syncSwipe(swipe: QueuedSwipe): Promise<boolean> {
       return false;
     }
 
+    // Map direction to database values: left=dismiss, right=like
+    const dbDirection = swipe.direction === 'right' ? 'like' : 'dismiss';
+
     // All swipes go to the unified likes table
+    // Unique constraint is on (user_id, target_id, target_type)
     const { error } = await supabase
       .from('likes')
       .upsert({
         user_id: user.id,
         target_id: swipe.targetId,
         target_type: swipe.targetType,
-        direction: swipe.direction
+        direction: dbDirection
       }, {
-        onConflict: 'user_id,target_id',
+        onConflict: 'user_id,target_id,target_type',
         ignoreDuplicates: false,
       });
 
