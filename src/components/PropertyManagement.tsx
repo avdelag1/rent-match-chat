@@ -5,11 +5,12 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useOwnerListings } from '@/hooks/useListings';
+import { useOwnerListingLikes } from '@/hooks/useOwnerListingLikes';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
-import { Home, Plus, Edit, Trash2, Eye, MapPin, Search, Bike, CircleDot, LayoutGrid, Sparkles, ImageIcon, Share2, Briefcase, CheckCircle } from 'lucide-react';
+import { Home, Plus, Edit, Trash2, Eye, MapPin, Search, Bike, CircleDot, LayoutGrid, Sparkles, ImageIcon, Share2, Briefcase, CheckCircle, Heart } from 'lucide-react';
 import { ListingPreviewDialog } from '@/components/ListingPreviewDialog';
 import { UnifiedListingForm } from '@/components/UnifiedListingForm';
 import { CategorySelectionDialog } from '@/components/CategorySelectionDialog';
@@ -37,6 +38,7 @@ const getCategoryColor = (category: string) => {
 export const PropertyManagement = memo(({ initialCategory, initialMode }: PropertyManagementProps) => {
   const { user } = useAuth();
   const { data: listings = [], isLoading, error } = useOwnerListings();
+  const { data: listingsWithLikes = [] } = useOwnerListingLikes();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState(initialCategory || 'all');
   const [viewingProperty, setViewingProperty] = useState<any>(null);
@@ -81,6 +83,11 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
     else if (activeTab === 'motorcycle') matchesCategory = listing.category === 'motorcycle';
     else if (activeTab === 'bicycle') matchesCategory = listing.category === 'bicycle';
     else if (activeTab === 'worker') matchesCategory = listing.category === 'worker' || listing.category === 'services';
+    else if (activeTab === 'liked') {
+      // For liked tab, check if listing has any likes
+      const likedListing = listingsWithLikes.find(l => l.id === listing.id);
+      matchesCategory = likedListing && likedListing.likeCount > 0;
+    }
     else if (activeTab === 'active') matchesCategory = listing.status === 'active';
     else if (activeTab === 'rented') matchesCategory = listing.status === 'rented';
     else if (activeTab === 'maintenance') matchesCategory = listing.status === 'maintenance';
@@ -241,6 +248,7 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
     { id: 'motorcycle', label: 'Motorcycles', icon: CircleDot, count: listings.filter(l => l.category === 'motorcycle').length },
     { id: 'bicycle', label: 'Bicycles', icon: Bike, count: listings.filter(l => l.category === 'bicycle').length },
     { id: 'worker', label: 'Services', icon: Briefcase, count: listings.filter(l => l.category === 'worker' || l.category === 'services').length },
+    { id: 'liked', label: 'Likes', icon: Heart, count: listingsWithLikes.filter(l => l.likeCount > 0).length },
     { id: 'active', label: 'Active', icon: CheckCircle, count: listings.filter(l => l.status === 'active').length },
     { id: 'rented', label: 'Rented', icon: Home, count: listings.filter(l => l.status === 'rented').length },
   ];
@@ -386,6 +394,22 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
                         </Badge>
                         {getStatusBadge(availabilityStatus[listing.id] || listing.status)}
                       </div>
+
+                      {/* Like Count Badge */}
+                      {(() => {
+                        const likedListing = listingsWithLikes.find(l => l.id === listing.id);
+                        if (likedListing && likedListing.likeCount > 0) {
+                          return (
+                            <div className="absolute top-2 right-2">
+                              <Badge className="bg-pink-500/90 text-white text-[10px] gap-1">
+                                <Heart className="w-3 h-3 fill-current" />
+                                {likedListing.likeCount}
+                              </Badge>
+                            </div>
+                          );
+                        }
+                        return null;
+                      })()}
 
                       {/* Price */}
                       <div className="absolute bottom-2 left-2">
