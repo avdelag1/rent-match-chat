@@ -92,7 +92,7 @@ export function BicycleListingForm({ onDataChange, initialData }: BicycleListing
               control={control}
               rules={{ required: 'Bicycle type is required' }}
               render={({ field }) => (
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value || ''}>
                   <SelectTrigger id="bicycle_type">
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>

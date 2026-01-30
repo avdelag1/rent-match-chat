@@ -80,7 +80,7 @@ export function PropertyListingForm({ onDataChange, initialData = {} }: Property
                 control={control}
                 rules={{ required: 'Minimum stay is required' }}
                 render={({ field }) => (
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value || ''}>
                     <SelectTrigger><SelectValue placeholder="Select duration" /></SelectTrigger>
                     <SelectContent>
                       {RENTAL_DURATIONS.map(d => <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>)}
@@ -122,7 +122,7 @@ export function PropertyListingForm({ onDataChange, initialData = {} }: Property
               control={control}
               rules={{ required: 'Property type is required' }}
               render={({ field }) => (
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value || ''}>
                   <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
                   <SelectContent>
                     {PROPERTY_TYPES.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
