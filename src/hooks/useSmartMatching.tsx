@@ -383,7 +383,6 @@ export function useSmartListingMatching(
           images,
           city,
           neighborhood,
-          tulum_location,
           beds,
           baths,
           square_footage,
