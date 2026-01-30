@@ -30,11 +30,11 @@ export function useOwnerStats() {
         likedClientsResult,
         interestedClientsResult
       ] = await Promise.all([
-        supabase
+        (supabase as any)
           .from('listings')
           .select('*', { count: 'exact', head: true })
           .eq('owner_id', user.id)
-          .eq('is_active', true),
+          .eq('status', 'active'),
         supabase
           .from('matches')
           .select('*', { count: 'exact', head: true })

@@ -188,13 +188,13 @@ export function useConversations() {
     if (!user?.id) return null;
 
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('conversations')
         .select(`
           *,
           client_profile:profiles!conversations_client_id_fkey(id, full_name, avatar_url),
           owner_profile:profiles!conversations_owner_id_fkey(id, full_name, avatar_url),
-          listing:listings!conversations_listing_id_fkey(id, title, price, images, category, mode, address, city)
+          listing:listings!conversations_listing_id_fkey(id, title, price, images, category, address, city)
         `)
         .eq('id', conversationId)
         .single();
@@ -216,9 +216,10 @@ export function useConversations() {
 
       const lastMessage = messagesData?.[0];
 
-      // Transform data
+      // Transform data - handle both array and object profile responses
       const isClient = data.client_id === user.id;
-      const otherUserProfile = isClient ? data.owner_profile : data.client_profile;
+      const rawOtherProfile = isClient ? data.owner_profile : data.client_profile;
+      const otherUserProfile = Array.isArray(rawOtherProfile) ? rawOtherProfile[0] : rawOtherProfile;
       const otherUserRole = isClient ? 'owner' : 'client';
 
       return {
@@ -237,7 +238,7 @@ export function useConversations() {
           role: otherUserRole
         } : undefined,
         last_message: lastMessage,
-        listing: data.listing || undefined
+        listing: (data.listing && !('error' in data.listing)) ? data.listing : undefined
       };
     } catch (error) {
       if (import.meta.env.DEV) {
@@ -258,7 +259,7 @@ export function useConversationMessages(conversationId: string) {
   return useQuery({
     queryKey: ['conversation-messages', conversationId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('conversation_messages')
         .select(`
           *,
@@ -272,7 +273,7 @@ export function useConversationMessages(conversationId: string) {
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      return data || [];
+      return (data || []) as any[];
     },
     enabled: !!conversationId,
   });

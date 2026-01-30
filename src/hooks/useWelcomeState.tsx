@@ -115,11 +115,11 @@ export function useWelcomeState(userId: string | undefined) {
 async function saveWelcomeNotification(userId: string) {
   try {
     // Check if welcome notification already exists
-    const { data: existing } = await supabase
+    const { data: existing } = await (supabase as any)
       .from('notifications')
       .select('id')
       .eq('user_id', userId)
-      .eq('type', 'system')
+      .eq('notification_type', 'system_announcement')
       .maybeSingle();
 
     if (existing) {
@@ -130,13 +130,13 @@ async function saveWelcomeNotification(userId: string) {
     // Insert welcome notification with correct schema
     const notificationData = {
       user_id: userId,
-      notification_type: 'system_announcement',
+      notification_type: 'system_announcement' as const,
       title: 'Welcome to Swipess! 🎉',
       message: 'Your journey to finding the perfect match starts now!',
       is_read: false
     };
 
-    await supabase.from('notifications').insert([notificationData]);
+    await (supabase as any).from('notifications').insert([notificationData]);
 
     logger.log('[Welcome] Saved welcome notification to database');
   } catch (error) {

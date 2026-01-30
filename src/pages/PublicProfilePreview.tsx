@@ -45,7 +45,7 @@ export default function PublicProfilePreview() {
       if (!id) throw new Error('No profile ID provided');
 
       // Try to fetch from profiles_public first (read-only public view)
-      const { data: publicProfile, error: publicError } = await supabase
+      const { data: publicProfile, error: publicError } = await (supabase as any)
         .from('profiles_public')
         .select('*')
         .eq('id', id)
@@ -53,9 +53,9 @@ export default function PublicProfilePreview() {
 
       if (publicError && publicError.code !== 'PGRST116') {
         // If profiles_public doesn't exist, fall back to profiles table
-        const { data: profile, error: profileError } = await supabase
+        const { data: profile, error: profileError } = await (supabase as any)
           .from('profiles')
-          .select('id, full_name, age, city, images, bio, interests, verified, occupation')
+          .select('id, full_name, city, avatar_url, bio')
           .eq('id', id)
           .single();
 
@@ -112,9 +112,9 @@ export default function PublicProfilePreview() {
     );
   }
 
-  const images = profile.images || [];
+  const images = (profile as any).images || (profile as any).profile_images || [];
   const hasImages = images.length > 0;
-  const previewImage = hasImages ? images[0] : null;
+  const previewImage = hasImages ? images[0] : (profile as any).avatar_url;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
@@ -155,7 +155,7 @@ export default function PublicProfilePreview() {
                 <>
                   <img
                     src={previewImage}
-                    alt={profile.full_name || 'Profile'}
+                    alt={(profile as any).full_name || 'Profile'}
                     className="w-full h-full object-cover"
                   />
                   {/* Gradient overlay for text readability */}
@@ -173,34 +173,34 @@ export default function PublicProfilePreview() {
                   <Avatar className="w-20 h-20 border-4 border-gray-900 shadow-xl">
                     <AvatarImage src={previewImage || undefined} />
                     <AvatarFallback className="bg-primary text-2xl font-bold">
-                      {profile.full_name?.charAt(0) || 'U'}
+                      {(profile as any).full_name?.charAt(0) || 'U'}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <h1 className="text-2xl font-bold text-white truncate">
-                        {profile.full_name || 'Anonymous'}
+                        {(profile as any).full_name || 'Anonymous'}
                       </h1>
-                      {profile.age && (
-                        <span className="text-xl text-gray-300">{profile.age}</span>
+                      {(profile as any).age && (
+                        <span className="text-xl text-gray-300">{(profile as any).age}</span>
                       )}
-                      {profile.verified && (
+                      {(profile as any).verified && (
                         <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
                           Verified
                         </Badge>
                       )}
                     </div>
                     <div className="flex flex-wrap gap-2 text-sm text-gray-300">
-                      {profile.city && (
+                      {(profile as any).city && (
                         <span className="flex items-center gap-1">
                           <MapPin className="w-3.5 h-3.5" />
-                          {profile.city}
+                          {(profile as any).city}
                         </span>
                       )}
-                      {profile.occupation && (
+                      {(profile as any).occupation && (
                         <span className="flex items-center gap-1">
                           <Briefcase className="w-3.5 h-3.5" />
-                          {profile.occupation}
+                          {(profile as any).occupation}
                         </span>
                       )}
                     </div>
@@ -211,26 +211,26 @@ export default function PublicProfilePreview() {
 
             <CardContent className="p-6 space-y-4">
               {/* Bio Preview */}
-              {profile.bio && (
+              {(profile as any).bio && (
                 <div>
                   <h3 className="text-sm font-medium text-gray-400 mb-2">About</h3>
-                  <p className="text-white line-clamp-3">{profile.bio}</p>
+                  <p className="text-white line-clamp-3">{(profile as any).bio}</p>
                 </div>
               )}
 
               {/* Interests Preview */}
-              {profile.interests && profile.interests.length > 0 && (
+              {(profile as any).interests && (profile as any).interests.length > 0 && (
                 <div>
                   <h3 className="text-sm font-medium text-gray-400 mb-2">Interests</h3>
                   <div className="flex flex-wrap gap-2">
-                    {profile.interests.slice(0, 5).map((interest: string, idx: number) => (
+                    {(profile as any).interests.slice(0, 5).map((interest: string, idx: number) => (
                       <Badge key={idx} variant="secondary" className="bg-primary/10 text-primary border-primary/20">
                         {interest}
                       </Badge>
                     ))}
-                    {profile.interests.length > 5 && (
+                    {(profile as any).interests.length > 5 && (
                       <Badge variant="secondary" className="bg-gray-700 text-gray-400">
-                        +{profile.interests.length - 5} more
+                        +{(profile as any).interests.length - 5} more
                       </Badge>
                     )}
                   </div>

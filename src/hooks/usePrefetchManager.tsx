@@ -29,10 +29,10 @@ export function usePrefetchManager() {
     await queryClient.prefetchQuery({
       queryKey: ['smart-listings', currentPage + 1],
       queryFn: async () => {
-        const { data } = await supabase
+        const { data } = await (supabase as any)
           .from('listings')
           .select('*')
-          .eq('is_active', true)
+          .eq('status', 'active')
           .order('created_at', { ascending: false })
           .range((currentPage + 1) * 10, (currentPage + 2) * 10 - 1);
         return data || [];

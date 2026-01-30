@@ -14,11 +14,11 @@ export function useUnreadNotifications() {
     if (!user?.id) return;
 
     try {
-      const { count, error } = await supabase
+      const { count, error } = await (supabase as any)
         .from('notifications')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
-        .eq('read', false);
+        .eq('is_read', false);
 
       if (error) {
         // Silently handle errors - not critical
