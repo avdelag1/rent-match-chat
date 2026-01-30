@@ -1,0 +1,88 @@
+name: Deploy Supabase Migrations
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/**'
+      - 'supabase/**'
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy-migrations:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Cache Supabase
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/supabase
+            ~/.local/share/supabase
+          key: ${{ runner.os }}-supabase-${{ hashFiles('supabase/migrations/*.sql') }}
+          restore-keys: |
+            ${{ runner.os }}-supabase-
+
+      - name: Link Supabase project
+        run: |
+          echo "${{ secrets.SUPABASE_PASSWORD }}" | supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_REF }} --password-stdin
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Validate migration files
+        run: supabase migration list
+
+      - name: Push migrations to database
+        run: supabase db push
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Show migration status
+        run: supabase migration list
+
+  validate-schema:
+    runs-on: ubuntu-latest
+    needs: deploy-migrations
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Link Supabase project
+        run: |
+          echo "${{ secrets.SUPABASE_PASSWORD }}" | supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_REF }} --password-stdin
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Generate types and validate
+        run: |
+          supabase gen types --local > /dev/null
+          supabase db lint
+
+      - name: Check for schema drift
+        run: |
+          supabase db diff --file-name migration_drift_check
+          if [ -f "supabase/migration_drift_check.sql" ]; then
+            echo "⚠️ Schema drift detected - manual review needed"
+            cat supabase/migration_drift_check.sql
+            exit 1
+          else
+            echo "✅ No schema drift detected"
+          fi
