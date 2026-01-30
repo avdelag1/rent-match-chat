@@ -142,10 +142,10 @@ export function ClientProfilePreview({ mode, clientId }: ClientProfilePreviewPro
                     {typeof profileData.location === 'string' ? profileData.location : JSON.stringify(profileData.location)}
                   </span>
                 )}
-                {profileData.occupation && (
+                {(profileData as any).occupation && (
                   <span className="flex items-center gap-1">
                     <Briefcase className="h-4 w-4" />
-                    {profileData.occupation}
+                    {(profileData as any).occupation}
                   </span>
                 )}
               </div>

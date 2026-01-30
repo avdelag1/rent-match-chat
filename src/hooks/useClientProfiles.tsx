@@ -33,7 +33,8 @@ export function useClientProfiles(excludeSwipedIds: string[] = [], options: { en
         // CRITICAL: Query profiles_public directly to ensure all profiles exist in auth system
         // IMPORTANT: Filter by role='client' to only show clients, not owners
         // FIXED: Add is_active filter to exclude suspended/blocked/inactive profiles
-        const { data: profiles, error } = await supabase
+        // NOTE: Using 'as any' because profiles_public view is not in auto-generated types
+        const { data: profiles, error } = await (supabase as any)
           .from('profiles_public')
           .select('*')
           .neq('id', user.id)

@@ -67,6 +67,21 @@ export interface Listing {
   electric_assist?: boolean;
   battery_range?: number;
   
+  // Worker/Service fields
+  service_type?: string;
+  hourly_rate?: number;
+  experience_years?: number;
+  skills?: string[];
+  certifications?: string[];
+  service_category?: string;
+  pricing_unit?: string;
+  work_type?: string;
+  schedule_type?: string;
+  days_available?: string[];
+  time_slots_available?: string[];
+  location_type?: string;
+  experience_level?: string;
+  
   // Additional details
   description_short?: string;
   description_full?: string;

@@ -602,6 +602,7 @@ export type Database = {
           gender: string | null
           has_children: boolean | null
           id: number
+          intentions: string[] | null
           interest_categories: string[] | null
           interests: string[] | null
           languages: string[] | null
@@ -612,7 +613,6 @@ export type Database = {
           name: string | null
           nationality: string | null
           neighborhood: string | null
-          occupation: string | null
           noise_tolerance: string | null
           personality_traits: string[] | null
           preferred_activities: string[] | null
@@ -622,7 +622,6 @@ export type Database = {
           updated_at: string | null
           user_id: string | null
           work_schedule: string | null
-          intentions: string[] | null
         }
         Insert: {
           age?: number | null
@@ -636,6 +635,7 @@ export type Database = {
           gender?: string | null
           has_children?: boolean | null
           id?: number
+          intentions?: string[] | null
           interest_categories?: string[] | null
           interests?: string[] | null
           languages?: string[] | null
@@ -655,7 +655,6 @@ export type Database = {
           updated_at?: string | null
           user_id?: string | null
           work_schedule?: string | null
-          intentions?: string[] | null
         }
         Update: {
           age?: number | null
@@ -669,6 +668,7 @@ export type Database = {
           gender?: string | null
           has_children?: boolean | null
           id?: number
+          intentions?: string[] | null
           interest_categories?: string[] | null
           interests?: string[] | null
           languages?: string[] | null
@@ -688,7 +688,6 @@ export type Database = {
           updated_at?: string | null
           user_id?: string | null
           work_schedule?: string | null
-          intentions?: string[] | null
         }
         Relationships: []
       }
@@ -812,6 +811,54 @@ export type Database = {
           receiver_id?: string | null
           sender_id?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "fk_conversation_messages_conversation"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_conversation_messages_sender"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversation_messages_dlq: {
+        Row: {
+          conversation_id: string | null
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          message_text: string | null
+          message_type: string | null
+          receiver_id: string | null
+          sender_id: string | null
+        }
+        Insert: {
+          conversation_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message_text?: string | null
+          message_type?: string | null
+          receiver_id?: string | null
+          sender_id?: string | null
+        }
+        Update: {
+          conversation_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message_text?: string | null
+          message_type?: string | null
+          receiver_id?: string | null
+          sender_id?: string | null
+        }
         Relationships: []
       }
       conversation_starters: {
@@ -889,10 +936,31 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "conversations_match_id_fkey"
+            foreignKeyName: "fk_conversations_client"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_conversations_listing"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_conversations_match"
             columns: ["match_id"]
             isOneToOne: false
             referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_conversations_owner"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1216,13 +1284,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "likes_target_id_fkey"
-            columns: ["target_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "likes_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -1248,7 +1309,7 @@ export type Database = {
           likes: number | null
           listing_type: string | null
           longitude: number | null
-          neighborhood: string | null`n          occupation: string | null
+          neighborhood: string | null
           owner_id: string
           price: number | null
           property_type: string | null
@@ -1387,17 +1448,17 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "matches_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "matches_listing_id_fkey"
             columns: ["listing_id"]
             isOneToOne: false
             referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1655,6 +1716,55 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      owner_likes: {
+        Row: {
+          client_id: string
+          created_at: string | null
+          id: string
+          is_super_like: boolean | null
+          listing_id: string | null
+          owner_id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string | null
+          id?: string
+          is_super_like?: boolean | null
+          listing_id?: string | null
+          owner_id: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string | null
+          id?: string
+          is_super_like?: boolean | null
+          listing_id?: string | null
+          owner_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "owner_likes_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_likes_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_likes_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       owner_profiles: {
         Row: {
@@ -2003,7 +2113,7 @@ export type Database = {
           languages_spoken: string[] | null
           lifestyle_tags: string[] | null
           nationality: string | null
-          neighborhood: string | null`n          occupation: string | null
+          neighborhood: string | null
           onboarding_completed: boolean | null
           package: string | null
           party_friendly: boolean | null
@@ -2142,7 +2252,15 @@ export type Database = {
           processed?: boolean
           processed_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "push_outbox_conversation_message_id_fkey"
+            columns: ["conversation_message_id"]
+            isOneToOne: false
+            referencedRelation: "conversation_messages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       push_outbox_dlq: {
         Row: {
@@ -3005,7 +3123,7 @@ export type Database = {
           document_type: Database["public"]["Enums"]["document_type"]
           file_path: string
           id: string
-          status: Database["public"]["Enums"]["document_status"]
+          status: string
           updated_at: string
           user_id: string
         }
@@ -3015,7 +3133,7 @@ export type Database = {
           document_type: Database["public"]["Enums"]["document_type"]
           file_path: string
           id?: string
-          status?: Database["public"]["Enums"]["document_status"]
+          status?: string
           updated_at?: string
           user_id: string
         }
@@ -3025,7 +3143,7 @@ export type Database = {
           document_type?: Database["public"]["Enums"]["document_type"]
           file_path?: string
           id?: string
-          status?: Database["public"]["Enums"]["document_status"]
+          status?: string
           updated_at?: string
           user_id?: string
         }
@@ -3449,42 +3567,6 @@ export type Database = {
         }
         Relationships: []
       }
-      vendors: {
-        Row: {
-          category: string
-          created_at: string
-          description: string
-          id: string
-          image_url: string | null
-          location: string
-          name: string
-          owner_id: string
-          price: number
-        }
-        Insert: {
-          category: string
-          created_at?: string
-          description: string
-          id?: string
-          image_url?: string | null
-          location: string
-          name: string
-          owner_id: string
-          price: number
-        }
-        Update: {
-          category?: string
-          created_at?: string
-          description?: string
-          id?: string
-          image_url?: string | null
-          location?: string
-          name?: string
-          owner_id?: string
-          price?: number
-        }
-        Relationships: []
-      }
     }
     Views: {
       geography_columns: {
@@ -3544,7 +3626,15 @@ export type Database = {
           processed: boolean | null
           processed_at: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "push_outbox_conversation_message_id_fkey"
+            columns: ["conversation_message_id"]
+            isOneToOne: false
+            referencedRelation: "conversation_messages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {
@@ -3831,6 +3921,16 @@ export type Database = {
         Args: { onboarding_data?: Json; user_id: string }
         Returns: undefined
       }
+      create_match_if_not_exists:
+        | { Args: { a: string; b: string }; Returns: undefined }
+        | {
+            Args: {
+              p_client_id: string
+              p_listing_id?: string
+              p_owner_id: string
+            }
+            Returns: undefined
+          }
       current_auth_uid: { Args: never; Returns: string }
       current_window_start: {
         Args: { window_seconds: number }
@@ -5134,7 +5234,14 @@ export type Database = {
         | "disputed"
       document_status: "pending" | "approved" | "rejected"
       document_type: "property_deed" | "broker_license" | "id_card" | "other"
+      listing_category:
+        | "property"
+        | "motorcycle"
+        | "bicycle"
+        | "yacht"
+        | "worker"
       listing_status: "active" | "pending" | "inactive" | "suspended"
+      listing_type: "rent" | "sale" | "both"
       notification_type:
         | "new_match"
         | "new_message"
@@ -5296,7 +5403,15 @@ export const Constants = {
       ],
       document_status: ["pending", "approved", "rejected"],
       document_type: ["property_deed", "broker_license", "id_card", "other"],
+      listing_category: [
+        "property",
+        "motorcycle",
+        "bicycle",
+        "yacht",
+        "worker",
+      ],
       listing_status: ["active", "pending", "inactive", "suspended"],
+      listing_type: ["rent", "sale", "both"],
       notification_type: [
         "new_match",
         "new_message",
@@ -5316,4 +5431,3 @@ export const Constants = {
     },
   },
 } as const
-

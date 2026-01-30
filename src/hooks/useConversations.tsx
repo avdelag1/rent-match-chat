@@ -115,7 +115,7 @@ export function useConversations() {
           owner_profile: { id: string; full_name: string; avatar_url?: string } | null;
           listing: { id: string; title: string; price?: number; images?: string[]; category?: string; mode?: string; address?: string; city?: string } | null;
         };
-        const conversationsWithProfiles = data.map((conversation: ConversationRow) => {
+        const conversationsWithProfiles = (data as any[]).map((conversation: any) => {
           const isClient = conversation.client_id === user.id;
           const otherUserProfile = isClient ? conversation.owner_profile : conversation.client_profile;
           // Determine role based on which side of the conversation the other user is
