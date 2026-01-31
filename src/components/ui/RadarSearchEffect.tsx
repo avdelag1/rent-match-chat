@@ -6,7 +6,9 @@
  *
  * Features:
  * - Multiple expanding ripple waves
+ * - Rotating sweep beam (like a real radar)
  * - Pulsing center point
+ * - Dynamic scan lines
  * - Continuous animation conveying "searching"
  * - Alive and responsive feeling
  * - GPU-accelerated
@@ -118,6 +120,64 @@ export const RadarSearchEffect = memo(function RadarSearchEffect({
           }}
         />
 
+        {/* ROTATING SWEEP BEAM - Classic radar sweep effect */}
+        <motion.div
+          animate={isActive ? {
+            rotate: [0, 360],
+          } : {}}
+          transition={{
+            duration: 3,
+            repeat: Infinity,
+            ease: 'linear',
+          }}
+          style={{
+            position: 'absolute',
+            width: size,
+            height: size,
+            overflow: 'hidden',
+            borderRadius: '50%',
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              width: size / 2,
+              height: size / 2,
+              transformOrigin: '0% 0%',
+              background: `conic-gradient(
+                from 0deg,
+                transparent 0%,
+                ${color}40 30%,
+                ${color}20 60%,
+                transparent 100%
+              )`,
+            }}
+          />
+        </motion.div>
+
+        {/* Scan line sweep - horizontal scanning */}
+        <motion.div
+          animate={isActive ? {
+            y: [-size * 0.4, size * 0.4],
+            opacity: [0, 0.6, 0],
+          } : {}}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: 'easeInOut',
+            repeatDelay: 0.5,
+          }}
+          style={{
+            position: 'absolute',
+            width: size * 0.8,
+            height: 2,
+            background: `linear-gradient(90deg, transparent, ${color}, transparent)`,
+            boxShadow: `0 0 8px ${color}80`,
+          }}
+        />
+
         {/* Ripple wave 1 - fast wave */}
         <motion.div
           animate={isActive ? {
@@ -184,11 +244,47 @@ export const RadarSearchEffect = memo(function RadarSearchEffect({
           }}
         />
 
-        {/* Center dot with subtle pulse */}
+        {/* Target detection blips - simulate finding targets */}
+        {isActive && [0, 1, 2].map((blip) => {
+          const angle = (blip * 120) + (Date.now() / 100 % 360);
+          const radius = size * 0.35;
+          const x = Math.cos(angle * Math.PI / 180) * radius;
+          const y = Math.sin(angle * Math.PI / 180) * radius;
+
+          return (
+            <motion.div
+              key={blip}
+              animate={{
+                scale: [0, 1.5, 0],
+                opacity: [0, 0.8, 0],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: 'easeOut',
+                delay: blip * 0.6,
+              }}
+              style={{
+                position: 'absolute',
+                width: size * 0.08,
+                height: size * 0.08,
+                left: `calc(50% + ${x}px)`,
+                top: `calc(50% + ${y}px)`,
+                marginLeft: -(size * 0.04),
+                marginTop: -(size * 0.04),
+                borderRadius: '50%',
+                backgroundColor: color,
+                boxShadow: `0 0 ${size * 0.15}px ${color}`,
+              }}
+            />
+          );
+        })}
+
+        {/* Center dot with enhanced pulse */}
         <motion.div
           animate={isActive ? {
-            scale: [1, 1.2, 1],
-            opacity: [0.8, 1, 0.8],
+            scale: [1, 1.3, 1],
+            opacity: [0.9, 1, 0.9],
           } : {}}
           transition={{
             duration: 1.5,
@@ -201,18 +297,18 @@ export const RadarSearchEffect = memo(function RadarSearchEffect({
             height: centerSize,
             borderRadius: '50%',
             backgroundColor: color,
-            boxShadow: `0 0 ${size * 0.1}px ${color}80`,
+            boxShadow: `0 0 ${size * 0.15}px ${color}`,
           }}
         />
 
-        {/* Secondary pulse ring from center */}
+        {/* Energy ring from center - stronger burst */}
         <motion.div
           animate={isActive ? {
-            scale: [0.5, 3],
-            opacity: [0.5, 0],
+            scale: [0.3, 3.5],
+            opacity: [0.7, 0],
           } : {}}
           transition={{
-            duration: 2,
+            duration: 2.5,
             repeat: Infinity,
             ease: 'easeOut',
           }}
@@ -221,7 +317,8 @@ export const RadarSearchEffect = memo(function RadarSearchEffect({
             width: centerSize,
             height: centerSize,
             borderRadius: '50%',
-            border: `2px solid ${color}`,
+            border: `3px solid ${color}`,
+            boxShadow: `0 0 ${size * 0.1}px ${color}`,
           }}
         />
       </div>
@@ -286,11 +383,49 @@ export const RadarSearchIcon = memo(function RadarSearchIcon({
         />
       </svg>
 
+      {/* Rotating sweep beam for compact icon */}
+      {isActive && (
+        <motion.div
+          animate={{
+            rotate: [0, 360],
+          }}
+          transition={{
+            duration: 2.5,
+            repeat: Infinity,
+            ease: 'linear',
+          }}
+          style={{
+            position: 'absolute',
+            width: size,
+            height: size,
+            overflow: 'hidden',
+            borderRadius: '50%',
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              width: size / 2,
+              height: size / 2,
+              transformOrigin: '0% 0%',
+              background: `conic-gradient(
+                from 0deg,
+                transparent 0%,
+                ${color}50 40%,
+                transparent 100%
+              )`,
+            }}
+          />
+        </motion.div>
+      )}
+
       {/* Ripple wave 1 */}
       {isActive && (
         <motion.div
           animate={{
-            scale: [0.3, 2],
+            scale: [0.3, 2.2],
             opacity: [0.7, 0],
           }}
           transition={{
@@ -313,7 +448,7 @@ export const RadarSearchIcon = memo(function RadarSearchIcon({
       {isActive && (
         <motion.div
           animate={{
-            scale: [0.3, 2],
+            scale: [0.3, 2.2],
             opacity: [0.7, 0],
           }}
           transition={{
