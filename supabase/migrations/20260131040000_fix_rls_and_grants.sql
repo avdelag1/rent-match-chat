@@ -2,12 +2,9 @@
 -- FIX RLS POLICIES, GRANTS, AND ADD EMAIL-CHECK RPC
 -- Date: 2026-01-31
 --
--- 1. conversations policies referenced client_id / owner_id which
---    do not exist on the table.  Actual columns are participant_one
---    and participant_two.  Every conversation query was silently
---    returning zero rows.
+-- 1. conversations policies: live DB columns are client_id / owner_id.
 --
--- 2. messages policies had a subquery with the same wrong columns.
+-- 2. messages table is actually conversation_messages on the live DB.
 --
 -- 3. message_activations INSERT policy required auth.uid() = user_id.
 --    processReferralReward inserts an activation for the *referrer*,
@@ -32,47 +29,47 @@ DROP POLICY IF EXISTS "users_can_view_own_conversations" ON public.conversations
 CREATE POLICY "users_can_view_own_conversations"
   ON public.conversations FOR SELECT
   TO authenticated
-  USING (auth.uid() = participant_one OR auth.uid() = participant_two);
+  USING (auth.uid() = client_id OR auth.uid() = owner_id);
 
 DROP POLICY IF EXISTS "users_can_create_conversations" ON public.conversations;
 CREATE POLICY "users_can_create_conversations"
   ON public.conversations FOR INSERT
   TO authenticated
-  WITH CHECK (auth.uid() = participant_one OR auth.uid() = participant_two);
+  WITH CHECK (auth.uid() = client_id OR auth.uid() = owner_id);
 
 DROP POLICY IF EXISTS "users_can_update_own_conversations" ON public.conversations;
 CREATE POLICY "users_can_update_own_conversations"
   ON public.conversations FOR UPDATE
   TO authenticated
-  USING  (auth.uid() = participant_one OR auth.uid() = participant_two)
-  WITH CHECK (auth.uid() = participant_one OR auth.uid() = participant_two);
+  USING  (auth.uid() = client_id OR auth.uid() = owner_id)
+  WITH CHECK (auth.uid() = client_id OR auth.uid() = owner_id);
 
 -- ============================================
--- 2. FIX MESSAGES RLS (subquery used wrong conversation columns)
+-- 2. FIX MESSAGES RLS (table is conversation_messages)
 -- ============================================
 
-DROP POLICY IF EXISTS "users_can_view_conversation_messages" ON public.messages;
+DROP POLICY IF EXISTS "users_can_view_conversation_messages" ON public.conversation_messages;
 CREATE POLICY "users_can_view_conversation_messages"
-  ON public.messages FOR SELECT
+  ON public.conversation_messages FOR SELECT
   TO authenticated
   USING (
     EXISTS (
       SELECT 1 FROM public.conversations
       WHERE id = conversation_id
-      AND (participant_one = auth.uid() OR participant_two = auth.uid())
+      AND (client_id = auth.uid() OR owner_id = auth.uid())
     )
   );
 
-DROP POLICY IF EXISTS "users_can_send_messages" ON public.messages;
+DROP POLICY IF EXISTS "users_can_send_messages" ON public.conversation_messages;
 CREATE POLICY "users_can_send_messages"
-  ON public.messages FOR INSERT
+  ON public.conversation_messages FOR INSERT
   TO authenticated
   WITH CHECK (
     auth.uid() = sender_id AND
     EXISTS (
       SELECT 1 FROM public.conversations
       WHERE id = conversation_id
-      AND (participant_one = auth.uid() OR participant_two = auth.uid())
+      AND (client_id = auth.uid() OR owner_id = auth.uid())
     )
   );
 

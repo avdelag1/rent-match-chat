@@ -200,56 +200,55 @@ GRANT EXECUTE ON FUNCTION public.upsert_user_role(UUID, TEXT) TO service_role;
 
 -- ============================================
 -- STEP 6: FIX CONVERSATIONS RLS
---   Previous migration used client_id / owner_id which do not
---   exist.  Actual columns are participant_one / participant_two.
+--   Live DB columns are client_id / owner_id.
 -- ============================================
 
 DROP POLICY IF EXISTS "users_can_view_own_conversations" ON public.conversations;
 CREATE POLICY "users_can_view_own_conversations"
   ON public.conversations FOR SELECT
   TO authenticated
-  USING (auth.uid() = participant_one OR auth.uid() = participant_two);
+  USING (auth.uid() = client_id OR auth.uid() = owner_id);
 
 DROP POLICY IF EXISTS "users_can_create_conversations" ON public.conversations;
 CREATE POLICY "users_can_create_conversations"
   ON public.conversations FOR INSERT
   TO authenticated
-  WITH CHECK (auth.uid() = participant_one OR auth.uid() = participant_two);
+  WITH CHECK (auth.uid() = client_id OR auth.uid() = owner_id);
 
 DROP POLICY IF EXISTS "users_can_update_own_conversations" ON public.conversations;
 CREATE POLICY "users_can_update_own_conversations"
   ON public.conversations FOR UPDATE
   TO authenticated
-  USING  (auth.uid() = participant_one OR auth.uid() = participant_two)
-  WITH CHECK (auth.uid() = participant_one OR auth.uid() = participant_two);
+  USING  (auth.uid() = client_id OR auth.uid() = owner_id)
+  WITH CHECK (auth.uid() = client_id OR auth.uid() = owner_id);
 
 -- ============================================
 -- STEP 7: FIX MESSAGES RLS
---   Subquery referenced wrong conversation columns.
+--   Live table is conversation_messages, not messages.
 -- ============================================
 
-DROP POLICY IF EXISTS "users_can_view_conversation_messages" ON public.messages;
+DROP POLICY IF EXISTS "users_can_view_conversation_messages" ON public.conversation_messages;
 CREATE POLICY "users_can_view_conversation_messages"
-  ON public.messages FOR SELECT
+  ON public.conversation_messages FOR SELECT
   TO authenticated
   USING (
     EXISTS (
       SELECT 1 FROM public.conversations
       WHERE id = conversation_id
-      AND (participant_one = auth.uid() OR participant_two = auth.uid())
+      AND (client_id = auth.uid() OR owner_id = auth.uid())
     )
   );
 
-DROP POLICY IF EXISTS "users_can_send_messages" ON public.messages;
+DROP POLICY IF EXISTS "users_can_send_messages" ON public.conversation_messages;
 CREATE POLICY "users_can_send_messages"
-  ON public.messages FOR INSERT
+  ON public.conversation_messages FOR INSERT
   TO authenticated
   WITH CHECK (
     auth.uid() = sender_id AND
     EXISTS (
       SELECT 1 FROM public.conversations
       WHERE id = conversation_id
-      AND (participant_one = auth.uid() OR participant_two = auth.uid())
+      AND (client_id = auth.uid() OR owner_id = auth.uid())
     )
   );
 
