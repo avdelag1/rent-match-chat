@@ -24,6 +24,8 @@ import { CompactRatingDisplay } from '@/components/RatingDisplay';
 import { useListingRatingAggregate } from '@/hooks/useRatingSystem';
 import { GradientMaskTop, GradientMaskBottom } from '@/components/ui/GradientMasks';
 import { useParallaxStore } from '@/state/parallaxStore';
+import CardImage from '@/components/CardImage';
+import { imageCache } from '@/lib/swipe/cardImageCache';
 
 // Exposed interface for parent to trigger swipe animations
 export interface SimpleSwipeCardRef {
@@ -37,9 +39,6 @@ const FALLBACK_PLACEHOLDER = '/placeholder.svg';
 
 // Max rotation angle (degrees) based on horizontal position
 const MAX_ROTATION = 12;
-
-// Global image cache for instant photo switching
-const imageCache = new Map<string, boolean>();
 
 // Calculate exit distance dynamically
 const getExitDistance = () => typeof window !== 'undefined' ? window.innerWidth * 1.5 : 800;
@@ -57,103 +56,6 @@ const SPRING_CONFIGS = {
 };
 
 const ACTIVE_SPRING = SPRING_CONFIGS.NATIVE;
-
-/**
- * FULL-SCREEN CARD IMAGE
- *
- * CRITICAL: Image MUST cover 100% of viewport (edge-to-edge, top-to-bottom)
- * - Uses position: absolute + inset: 0
- * - object-fit: cover ensures no letterboxing
- * - Sits at the LOWEST z-layer (z-index: 1)
- * - Preloads image when rendered
- */
-const CardImage = memo(({ src, alt }: { src: string; alt: string }) => {
-  // Check if image was already cached - if so, show immediately (no skeleton)
-  const [loaded, setLoaded] = useState(() => imageCache.has(src));
-  const [error, setError] = useState(false);
-  const optimizedSrc = getCardImageUrl(src);
-
-  // CRITICAL FIX: Check cache on every render, not just once
-  // This ensures cached images show instantly when tapping between photos
-  const wasInCache = useMemo(() => imageCache.has(src), [src]);
-
-  // Preload image when card renders (non-top cards need this)
-  useEffect(() => {
-    if (!src || error) return;
-
-    // If already in cache, mark as loaded immediately (no transition)
-    if (imageCache.has(src)) {
-      setLoaded(true);
-      return;
-    }
-
-    const img = new Image();
-    img.onload = () => {
-      imageCache.set(src, true);
-      setLoaded(true);
-    };
-    img.onerror = () => setError(true);
-    img.src = optimizedSrc;
-  }, [src, optimizedSrc, error]);
-
-  return (
-    <div
-      className="absolute inset-0 w-full h-full rounded-[24px]"
-      style={{
-        // GPU acceleration for smooth rendering
-        transform: 'translateZ(0)',
-        willChange: 'contents',
-        // Disable all browser touch behaviors for instant response
-        touchAction: 'none',
-        WebkitUserSelect: 'none',
-        userSelect: 'none',
-        // LOWEST z-layer - image sits behind everything
-        zIndex: 1,
-        // Ensure corners are visible even when card is dragged
-        overflow: 'hidden',
-      }}
-    >
-      {/* Skeleton - GPU-accelerated with smooth 150ms crossfade (skip if cached) */}
-      <div
-        className="absolute inset-0 bg-gradient-to-br from-muted to-muted-foreground/20"
-        style={{
-          opacity: loaded ? 0 : 1,
-          transition: wasInCache ? 'none' : 'opacity 150ms ease-out',
-          transform: 'translateZ(0)',
-        }}
-      />
-
-      {/* Image - FULL VIEWPORT coverage */}
-      <img
-        src={error ? FALLBACK_PLACEHOLDER : optimizedSrc}
-        alt={alt}
-        className="absolute inset-0 w-full h-full rounded-[24px]"
-        style={{
-          // CRITICAL: object-fit: cover ensures no letterboxing/padding
-          objectFit: 'cover',
-          objectPosition: 'center',
-          opacity: loaded ? 1 : 0,
-          transition: wasInCache ? 'none' : 'opacity 150ms ease-out',
-          // CSS performance optimizations
-          willChange: 'opacity',
-          backfaceVisibility: 'hidden',
-          transform: 'translateZ(0)',
-          // Disable image dragging
-          WebkitUserDrag: 'none',
-          pointerEvents: 'none',
-        } as React.CSSProperties}
-        onLoad={() => {
-          imageCache.set(src, true);
-          setLoaded(true);
-        }}
-        onError={() => setError(true)}
-        draggable={false}
-        loading="eager"
-        decoding="async"
-      />
-    </div>
-  );
-});
 
 interface SimpleSwipeCardProps {
   listing: Listing | MatchedListing;
