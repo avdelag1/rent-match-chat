@@ -26,34 +26,32 @@ export function useAccountLinking() {
 
   const checkExistingAccount = async (email: string): Promise<{ profile: ExistingProfile | null; hasConflict: boolean }> => {
     try {
-      // Check if there's an existing profile with this email
-      const { data: existingProfile, error } = await supabase
-        .from('profiles')
-        .select('id, email, full_name, created_at')
-        .eq('email', email)
-        .maybeSingle();
+      // Use SECURITY DEFINER RPC so this works in any auth context (including anon
+      // before signup).  Direct queries to profiles/user_roles are blocked by RLS
+      // for unauthenticated users.
+      const { data, error } = await supabase.rpc('check_email_exists', { p_email: email });
 
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
         if (import.meta.env.DEV) {
           logger.error('Error checking existing account:', error);
         }
         return { profile: null, hasConflict: false };
       }
 
-      if (!existingProfile) {
+      if (!data?.exists) {
         return { profile: null, hasConflict: false };
       }
 
-      // Fetch role from user_roles table
-      const { data: roleData } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', existingProfile.id)
-        .maybeSingle();
-
-      return { 
-        profile: { ...existingProfile, role: roleData?.role as 'client' | 'owner' | undefined }, 
-        hasConflict: false // We'll determine this in the linking logic
+      return {
+        profile: {
+          id: data.id,
+          email: data.email,
+          full_name: data.full_name,
+          role: data.role as 'client' | 'owner' | undefined,
+          avatar_url: data.avatar_url,
+          created_at: data.created_at,
+        } as ExistingProfile,
+        hasConflict: false,
       };
     } catch (error) {
       if (import.meta.env.DEV) {
@@ -127,26 +125,6 @@ export function useAccountLinking() {
           .eq('id', existingProfile.id);
       }
 
-      // Log successful account linking (non-blocking)
-      try {
-        await supabase.from('audit_logs').insert([{
-          table_name: 'profiles',
-          action: 'ACCOUNT_LINKED',
-          record_id: existingProfile.id,
-          changed_by: oauthUser.id,
-          details: {
-            oauth_provider: oauthUser.app_metadata?.provider,
-            role_conflict: roleConflict,
-            existing_role: existingProfile.role,
-            requested_role: requestedRole
-          }
-        }]);
-      } catch (auditError) {
-        if (import.meta.env.DEV) {
-          logger.error('Audit log failed:', auditError);
-        }
-      }
-
       toast({
         title: "Account Linked Successfully",
         description: `Welcome back! Your ${oauthUser.app_metadata?.provider} account has been linked.`,
@@ -190,8 +168,10 @@ export function useAccountLinking() {
         id: oauthUser.id,
         full_name: oauthUser.user_metadata?.name || oauthUser.user_metadata?.full_name || '',
         email: oauthUser.email || '',
+        role: role,
         avatar_url: oauthUser.user_metadata?.avatar_url || null,
         is_active: true,
+        onboarding_completed: true,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };

@@ -102,8 +102,9 @@ export function useProfileSetup() {
           .from('notifications')
           .insert([{
             user_id: referrerId,
-            notification_type: 'system_announcement',
-            message: 'You earned 1 free message for inviting a new user!',
+            type: 'system',
+            title: 'Referral Reward',
+            content: 'You earned 1 free message for inviting a new user!',
             is_read: false,
           }])
           .then(() => {});
@@ -301,8 +302,7 @@ export function useProfileSetup() {
             .from('message_activations')
             .select('id')
             .eq('user_id', userId)
-            .eq('activation_type', 'referral_bonus')
-            .like('notes', '%Welcome bonus%')
+            .eq('activation_type', 'welcome')
             .maybeSingle();
           const existingWelcome = welcomeResult?.data;
 
@@ -353,7 +353,7 @@ export function useProfileSetup() {
 
           const insertData = {
             user_id: userId,
-            activation_type: 'referral_bonus' as const,
+            activation_type: 'welcome' as const,
             total_activations: activationCount,
             remaining_activations: activationCount,
             used_activations: 0,

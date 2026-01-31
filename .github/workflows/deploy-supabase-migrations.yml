@@ -2,10 +2,11 @@ name: Deploy Supabase Migrations
 
 on:
   push:
-    branches: [main]
+    branches: [main, 'claude/*']
     paths:
       - 'supabase/migrations/**'
       - 'supabase/**'
+      - '.github/workflows/deploy-supabase-migrations.yml'
   workflow_dispatch:
 
 permissions:
@@ -15,7 +16,6 @@ permissions:
 jobs:
   deploy-migrations:
     runs-on: ubuntu-latest
-    environment: production
 
     steps:
       - name: Checkout repository
