@@ -115,8 +115,9 @@ async function syncSwipe(swipe: QueuedSwipe): Promise<boolean> {
       return false;
     }
 
-    // Map direction to database values: left=dismiss, right=like
-    const dbDirection = swipe.direction === 'right' ? 'like' : 'dismiss';
+    // Pass direction directly to database: 'left' or 'right'
+    // DB constraint requires direction IN ('left', 'right')
+    const dbDirection = swipe.direction;
 
     // All swipes go to the unified likes table
     // Unique constraint is on (user_id, target_id, target_type)

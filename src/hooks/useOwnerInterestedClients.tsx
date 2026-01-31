@@ -68,7 +68,7 @@ export function useOwnerInterestedClients() {
         `)
         .in('target_id', listingIds)
         .eq('target_type', 'listing')
-        .eq('direction', 'like')
+        .eq('direction', 'right')
         .order('created_at', { ascending: false });
 
       if (error) {

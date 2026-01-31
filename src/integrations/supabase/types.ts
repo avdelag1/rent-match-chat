@@ -1264,7 +1264,7 @@ export type Database = {
           id: string
           target_id: string
           target_type: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string | null
@@ -1272,7 +1272,7 @@ export type Database = {
           id?: string
           target_id: string
           target_type: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string | null
@@ -1280,7 +1280,7 @@ export type Database = {
           id?: string
           target_id?: string
           target_type?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -1296,83 +1296,254 @@ export type Database = {
         Row: {
           address: string | null
           amenities: string[] | null
+          background_check_verified: boolean | null
           baths: number | null
+          battery_range: number | null
           beds: number | null
+          bicycle_type: string | null
+          brake_type: string | null
           category: string | null
+          certifications: string[] | null
           city: string | null
+          color: string | null
           contacts: number | null
+          country: string | null
           created_at: string | null
+          currency: string | null
+          custom_service_name: string | null
+          days_available: string[] | null
           description: string | null
+          electric_assist: boolean | null
+          engine_cc: number | null
+          experience_level: string | null
+          experience_years: number | null
+          frame_material: string | null
+          frame_size: string | null
+          fuel_type: string | null
+          has_abs: boolean | null
+          has_heated_grips: boolean | null
+          has_luggage_rack: boolean | null
+          has_traction_control: boolean | null
+          hourly_rate: number | null
           id: string
           images: string[] | null
+          includes_basket: boolean | null
+          includes_gear: boolean | null
+          includes_helmet: boolean | null
+          includes_lights: boolean | null
+          includes_lock: boolean | null
+          includes_pump: boolean | null
+          insurance_verified: boolean | null
+          is_active: boolean | null
           latitude: number | null
+          license_required: string | null
           likes: number | null
           listing_type: string | null
+          location_type: string | null
           longitude: number | null
+          mileage: number | null
+          minimum_booking_hours: number | null
+          motorcycle_type: string | null
           neighborhood: string | null
+          number_of_gears: number | null
+          offers_emergency_service: boolean | null
           owner_id: string
           price: number | null
+          pricing_unit: string | null
           property_type: string | null
+          rental_duration_type: string | null
+          rental_rates: Json | null
           rules: string[] | null
+          schedule_type: string | null
+          service_category: string | null
+          service_radius_km: number | null
+          service_type: string | null
           square_footage: number | null
+          state: string | null
           status: string | null
+          suspension_type: string | null
+          time_slots_available: string[] | null
           title: string | null
+          tools_equipment: string[] | null
+          transmission_type: string | null
+          vehicle_brand: string | null
+          vehicle_condition: string | null
+          vehicle_model: string | null
+          vehicle_type: string | null
           video_url: string | null
           views: number | null
+          wheel_size: string | null
+          work_type: string | null
+          worker_skills: string[] | null
+          year: number | null
         }
         Insert: {
           address?: string | null
           amenities?: string[] | null
+          background_check_verified?: boolean | null
           baths?: number | null
+          battery_range?: number | null
           beds?: number | null
+          bicycle_type?: string | null
+          brake_type?: string | null
           category?: string | null
+          certifications?: string[] | null
           city?: string | null
+          color?: string | null
           contacts?: number | null
+          country?: string | null
           created_at?: string | null
+          currency?: string | null
+          custom_service_name?: string | null
+          days_available?: string[] | null
           description?: string | null
+          electric_assist?: boolean | null
+          engine_cc?: number | null
+          experience_level?: string | null
+          experience_years?: number | null
+          frame_material?: string | null
+          frame_size?: string | null
+          fuel_type?: string | null
+          has_abs?: boolean | null
+          has_heated_grips?: boolean | null
+          has_luggage_rack?: boolean | null
+          has_traction_control?: boolean | null
+          hourly_rate?: number | null
           id?: string
           images?: string[] | null
+          includes_basket?: boolean | null
+          includes_gear?: boolean | null
+          includes_helmet?: boolean | null
+          includes_lights?: boolean | null
+          includes_lock?: boolean | null
+          includes_pump?: boolean | null
+          insurance_verified?: boolean | null
+          is_active?: boolean | null
           latitude?: number | null
+          license_required?: string | null
           likes?: number | null
           listing_type?: string | null
+          location_type?: string | null
           longitude?: number | null
+          mileage?: number | null
+          minimum_booking_hours?: number | null
+          motorcycle_type?: string | null
           neighborhood?: string | null
+          number_of_gears?: number | null
+          offers_emergency_service?: boolean | null
           owner_id: string
           price?: number | null
+          pricing_unit?: string | null
           property_type?: string | null
+          rental_duration_type?: string | null
+          rental_rates?: Json | null
           rules?: string[] | null
+          schedule_type?: string | null
+          service_category?: string | null
+          service_radius_km?: number | null
+          service_type?: string | null
           square_footage?: number | null
+          state?: string | null
           status?: string | null
+          suspension_type?: string | null
+          time_slots_available?: string[] | null
           title?: string | null
+          tools_equipment?: string[] | null
+          transmission_type?: string | null
+          vehicle_brand?: string | null
+          vehicle_condition?: string | null
+          vehicle_model?: string | null
+          vehicle_type?: string | null
           video_url?: string | null
           views?: number | null
+          wheel_size?: string | null
+          work_type?: string | null
+          worker_skills?: string[] | null
+          year?: number | null
         }
         Update: {
           address?: string | null
           amenities?: string[] | null
+          background_check_verified?: boolean | null
           baths?: number | null
+          battery_range?: number | null
           beds?: number | null
+          bicycle_type?: string | null
+          brake_type?: string | null
           category?: string | null
+          certifications?: string[] | null
           city?: string | null
+          color?: string | null
           contacts?: number | null
+          country?: string | null
           created_at?: string | null
+          currency?: string | null
+          custom_service_name?: string | null
+          days_available?: string[] | null
           description?: string | null
+          electric_assist?: boolean | null
+          engine_cc?: number | null
+          experience_level?: string | null
+          experience_years?: number | null
+          frame_material?: string | null
+          frame_size?: string | null
+          fuel_type?: string | null
+          has_abs?: boolean | null
+          has_heated_grips?: boolean | null
+          has_luggage_rack?: boolean | null
+          has_traction_control?: boolean | null
+          hourly_rate?: number | null
           id?: string
           images?: string[] | null
+          includes_basket?: boolean | null
+          includes_gear?: boolean | null
+          includes_helmet?: boolean | null
+          includes_lights?: boolean | null
+          includes_lock?: boolean | null
+          includes_pump?: boolean | null
+          insurance_verified?: boolean | null
+          is_active?: boolean | null
           latitude?: number | null
+          license_required?: string | null
           likes?: number | null
           listing_type?: string | null
+          location_type?: string | null
           longitude?: number | null
+          mileage?: number | null
+          minimum_booking_hours?: number | null
+          motorcycle_type?: string | null
           neighborhood?: string | null
+          number_of_gears?: number | null
+          offers_emergency_service?: boolean | null
           owner_id?: string
           price?: number | null
+          pricing_unit?: string | null
           property_type?: string | null
+          rental_duration_type?: string | null
+          rental_rates?: Json | null
           rules?: string[] | null
+          schedule_type?: string | null
+          service_category?: string | null
+          service_radius_km?: number | null
+          service_type?: string | null
           square_footage?: number | null
+          state?: string | null
           status?: string | null
+          suspension_type?: string | null
+          time_slots_available?: string[] | null
           title?: string | null
+          tools_equipment?: string[] | null
+          transmission_type?: string | null
+          vehicle_brand?: string | null
+          vehicle_condition?: string | null
+          vehicle_model?: string | null
+          vehicle_type?: string | null
           video_url?: string | null
           views?: number | null
+          wheel_size?: string | null
+          work_type?: string | null
+          worker_skills?: string[] | null
+          year?: number | null
         }
         Relationships: [
           {
@@ -3611,44 +3782,6 @@ export type Database = {
         }
         Relationships: []
       }
-      likes: {
-        Row: {
-          id: string
-          user_id: string
-          target_id: string | null
-          target_type: string | null
-          direction: string | null
-          source: string | null
-          created_at: string | null
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          target_id?: string | null
-          target_type?: string | null
-          direction?: string | null
-          source?: string | null
-          created_at?: string | null
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          target_id?: string | null
-          target_type?: string | null
-          direction?: string | null
-          source?: string | null
-          created_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "likes_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       vw_push_outbox_failures: {
         Row: {
           attempt_count: number | null
@@ -5242,7 +5375,12 @@ export type Database = {
       }
       upsert_user_role: {
         Args: { p_role: string; p_user_id: string }
-        Returns: undefined
+        Returns: {
+          message: string
+          role: string
+          success: boolean
+          user_id: string
+        }[]
       }
       user_has_restriction:
         | { Args: never; Returns: boolean }

@@ -40,7 +40,7 @@ export function useSwipeDismissal(targetType: DismissalTargetType) {
           .select('target_id')
           .eq('user_id', user.id)
           .eq('target_type', dbTargetType)
-          .eq('direction', 'dismiss');
+          .eq('direction', 'left');
 
         if (error) {
           logger.error('[useSwipeDismissal] Error fetching dismissals:', error);
@@ -78,7 +78,7 @@ export function useSwipeDismissal(targetType: DismissalTargetType) {
           user_id: user.id,
           target_id: targetId,
           target_type: dbTargetType,
-          direction: 'dismiss'
+          direction: 'left'
         }, {
           onConflict: 'user_id,target_id,target_type',
         });
