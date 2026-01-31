@@ -190,8 +190,10 @@ export function useAccountLinking() {
         id: oauthUser.id,
         full_name: oauthUser.user_metadata?.name || oauthUser.user_metadata?.full_name || '',
         email: oauthUser.email || '',
+        role: role,
         avatar_url: oauthUser.user_metadata?.avatar_url || null,
         is_active: true,
+        onboarding_completed: true,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
