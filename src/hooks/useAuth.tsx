@@ -412,6 +412,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Background role validation - runs after navigation, never blocks UI
+  const validateRoleInBackground = async (user: User, expectedRole: 'client' | 'owner') => {
+    try {
+      const { data: roleData, error: roleError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (roleError) {
+        logger.error('[Auth] Background role check error:', roleError);
+        return; // Don't disrupt the user, they're already in the dashboard
+      }
+
+      if (roleData) {
+        const actualRole = roleData.role as 'client' | 'owner';
+
+        // If role mismatch, redirect to correct dashboard (no logout)
+        if (actualRole !== expectedRole) {
+          const correctPath = actualRole === 'client' ? '/client/dashboard' : '/owner/dashboard';
+
+          toast({
+            title: "Redirecting",
+            description: `Switching to your ${actualRole} dashboard.`,
+          });
+
+          navigate(correctPath, { replace: true });
+          return;
+        }
+
+        // Ensure profile exists (background)
+        createProfileIfMissing(user, actualRole);
+      } else {
+        // No role found - try to create one based on expected role
+        // This handles edge cases where user_roles trigger didn't fire
+        createProfileIfMissing(user, expectedRole);
+      }
+    } catch (error) {
+      logger.error('[Auth] Background validation error:', error);
+      // Silent fail - user is already in dashboard, don't disrupt
+    }
+  };
+
   const signInWithOAuth = async (provider: 'google', role: 'client' | 'owner') => {
     try {
       if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY) {

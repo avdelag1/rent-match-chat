@@ -302,7 +302,8 @@ export function useProfileSetup() {
             .from('message_activations')
             .select('id')
             .eq('user_id', userId)
-            .eq('activation_type', 'welcome')
+            .eq('activation_type', 'referral_bonus')
+            .like('notes', '%Welcome bonus%')
             .maybeSingle();
           const existingWelcome = welcomeResult?.data;
 
@@ -353,7 +354,7 @@ export function useProfileSetup() {
 
           const insertData = {
             user_id: userId,
-            activation_type: 'welcome' as const,
+            activation_type: 'referral_bonus' as const,
             total_activations: activationCount,
             remaining_activations: activationCount,
             used_activations: 0,
