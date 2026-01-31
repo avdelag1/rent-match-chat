@@ -54,6 +54,8 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [showResendConfirmation, setShowResendConfirmation] = useState(false);
+  const [errorDetails, setErrorDetails] = useState<any>(null);
+  const [showErrorDetails, setShowErrorDetails] = useState(false);
   const { signIn, signUp, signInWithOAuth } = useAuth();
 
   // Check if running on a native platform (iOS/Android)
@@ -211,11 +213,34 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
         }
       }
     } catch (error: any) {
+      // Capture full error details for debugging
+      const errorInfo = {
+        message: error.message || 'Unknown error',
+        code: error.code || error.status || 'N/A',
+        stack: error.stack,
+        fullError: JSON.stringify(error, null, 2),
+        timestamp: new Date().toISOString(),
+        action: isLogin ? 'Sign In' : 'Sign Up',
+        role: role
+      };
+
+      // Log to console for debugging
+      console.error('🚨 AUTH ERROR:', errorInfo);
+      setErrorDetails(errorInfo);
+
       if (error.errors) {
         toast({
           title: "Validation Error",
           description: error.errors[0]?.message || "Please check your input.",
           variant: "destructive",
+          action: (
+            <button
+              onClick={() => setShowErrorDetails(true)}
+              className="text-xs underline opacity-80 hover:opacity-100"
+            >
+              View Details
+            </button>
+          ),
         });
       } else {
         // Check if error is related to email confirmation
@@ -225,12 +250,45 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
             title: "Email Not Confirmed",
             description: "Please verify your email address. Check your inbox or click 'Resend confirmation email' below.",
             variant: "destructive",
+            action: (
+              <button
+                onClick={() => setShowErrorDetails(true)}
+                className="text-xs underline opacity-80 hover:opacity-100"
+              >
+                View Details
+              </button>
+            ),
           });
         } else {
+          // Enhanced error message with suggestions
+          let errorMessage = error.message || "Authentication failed.";
+          let suggestion = "";
+
+          if (error.message?.toLowerCase().includes('database')) {
+            suggestion = "Database issue detected. Please contact support.";
+          } else if (error.message?.toLowerCase().includes('network')) {
+            suggestion = "Network error. Check your connection and try again.";
+          } else if (error.message?.toLowerCase().includes('invalid')) {
+            suggestion = "Check your email and password are correct.";
+          }
+
           toast({
-            title: "Error",
-            description: error.message || "Authentication failed.",
+            title: `${isLogin ? 'Sign In' : 'Sign Up'} Failed`,
+            description: (
+              <div className="space-y-2">
+                <p className="font-medium">{errorMessage}</p>
+                {suggestion && <p className="text-xs opacity-80">{suggestion}</p>}
+                <button
+                  onClick={() => setShowErrorDetails(true)}
+                  className="text-xs underline opacity-80 hover:opacity-100 flex items-center gap-1"
+                >
+                  <Shield className="w-3 h-3" />
+                  Click here to see technical details
+                </button>
+              </div>
+            ),
             variant: "destructive",
+            duration: 10000, // Show for 10 seconds
           });
         }
       }
@@ -249,9 +307,39 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
 
       if (error) throw error;
     } catch (error: any) {
-      if (import.meta.env.DEV) {
-        // Using conditional log - prodLogger handles this automatically
-      }
+      // Capture OAuth error details
+      const errorInfo = {
+        message: error.message || 'OAuth sign-in failed',
+        code: error.code || error.status || 'N/A',
+        stack: error.stack,
+        fullError: JSON.stringify(error, null, 2),
+        timestamp: new Date().toISOString(),
+        action: 'OAuth Sign In',
+        provider: provider,
+        role: role
+      };
+
+      console.error('🚨 OAUTH ERROR:', errorInfo);
+      setErrorDetails(errorInfo);
+
+      toast({
+        title: `${provider.charAt(0).toUpperCase() + provider.slice(1)} Sign-In Failed`,
+        description: (
+          <div className="space-y-2">
+            <p className="font-medium">{error.message || 'Failed to sign in with Google'}</p>
+            <button
+              onClick={() => setShowErrorDetails(true)}
+              className="text-xs underline opacity-80 hover:opacity-100 flex items-center gap-1"
+            >
+              <Shield className="w-3 h-3" />
+              Click here to see technical details
+            </button>
+          </div>
+        ),
+        variant: "destructive",
+        duration: 10000,
+      });
+
       setIsLoading(false);
     }
   };
@@ -526,6 +614,118 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
                 </div>
               </div>
             </div>
+
+          {/* Error Details Modal */}
+          {showErrorDetails && errorDetails && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+              <div className="bg-zinc-900 border border-red-500/20 rounded-xl max-w-2xl w-full max-h-[80vh] overflow-hidden shadow-2xl">
+                {/* Header */}
+                <div className="bg-red-500/10 border-b border-red-500/20 px-6 py-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
+                      <Shield className="w-5 h-5 text-red-400" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-white">Error Details</h3>
+                      <p className="text-xs text-white/60">{errorDetails.timestamp}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowErrorDetails(false)}
+                    className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors"
+                  >
+                    <X className="w-4 h-4 text-white" />
+                  </button>
+                </div>
+
+                {/* Content */}
+                <div className="p-6 overflow-y-auto max-h-[calc(80vh-180px)] space-y-4">
+                  {/* Main Error */}
+                  <div className="bg-red-500/5 border border-red-500/20 rounded-lg p-4">
+                    <div className="flex items-start gap-3">
+                      <X className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <h4 className="text-sm font-semibold text-red-400 mb-1">Error Message</h4>
+                        <p className="text-sm text-white font-mono break-words">{errorDetails.message}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Error Code */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-white/5 border border-white/10 rounded-lg p-3">
+                      <p className="text-xs text-white/60 mb-1">Error Code</p>
+                      <p className="text-sm text-white font-mono">{errorDetails.code}</p>
+                    </div>
+                    <div className="bg-white/5 border border-white/10 rounded-lg p-3">
+                      <p className="text-xs text-white/60 mb-1">Action</p>
+                      <p className="text-sm text-white">{errorDetails.action} as {errorDetails.role}</p>
+                    </div>
+                  </div>
+
+                  {/* Full Error Object */}
+                  <div className="bg-black/40 border border-white/10 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-xs font-semibold text-white/80">Technical Details (for support)</h4>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(JSON.stringify(errorDetails, null, 2));
+                          toast({
+                            title: "Copied!",
+                            description: "Error details copied to clipboard",
+                          });
+                        }}
+                        className="text-xs text-orange-400 hover:text-orange-300 underline flex items-center gap-1"
+                      >
+                        <span>Copy</span>
+                      </button>
+                    </div>
+                    <pre className="text-xs text-white/70 font-mono overflow-x-auto whitespace-pre-wrap break-words">
+                      {errorDetails.fullError}
+                    </pre>
+                  </div>
+
+                  {/* Helpful Tips */}
+                  <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-orange-400 mb-2 flex items-center gap-2">
+                      <Sparkles className="w-4 h-4" />
+                      Troubleshooting Tips
+                    </h4>
+                    <ul className="text-xs text-white/80 space-y-1.5 list-disc list-inside">
+                      <li>Check your internet connection</li>
+                      <li>Ensure your email and password are correct</li>
+                      <li>Try refreshing the page and signing up again</li>
+                      <li>Check browser console (F12) for additional errors</li>
+                      <li>Contact support with the error code above</li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="border-t border-white/10 px-6 py-4 flex gap-3">
+                  <Button
+                    onClick={() => {
+                      navigator.clipboard.writeText(JSON.stringify(errorDetails, null, 2));
+                      toast({
+                        title: "Copied!",
+                        description: "Error details copied to clipboard. Share this with support.",
+                      });
+                    }}
+                    variant="outline"
+                    className="flex-1 border-white/10 hover:bg-white/5"
+                  >
+                    Copy Error
+                  </Button>
+                  <Button
+                    onClick={() => setShowErrorDetails(false)}
+                    className="flex-1 bg-orange-500 hover:bg-orange-600 text-white"
+                  >
+                    Close
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
           </div>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
