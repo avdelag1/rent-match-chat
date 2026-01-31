@@ -60,7 +60,7 @@ export interface Listing {
   
   // Bicycle fields
   frame_size?: string;
-  wheel_size?: number;
+  wheel_size?: string;
   frame_material?: string;
   brake_type?: string;
   gear_type?: string;

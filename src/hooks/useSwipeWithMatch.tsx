@@ -126,7 +126,7 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
                 user_id: user.id,
                 target_id: targetId,
                 target_type: 'profile',
-                direction: 'like'
+                direction: 'right'
               })
               .select()
               .single();
@@ -218,7 +218,7 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
               user_id: user.id,
               target_id: targetId,
               target_type: targetType as 'listing' | 'profile',
-              direction: 'dismiss'
+              direction: 'left'
             }, {
               onConflict: 'user_id,target_id,target_type',
               ignoreDuplicates: false
@@ -241,7 +241,7 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
               user_id: user.id,
               target_id: targetId,
               target_type: 'listing',
-              direction: 'like'
+              direction: 'right'
             }, {
               onConflict: 'user_id,target_id,target_type',
               ignoreDuplicates: false
@@ -296,7 +296,7 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
               user_id: user.id,
               target_id: targetId,
               target_type: 'listing',
-              direction: 'dismiss'
+              direction: 'left'
             }, {
               onConflict: 'user_id,target_id,target_type',
               ignoreDuplicates: false
@@ -427,7 +427,7 @@ async function detectAndCreateMatch({
         .select('*')
         .eq('user_id', targetId)
         .eq('target_type', 'listing')
-        .eq('direction', 'like')
+        .eq('direction', 'right')
         .in('target_id', listingIds)
         .limit(1)
         .maybeSingle();

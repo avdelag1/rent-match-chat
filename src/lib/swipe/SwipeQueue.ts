@@ -193,8 +193,9 @@ class SwipeQueueProcessor {
     const userId = swipe.userId || this.cachedUserId;
     if (!userId) throw new Error('No user ID');
 
-    // Map direction to database values: left=dismiss, right=like
-    const dbDirection = swipe.direction === 'right' ? 'like' : 'dismiss';
+    // Pass direction directly to database: 'left' or 'right'
+    // DB constraint requires direction IN ('left', 'right')
+    const dbDirection = swipe.direction;
 
     // Upsert to likes table with direction
     // Unique constraint is on (user_id, target_id, target_type)
@@ -273,14 +274,14 @@ class SwipeQueueProcessor {
           if (!listing) return;
 
           // Check if owner liked this client (check likes table for profile like)
-          // Database uses 'like' not 'right' for direction
+          // Database uses 'right' for likes, 'left' for dismissals
           const { data: ownerLike } = await supabase
             .from('likes')
             .select('*')
             .eq('user_id', listing.owner_id)
             .eq('target_id', userId)
             .eq('target_type', 'profile')
-            .eq('direction', 'like')
+            .eq('direction', 'right')
             .maybeSingle();
 
           if (ownerLike) {

@@ -100,7 +100,7 @@ export function useSwipeUndo() {
       if (swiped.targetType === 'listing') {
         undoClientSwipe();
       } else {
-        undoOwnerSwipe('property');
+        undoOwnerSwipe(swiped.category || 'property');
       }
 
       // Mark undo as successful
