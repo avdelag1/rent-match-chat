@@ -133,12 +133,20 @@ const CardImage = memo(({ src, alt, name }: { src: string; alt: string; name?: s
     return <PlaceholderImage name={name} />;
   }
 
-  // Use smooth transition only for uncached images
-  const wasInCache = imageCache.has(src);
+  // CRITICAL FIX: Check cache on every render, not just once
+  // This ensures cached images show instantly when tapping between photos
+  const wasInCache = useMemo(() => imageCache.has(src), [src]);
 
   // Preload image when card renders (for non-top cards)
   useEffect(() => {
-    if (!src || wasInCache || error) return;
+    if (!src || error) return;
+
+    // If already in cache, mark as loaded immediately (no transition)
+    if (imageCache.has(src)) {
+      setLoaded(true);
+      return;
+    }
+
     const img = new Image();
     img.onload = () => {
       imageCache.set(src, true);
@@ -146,7 +154,7 @@ const CardImage = memo(({ src, alt, name }: { src: string; alt: string; name?: s
     };
     img.onerror = () => setError(true);
     img.src = src;
-  }, [src, wasInCache, error]);
+  }, [src, error]);
 
   return (
     <div
