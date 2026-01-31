@@ -33,6 +33,9 @@ android/app/src/*
 android/app/src/main/*
 !android/app/src/main/AndroidManifest.xml
 
+# Supabase CLI cache
+supabase/.temp/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
