@@ -43,3 +43,6 @@ android/app/src/main/*
 *.njsproj
 *.sln
 *.sw?
+
+# Supabase CLI cache
+supabase/.temp/
