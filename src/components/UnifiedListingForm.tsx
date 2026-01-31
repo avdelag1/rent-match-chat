@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/hooks/use-toast';
-import { Upload, X } from 'lucide-react';
+import { Upload, X, Bike, CircleDot } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { validateNoContactInfo } from '@/utils/contactInfoValidation';
 import { CategorySelector, Category, Mode } from './CategorySelector';
@@ -111,8 +111,8 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
         city: formData.city,
         country: formData.country,
         neighborhood: formData.neighborhood,
-        latitude: selectedCategory === 'property' ? null : location.lat,
-        longitude: selectedCategory === 'property' ? null : location.lng,
+        latitude: selectedCategory === 'property' ? null : (location.lat || null),
+        longitude: selectedCategory === 'property' ? null : (location.lng || null),
       };
 
       if (selectedCategory === 'motorcycle') {
@@ -339,6 +339,33 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
               onCategoryChange={setSelectedCategory}
               onModeChange={setSelectedMode}
             />
+
+            {/* Category Indicator for Motorcycle and Bicycle */}
+            {(selectedCategory === 'motorcycle' || selectedCategory === 'bicycle') && (
+              <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20">
+                <div className={`p-2.5 sm:p-3 rounded-lg sm:rounded-xl ${
+                  selectedCategory === 'motorcycle'
+                    ? 'text-orange-500 bg-orange-500/10'
+                    : 'text-purple-500 bg-purple-500/10'
+                }`}>
+                  {selectedCategory === 'motorcycle' ? (
+                    <CircleDot className="w-6 h-6 sm:w-7 sm:h-7" />
+                  ) : (
+                    <Bike className="w-6 h-6 sm:w-7 sm:h-7" />
+                  )}
+                </div>
+                <div>
+                  <h3 className="font-semibold text-foreground text-sm sm:text-base">
+                    {selectedCategory === 'motorcycle' ? 'Motorcycle' : 'Bicycle'}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground">
+                    {selectedCategory === 'motorcycle'
+                      ? 'Motorcycles, scooters, ATVs'
+                      : 'Bikes, e-bikes, mountain bikes'}
+                  </p>
+                </div>
+              </div>
+            )}
 
             {selectedCategory === 'property' && <PropertyListingForm onDataChange={(data) => setFormData({ ...formData, ...data })} initialData={formData} />}
             {selectedCategory === 'motorcycle' && <MotorcycleListingForm onDataChange={(data) => setFormData({ ...formData, ...data })} initialData={formData as unknown as MotorcycleFormData} />}
