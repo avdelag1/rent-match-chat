@@ -16,7 +16,6 @@ permissions:
 jobs:
   deploy-migrations:
     runs-on: ubuntu-latest
-    environment: production
 
     steps:
       - name: Checkout repository
