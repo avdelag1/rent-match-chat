@@ -38,7 +38,7 @@ DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON public.profi
 CREATE POLICY "authenticated_users_can_browse_profiles"
   ON public.profiles FOR SELECT
   TO authenticated
-  USING (is_verified = true OR auth.uid() = id);
+  USING (is_active = true OR auth.uid() = id);
 
 -- ============================================
 -- LISTINGS TABLE POLICIES
@@ -116,10 +116,10 @@ CREATE POLICY "users_can_update_own_conversations"
   USING (auth.uid() = client_id OR auth.uid() = owner_id)
   WITH CHECK (auth.uid() = client_id OR auth.uid() = owner_id);
 
--- Ensure message access policies
-DROP POLICY IF EXISTS "users_can_view_conversation_messages" ON public.messages;
+-- Ensure message access policies (conversation_messages table, not messages)
+DROP POLICY IF EXISTS "users_can_view_conversation_messages" ON public.conversation_messages;
 CREATE POLICY "users_can_view_conversation_messages"
-  ON public.messages FOR SELECT
+  ON public.conversation_messages FOR SELECT
   TO authenticated
   USING (
     EXISTS (
@@ -129,9 +129,9 @@ CREATE POLICY "users_can_view_conversation_messages"
     )
   );
 
-DROP POLICY IF EXISTS "users_can_send_messages" ON public.messages;
+DROP POLICY IF EXISTS "users_can_send_messages" ON public.conversation_messages;
 CREATE POLICY "users_can_send_messages"
-  ON public.messages FOR INSERT
+  ON public.conversation_messages FOR INSERT
   TO authenticated
   WITH CHECK (
     auth.uid() = sender_id AND
@@ -196,6 +196,27 @@ CREATE POLICY "users_can_delete_own_likes"
   TO authenticated
   USING (auth.uid() = user_id);
 
+-- CRITICAL: Allow owners to see who liked their listings
+DROP POLICY IF EXISTS "owners_can_see_likes_on_listings" ON public.likes;
+CREATE POLICY "owners_can_see_likes_on_listings"
+  ON public.likes FOR SELECT
+  TO authenticated
+  USING (
+    target_type = 'listing' AND
+    EXISTS (
+      SELECT 1 FROM public.listings
+      WHERE id = target_id AND owner_id = auth.uid()
+    )
+  );
+
+-- Allow users to update their own likes (for direction changes)
+DROP POLICY IF EXISTS "users_can_update_own_likes" ON public.likes;
+CREATE POLICY "users_can_update_own_likes"
+  ON public.likes FOR UPDATE
+  TO authenticated
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
 -- ============================================
 -- SWIPES TABLE POLICIES
 -- ============================================
@@ -259,9 +280,9 @@ GRANT SELECT, INSERT, UPDATE ON public.profiles TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.listings TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.client_filter_preferences TO authenticated;
 GRANT SELECT, INSERT, UPDATE ON public.conversations TO authenticated;
-GRANT SELECT, INSERT ON public.messages TO authenticated;
+GRANT SELECT, INSERT ON public.conversation_messages TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.notifications TO authenticated;
-GRANT SELECT, INSERT, DELETE ON public.likes TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.likes TO authenticated;
 GRANT SELECT, INSERT, DELETE ON public.swipes TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.saved_listings TO authenticated;
 GRANT SELECT, INSERT, UPDATE ON public.subscriptions TO authenticated;
@@ -269,6 +290,9 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON public.matches TO authenticated;
 
 -- Grant on listings_photos
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.listings_photos TO authenticated;
+
+-- Grant on user_roles
+GRANT SELECT, INSERT, UPDATE ON public.user_roles TO authenticated;
 
 -- ============================================
 -- VERIFICATION
@@ -278,5 +302,5 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON public.listings_photos TO authenticated;
 -- SELECT tablename, policyname, cmd
 -- FROM pg_policies
 -- WHERE schemaname = 'public'
--- AND tablename IN ('profiles', 'listings', 'conversations', 'messages', 'notifications', 'likes')
+-- AND tablename IN ('profiles', 'listings', 'conversations', 'conversation_messages', 'notifications', 'likes', 'user_roles')
 -- ORDER BY tablename, policyname;

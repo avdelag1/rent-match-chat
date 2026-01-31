@@ -6,18 +6,49 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- ============================================
--- USERS TABLE (extends auth.users)
+-- USERS TABLE (extends auth.users) - matches live DB schema
 -- ============================================
 CREATE TABLE public.profiles (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-    email TEXT NOT NULL,
+    email TEXT,
     full_name TEXT,
-    role TEXT NOT NULL CHECK (role IN ('owner', 'worker', 'client')),
+    role TEXT CHECK (role IN ('owner', 'worker', 'client')),
     avatar_url TEXT,
     bio TEXT,
     phone TEXT,
-    is_verified BOOLEAN DEFAULT FALSE,
-    is_premium BOOLEAN DEFAULT FALSE,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    onboarding_completed BOOLEAN DEFAULT FALSE,
+    -- Additional fields from live DB
+    age INTEGER,
+    gender TEXT,
+    city TEXT,
+    country TEXT,
+    neighborhood TEXT,
+    nationality TEXT,
+    languages_spoken TEXT[],
+    interests TEXT[],
+    lifestyle_tags TEXT[],
+    images TEXT[],
+    profile_photo_url TEXT,
+    has_pets BOOLEAN,
+    smoking BOOLEAN,
+    party_friendly BOOLEAN,
+    work_schedule TEXT,
+    budget_min NUMERIC,
+    budget_max NUMERIC,
+    active_mode TEXT,
+    package TEXT,
+    verified BOOLEAN DEFAULT FALSE,
+    is_banned BOOLEAN DEFAULT FALSE,
+    is_blocked BOOLEAN DEFAULT FALSE,
+    is_suspended BOOLEAN DEFAULT FALSE,
+    average_rating NUMERIC,
+    total_reviews INTEGER DEFAULT 0,
+    broker_verified BOOLEAN DEFAULT FALSE,
+    broker_tier TEXT,
+    theme_preference TEXT,
+    cache_version INTEGER DEFAULT 1,
+    deleted_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -252,14 +283,16 @@ CREATE POLICY "Users can swipe on listings"
     ON public.swipes FOR INSERT WITH CHECK (auth.uid() = user_id);
 
 -- ============================================
--- LIKES TABLE (alias for swipes with like)
+-- LIKES TABLE (matches live DB schema)
 -- ============================================
 CREATE TABLE public.likes (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
-    target_listing_id UUID REFERENCES public.listings(id) ON DELETE CASCADE,
+    target_id UUID NOT NULL,
+    target_type TEXT NOT NULL CHECK (target_type IN ('listing', 'profile')),
+    direction TEXT NOT NULL DEFAULT 'right' CHECK (direction IN ('left', 'right')),
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    UNIQUE(user_id, target_listing_id)
+    UNIQUE(user_id, target_id, target_type)
 );
 
 ALTER TABLE public.likes ENABLE ROW LEVEL SECURITY;
@@ -267,8 +300,24 @@ ALTER TABLE public.likes ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can view own likes"
     ON public.likes FOR SELECT USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can like listings"
+CREATE POLICY "Users can insert likes"
     ON public.likes FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own likes"
+    ON public.likes FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own likes"
+    ON public.likes FOR DELETE USING (auth.uid() = user_id);
+
+-- Allow owners to see who liked their listings
+CREATE POLICY "Owners can see likes on their listings"
+    ON public.likes FOR SELECT USING (
+        target_type = 'listing' AND
+        EXISTS (
+            SELECT 1 FROM public.listings
+            WHERE id = target_id AND owner_id = auth.uid()
+        )
+    );
 
 -- ============================================
 -- MATCHES TABLE (mutual likes)
@@ -295,51 +344,63 @@ CREATE POLICY "Users can update own matches"
     ON public.matches FOR UPDATE USING (auth.uid() = client_id OR auth.uid() = owner_id);
 
 -- ============================================
--- CONVERSATIONS TABLE
+-- CONVERSATIONS TABLE (matches live DB schema)
 -- ============================================
 CREATE TABLE public.conversations (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     match_id UUID REFERENCES public.matches(id) ON DELETE SET NULL,
-    participant_one UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
-    participant_two UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
+    client_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    owner_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    listing_id UUID REFERENCES public.listings(id) ON DELETE SET NULL,
+    last_message TEXT,
     last_message_at TIMESTAMPTZ DEFAULT NOW(),
-    created_at TIMESTAMPTZ DEFAULT NOW()
+    last_message_sender_id UUID REFERENCES public.profiles(id),
+    status TEXT DEFAULT 'active',
+    free_messaging BOOLEAN DEFAULT FALSE,
+    deleted_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 ALTER TABLE public.conversations ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Users can view own conversations"
-    ON public.conversations FOR SELECT USING (auth.uid() = participant_one OR auth.uid() = participant_two);
+    ON public.conversations FOR SELECT USING (auth.uid() = client_id OR auth.uid() = owner_id);
 
 CREATE POLICY "Users can create conversations"
-    ON public.conversations FOR INSERT WITH CHECK (auth.uid() = participant_one OR auth.uid() = participant_two);
+    ON public.conversations FOR INSERT WITH CHECK (auth.uid() = client_id OR auth.uid() = owner_id);
+
+CREATE POLICY "Users can update own conversations"
+    ON public.conversations FOR UPDATE USING (auth.uid() = client_id OR auth.uid() = owner_id);
 
 -- ============================================
--- MESSAGES TABLE
+-- CONVERSATION_MESSAGES TABLE (matches live DB schema)
 -- ============================================
-CREATE TABLE public.messages (
+CREATE TABLE public.conversation_messages (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    conversation_id UUID REFERENCES public.conversations(id) ON DELETE CASCADE,
-    sender_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
-    content TEXT,
+    conversation_id UUID NOT NULL REFERENCES public.conversations(id) ON DELETE CASCADE,
+    sender_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    receiver_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
+    message_text TEXT NOT NULL,
+    message_type TEXT DEFAULT 'text',
     is_read BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.conversation_messages ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Users can view messages in own conversations"
-    ON public.messages FOR SELECT USING (
-        EXISTS (SELECT 1 FROM public.conversations WHERE id = conversation_id AND (participant_one = auth.uid() OR participant_two = auth.uid()))
+    ON public.conversation_messages FOR SELECT USING (
+        EXISTS (SELECT 1 FROM public.conversations WHERE id = conversation_id AND (client_id = auth.uid() OR owner_id = auth.uid()))
     );
 
 CREATE POLICY "Users can send messages"
-    ON public.messages FOR INSERT WITH CHECK (auth.uid() = sender_id);
+    ON public.conversation_messages FOR INSERT WITH CHECK (auth.uid() = sender_id);
 
 CREATE POLICY "Users can update messages"
-    ON public.messages FOR UPDATE USING (
-        auth.uid() = sender_id OR 
-        EXISTS (SELECT 1 FROM public.conversations WHERE id = conversation_id AND (participant_one = auth.uid() OR participant_two = auth.uid()))
+    ON public.conversation_messages FOR UPDATE USING (
+        auth.uid() = sender_id OR
+        EXISTS (SELECT 1 FROM public.conversations WHERE id = conversation_id AND (client_id = auth.uid() OR owner_id = auth.uid()))
     );
 
 -- ============================================
@@ -391,6 +452,26 @@ CREATE POLICY "System can create notifications"
     ON public.notifications FOR INSERT WITH CHECK (true);
 
 -- ============================================
+-- USER_ROLES TABLE (used by signup trigger)
+-- ============================================
+CREATE TABLE public.user_roles (
+    user_id UUID PRIMARY KEY REFERENCES public.profiles(id) ON DELETE CASCADE,
+    role TEXT NOT NULL CHECK (role IN ('owner', 'worker', 'client')),
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own role"
+    ON public.user_roles FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own role"
+    ON public.user_roles FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own role"
+    ON public.user_roles FOR UPDATE USING (auth.uid() = user_id);
+
+-- ============================================
 -- INDEXES FOR PERFORMANCE
 -- ============================================
 CREATE INDEX idx_listings_location ON public.listings(state, city);
@@ -400,8 +481,8 @@ CREATE INDEX idx_listings_owner ON public.listings(owner_id);
 CREATE INDEX idx_swipes_user ON public.swipes(user_id);
 CREATE INDEX idx_likes_user ON public.likes(user_id);
 CREATE INDEX idx_matches_participants ON public.matches(client_id, owner_id);
-CREATE INDEX idx_conversations_participants ON public.conversations(participant_one, participant_two);
-CREATE INDEX idx_messages_conversation ON public.messages(conversation_id);
+CREATE INDEX idx_conversations_participants ON public.conversations(client_id, owner_id);
+CREATE INDEX idx_conversation_messages_conversation ON public.conversation_messages(conversation_id);
 CREATE INDEX idx_notifications_user ON public.notifications(user_id) WHERE is_read = false;
 
 -- ============================================
