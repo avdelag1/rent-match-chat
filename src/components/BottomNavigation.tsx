@@ -121,10 +121,10 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
       path: '/owner/liked-clients',
     },
     {
-      id: 'listings',
-      label: 'Listings',
-      icon: List,
-      path: '/owner/properties',
+      id: 'add',
+      label: 'Add',
+      icon: Plus,
+      onClick: onAddListingClick,
       isCenter: true,
     },
     {
@@ -166,6 +166,9 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
 
   // Get icon color class - bright and vibrant
   const getIconColorClass = (item: NavItem, active: boolean) => {
+    // Add button is always white — it's an action, not a nav state
+    if (item.id === 'add') return 'text-white';
+
     if (!active) {
       // Inactive icons - much brighter (85% opacity instead of 70%)
       return 'text-white/85';
@@ -247,7 +250,10 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.82, transition: { type: 'spring', stiffness: 600, damping: 20, mass: 0.5 } }}
               // EXPANDED TOUCH TARGETS: Each button has generous hit area
-              className="relative transition-colors duration-75 select-none touch-manipulation flex items-center justify-center rounded-2xl"
+              className={cn(
+                "relative transition-colors duration-75 select-none touch-manipulation flex items-center justify-center rounded-2xl",
+                item.id === 'add' && "bg-red-500 rounded-full shadow-lg shadow-red-500/40"
+              )}
               style={{
                 // Ensure minimum touch target size
                 minWidth: TOUCH_TARGET_SIZE,
