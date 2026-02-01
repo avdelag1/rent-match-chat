@@ -160,7 +160,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
       )}
       whileTap={{ scale: 0.85, transition: { type: 'spring', stiffness: 600, damping: 20, mass: 0.5 } }}
       transition={{ type: 'spring', stiffness: 500, damping: 30, mass: 0.5 }}
-      aria-label={`Switch to ${activeMode === 'client' ? 'I own' : 'I Do'} mode`}
+      aria-label={`Switch to ${activeMode === 'client' ? 'I own' : 'Client'} mode`}
     >
       <AnimatePresence mode="wait">
         <motion.div
@@ -177,7 +177,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
           ) : activeMode === 'client' ? (
             <>
               <Search className="h-3.5 w-3.5 text-orange-400 drop-shadow-[0_0_8px_rgba(251,146,60,0.5)]" />
-              <span className="font-bold text-orange-400 drop-shadow-[0_0_8px_rgba(251,146,60,0.5)]">I Do</span>
+              <span className="font-bold text-orange-400 drop-shadow-[0_0_8px_rgba(251,146,60,0.5)]">Client</span>
             </>
           ) : (
             <>
