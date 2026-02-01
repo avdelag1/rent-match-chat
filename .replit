@@ -1,0 +1,5 @@
+[run]
+command = "node server.js"
+
+[build]
+command = "npm install && npm run build"
