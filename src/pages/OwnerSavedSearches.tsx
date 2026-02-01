@@ -2,9 +2,10 @@
 import { useState } from 'react';
 import { SavedSearches } from "@/components/SavedSearches";
 import { Button } from "@/components/ui/button";
-import { Settings, Users } from "lucide-react";
+import { Settings, Users, ArrowLeft } from "lucide-react";
 import { OwnerClientFilterDialog } from "@/components/OwnerClientFilterDialog";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { toast } from "@/hooks/use-toast";
 
 const OwnerSavedSearches = () => {
@@ -23,6 +24,14 @@ const OwnerSavedSearches = () => {
     <>
       <div className="w-full p-4 sm:p-6 md:p-8 pb-24 sm:pb-8">
         <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
+          <motion.button
+            onClick={() => navigate(-1)}
+            whileTap={{ scale: 0.8, transition: { type: "spring", stiffness: 400, damping: 17 } }}
+            className="flex items-center gap-1.5 text-sm font-medium text-white/60 hover:text-white transition-colors duration-150 mb-4 px-1"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back
+          </motion.button>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
             <div>
               <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white">Client Filters</h1>

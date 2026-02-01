@@ -244,8 +244,8 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
               onTouchStart={(e) => { e.stopPropagation(); if (item.path) prefetchRoute(item.path); }}
               onMouseEnter={(e) => { e.stopPropagation(); if (item.path) prefetchRoute(item.path); }}
               onFocus={(e) => { e.stopPropagation(); if (item.path) prefetchRoute(item.path); }}
-              whileHover={{ scale: 1.08 }}
-              whileTap={{ scale: 0.92, transition: springConfigs.instant }}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.82, transition: { type: 'spring', stiffness: 600, damping: 20, mass: 0.5 } }}
               // EXPANDED TOUCH TARGETS: Each button has generous hit area
               className="relative transition-colors duration-75 select-none touch-manipulation flex items-center justify-center rounded-2xl"
               style={{

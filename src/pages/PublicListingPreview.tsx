@@ -12,7 +12,7 @@ import { DirectMessageDialog } from '@/components/DirectMessageDialog';
 import {
   Home, MapPin, Bed, Bath, Square, DollarSign, Lock, LogIn, UserPlus,
   Sparkles, Anchor, Bike, Car, CircleDot, Eye, Flame, MessageSquare,
-  Calendar, CheckCircle, Users, MessageCircle, Send
+  Calendar, CheckCircle, Users, MessageCircle, Send, ArrowLeft
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { STORAGE } from '@/constants/app';
@@ -157,6 +157,14 @@ export default function PublicListingPreview() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
+      <motion.button
+        onClick={() => navigate(-1)}
+        whileTap={{ scale: 0.8, transition: { type: "spring", stiffness: 400, damping: 17 } }}
+        className="flex items-center gap-1.5 text-sm font-medium text-white/60 hover:text-white transition-colors duration-150 mb-4 px-1"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Back
+      </motion.button>
       {/* Header */}
       <div className="sticky top-0 z-50 bg-gray-900/80 backdrop-blur-lg border-b border-gray-700/50">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">

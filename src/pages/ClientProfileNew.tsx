@@ -11,7 +11,7 @@ import { useClientProfile } from "@/hooks/useClientProfile";
 import { useAuth } from "@/hooks/useAuth";
 import { Separator } from "@/components/ui/separator";
 import {
-  LogOut, User, Camera, Sparkles, Crown,
+  LogOut, User, Camera, Sparkles, Crown, ArrowLeft,
   Share2, Flame,
   Settings as SettingsIcon, Palette, Scale, FileText, Heart
 } from "lucide-react";
@@ -76,14 +76,14 @@ const ClientProfileNew = () => {
       <div className="w-full px-5 py-4 pb-24">
         <div className="max-w-lg mx-auto space-y-4">
           {/* Back Button */}
-          <Button
-            variant="ghost"
-            size="sm"
+          <motion.button
             onClick={() => navigate(-1)}
-            className="mb-2 text-muted-foreground hover:text-foreground"
+            whileTap={{ scale: 0.8, transition: { type: "spring", stiffness: 400, damping: 17 } }}
+            className="flex items-center gap-1.5 text-sm font-medium text-white/60 hover:text-white transition-colors duration-150 mb-4 px-1"
           >
+            <ArrowLeft className="w-4 h-4" />
             Back
-          </Button>
+          </motion.button>
 
           {/* Profile Header */}
           <motion.div

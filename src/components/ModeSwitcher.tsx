@@ -51,8 +51,8 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
           size === 'sm' ? 'h-8 w-8' : size === 'md' ? 'h-9 w-9' : 'h-10 w-10',
           className
         )}
-        whileTap={{ scale: 0.92 }}
-        aria-label={`Switch to ${activeMode === 'client' ? 'Owner' : 'Client'} mode`}
+        whileTap={{ scale: 0.82, transition: { type: 'spring', stiffness: 600, damping: 20, mass: 0.5 } }}
+        aria-label={`Switch to ${activeMode === 'client' ? 'I own' : 'I Do'} mode`}
       >
         <AnimatePresence mode="wait">
           {isSwitching ? (
@@ -99,8 +99,8 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
           sizeClasses[size],
           className
         )}
-        whileTap={{ scale: 0.97 }}
-        aria-label={`Switch to ${activeMode === 'client' ? 'Owner' : 'Client'} mode`}
+        whileTap={{ scale: 0.9, transition: { type: 'spring', stiffness: 600, damping: 20, mass: 0.5 } }}
+        aria-label={`Switch to ${activeMode === 'client' ? 'I own' : 'I Do'} mode`}
       >
         <motion.div
           className="absolute inset-y-1 rounded-full bg-gradient-to-r from-primary/30 to-primary/20"
@@ -119,7 +119,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
           activeMode === 'client' ? 'text-white font-semibold' : 'text-gray-400'
         )}>
           <Search className="h-3.5 w-3.5" />
-          <span className="font-bold">Client</span>
+          <span className="font-bold">I Do</span>
         </div>
 
         <div className={cn(
@@ -127,7 +127,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
           activeMode === 'owner' ? 'text-teal-300 font-semibold' : 'text-gray-400'
         )}>
           <Briefcase className="h-3.5 w-3.5" />
-          <span className="font-bold">Owner</span>
+          <span className="font-bold">I own</span>
         </div>
 
         <AnimatePresence>
@@ -158,9 +158,9 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
         sizeClasses[size],
         className
       )}
-      whileTap={{ scale: 0.96 }}
+      whileTap={{ scale: 0.85, transition: { type: 'spring', stiffness: 600, damping: 20, mass: 0.5 } }}
       transition={{ type: 'spring', stiffness: 500, damping: 30, mass: 0.5 }}
-      aria-label={`Switch to ${activeMode === 'client' ? 'Owner' : 'Client'} mode`}
+      aria-label={`Switch to ${activeMode === 'client' ? 'I own' : 'I Do'} mode`}
     >
       <AnimatePresence mode="wait">
         <motion.div
@@ -177,12 +177,12 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
           ) : activeMode === 'client' ? (
             <>
               <Search className="h-3.5 w-3.5 text-orange-400 drop-shadow-[0_0_8px_rgba(251,146,60,0.5)]" />
-              <span className="font-bold text-orange-400 drop-shadow-[0_0_8px_rgba(251,146,60,0.5)]">Client</span>
+              <span className="font-bold text-orange-400 drop-shadow-[0_0_8px_rgba(251,146,60,0.5)]">I Do</span>
             </>
           ) : (
             <>
               <Briefcase className="h-3.5 w-3.5 text-teal-400 drop-shadow-[0_0_8px_rgba(45,212,191,0.5)]" />
-              <span className="font-bold text-teal-400 drop-shadow-[0_0_8px_rgba(45,212,191,0.5)]">Owner</span>
+              <span className="font-bold text-teal-400 drop-shadow-[0_0_8px_rgba(45,212,191,0.5)]">I own</span>
             </>
           )}
         </motion.div>

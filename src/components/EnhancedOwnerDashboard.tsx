@@ -7,9 +7,7 @@ import { NotificationBar } from '@/components/NotificationBar';
 import { CategorySelectionDialog } from '@/components/CategorySelectionDialog';
 import { useSmartClientMatching } from '@/hooks/useSmartMatching';
 import { useAuth } from '@/hooks/useAuth';
-import { useNotifications } from '@/hooks/useNotifications';
 import { useNotificationSystem } from '@/hooks/useNotificationSystem';
-import { NotificationSystem } from '@/components/NotificationSystem';
 import { useNavigate } from 'react-router-dom';
 
 interface EnhancedOwnerDashboardProps {
@@ -45,9 +43,6 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick, filters }: E
   );
   const { notifications, dismissNotification, markAllAsRead, handleNotificationClick } = useNotificationSystem();
 
-  // Initialize notifications
-  useNotifications();
-
   const handleClientTap = (clientId: string) => {
     setSelectedClientId(clientId);
     setInsightsOpen(true);
@@ -73,7 +68,6 @@ const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick, filters }: E
 
   return (
     <>
-      <NotificationSystem />
       <NotificationBar
         notifications={notifications}
         onDismiss={dismissNotification}
