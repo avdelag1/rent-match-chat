@@ -43,7 +43,7 @@ export function RoleSwitcher({ variant = 'card', className }: RoleSwitcherProps)
           <ArrowLeftRight className="w-4 h-4" />
         )}
         <span>
-          {activeMode === 'client' ? 'Switch to I Own' : 'Switch to I\'m a Client'}
+          {activeMode === 'client' ? 'Switch to I own' : 'Switch to I Do'}
         </span>
       </motion.button>
     );
@@ -70,7 +70,7 @@ export function RoleSwitcher({ variant = 'card', className }: RoleSwitcherProps)
           <ModeOption
             mode="client"
             icon={Search}
-            label="I'm a Client"
+            label="I Do"
             description="Browse & discover"
             isActive={activeMode === 'client'}
             onClick={() => switchMode('client')}
@@ -79,7 +79,7 @@ export function RoleSwitcher({ variant = 'card', className }: RoleSwitcherProps)
           <ModeOption
             mode="owner"
             icon={Briefcase}
-            label="I Own / I Can Do"
+            label="I own"
             description="Share & manage"
             isActive={activeMode === 'owner'}
             onClick={() => switchMode('owner')}
@@ -97,7 +97,7 @@ export function RoleSwitcher({ variant = 'card', className }: RoleSwitcherProps)
             <span className="text-gray-300">
               Currently in{' '}
               <span className="font-bold text-white">
-                {activeMode === 'client' ? 'I\'m a Client' : 'I Own / I Can Do'}
+                {activeMode === 'client' ? 'I Do' : 'I own'}
               </span>
               {' '}mode
             </span>
@@ -202,12 +202,12 @@ export function RoleIndicator({ className }: { className?: string }) {
       {activeMode === 'client' ? (
         <>
           <Search className="w-3 h-3" />
-          <span>I'm a Client</span>
+          <span>I Do</span>
         </>
       ) : (
         <>
           <Briefcase className="w-3 h-3" />
-          <span>I Own</span>
+          <span>I own</span>
         </>
       )}
     </div>

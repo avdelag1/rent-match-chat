@@ -7,10 +7,11 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { MotoClientFilters } from '@/components/filters/MotoClientFilters';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Search, Filter, MessageCircle, User } from 'lucide-react';
+import { Search, Filter, MessageCircle, User, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSmartClientMatching, ClientFilters } from '@/hooks/useSmartMatching';
 import { useAuth } from '@/hooks/useAuth';
+import { motion } from 'framer-motion';
 
 export default function OwnerMotoClientDiscovery() {
   const navigate = useNavigate();
@@ -72,6 +73,14 @@ export default function OwnerMotoClientDiscovery() {
   return (
     <>
       <div className="min-h-screen bg-background">
+        <motion.button
+          onClick={() => navigate(-1)}
+          whileTap={{ scale: 0.8, transition: { type: "spring", stiffness: 400, damping: 17 } }}
+          className="flex items-center gap-1.5 text-sm font-medium text-white/60 hover:text-white transition-colors duration-150 mb-4 px-1"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back
+        </motion.button>
         <div className="border-b bg-card">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">

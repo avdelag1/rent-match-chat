@@ -3,15 +3,18 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useContracts, useActiveDeals } from "@/hooks/useContracts";
-import { FileText, Clock, CheckCircle, AlertTriangle, Eye, FileEdit, Plus } from "lucide-react";
+import { FileText, Clock, CheckCircle, AlertTriangle, Eye, FileEdit, Plus, ArrowLeft } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useState } from "react";
 import { ContractSigningDialog } from "@/components/ContractSigningDialog";
 import { ContractTemplateSelector } from "@/components/ContractTemplateSelector";
 import { ContractDocumentDialog } from "@/components/ContractDocumentDialog";
 import { ContractTemplate } from "@/data/contractTemplates";
+import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 const ClientContracts = () => {
+  const navigate = useNavigate();
   const { data: contracts, isLoading: contractsLoading } = useContracts();
   const { data: activeDeals, isLoading: dealsLoading } = useActiveDeals();
   const [selectedContract, setSelectedContract] = useState<string | null>(null);
@@ -67,6 +70,14 @@ const ClientContracts = () => {
     <>
       <div className="w-full overflow-x-hidden p-4 sm:p-6 lg:p-8 pb-24 sm:pb-8">
         <div className="max-w-6xl mx-auto">
+          <motion.button
+            onClick={() => navigate(-1)}
+            whileTap={{ scale: 0.8, transition: { type: "spring", stiffness: 400, damping: 17 } }}
+            className="flex items-center gap-1.5 text-sm font-medium text-white/60 hover:text-white transition-colors duration-150 mb-4 px-1"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back
+          </motion.button>
           <div className="text-center mb-6 sm:mb-8">
             <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2 sm:mb-4">My Contracts</h1>
             <p className="text-white/80 text-sm sm:text-base">Manage your rental agreements and contracts</p>
