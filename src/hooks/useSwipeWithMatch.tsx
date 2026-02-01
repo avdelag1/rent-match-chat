@@ -189,7 +189,7 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
           // Create in-app notification for the client
           supabase.from('notifications').insert([{
             user_id: targetId,
-            notification_type: 'new_like',
+            type: 'like',
             title: '🔥 New Flame!',
             message: `${ownerName} liked your profile!`,
             is_read: false
@@ -269,7 +269,7 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
             // Create in-app notification for the owner
             supabase.from('notifications').insert([{
               user_id: listingResult.data.owner_id,
-              notification_type: 'new_like',
+              type: 'like',
               title: '🔥 New Flame!',
               message: `${clientName} liked ${listingTitle}!`,
               is_read: false
