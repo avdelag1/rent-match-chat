@@ -161,6 +161,7 @@ const App = () => (
                 <AppLayout>
                   <TooltipProvider>
                     <Sonner />
+                    <Toaster />
                   </TooltipProvider>
                   <Suspense fallback={<SuspenseFallback />}>
                     <Routes>
