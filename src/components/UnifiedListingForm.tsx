@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/hooks/use-toast';
+import { notifications } from '@/utils/notifications';
 import { Upload, X, Bike, CircleDot } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { validateNoContactInfo } from '@/utils/contactInfoValidation';
@@ -229,14 +230,19 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
       }
     },
     onSuccess: () => {
-      toast({
-        title: editingId ? "Listing Updated!" : "Listing Created!",
-        description: "Your changes are now visible.",
-        duration: 2000,
-      });
+      // Close dialog immediately for instant feedback
+      handleClose();
+
+      // Show notification after closing
+      if (editingId) {
+        notifications.listing.updated(selectedCategory);
+      } else {
+        notifications.listing.created(selectedCategory);
+      }
+
+      // Invalidate queries to refresh the listing page
       queryClient.invalidateQueries({ queryKey: ['owner-listings'] });
       queryClient.invalidateQueries({ queryKey: ['listings'] });
-      handleClose();
     },
     onError: (error: Error) => {
       queryClient.invalidateQueries({ queryKey: ['owner-listings'] });

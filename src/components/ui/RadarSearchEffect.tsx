@@ -181,13 +181,13 @@ export const RadarSearchEffect = memo(function RadarSearchEffect({
         {/* Ripple wave 1 - fast wave */}
         <motion.div
           animate={isActive ? {
-            scale: [0.2, 1.8],
-            opacity: [0.8, 0],
+            scale: [0.2, 2.2],
+            opacity: [1, 0],
           } : {}}
           transition={{
-            duration: 2,
+            duration: 1.8,
             repeat: Infinity,
-            ease: 'easeOut',
+            ease: [0.2, 0.8, 0.2, 1],
             delay: 0,
           }}
           style={{
@@ -195,7 +195,8 @@ export const RadarSearchEffect = memo(function RadarSearchEffect({
             width: size * 0.3,
             height: size * 0.3,
             borderRadius: '50%',
-            border: `2px solid ${color}`,
+            border: `3px solid ${color}`,
+            boxShadow: `0 0 ${size * 0.1}px ${color}80`,
             willChange: 'transform, opacity',
           }}
         />
@@ -203,21 +204,22 @@ export const RadarSearchEffect = memo(function RadarSearchEffect({
         {/* Ripple wave 2 - medium wave with delay */}
         <motion.div
           animate={isActive ? {
-            scale: [0.2, 1.8],
-            opacity: [0.8, 0],
+            scale: [0.2, 2.2],
+            opacity: [1, 0],
           } : {}}
           transition={{
-            duration: 2.2,
+            duration: 1.8,
             repeat: Infinity,
-            ease: 'easeOut',
-            delay: 0.4,
+            ease: [0.2, 0.8, 0.2, 1],
+            delay: 0.35,
           }}
           style={{
             position: 'absolute',
             width: size * 0.3,
             height: size * 0.3,
             borderRadius: '50%',
-            border: `2px solid ${color}`,
+            border: `3px solid ${color}`,
+            boxShadow: `0 0 ${size * 0.1}px ${color}80`,
             willChange: 'transform, opacity',
           }}
         />
@@ -225,21 +227,45 @@ export const RadarSearchEffect = memo(function RadarSearchEffect({
         {/* Ripple wave 3 - slow wave with longer delay */}
         <motion.div
           animate={isActive ? {
-            scale: [0.2, 1.8],
-            opacity: [0.8, 0],
+            scale: [0.2, 2.2],
+            opacity: [1, 0],
           } : {}}
           transition={{
-            duration: 2.4,
+            duration: 1.8,
             repeat: Infinity,
-            ease: 'easeOut',
-            delay: 0.8,
+            ease: [0.2, 0.8, 0.2, 1],
+            delay: 0.7,
           }}
           style={{
             position: 'absolute',
             width: size * 0.3,
             height: size * 0.3,
             borderRadius: '50%',
-            border: `2px solid ${color}`,
+            border: `3px solid ${color}`,
+            boxShadow: `0 0 ${size * 0.1}px ${color}80`,
+            willChange: 'transform, opacity',
+          }}
+        />
+
+        {/* Ripple wave 4 - extra wave for more liveliness */}
+        <motion.div
+          animate={isActive ? {
+            scale: [0.2, 2.2],
+            opacity: [1, 0],
+          } : {}}
+          transition={{
+            duration: 1.8,
+            repeat: Infinity,
+            ease: [0.2, 0.8, 0.2, 1],
+            delay: 1.05,
+          }}
+          style={{
+            position: 'absolute',
+            width: size * 0.3,
+            height: size * 0.3,
+            borderRadius: '50%',
+            border: `3px solid ${color}`,
+            boxShadow: `0 0 ${size * 0.1}px ${color}80`,
             willChange: 'transform, opacity',
           }}
         />
@@ -280,16 +306,17 @@ export const RadarSearchEffect = memo(function RadarSearchEffect({
           );
         })}
 
-        {/* Center dot with enhanced pulse */}
+        {/* Center dot with enhanced pulse - heartbeat effect */}
         <motion.div
           animate={isActive ? {
-            scale: [1, 1.3, 1],
-            opacity: [0.9, 1, 0.9],
+            scale: [1, 1.4, 1.1, 1.4, 1],
+            opacity: [0.9, 1, 0.95, 1, 0.9],
           } : {}}
           transition={{
-            duration: 1.5,
+            duration: 1.2,
             repeat: Infinity,
             ease: 'easeInOut',
+            times: [0, 0.2, 0.3, 0.5, 1],
           }}
           style={{
             position: 'absolute',
@@ -297,7 +324,7 @@ export const RadarSearchEffect = memo(function RadarSearchEffect({
             height: centerSize,
             borderRadius: '50%',
             backgroundColor: color,
-            boxShadow: `0 0 ${size * 0.15}px ${color}`,
+            boxShadow: `0 0 ${size * 0.2}px ${color}`,
           }}
         />
 

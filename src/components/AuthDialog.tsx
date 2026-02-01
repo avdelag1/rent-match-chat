@@ -9,6 +9,7 @@ import {
   Check, X, Shield, Sparkles
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { notifications } from '@/utils/notifications';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { FaGoogle } from 'react-icons/fa';
@@ -105,20 +106,18 @@ export function AuthDialog({ isOpen, onClose, role }: AuthDialogProps) {
 
       if (error) throw error;
 
+      notifications.app.updateAvailable(); // Using info notification
       toast({
         title: "Check your email",
         description: "We've sent you a password reset link.",
+        variant: "info",
       });
 
       setIsForgotPassword(false);
       setEmail('');
     } catch (error: any) {
       if (error.errors) {
-        toast({
-          title: "Validation Error",
-          description: error.errors[0]?.message || "Please check your input.",
-          variant: "destructive",
-        });
+        notifications.auth.invalidEmail();
       } else {
         toast({
           title: "Error",
