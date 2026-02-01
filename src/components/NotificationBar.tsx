@@ -130,7 +130,7 @@ export function NotificationBar({ notifications, onDismiss, onMarkAllRead, onNot
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -100, opacity: 0 }}
           transition={{ type: "spring", stiffness: 500, damping: 30 }}
-          className="fixed top-0 left-0 right-0 z-50 px-2 sm:px-4 pt-2"
+          className="fixed top-16 left-0 right-0 z-40 px-2 sm:px-4"
         >
           <Card className="mx-auto max-w-4xl bg-gradient-to-br from-gray-900/98 to-gray-800/98 backdrop-blur-xl border-white/10 shadow-2xl rounded-3xl">
             
