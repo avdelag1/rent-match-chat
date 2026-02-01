@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
 
 jobs:
@@ -20,6 +20,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
@@ -35,6 +42,16 @@ jobs:
           key: ${{ runner.os }}-supabase-${{ hashFiles('supabase/migrations/*.sql') }}
           restore-keys: |
             ${{ runner.os }}-supabase-
+
+      - name: Pre-deployment validation
+        run: |
+          echo "🔍 Running pre-deployment validation..."
+          node supabase/scripts/validate-migration.js || {
+            echo "❌ Validation failed! Please fix column name mismatches before deploying."
+            echo "Run: supabase gen types typescript --project-id ${{ secrets.SUPABASE_PROJECT_REF }} > src/integrations/supabase/types.ts"
+            exit 1
+          }
+        continue-on-error: false
 
       - name: Link Supabase project
         run: |
@@ -52,6 +69,36 @@ jobs:
 
       - name: Show migration status
         run: supabase migration list
+
+      - name: Regenerate TypeScript types
+        id: regen_types
+        run: |
+          echo "🔄 Regenerating TypeScript types from database..."
+          supabase gen types typescript --project-id ${{ secrets.SUPABASE_PROJECT_REF }} > src/integrations/supabase/types.ts
+
+          # Check if types changed
+          if git diff --quiet src/integrations/supabase/types.ts; then
+            echo "types_changed=false" >> $GITHUB_OUTPUT
+            echo "✅ Types are up to date"
+          else
+            echo "types_changed=true" >> $GITHUB_OUTPUT
+            echo "⚠️ Types were regenerated and differ from committed version"
+          fi
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Commit updated types
+        if: steps.regen_types.outputs.types_changed == 'true'
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add src/integrations/supabase/types.ts
+          git commit -m "chore: auto-regenerate TypeScript types after migration
+
+          https://claude.ai/code/session_bmgOp"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   validate-schema:
     runs-on: ubuntu-latest

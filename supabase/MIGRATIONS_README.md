@@ -216,19 +216,134 @@ When creating a new migration:
 - [ ] Enable RLS if creating new user-facing tables
 - [ ] Add column/table comments for documentation
 - [ ] Test migration locally if possible
+- [ ] **Run validation script: `node supabase/scripts/validate-migration.js`**
+- [ ] **Run test script: `./supabase/scripts/test-migration.sh`**
 - [ ] Update TypeScript types after applying
 - [ ] Document migration in this README
 - [ ] Test application functionality after migration
 
+## Preventing Migration Failures
+
+### Column Name Mismatches (CRITICAL)
+
+**Problem**: Database column names differ from TypeScript types, causing silent data loss.
+
+**Example**: The beds/baths issue (PR #898)
+- Database had `bedrooms` and `bathrooms` columns
+- TypeScript types showed `beds` and `baths`
+- Form submitted data with wrong column names
+- Data was silently dropped (no errors!)
+
+**Prevention Measures**:
+
+1. **Automated Validation** (Added)
+   - Pre-deployment script validates column name alignment
+   - GitHub Actions automatically regenerate types after migrations
+   - Validates before every deployment
+
+2. **Testing Tools**
+   ```bash
+   # Test migration files for common issues
+   ./supabase/scripts/test-migration.sh
+
+   # Validate column names match between DB and TypeScript
+   node supabase/scripts/validate-migration.js
+   ```
+
+3. **Naming Conventions**
+   - **ALWAYS use full column names** in database schema
+   - ✅ GOOD: `bedrooms`, `bathrooms`, `description`, `address`
+   - ❌ BAD: `beds`, `baths`, `desc`, `addr`
+   - Abbreviations cause TypeScript type mismatches
+
+4. **Runtime Validation** (Added)
+   - Zod schemas now enforced before DB submission
+   - Form data validated against schema before insert/update
+   - Prevents invalid data from reaching database
+
+5. **Type Generation**
+   ```bash
+   # After ANY migration, regenerate types
+   supabase gen types typescript --project-id vplgtcguxujxwrgguxqq > src/integrations/supabase/types.ts
+
+   # Or use GitHub Actions (automatic on push)
+   git push  # Types auto-regenerated
+   ```
+
+### Common Migration Pitfalls
+
+**1. Case-Sensitive Constraints**
+```sql
+-- ❌ BAD: Will reject "Excellent" from forms
+CHECK (vehicle_condition IN ('excellent', 'good', 'fair'))
+
+-- ✅ GOOD: Case-insensitive
+CHECK (LOWER(vehicle_condition) IN ('excellent', 'good', 'fair'))
+```
+
+**2. NOT NULL on Existing Tables**
+```sql
+-- ❌ BAD: Will fail if table has existing rows
+ALTER TABLE listings ADD COLUMN state TEXT NOT NULL;
+
+-- ✅ GOOD: Make nullable or provide default
+ALTER TABLE listings ADD COLUMN state TEXT;
+```
+
+**3. Type Mismatches**
+```sql
+-- ❌ BAD: Form sends "700c" (string) but DB expects number
+wheel_size DECIMAL(5,2)
+
+-- ✅ GOOD: Match form data type
+wheel_size TEXT
+```
+
+**4. Missing Idempotency**
+```sql
+-- ❌ BAD: Will fail on second run
+CREATE TABLE listings (...);
+
+-- ✅ GOOD: Safe to re-run
+CREATE TABLE IF NOT EXISTS listings (...);
+ALTER TABLE listings ADD COLUMN IF NOT EXISTS new_field TEXT;
+```
+
+### Emergency Recovery
+
+If you encounter migration failures:
+
+1. **Check validation**:
+   ```bash
+   node supabase/scripts/validate-migration.js
+   ```
+
+2. **Review GitHub Actions logs** for specific errors
+
+3. **Regenerate types** to fix mismatches:
+   ```bash
+   supabase gen types typescript --project-id vplgtcguxujxwrgguxqq > src/integrations/supabase/types.ts
+   git add src/integrations/supabase/types.ts
+   git commit -m "fix: regenerate TypeScript types"
+   git push
+   ```
+
+4. **Test locally** before deploying:
+   ```bash
+   ./supabase/scripts/test-migration.sh path/to/migration.sql
+   ```
+
 ## Future Enhancements
 
-Potential improvements to the migration system:
+~~Potential~~ **Completed** and potential improvements to the migration system:
 
-1. **Automated Type Generation**: Set up CI/CD to automatically regenerate types
-2. **Migration Testing**: Add automated tests for migration scripts
-3. **Rollback Scripts**: Create corresponding rollback migrations for complex changes
-4. **Migration Documentation**: Generate schema documentation from migrations
-5. **Schema Visualization**: Create entity-relationship diagrams from current schema
+1. ✅ **Automated Type Generation**: ~~Set up~~ CI/CD automatically regenerates types after migrations
+2. ✅ **Migration Testing**: ~~Add~~ Automated tests for migration scripts via `test-migration.sh`
+3. ✅ **Column Validation**: Pre-deployment validation catches column name mismatches
+4. ✅ **Runtime Validation**: Zod schemas enforce data integrity before DB submission
+5. **Rollback Scripts**: Create corresponding rollback migrations for complex changes
+6. **Migration Documentation**: Generate schema documentation from migrations
+7. **Schema Visualization**: Create entity-relationship diagrams from current schema
 
 ## Resources
 
@@ -246,6 +361,7 @@ For questions about migrations or database schema:
 
 ---
 
-**Last Updated**: October 29, 2025
-**Total Migrations**: 99+
+**Last Updated**: February 1, 2026
+**Total Migrations**: 19+
 **Database Version**: PostgreSQL 15 (Supabase)
+**Validation Tools**: ✅ Automated (see scripts directory)

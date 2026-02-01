@@ -19,6 +19,7 @@ import { PropertyListingForm } from './PropertyListingForm';
 import { WorkerListingForm, WorkerFormData } from './WorkerListingForm';
 import { validateImageFile } from '@/utils/fileValidation';
 import { uploadPhotoBatch } from '@/utils/photoUpload';
+import { propertyListingSchema } from '@/schemas/validations';
 
 interface EditingListing {
   id?: string;
@@ -193,6 +194,28 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
           languages: formData.languages,
           listing_type: 'service',
         });
+      }
+
+      // Validate property listings before submission to prevent column name mismatches
+      if (selectedCategory === 'property') {
+        const validationData = {
+          title: listingData.title as string,
+          description: formData.description as string,
+          price: listingData.price as number,
+          country: listingData.country as string,
+          city: listingData.city as string,
+          neighborhood: listingData.neighborhood as string,
+          bedrooms: listingData.bedrooms as number,
+          bathrooms: listingData.bathrooms as number,
+        };
+
+        const validationResult = propertyListingSchema.safeParse(validationData);
+        if (!validationResult.success) {
+          const errorMessages = validationResult.error.errors.map(err =>
+            `${err.path.join('.')}: ${err.message}`
+          ).join(', ');
+          throw new Error(`Validation failed: ${errorMessages}`);
+        }
       }
 
       if (editingId) {
