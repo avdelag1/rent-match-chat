@@ -8,7 +8,7 @@ import { Bell, MessageSquare, Flame, CheckCheck, Trash2, Star, Sparkles, Eye, Cr
 import { useNotificationSystem } from '@/hooks/useNotificationSystem';
 import { formatDistanceToNow } from '@/utils/timeFormatter';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface NotificationsDialogProps {
@@ -72,6 +72,13 @@ export function NotificationsDialog({ isOpen, onClose }: NotificationsDialogProp
   const { notifications, dismissNotification, markAllAsRead, handleNotificationClick } = useNotificationSystem();
   const [activeFilter, setActiveFilter] = useState('all');
   const navigate = useNavigate();
+
+  // Mark all as read the moment the panel opens — no need to tap each one
+  useEffect(() => {
+    if (isOpen) {
+      markAllAsRead();
+    }
+  }, [isOpen, markAllAsRead]);
 
   const filteredNotifications = notifications.filter(n => {
     if (activeFilter === 'all') return true;

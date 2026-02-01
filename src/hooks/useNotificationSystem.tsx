@@ -202,6 +202,15 @@ export function useNotificationSystem() {
 
   const markAllAsRead = () => {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    // Persist to DB so the bell badge (useUnreadNotifications) clears via realtime
+    if (user?.id) {
+      (supabase as any)
+        .from('notifications')
+        .update({ is_read: true })
+        .eq('user_id', user.id)
+        .eq('is_read', false)
+        .catch(() => {});
+    }
   };
 
   const handleNotificationClick = (notification: Notification) => {
