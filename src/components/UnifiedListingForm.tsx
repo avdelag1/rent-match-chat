@@ -158,8 +158,8 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
         Object.assign(listingData, {
           address: formData.address,
           property_type: typeof formData.property_type === 'string' ? formData.property_type.toLowerCase() : formData.property_type,
-          bedrooms: formData.beds,
-          bathrooms: formData.baths,
+          beds: formData.beds,
+          baths: formData.baths,
           square_footage: formData.square_footage,
           furnished: formData.furnished,
           pet_friendly: formData.pet_friendly,
