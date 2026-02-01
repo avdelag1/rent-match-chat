@@ -204,12 +204,13 @@ export function useNotificationSystem() {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     // Persist to DB so the bell badge (useUnreadNotifications) clears via realtime
     if (user?.id) {
-      (supabase as any)
-        .from('notifications')
-        .update({ is_read: true })
-        .eq('user_id', user.id)
-        .eq('is_read', false)
-        .catch(() => {});
+      Promise.resolve(
+        (supabase as any)
+          .from('notifications')
+          .update({ is_read: true })
+          .eq('user_id', user.id)
+          .eq('is_read', false)
+      ).catch(() => {});
     }
   };
 
