@@ -7,8 +7,8 @@ export function validateNoContactInfo(text: string): string | null {
 
   // Phone number patterns
   const phonePatterns = [
-    /\+?[\d\s\-().]{7,}/,  // International/formatted numbers
-    /\d{3}[-.\s]?\d{3}[-.\s]?\d{4}/,  // US format
+    /\+\d[\d\s\-()]{6,}\d/,  // International: must start with +digit, end with digit
+    /\d{3}[-.\s]?\d{3}[-.\s]?\d{4}/,  // US format: 123-456-7890
     /\d{10,}/,  // 10+ consecutive digits
   ];
 

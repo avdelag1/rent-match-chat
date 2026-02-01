@@ -24,7 +24,8 @@ export const uploadPhoto = async ({
   onProgress,
 }: PhotoUploadOptions): Promise<PhotoUploadResult> => {
   const timestamp = Date.now();
-  const fileName = `${userId}/${timestamp}.jpg`;
+  const unique = Math.random().toString(36).slice(2, 9);
+  const fileName = `${userId}/${timestamp}-${unique}.jpg`;
 
   const file = new File([blob], fileName, { type: 'image/jpeg' });
 

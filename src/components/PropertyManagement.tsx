@@ -447,14 +447,14 @@ export const PropertyManagement = memo(({ initialCategory, initialMode }: Proper
 
                       {/* Details */}
                       <div className="text-xs text-gray-400">
-                        {(!listing.category || listing.category === 'property') && listing.beds && listing.baths && (
-                          <span>{listing.beds} bed • {listing.baths} bath</span>
+                        {(!listing.category || listing.category === 'property') && listing.bedrooms && listing.bathrooms && (
+                          <span>{listing.bedrooms} bed • {listing.bathrooms} bath</span>
                         )}
                         {listing.category === 'motorcycle' && (
-                          <span>{listing.brand} {listing.model}{listing.year && ` • ${listing.year}`}</span>
+                          <span>{listing.vehicle_brand} {listing.vehicle_model}{listing.year && ` • ${listing.year}`}</span>
                         )}
                         {listing.category === 'bicycle' && (
-                          <span>{listing.brand} {listing.model}{listing.electric_assist && ' • Electric'}</span>
+                          <span>{listing.vehicle_brand} {listing.vehicle_model}{listing.electric_assist && ' • Electric'}</span>
                         )}
                       </div>
 
