@@ -65,7 +65,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
     targetSelector: '#dashboard-scroll-container'
   });
 
-  // Client/Renter Navigation Items - with Filter between Browse and Flames
+  // Client/Renter Navigation Items - Profile next to Browse, Filter at the end
   const clientNavItems: NavItem[] = [
     {
       id: 'browse',
@@ -74,10 +74,10 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
       path: '/client/dashboard',
     },
     {
-      id: 'filter',
-      label: 'Filter',
-      icon: Filter,
-      path: '/client/filters',
+      id: 'profile',
+      label: 'Profile',
+      icon: User,
+      path: '/client/profile',
     },
     {
       id: 'likes',
@@ -93,14 +93,14 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
       badge: unreadCount,
     },
     {
-      id: 'profile',
-      label: 'Profile',
-      icon: User,
-      path: '/client/profile',
+      id: 'filter',
+      label: 'Filter',
+      icon: Filter,
+      path: '/client/filters',
     },
   ];
 
-  // Owner/Landlord Navigation Items
+  // Owner/Landlord Navigation Items - Profile next to Browse, Filter at the end
   const ownerNavItems: NavItem[] = [
     {
       id: 'browse',
@@ -109,10 +109,10 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
       path: '/owner/dashboard',
     },
     {
-      id: 'filter',
-      label: 'Filter',
-      icon: SlidersHorizontal,
-      path: '/owner/filters',
+      id: 'profile',
+      label: 'Profile',
+      icon: User,
+      path: '/owner/profile',
     },
     {
       id: 'liked',
@@ -135,10 +135,10 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
       badge: unreadCount,
     },
     {
-      id: 'profile',
-      label: 'Profile',
-      icon: User,
-      path: '/owner/profile',
+      id: 'filter',
+      label: 'Filter',
+      icon: SlidersHorizontal,
+      path: '/owner/filters',
     },
   ];
 
