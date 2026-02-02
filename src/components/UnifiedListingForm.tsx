@@ -314,8 +314,9 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
       toast({ title: "Photo Required", description: "Please upload at least 1 photo.", variant: "destructive" });
       return;
     }
-    
-    if (formData.title && typeof formData.title === 'string') {
+
+    // Only validate title if it has actual content (not empty or just whitespace)
+    if (formData.title && typeof formData.title === 'string' && formData.title.trim().length > 0) {
       const titleError = validateNoContactInfo(formData.title as string);
       if (titleError) {
         toast({ title: "Invalid Title", description: titleError, variant: "destructive" });
