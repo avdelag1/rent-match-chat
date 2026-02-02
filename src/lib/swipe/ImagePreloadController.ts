@@ -105,13 +105,15 @@ class ImagePreloadController {
 
   /**
    * Preload multiple images in priority order
+   * Always keeps next 2-3 cards ready to prevent swipe delays
    */
   async preloadBatch(urls: string[]): Promise<void> {
     const validUrls = urls.filter(url => url && url !== '/placeholder.svg');
 
-    // Preload first 2 with high priority (current and next)
-    const highPriority = validUrls.slice(0, 2);
-    const lowPriority = validUrls.slice(2);
+    // Preload first 3 with high priority (current, next, and backup)
+    // This ensures no delay when swiping - the next card is always ready
+    const highPriority = validUrls.slice(0, 3);
+    const lowPriority = validUrls.slice(3);
 
     // Start high priority immediately
     await Promise.all(highPriority.map(url => this.preload(url, 'high')));
