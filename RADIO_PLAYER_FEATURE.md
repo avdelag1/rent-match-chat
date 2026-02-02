@@ -103,6 +103,7 @@ src/
 └── supabase/
     └── migrations/
         └── 20260202_add_radio_features.sql
+```
 
 ## Database Schema
 
