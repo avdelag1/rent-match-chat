@@ -4,6 +4,7 @@ import { Flame, Sparkles, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { triggerHaptic } from '@/utils/haptics';
+import { playNotificationSound } from '@/utils/notificationSounds';
 
 interface MatchCelebrationProps {
   isOpen: boolean;
@@ -23,6 +24,12 @@ export function MatchCelebration({ isOpen, onClose, onMessage, matchedUser }: Ma
     if (isOpen) {
       // Trigger celebration haptic when match celebration opens
       triggerHaptic('match');
+
+      // Play celebratory bell sound for the match
+      playNotificationSound('match').catch((error) => {
+        console.warn('Failed to play match notification sound:', error);
+      });
+
       const timer = setTimeout(() => setShowContent(true), 500);
       return () => clearTimeout(timer);
     } else {
