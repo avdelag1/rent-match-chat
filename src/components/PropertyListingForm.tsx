@@ -63,22 +63,21 @@ export function PropertyListingForm({ onDataChange, initialData = {} }: Property
         <CardHeader><CardTitle>Basic Information</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label>Title *</Label>
-            <Input {...register('title', { required: 'Title is required' })} placeholder="Beautiful 2BR Apartment" />
+            <Label>Title</Label>
+            <Input {...register('title')} placeholder="Beautiful 2BR Apartment" />
             {errors.title && <p className="text-sm text-destructive mt-1">{errors.title.message}</p>}
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>Price ($/month) *</Label>
-              <Input type="number" {...register('price', { required: 'Price is required', valueAsNumber: true })} placeholder="2500" />
+              <Label>Price ($/month)</Label>
+              <Input type="number" {...register('price', { valueAsNumber: true })} placeholder="2500" />
               {errors.price && <p className="text-sm text-destructive mt-1">{errors.price.message}</p>}
             </div>
             <div>
-              <Label>Minimum Stay *</Label>
+              <Label>Minimum Stay</Label>
               <Controller
                 name="rental_duration_type"
                 control={control}
-                rules={{ required: 'Minimum stay is required' }}
                 render={({ field }) => (
                   <Select onValueChange={field.onChange} value={field.value || ''}>
                     <SelectTrigger><SelectValue placeholder="Select duration" /></SelectTrigger>
@@ -97,7 +96,6 @@ export function PropertyListingForm({ onDataChange, initialData = {} }: Property
       <Controller
         name="country"
         control={control}
-        rules={{ required: 'Country is required' }}
         render={({ field }) => (
           <OwnerLocationSelector
             country={field.value}
@@ -116,11 +114,10 @@ export function PropertyListingForm({ onDataChange, initialData = {} }: Property
         <CardHeader><CardTitle>Property Details</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label>Property Type *</Label>
+            <Label>Property Type</Label>
             <Controller
               name="property_type"
               control={control}
-              rules={{ required: 'Property type is required' }}
               render={({ field }) => (
                 <Select onValueChange={field.onChange} value={field.value || ''}>
                   <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
@@ -135,13 +132,13 @@ export function PropertyListingForm({ onDataChange, initialData = {} }: Property
 
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <Label>Bedrooms *</Label>
-              <Input type="number" {...register('beds', { required: 'Number of bedrooms is required', valueAsNumber: true, min: 0 })} placeholder="2" />
+              <Label>Bedrooms</Label>
+              <Input type="number" {...register('beds', { valueAsNumber: true, min: 0 })} placeholder="2" />
               {errors.beds && <p className="text-sm text-destructive mt-1">{errors.beds.message}</p>}
             </div>
             <div>
-              <Label>Bathrooms *</Label>
-              <Input type="number" step="0.5" {...register('baths', { required: 'Number of bathrooms is required', valueAsNumber: true, min: 0 })} placeholder="2" />
+              <Label>Bathrooms</Label>
+              <Input type="number" step="0.5" {...register('baths', { valueAsNumber: true, min: 0 })} placeholder="2" />
               {errors.baths && <p className="text-sm text-destructive mt-1">{errors.baths.message}</p>}
             </div>
             <div>

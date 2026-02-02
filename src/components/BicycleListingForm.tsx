@@ -84,10 +84,10 @@ export function BicycleListingForm({ onDataChange, initialData }: BicycleListing
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="title">Listing Title *</Label>
+            <Label htmlFor="title">Listing Title</Label>
             <Input
               id="title"
-              {...register('title', { required: 'Title is required' })}
+              {...register('title')}
               placeholder="e.g., 2022 Specialized Turbo Levo"
             />
             <p className="text-xs text-muted-foreground mt-1">No contact info allowed - share after messaging connection</p>
@@ -95,11 +95,10 @@ export function BicycleListingForm({ onDataChange, initialData }: BicycleListing
           </div>
 
           <div>
-            <Label htmlFor="bicycle_type">Bicycle Type *</Label>
+            <Label htmlFor="bicycle_type">Bicycle Type</Label>
             <Controller
               name="bicycle_type"
               control={control}
-              rules={{ required: 'Bicycle type is required' }}
               render={({ field }) => (
                 <Select onValueChange={field.onChange} value={field.value || ''}>
                   <SelectTrigger id="bicycle_type">
@@ -117,10 +116,10 @@ export function BicycleListingForm({ onDataChange, initialData }: BicycleListing
           </div>
 
           <div>
-            <Label htmlFor="city">Location / City *</Label>
+            <Label htmlFor="city">Location / City</Label>
             <Input
               id="city"
-              {...register('city', { required: 'City is required' })}
+              {...register('city')}
               placeholder="e.g., Tulum, Playa del Carmen"
             />
             {errors.city && <p className="text-sm text-destructive mt-1">{errors.city.message}</p>}
@@ -132,14 +131,14 @@ export function BicycleListingForm({ onDataChange, initialData }: BicycleListing
         <CardHeader><CardTitle>Bicycle Specifications</CardTitle></CardHeader>
         <CardContent className="grid md:grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="brand">Brand *</Label>
-            <Input id="brand" {...register('brand', { required: 'Brand is required' })} placeholder="Specialized, Trek, Giant..." />
+            <Label htmlFor="brand">Brand</Label>
+            <Input id="brand" {...register('brand')} placeholder="Specialized, Trek, Giant..." />
             {errors.brand && <p className="text-sm text-destructive mt-1">{errors.brand.message}</p>}
           </div>
 
           <div>
-            <Label htmlFor="model">Model *</Label>
-            <Input id="model" {...register('model', { required: 'Model is required' })} placeholder="Turbo Levo" />
+            <Label htmlFor="model">Model</Label>
+            <Input id="model" {...register('model')} placeholder="Turbo Levo" />
             {errors.model && <p className="text-sm text-destructive mt-1">{errors.model.message}</p>}
           </div>
 
@@ -149,11 +148,10 @@ export function BicycleListingForm({ onDataChange, initialData }: BicycleListing
           </div>
 
           <div>
-            <Label htmlFor="condition">Condition *</Label>
+            <Label htmlFor="condition">Condition</Label>
             <Controller
               name="condition"
               control={control}
-              rules={{ required: 'Condition is required' }}
               render={({ field }) => (
                 <Select onValueChange={field.onChange} value={field.value || ''}>
                   <SelectTrigger id="condition"><SelectValue placeholder="Select condition" /></SelectTrigger>
@@ -167,11 +165,10 @@ export function BicycleListingForm({ onDataChange, initialData }: BicycleListing
           </div>
 
           <div>
-            <Label htmlFor="frame_size">Frame Size *</Label>
+            <Label htmlFor="frame_size">Frame Size</Label>
             <Controller
               name="frame_size"
               control={control}
-              rules={{ required: 'Frame size is required' }}
               render={({ field }) => (
                 <Select onValueChange={field.onChange} value={field.value || ''}>
                   <SelectTrigger id="frame_size"><SelectValue placeholder="Select frame size" /></SelectTrigger>

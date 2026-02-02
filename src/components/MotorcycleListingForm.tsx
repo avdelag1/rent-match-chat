@@ -70,18 +70,17 @@ export function MotorcycleListingForm({ onDataChange, initialData }: MotorcycleL
         <CardHeader><CardTitle>Basic Information</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="title">Listing Title *</Label>
-            <Input id="title" {...register('title', { required: 'Title is required' })} placeholder="e.g., 2021 Yamaha MT-07" />
+            <Label htmlFor="title">Listing Title</Label>
+            <Input id="title" {...register('title')} placeholder="e.g., 2021 Yamaha MT-07" />
             <p className="text-xs text-muted-foreground mt-1">No contact info allowed.</p>
             {errors.title && <p className="text-sm text-destructive mt-1">{errors.title.message}</p>}
           </div>
 
           <div>
-            <Label htmlFor="motorcycle_type">Motorcycle Type *</Label>
+            <Label htmlFor="motorcycle_type">Motorcycle Type</Label>
             <Controller
               name="motorcycle_type"
               control={control}
-              rules={{ required: 'Motorcycle type is required' }}
               render={({ field }) => (
                 <Select onValueChange={field.onChange} value={field.value || ''}>
                   <SelectTrigger id="motorcycle_type"><SelectValue placeholder="Select type" /></SelectTrigger>
@@ -95,8 +94,8 @@ export function MotorcycleListingForm({ onDataChange, initialData }: MotorcycleL
           </div>
 
           <div>
-            <Label htmlFor="city">Location / City *</Label>
-            <Input id="city" {...register('city', { required: 'City is required' })} placeholder="e.g., Tulum, Playa del Carmen" />
+            <Label htmlFor="city">Location / City</Label>
+            <Input id="city" {...register('city')} placeholder="e.g., Tulum, Playa del Carmen" />
             {errors.city && <p className="text-sm text-destructive mt-1">{errors.city.message}</p>}
           </div>
         </CardContent>
@@ -106,41 +105,40 @@ export function MotorcycleListingForm({ onDataChange, initialData }: MotorcycleL
         <CardHeader><CardTitle>Motorcycle Specifications</CardTitle></CardHeader>
         <CardContent className="grid md:grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="brand">Brand *</Label>
-            <Input id="brand" {...register('brand', { required: 'Brand is required' })} placeholder="Yamaha, Honda, KTM..." />
+            <Label htmlFor="brand">Brand</Label>
+            <Input id="brand" {...register('brand')} placeholder="Yamaha, Honda, KTM..." />
             {errors.brand && <p className="text-sm text-destructive mt-1">{errors.brand.message}</p>}
           </div>
 
           <div>
-            <Label htmlFor="model">Model *</Label>
-            <Input id="model" {...register('model', { required: 'Model is required' })} placeholder="MT-07" />
+            <Label htmlFor="model">Model</Label>
+            <Input id="model" {...register('model')} placeholder="MT-07" />
             {errors.model && <p className="text-sm text-destructive mt-1">{errors.model.message}</p>}
           </div>
 
           <div>
-            <Label htmlFor="year">Year *</Label>
-            <Input id="year" type="number" {...register('year', { required: 'Year is required', valueAsNumber: true })} placeholder="2021" />
+            <Label htmlFor="year">Year</Label>
+            <Input id="year" type="number" {...register('year', { valueAsNumber: true })} placeholder="2021" />
             {errors.year && <p className="text-sm text-destructive mt-1">{errors.year.message}</p>}
           </div>
 
           <div>
-            <Label htmlFor="mileage">Mileage (km) *</Label>
-            <Input id="mileage" type="number" {...register('mileage', { required: 'Mileage is required', valueAsNumber: true })} placeholder="e.g., 12,000" />
+            <Label htmlFor="mileage">Mileage (km)</Label>
+            <Input id="mileage" type="number" {...register('mileage', { valueAsNumber: true })} placeholder="e.g., 12,000" />
             {errors.mileage && <p className="text-sm text-destructive mt-1">{errors.mileage.message}</p>}
           </div>
 
           <div>
-            <Label htmlFor="engine_cc">Engine (cc) *</Label>
-            <Input id="engine_cc" type="number" {...register('engine_cc', { required: 'Engine size is required', valueAsNumber: true })} placeholder="689" />
+            <Label htmlFor="engine_cc">Engine (cc)</Label>
+            <Input id="engine_cc" type="number" {...register('engine_cc', { valueAsNumber: true })} placeholder="689" />
             {errors.engine_cc && <p className="text-sm text-destructive mt-1">{errors.engine_cc.message}</p>}
           </div>
 
           <div>
-            <Label htmlFor="transmission">Transmission *</Label>
+            <Label htmlFor="transmission">Transmission</Label>
             <Controller
               name="transmission"
               control={control}
-              rules={{ required: 'Transmission type is required' }}
               render={({ field }) => (
                 <Select onValueChange={field.onChange} value={field.value || ''}>
                   <SelectTrigger id="transmission"><SelectValue placeholder="Select transmission" /></SelectTrigger>
@@ -154,11 +152,10 @@ export function MotorcycleListingForm({ onDataChange, initialData }: MotorcycleL
           </div>
 
           <div>
-            <Label htmlFor="fuel_type">Fuel Type *</Label>
+            <Label htmlFor="fuel_type">Fuel Type</Label>
             <Controller
               name="fuel_type"
               control={control}
-              rules={{ required: 'Fuel type is required' }}
               render={({ field }) => (
                 <Select onValueChange={field.onChange} value={field.value || ''}>
                   <SelectTrigger id="fuel_type"><SelectValue placeholder="Select fuel type" /></SelectTrigger>
@@ -172,11 +169,10 @@ export function MotorcycleListingForm({ onDataChange, initialData }: MotorcycleL
           </div>
 
           <div>
-            <Label htmlFor="condition">Condition *</Label>
+            <Label htmlFor="condition">Condition</Label>
             <Controller
               name="condition"
               control={control}
-              rules={{ required: 'Condition is required' }}
               render={({ field }) => (
                 <Select onValueChange={field.onChange} value={field.value || ''}>
                   <SelectTrigger id="condition"><SelectValue placeholder="Select condition" /></SelectTrigger>

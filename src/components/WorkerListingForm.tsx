@@ -195,11 +195,10 @@ export function WorkerListingForm({ onDataChange, initialData = {} }: WorkerList
                 <CardHeader><CardTitle>Service Details</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
                     <div>
-                        <Label>Service Category *</Label>
+                        <Label>Service Category</Label>
                         <Controller
                             name="service_category"
                             control={control}
-                            rules={{ required: 'Service category is required' }}
                             render={({ field }) => (
                                 <Select onValueChange={field.onChange} value={field.value || ''}>
                                     <SelectTrigger><SelectValue placeholder="Select service category" /></SelectTrigger>
@@ -214,15 +213,15 @@ export function WorkerListingForm({ onDataChange, initialData = {} }: WorkerList
 
                     {watchedServiceCategory === 'other' && (
                         <div>
-                            <Label>Custom Service Name *</Label>
-                            <Input {...register('custom_service_name', { required: 'Custom service name is required' })} placeholder="e.g., Personal Stylist" />
+                            <Label>Custom Service Name</Label>
+                            <Input {...register('custom_service_name')} placeholder="e.g., Personal Stylist" />
                             {errors.custom_service_name && <p className="text-sm text-destructive mt-1">{errors.custom_service_name.message}</p>}
                         </div>
                     )}
 
                     <div>
-                        <Label>Service Title *</Label>
-                        <Input {...register('title', { required: 'Service title is required' })} placeholder="e.g., Experienced Yoga Instructor" />
+                        <Label>Service Title</Label>
+                        <Input {...register('title')} placeholder="e.g., Experienced Yoga Instructor" />
                         {errors.title && <p className="text-sm text-destructive mt-1">{errors.title.message}</p>}
                     </div>
 
@@ -241,13 +240,13 @@ export function WorkerListingForm({ onDataChange, initialData = {} }: WorkerList
               <CardHeader><CardTitle>Location</CardTitle></CardHeader>
               <CardContent className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>City *</Label>
-                  <Input {...register('city', { required: 'City is required' })} placeholder="e.g., Tulum" />
+                  <Label>City</Label>
+                  <Input {...register('city')} placeholder="e.g., Tulum" />
                   {errors.city && <p className="text-sm text-destructive mt-1">{errors.city.message}</p>}
                 </div>
                 <div>
-                  <Label>Country *</Label>
-                  <Input {...register('country', { required: 'Country is required' })} placeholder="e.g., Mexico" />
+                  <Label>Country</Label>
+                  <Input {...register('country')} placeholder="e.g., Mexico" />
                   {errors.country && <p className="text-sm text-destructive mt-1">{errors.country.message}</p>}
                 </div>
               </CardContent>
@@ -257,16 +256,15 @@ export function WorkerListingForm({ onDataChange, initialData = {} }: WorkerList
                 <CardHeader><CardTitle>Pricing</CardTitle></CardHeader>
                 <CardContent className="grid grid-cols-2 gap-4">
                     <div>
-                        <Label>Price (USD) *</Label>
-                        <Input type="number" {...register('price', { required: 'Price is required', valueAsNumber: true })} placeholder="25" />
+                        <Label>Price (USD)</Label>
+                        <Input type="number" {...register('price', { valueAsNumber: true })} placeholder="25" />
                         {errors.price && <p className="text-sm text-destructive mt-1">{errors.price.message}</p>}
                     </div>
                     <div>
-                        <Label>Pricing Unit *</Label>
+                        <Label>Pricing Unit</Label>
                         <Controller
                             name="pricing_unit"
                             control={control}
-                            rules={{ required: 'Pricing unit is required' }}
                             render={({ field }) => (
                                 <Select onValueChange={field.onChange} value={field.value || ''}>
                                     <SelectTrigger><SelectValue placeholder="Select unit" /></SelectTrigger>
@@ -285,11 +283,10 @@ export function WorkerListingForm({ onDataChange, initialData = {} }: WorkerList
                 <CardHeader><CardTitle>Experience & Qualifications</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
                     <div>
-                        <Label>Experience Level *</Label>
+                        <Label>Experience Level</Label>
                         <Controller
                             name="experience_level"
                             control={control}
-                            rules={{ required: 'Experience level is required' }}
                             render={({ field }) => (
                                 <Select onValueChange={field.onChange} value={field.value || ''}>
                                     <SelectTrigger><SelectValue placeholder="Select level" /></SelectTrigger>
@@ -302,8 +299,8 @@ export function WorkerListingForm({ onDataChange, initialData = {} }: WorkerList
                         {errors.experience_level && <p className="text-sm text-destructive mt-1">{errors.experience_level.message}</p>}
                     </div>
                     <div>
-                        <Label>Years of Experience *</Label>
-                        <Input type="number" {...register('experience_years', { required: 'Years of experience is required', valueAsNumber: true, min: 0 })} placeholder="5" />
+                        <Label>Years of Experience</Label>
+                        <Input type="number" {...register('experience_years', { valueAsNumber: true, min: 0 })} placeholder="5" />
                         {errors.experience_years && <p className="text-sm text-destructive mt-1">{errors.experience_years.message}</p>}
                     </div>
                 </CardContent>
