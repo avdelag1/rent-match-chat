@@ -22,7 +22,7 @@ interface ModernSkinProps {
 }
 
 // Cities available for toggle (as requested)
-const CITY_GROUPS: CityLocation[] = ['california', 'texas', 'new-york', 'french', 'podcasts'];
+const CITY_GROUPS: CityLocation[] = ['california', 'texas', 'new-york', 'tulum', 'french', 'podcasts'];
 
 export function ModernSkin({
   station,
@@ -40,7 +40,7 @@ export function ModernSkin({
   onVolumeChange,
   theme = 'light'
 }: ModernSkinProps) {
-  const [frequencyNum, setFrequencyNum] = useState(99.2);
+  const [frequencyNum, setFrequencyNum] = useState<number | null>(null);
   const volumeRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -121,7 +121,7 @@ export function ModernSkin({
             animate={{ opacity: [0.8, 1, 0.8] }}
             transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
           >
-            {frequencyNum.toFixed(1)}
+            {frequencyNum !== null ? frequencyNum.toFixed(1) : '--.-'}
           </motion.div>
           <div className={`text-3xl font-light ${secondaryText} -mt-2`}>FM</div>
         </div>

@@ -56,6 +56,11 @@ export function useRadioPlayer() {
 
   const loadUserPreferences = async () => {
     if (!user?.id) {
+      // Auto-select first station of default city for non-logged-in users
+      const stations = getStationsByCity('tulum');
+      if (stations.length > 0) {
+        setState(prev => ({ ...prev, currentStation: stations[0] }));
+      }
       setLoading(false);
       return;
     }
@@ -76,21 +81,39 @@ export function useRadioPlayer() {
 
       if (data) {
         const currentStationId = data.radio_current_station_id;
-        const currentStation = currentStationId ? getStationById(currentStationId) : null;
+        const city = (data.radio_current_city as CityLocation) || 'tulum';
+        let currentStation = currentStationId ? getStationById(currentStationId) : null;
+
+        // Auto-select first station if no station is saved
+        if (!currentStation) {
+          const stations = getStationsByCity(city);
+          currentStation = stations.length > 0 ? stations[0] : null;
+        }
 
         setState(prev => ({
           ...prev,
           skin: (data.radio_skin as RadioSkin) || 'modern',
-          currentCity: (data.radio_current_city as CityLocation) || 'tulum',
-          currentStation: currentStation || null,
+          currentCity: city,
+          currentStation: currentStation,
           volume: data.radio_volume || 0.7,
           isShuffle: data.radio_shuffle_mode || false,
           favorites: data.radio_favorite_stations || []
         }));
+      } else {
+        // No saved data, auto-select first station of default city
+        const stations = getStationsByCity('tulum');
+        if (stations.length > 0) {
+          setState(prev => ({ ...prev, currentStation: stations[0] }));
+        }
       }
     } catch (err) {
       // Silently use defaults if preferences can't be loaded
       logger.info('[RadioPlayer] Using default preferences:', err);
+      // Auto-select first station of default city
+      const stations = getStationsByCity('tulum');
+      if (stations.length > 0) {
+        setState(prev => ({ ...prev, currentStation: stations[0] }));
+      }
     } finally {
       setLoading(false);
     }
