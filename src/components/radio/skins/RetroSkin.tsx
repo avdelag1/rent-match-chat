@@ -21,7 +21,7 @@ interface RetroSkinProps {
 }
 
 // Cities available for toggle (as requested)
-const CITY_GROUPS: CityLocation[] = ['california', 'texas', 'new-york', 'french', 'podcasts'];
+const CITY_GROUPS: CityLocation[] = ['california', 'texas', 'new-york', 'tulum', 'french', 'podcasts'];
 
 export function RetroSkin({
   station,
