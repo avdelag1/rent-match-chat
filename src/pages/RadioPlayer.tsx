@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { motion, AnimatePresence, PanInfo } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useRadioPlayer } from '@/hooks/useRadioPlayer';
 import { IPhoneSkin } from '@/components/radio/skins/IPhoneSkin';
 import { getAllCities, cityThemes } from '@/data/radioStations';
@@ -29,34 +29,6 @@ export default function RadioPlayer() {
 
   const cities = getAllCities();
   const currentCityTheme = cityThemes[state.currentCity];
-
-  // Handle swipe gestures for changing stations/cities
-  const handleSwipe = (_e: PointerEvent, info: PanInfo) => {
-    const swipeThreshold = 50;
-    const velocityThreshold = 500;
-
-    // Horizontal swipe: change station
-    if (Math.abs(info.offset.x) > swipeThreshold || Math.abs(info.velocity.x) > velocityThreshold) {
-      if (info.offset.x > 0) {
-        changeStation('prev');
-        toast.success('Previous station');
-      } else {
-        changeStation('next');
-        toast.success('Next station');
-      }
-    }
-
-    // Vertical swipe: change city
-    if (Math.abs(info.offset.y) > swipeThreshold * 1.5 || Math.abs(info.velocity.y) > velocityThreshold) {
-      if (info.offset.y > 0) {
-        changeCity('prev', cities);
-        toast.success(`Switched to ${cityThemes[state.currentCity].name}`);
-      } else {
-        changeCity('next', cities);
-        toast.success(`Switched to ${cityThemes[state.currentCity].name}`);
-      }
-    }
-  };
 
   const handleCityChange = () => {
     changeCity('next', cities);
@@ -113,13 +85,7 @@ export default function RadioPlayer() {
   }
 
   return (
-    <motion.div
-      className="relative min-h-screen overflow-hidden"
-      drag
-      dragConstraints={{ top: 0, bottom: 0, left: 0, right: 0 }}
-      dragElastic={0.1}
-      onDragEnd={handleSwipe}
-    >
+    <div className="relative min-h-screen overflow-hidden">
       {/* Back Button */}
       <motion.button
         whileTap={{ scale: 0.95 }}
@@ -261,19 +227,6 @@ export default function RadioPlayer() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Swipe Hint */}
-      {!state.isPlaying && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 2 }}
-          className="fixed bottom-20 left-0 right-0 text-center text-white/50 text-sm px-6"
-        >
-          <div>⟷ Swipe left/right to change stations</div>
-          <div>⟺ Swipe up/down to change cities</div>
-        </motion.div>
-      )}
-    </motion.div>
+    </div>
   );
 }
