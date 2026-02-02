@@ -11,9 +11,10 @@ interface PlaylistDialogProps {
   onClose: () => void;
   currentStation: RadioStation | null;
   onPlayStation: (station: RadioStation) => void;
+  addingMode?: boolean; // When true, focus on adding current station to a playlist
 }
 
-export function PlaylistDialog({ isOpen, onClose, currentStation, onPlayStation }: PlaylistDialogProps) {
+export function PlaylistDialog({ isOpen, onClose, currentStation, onPlayStation, addingMode = false }: PlaylistDialogProps) {
   const { playlists, loading, createPlaylist, deletePlaylist, addStationToPlaylist, removeStationFromPlaylist } = useRadioPlaylists();
   const [newPlaylistName, setNewPlaylistName] = useState('');
   const [selectedPlaylistId, setSelectedPlaylistId] = useState<string | null>(null);
@@ -64,16 +65,23 @@ export function PlaylistDialog({ isOpen, onClose, currentStation, onPlayStation 
           className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[80vh] overflow-hidden"
         >
           {/* Header */}
-          <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-gray-900">
-              {selectedPlaylist ? selectedPlaylist.name : 'My Playlists'}
-            </h2>
-            <button
-              onClick={selectedPlaylist ? () => setSelectedPlaylistId(null) : onClose}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            >
-              <X className="w-6 h-6 text-gray-600" />
-            </button>
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-gray-900">
+                {selectedPlaylist ? selectedPlaylist.name : (addingMode ? 'Add to Playlist' : 'My Playlists')}
+              </h2>
+              <button
+                onClick={selectedPlaylist ? () => setSelectedPlaylistId(null) : onClose}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X className="w-6 h-6 text-gray-600" />
+              </button>
+            </div>
+            {addingMode && currentStation && !selectedPlaylist && (
+              <div className="mt-2 p-2 bg-blue-50 rounded-lg text-sm text-blue-700">
+                Select a playlist to add <strong>{currentStation.name}</strong>
+              </div>
+            )}
           </div>
 
           {/* Content */}

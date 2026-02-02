@@ -246,7 +246,7 @@ export const radioStations: RadioStation[] = [
     id: 'tulum-paradise-mellow',
     name: 'RP Mellow Mix',
     frequency: '94.1 FM',
-    streamUrl: 'http://stream.radioparadise.com/mellow-128',
+    streamUrl: 'https://stream.radioparadise.com/mellow-128',
     city: 'tulum',
     genre: 'Mellow Eclectic',
     description: 'Eclectic mix of calming music for relaxation'
@@ -416,7 +416,7 @@ export const radioStations: RadioStation[] = [
     id: 'talk-bbc-world',
     name: 'BBC World Service',
     frequency: 'Talk 1',
-    streamUrl: 'http://stream.live.vc.bbcmedia.co.uk/bbc_world_service',
+    streamUrl: 'https://stream.live.vc.bbcmedia.co.uk/bbc_world_service',
     city: 'podcasts',
     genre: 'World News',
     description: 'Global news, analysis and features from the BBC'
@@ -434,7 +434,7 @@ export const radioStations: RadioStation[] = [
     id: 'talk-paradise-main',
     name: 'Radio Paradise',
     frequency: 'Talk 3',
-    streamUrl: 'http://stream.radioparadise.com/mp3-128',
+    streamUrl: 'https://stream.radioparadise.com/mp3-128',
     city: 'podcasts',
     genre: 'Eclectic Mix',
     description: 'Eclectic mix of rock, indie, electronica, world - DJ curated'

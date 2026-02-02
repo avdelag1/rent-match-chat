@@ -25,12 +25,14 @@ export default function RadioPlayer() {
     toggleShuffle,
     toggleFavorite,
     setSkin,
+    setVolume,
     isStationFavorite
   } = useRadioPlayer();
 
   const [showSkinSelector, setShowSkinSelector] = useState(false);
   const [skinTheme, setSkinTheme] = useState<'light' | 'dark' | 'vibrant'>('dark');
   const [showPlaylistDialog, setShowPlaylistDialog] = useState(false);
+  const [addingToPlaylist, setAddingToPlaylist] = useState(false);
 
   const cities = getAllCities();
   const currentCityTheme = cityThemes[state.currentCity];
@@ -122,7 +124,7 @@ export default function RadioPlayer() {
       >
         <Palette className="w-5 h-5" />
       </motion.button>
-
+      
       {/* Skin Selector Button */}
       <motion.button
         whileTap={{ scale: 0.95 }}
@@ -179,6 +181,7 @@ export default function RadioPlayer() {
               isShuffle={state.isShuffle}
               isFavorite={state.currentStation ? isStationFavorite(state.currentStation.id) : false}
               currentCity={state.currentCity}
+              volume={state.volume}
               onPlayPause={togglePlayPause}
               onPrevious={() => changeStation('prev')}
               onNext={() => changeStation('next')}
@@ -240,12 +243,17 @@ export default function RadioPlayer() {
       {/* Playlist Dialog */}
       <PlaylistDialog
         isOpen={showPlaylistDialog}
-        onClose={() => setShowPlaylistDialog(false)}
+        onClose={() => {
+          setShowPlaylistDialog(false);
+          setAddingToPlaylist(false);
+        }}
         currentStation={state.currentStation}
         onPlayStation={(station) => {
           play(station);
           setShowPlaylistDialog(false);
+          setAddingToPlaylist(false);
         }}
+        addingMode={addingToPlaylist}
       />
     </div>
   );
