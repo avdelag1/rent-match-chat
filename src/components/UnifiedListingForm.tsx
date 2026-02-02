@@ -156,11 +156,11 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
           includes_pump: formData.includes_pump,
         });
       } else if (selectedCategory === 'property') {
+        // Remove bathrooms field - doesn't exist in production DB
         Object.assign(listingData, {
           address: formData.address,
           property_type: typeof formData.property_type === 'string' ? formData.property_type.toLowerCase() : formData.property_type,
           bedrooms: formData.beds,
-          bathrooms: formData.baths,
           square_footage: formData.square_footage,
           furnished: formData.furnished,
           pet_friendly: formData.pet_friendly,
@@ -171,6 +171,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
           listing_type: selectedMode === 'rent' ? 'rent' : 'buy',
         });
       } else if (selectedCategory === 'worker') {
+        // Remove languages field - doesn't exist in production DB
         Object.assign(listingData, {
           description: formData.description,
           service_category: formData.service_category,
@@ -191,7 +192,6 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
           offers_emergency_service: formData.offers_emergency_service,
           background_check_verified: formData.background_check_verified,
           insurance_verified: formData.insurance_verified,
-          languages: formData.languages,
           listing_type: 'service',
         });
       }
