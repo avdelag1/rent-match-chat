@@ -23,6 +23,7 @@ import { usePrefetchImages } from '@/hooks/usePrefetchImages';
 import { useSwipePrefetch, usePrefetchManager } from '@/hooks/usePrefetchManager';
 import { useSwipeDeckStore, persistDeckToSession, getDeckFromSession } from '@/state/swipeDeckStore';
 import { useSwipeDismissal } from '@/hooks/useSwipeDismissal';
+import { useSwipeSounds } from '@/hooks/useSwipeSounds';
 import { shallow } from 'zustand/shallow';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -414,6 +415,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     }
   }, [undoSuccess, resetUndoState]);
   const recordProfileView = useRecordProfileView();
+  const { playSwipeSound } = useSwipeSounds();
 
   // PERF: Initialize swipeQueue with user ID for fire-and-forget background writes
   // This eliminates the async auth call on every swipe
@@ -816,6 +818,9 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     // Immediate haptic feedback
     triggerHaptic(direction === 'right' ? 'success' : 'warning');
 
+    // Play swipe sound effect
+    playSwipeSound(direction);
+
     // INSTANT SWIPE: Always execute immediately - never block on image prefetch
     // The next card will show with skeleton placeholder until image loads
     executeSwipe(direction);
@@ -836,7 +841,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     if (imagesToPreload.length > 0) {
       imagePreloadController.preloadBatch(imagesToPreload);
     }
-  }, [executeSwipe]);
+  }, [executeSwipe, playSwipeSound]);
 
   // Button-triggered swipe - animates the card via ref
   const handleButtonLike = useCallback(() => {
