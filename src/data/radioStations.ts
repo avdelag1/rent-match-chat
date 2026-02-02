@@ -223,101 +223,101 @@ export const radioStations: RadioStation[] = [
     description: 'Americana Roots music for Cowhands, Cowpokes and Cowpunks'
   },
 
-  // Tulum/Playa del Carmen - Relaxing/World Music
+  // Tulum/Playa del Carmen - Meditation, Chill, Ambient
   {
-    id: 'tulum-paradise-main',
-    name: 'Radio Paradise',
+    id: 'tulum-dronezone',
+    name: 'Drone Zone',
     frequency: '100.1 FM',
-    streamUrl: 'http://stream.radioparadise.com/mp3-128',
+    streamUrl: 'https://ice1.somafm.com/dronezone-128-mp3',
     city: 'tulum',
-    genre: 'Eclectic',
-    description: 'Eclectic mix of rock, indie, electronica, world music'
+    genre: 'Ambient Meditation',
+    description: 'Atmospheric ambient for meditation and contemplation'
+  },
+  {
+    id: 'tulum-deepspace',
+    name: 'Deep Space One',
+    frequency: '102.5 FM',
+    streamUrl: 'https://ice1.somafm.com/deepspaceone-128-mp3',
+    city: 'tulum',
+    genre: 'Ambient Space',
+    description: 'Deep ambient electronic and space music for exploration'
   },
   {
     id: 'tulum-paradise-mellow',
     name: 'RP Mellow Mix',
-    frequency: '102.5 FM',
+    frequency: '94.1 FM',
     streamUrl: 'http://stream.radioparadise.com/mellow-128',
     city: 'tulum',
-    genre: 'Mellow',
-    description: 'A mellower version of Radio Paradise'
-  },
-  {
-    id: 'tulum-paradise-rock',
-    name: 'RP Rock Mix',
-    frequency: '94.1 FM',
-    streamUrl: 'http://stream.radioparadise.com/rock-128',
-    city: 'tulum',
-    genre: 'Rock',
-    description: 'Rocks a little harder than the Main Mix'
-  },
-  {
-    id: 'tulum-paradise-global',
-    name: 'RP Global Mix',
-    frequency: '101.5 FM',
-    streamUrl: 'http://stream.radioparadise.com/world-etc-128',
-    city: 'tulum',
-    genre: 'World',
-    description: 'Global and world music from Radio Paradise'
+    genre: 'Mellow Eclectic',
+    description: 'Eclectic mix of calming music for relaxation'
   },
   {
     id: 'tulum-suburbs',
     name: 'Suburbs of Goa',
-    frequency: '99.3 FM',
+    frequency: '101.5 FM',
     streamUrl: 'https://ice1.somafm.com/suburbsofgoa-128-mp3',
     city: 'tulum',
     genre: 'Psybient',
-    description: 'Downtempo psybient music for stargazing'
+    description: 'Downtempo psybient music for stargazing and relaxation'
+  },
+  {
+    id: 'tulum-lush',
+    name: 'Lush',
+    frequency: '99.3 FM',
+    streamUrl: 'https://ice1.somafm.com/lush-128-mp3',
+    city: 'tulum',
+    genre: 'Chillout Vocals',
+    description: 'Sensuous and mellow vocals, mostly female, with chillout beats'
   },
 
-  // California - Indie/Alternative/Rock
+  // California - Electronic, Pop, Chill
   {
-    id: 'ca-leftcoast',
-    name: 'Left Coast 70s',
+    id: 'ca-groovesalad',
+    name: 'Groove Salad',
     frequency: '106.7 FM',
+    streamUrl: 'https://ice1.somafm.com/groovesalad-128-mp3',
+    city: 'california',
+    genre: 'Chillout',
+    description: 'A nicely chilled plate of ambient/downtempo beats'
+  },
+  {
+    id: 'ca-poptron',
+    name: 'PopTron',
+    frequency: '102.7 FM',
+    streamUrl: 'https://ice1.somafm.com/poptron-128-mp3',
+    city: 'california',
+    genre: 'Electropop',
+    description: 'Electropop and indie dance rock'
+  },
+  {
+    id: 'ca-indiepop',
+    name: 'Indie Pop Rocks',
+    frequency: '91.5 FM',
+    streamUrl: 'https://ice1.somafm.com/indiepop-128-mp3',
+    city: 'california',
+    genre: 'Indie Pop',
+    description: 'New and classic indie pop from around the world'
+  },
+  {
+    id: 'ca-beatblender',
+    name: 'Beat Blender',
+    frequency: '89.9 FM',
+    streamUrl: 'https://ice1.somafm.com/beatblender-128-mp3',
+    city: 'california',
+    genre: 'Electronic',
+    description: 'A late night blend of deep-house and downtempo chill'
+  },
+  {
+    id: 'ca-seventies',
+    name: 'Left Coast 70s',
+    frequency: '89.3 FM',
     streamUrl: 'https://ice1.somafm.com/seventies-128-mp3',
     city: 'california',
     genre: 'Classic Rock',
-    description: 'Mellow album rock from the 70s'
-  },
-  {
-    id: 'ca-bagel',
-    name: 'BAGeL Radio',
-    frequency: '102.7 FM',
-    streamUrl: 'https://ice1.somafm.com/bagel-128-mp3',
-    city: 'california',
-    genre: 'Alternative',
-    description: 'What alternative rock sounded like in 2005'
-  },
-  {
-    id: 'ca-covers',
-    name: 'Covers',
-    frequency: '91.5 FM',
-    streamUrl: 'https://ice1.somafm.com/covers-128-mp3',
-    city: 'california',
-    genre: 'Cover Songs',
-    description: 'Just covers. Songs you know by artists you don\'t.'
-  },
-  {
-    id: 'ca-folkfwd',
-    name: 'Folk Forward',
-    frequency: '89.9 FM',
-    streamUrl: 'https://ice1.somafm.com/folkfwd-128-mp3',
-    city: 'california',
-    genre: 'Folk',
-    description: 'Indie Folk, Alt-folk and the occasional folk classics'
-  },
-  {
-    id: 'ca-sonicuniverse',
-    name: 'Sonic Universe',
-    frequency: '89.3 FM',
-    streamUrl: 'https://ice1.somafm.com/sonicuniverse-128-mp3',
-    city: 'california',
-    genre: 'Jazz',
-    description: 'Transcending the world of jazz with eclectic, avant-garde takes'
+    description: 'Mellow album rock from the 70s - one rock station'
   },
 
-  // Texas - Country/Americana/Rock
+  // Texas - Electronic, Lounge, Americana
   {
     id: 'tx-bootliquor',
     name: 'Boot Liquor',
@@ -325,43 +325,43 @@ export const radioStations: RadioStation[] = [
     streamUrl: 'https://ice1.somafm.com/bootliquor-128-mp3',
     city: 'texas',
     genre: 'Americana',
-    description: 'Americana Roots music for Cowhands, Cowpokes and Cowpunks'
+    description: 'Americana Roots music - the one rock/country station'
   },
   {
-    id: 'tx-poptron',
-    name: 'PopTron',
+    id: 'tx-spacesta',
+    name: 'Space Station Soma',
     frequency: '96.7 FM',
-    streamUrl: 'https://ice1.somafm.com/poptron-128-mp3',
+    streamUrl: 'https://ice1.somafm.com/spacestation-128-mp3',
     city: 'texas',
-    genre: 'Electropop',
-    description: 'Electropop and indie dance rock'
+    genre: 'Ambient Electronic',
+    description: 'Tune in, turn on, space out - electronic ambient'
   },
   {
-    id: 'tx-metal',
-    name: 'Metal Detector',
+    id: 'tx-fluid',
+    name: 'Fluid',
     frequency: '96.7 FM',
-    streamUrl: 'https://ice1.somafm.com/metal-128-mp3',
+    streamUrl: 'https://ice1.somafm.com/fluid-128-mp3',
     city: 'texas',
-    genre: 'Metal',
-    description: 'From black to doom, prog to sludge, thrash to post, stoner to crossover'
-  },
-  {
-    id: 'tx-thistle',
-    name: 'Thistle Radio',
-    frequency: '90.5 FM',
-    streamUrl: 'https://ice1.somafm.com/thistle-128-mp3',
-    city: 'texas',
-    genre: 'Celtic',
-    description: 'Exploring music from the Celtic lands'
+    genre: 'Instrumental Hip Hop',
+    description: 'Drown in instrumental hip-hop, future soul and liquid trap'
   },
   {
     id: 'tx-illstreet',
     name: 'Illinois Street Lounge',
-    frequency: '98.9 FM',
+    frequency: '90.5 FM',
     streamUrl: 'https://ice1.somafm.com/illstreet-128-mp3',
     city: 'texas',
     genre: 'Lounge',
     description: 'Classic bachelor pad, playful exotica and vintage music'
+  },
+  {
+    id: 'tx-secretagent',
+    name: 'Secret Agent',
+    frequency: '98.9 FM',
+    streamUrl: 'https://ice1.somafm.com/secretagent-128-mp3',
+    city: 'texas',
+    genre: 'Lounge Spy',
+    description: 'The soundtrack for your stylish, mysterious life'
   },
 
   // French - Keeping original French stations (these URLs should work)
@@ -411,87 +411,87 @@ export const radioStations: RadioStation[] = [
     description: 'New Music and World Sounds'
   },
 
-  // Podcasts - Specialty/Eclectic Channels
+  // Talk Radio & Informational - News, Culture, Variety
   {
-    id: 'pod-cliqhop',
-    name: 'cliqhop idm',
-    frequency: 'Stream 1',
-    streamUrl: 'https://ice1.somafm.com/cliqhop-128-mp3',
+    id: 'talk-bbc-world',
+    name: 'BBC World Service',
+    frequency: 'Talk 1',
+    streamUrl: 'http://stream.live.vc.bbcmedia.co.uk/bbc_world_service',
     city: 'podcasts',
-    genre: 'IDM',
-    description: 'Blips and bleeps from the smart bomb of electronica'
+    genre: 'World News',
+    description: 'Global news, analysis and features from the BBC'
   },
   {
-    id: 'pod-earwaves',
-    name: 'Earwaves',
-    frequency: 'Stream 2',
-    streamUrl: 'https://ice1.somafm.com/earwaves-128-mp3',
+    id: 'talk-fip',
+    name: 'FIP',
+    frequency: 'Talk 2',
+    streamUrl: 'https://icecast.radiofrance.fr/fip-midfi.mp3',
     city: 'podcasts',
-    genre: 'Experimental',
-    description: 'Spanning the history of electronic and experimental music'
+    genre: 'Eclectic Radio',
+    description: 'French eclectic radio with diverse music and minimal talk'
   },
   {
-    id: 'pod-live',
-    name: 'SomaFM Live',
-    frequency: 'Stream 3',
-    streamUrl: 'https://ice1.somafm.com/live-128-mp3',
+    id: 'talk-paradise-main',
+    name: 'Radio Paradise',
+    frequency: 'Talk 3',
+    streamUrl: 'http://stream.radioparadise.com/mp3-128',
     city: 'podcasts',
-    genre: 'Live Sets',
-    description: 'Special broadcasts and DJ mixes'
+    genre: 'Eclectic Mix',
+    description: 'Eclectic mix of rock, indie, electronica, world - DJ curated'
   },
   {
-    id: 'pod-specials',
-    name: 'SomaFM Specials',
-    frequency: 'Stream 4',
-    streamUrl: 'https://ice1.somafm.com/specials-128-mp3',
+    id: 'talk-francecult',
+    name: 'France Culture',
+    frequency: 'Talk 4',
+    streamUrl: 'https://icecast.radiofrance.fr/franceculture-midfi.mp3',
     city: 'podcasts',
-    genre: 'Specials',
-    description: 'Special music programming'
+    genre: 'Culture & Ideas',
+    description: 'French cultural radio with debates, documentaries, and analysis'
   },
   {
-    id: 'pod-christmas',
-    name: 'Christmas Lounge',
-    frequency: 'Stream 5',
-    streamUrl: 'https://ice1.somafm.com/christmas-128-mp3',
+    id: 'talk-inter',
+    name: 'France Inter',
+    frequency: 'Talk 5',
+    streamUrl: 'https://icecast.radiofrance.fr/franceinter-midfi.mp3',
     city: 'podcasts',
-    genre: 'Holiday',
-    description: 'Chilled holiday grooves and classic winter lounge tracks'
+    genre: 'News & Culture',
+    description: 'French talk radio with news, interviews, and entertainment'
   },
   {
-    id: 'pod-jollyol',
-    name: 'Jolly Ol Soul',
-    frequency: 'Stream 6',
-    streamUrl: 'https://ice1.somafm.com/jollysoul-128-mp3',
+    id: 'talk-sonicuniverse',
+    name: 'Sonic Universe',
+    frequency: 'Talk 6',
+    streamUrl: 'https://ice1.somafm.com/sonicuniverse-128-mp3',
     city: 'podcasts',
-    genre: 'Holiday Soul',
-    description: 'Where all the soul, funk, and jazz that has been traditionally played is preserved for your dancing and celebration'
+    genre: 'Jazz Variety',
+    description: 'Transcending jazz with eclectic, avant-garde takes and world fusion'
   },
   {
-    id: 'pod-xmasrocks',
-    name: 'Christmas Rocks',
-    frequency: 'Stream 7',
-    streamUrl: 'https://ice1.somafm.com/xmasrocks-128-mp3',
+    id: 'talk-indie',
+    name: 'Indie Pop Rocks',
+    frequency: 'Talk 7',
+    streamUrl: 'https://ice1.somafm.com/indiepop-128-mp3',
     city: 'podcasts',
-    genre: 'Holiday Rock',
-    description: 'Have your self an indie/alternative holiday season'
+    genre: 'Indie Pop',
+    description: 'New and classic indie pop from around the world'
   },
   {
-    id: 'pod-xmasinfrisko',
-    name: 'Xmas in Frisko',
-    frequency: 'Stream 8',
-    streamUrl: 'https://ice1.somafm.com/xmasinfrisko-128-mp3',
+    id: 'talk-folkfwd',
+    name: 'Folk Forward',
+    frequency: 'Talk 8',
+    streamUrl: 'https://ice1.somafm.com/folkfwd-128-mp3',
     city: 'podcasts',
-    genre: 'Holiday Jazz',
-    description: 'SomaFM\'s year-round Cabinet of Musical Curiosities'
+    genre: 'Folk & Americana',
+    description: 'Indie folk, alt-folk and occasional classics'
   },
   {
-    id: 'pod-fluid',
-    name: 'Fluid',
-    frequency: 'Stream 9',
-    streamUrl: 'https://ice1.somafm.com/fluid-128-mp3',
+    id: 'talk-covers',
+    name: 'Covers',
+    frequency: 'Talk 9',
+    streamUrl: 'https://ice1.somafm.com/covers-128-mp3',
     city: 'podcasts',
-    genre: 'Downtempo',
-    description: 'Drown in the electronic sound of instrumental hip-hop, future soul and liquid trap'
+    genre: 'Cover Songs',
+    description: 'Songs you know by artists you don\'t - unique cover versions'
   }
 ];
 

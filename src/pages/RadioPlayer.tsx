@@ -93,7 +93,7 @@ export default function RadioPlayer() {
       <motion.button
         whileTap={{ scale: 0.95 }}
         onClick={() => navigate(-1)}
-        className="fixed top-4 left-4 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white"
+        className="fixed top-20 left-4 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg"
         aria-label="Go back"
       >
         <ArrowLeft className="w-5 h-5" />
@@ -103,7 +103,7 @@ export default function RadioPlayer() {
       <motion.button
         whileTap={{ scale: 0.95 }}
         onClick={() => setShowPlaylistDialog(true)}
-        className="fixed top-4 right-28 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white"
+        className="fixed top-20 right-4 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg"
         aria-label="Open playlists"
       >
         <List className="w-5 h-5" />
@@ -113,7 +113,7 @@ export default function RadioPlayer() {
       <motion.button
         whileTap={{ scale: 0.95 }}
         onClick={handleThemeChange}
-        className="fixed top-4 right-14 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white"
+        className="fixed top-20 right-16 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg"
         aria-label="Change theme"
       >
         <Palette className="w-5 h-5" />
@@ -123,7 +123,7 @@ export default function RadioPlayer() {
       <motion.button
         whileTap={{ scale: 0.95 }}
         onClick={() => setShowSkinSelector(!showSkinSelector)}
-        className="fixed top-4 right-4 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white"
+        className="fixed top-20 right-28 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg"
         aria-label="Change skin"
       >
         <span className="text-lg">🎨</span>
@@ -136,7 +136,7 @@ export default function RadioPlayer() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-16 right-4 z-50 bg-white rounded-lg shadow-2xl p-4 min-w-[150px]"
+            className="fixed top-32 right-4 z-50 bg-white rounded-lg shadow-2xl p-4 min-w-[150px]"
           >
             <div className="text-sm font-semibold mb-2 text-gray-900">Select Skin</div>
             <div className="space-y-2">
