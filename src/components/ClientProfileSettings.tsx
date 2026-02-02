@@ -253,17 +253,6 @@ export function ClientProfileSettings() {
                 placeholder="e.g., Digital Nomad, Developer, Designer"
               />
             </div>
-            <div className="md:col-span-2">
-              <Label htmlFor="bio" className="text-foreground">Bio</Label>
-              <Textarea
-                id="bio"
-                value={profile.bio}
-                onChange={(e) => setProfile(prev => ({ ...prev, bio: e.target.value }))}
-                className="bg-background border-border text-foreground"
-                placeholder="Tell us a bit about yourself..."
-                rows={3}
-              />
-            </div>
           </div>
         </CardContent>
       </Card>
