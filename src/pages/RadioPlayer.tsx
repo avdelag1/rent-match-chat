@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRadioPlayer } from '@/hooks/useRadioPlayer';
 import { IPhoneSkin } from '@/components/radio/skins/IPhoneSkin';
+import { PlaylistDialog } from '@/components/radio/PlaylistDialog';
 import { getAllCities, cityThemes } from '@/data/radioStations';
 import { CityLocation, RadioSkin } from '@/types/radio';
 import { Button } from '@/components/ui/button';
-import { Palette, ArrowLeft } from 'lucide-react';
+import { Palette, ArrowLeft, List } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -15,6 +16,7 @@ export default function RadioPlayer() {
     state,
     loading,
     error,
+    play,
     togglePlayPause,
     changeStation,
     changeCity,
@@ -26,6 +28,7 @@ export default function RadioPlayer() {
 
   const [showSkinSelector, setShowSkinSelector] = useState(false);
   const [skinTheme, setSkinTheme] = useState<'light' | 'dark' | 'vibrant'>('dark');
+  const [showPlaylistDialog, setShowPlaylistDialog] = useState(false);
 
   const cities = getAllCities();
   const currentCityTheme = cityThemes[state.currentCity];
@@ -94,6 +97,16 @@ export default function RadioPlayer() {
         aria-label="Go back"
       >
         <ArrowLeft className="w-5 h-5" />
+      </motion.button>
+
+      {/* Playlist Button */}
+      <motion.button
+        whileTap={{ scale: 0.95 }}
+        onClick={() => setShowPlaylistDialog(true)}
+        className="fixed top-4 right-28 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white"
+        aria-label="Open playlists"
+      >
+        <List className="w-5 h-5" />
       </motion.button>
 
       {/* Theme Toggle Button */}
@@ -227,6 +240,17 @@ export default function RadioPlayer() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Playlist Dialog */}
+      <PlaylistDialog
+        isOpen={showPlaylistDialog}
+        onClose={() => setShowPlaylistDialog(false)}
+        currentStation={state.currentStation}
+        onPlayStation={(station) => {
+          play(station);
+          setShowPlaylistDialog(false);
+        }}
+      />
     </div>
   );
 }
