@@ -15,6 +15,7 @@ import { usePrefetchImages } from '@/hooks/usePrefetchImages';
 import { usePrefetchManager } from '@/hooks/usePrefetchManager';
 import { useSwipeDeckStore, persistDeckToSession, getDeckFromSession } from '@/state/swipeDeckStore';
 import { useSwipeDismissal } from '@/hooks/useSwipeDismissal';
+import { useSwipeSounds } from '@/hooks/useSwipeSounds';
 import { shallow } from 'zustand/shallow';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -295,6 +296,7 @@ const ClientSwipeContainerComponent = ({
   const { recordSwipe, undoLastSwipe, canUndo, isUndoing, undoSuccess, resetUndoState } = useSwipeUndo();
   const startConversation = useStartConversation();
   const recordProfileView = useRecordProfileView();
+  const { playSwipeSound } = useSwipeSounds();
 
   // Swipe dismissal tracking for client profiles
   const { dismissedIds, dismissTarget, filterDismissed } = useSwipeDismissal('client');
@@ -537,6 +539,9 @@ const ClientSwipeContainerComponent = ({
     // Immediate haptic feedback
     triggerHaptic(direction === 'right' ? 'success' : 'light');
 
+    // Play swipe sound effect
+    playSwipeSound(direction);
+
     // INSTANT SWIPE: Always execute immediately - never block on image prefetch
     // The next card will show with skeleton placeholder until image loads
     executeSwipe(direction);
@@ -553,7 +558,7 @@ const ClientSwipeContainerComponent = ({
     if (nextNextImage) {
       preloadClientImageToCache(nextNextImage);
     }
-  }, [executeSwipe]);
+  }, [executeSwipe, playSwipeSound]);
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
