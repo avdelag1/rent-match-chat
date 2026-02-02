@@ -324,8 +324,8 @@ const ClientLikedProperties = () => {
                           <DropdownMenuTrigger asChild>
                             <Button
                               size="sm"
-                              variant="ghost"
-                              className="bg-background/20 hover:bg-background/30 text-foreground"
+                              variant="secondary"
+                              className="bg-background hover:bg-accent text-foreground shadow-md"
                               onClick={(e) => e.stopPropagation()}
                             >
                               <MoreVertical className="w-4 h-4" />
