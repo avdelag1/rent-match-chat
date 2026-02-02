@@ -2,24 +2,32 @@
 -- Description: Adds radio player preferences and user playlists
 -- Date: 2026-02-02
 
--- Add radio preferences to profiles table
-ALTER TABLE public.profiles
-ADD COLUMN IF NOT EXISTS radio_skin TEXT DEFAULT 'iphone' CHECK (radio_skin IN ('iphone', 'vinyl', 'ipod'));
+-- Add radio preferences to profiles table (columns without inline CHECK)
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS radio_skin TEXT DEFAULT 'iphone';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS radio_current_city TEXT DEFAULT 'tulum';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS radio_current_station_id TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS radio_volume DECIMAL(3, 2) DEFAULT 0.7;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS radio_shuffle_mode BOOLEAN DEFAULT FALSE;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS radio_favorite_stations TEXT[] DEFAULT '{}';
 
-ALTER TABLE public.profiles
-ADD COLUMN IF NOT EXISTS radio_current_city TEXT DEFAULT 'tulum' CHECK (radio_current_city IN ('new-york', 'miami', 'ibiza', 'tulum', 'california', 'texas', 'french', 'podcasts'));
+-- Add CHECK constraints separately (drop first to make idempotent)
+DO $$ BEGIN
+  ALTER TABLE public.profiles DROP CONSTRAINT IF EXISTS check_radio_skin;
+  ALTER TABLE public.profiles ADD CONSTRAINT check_radio_skin CHECK (radio_skin IN ('iphone', 'vinyl', 'ipod'));
+EXCEPTION WHEN others THEN NULL;
+END $$;
 
-ALTER TABLE public.profiles
-ADD COLUMN IF NOT EXISTS radio_current_station_id TEXT;
+DO $$ BEGIN
+  ALTER TABLE public.profiles DROP CONSTRAINT IF EXISTS check_radio_current_city;
+  ALTER TABLE public.profiles ADD CONSTRAINT check_radio_current_city CHECK (radio_current_city IN ('new-york', 'miami', 'ibiza', 'tulum', 'california', 'texas', 'french', 'podcasts'));
+EXCEPTION WHEN others THEN NULL;
+END $$;
 
-ALTER TABLE public.profiles
-ADD COLUMN IF NOT EXISTS radio_volume DECIMAL(3, 2) DEFAULT 0.7 CHECK (radio_volume >= 0 AND radio_volume <= 1);
-
-ALTER TABLE public.profiles
-ADD COLUMN IF NOT EXISTS radio_shuffle_mode BOOLEAN DEFAULT FALSE;
-
-ALTER TABLE public.profiles
-ADD COLUMN IF NOT EXISTS radio_favorite_stations TEXT[] DEFAULT '{}';
+DO $$ BEGIN
+  ALTER TABLE public.profiles DROP CONSTRAINT IF EXISTS check_radio_volume;
+  ALTER TABLE public.profiles ADD CONSTRAINT check_radio_volume CHECK (radio_volume >= 0 AND radio_volume <= 1);
+EXCEPTION WHEN others THEN NULL;
+END $$;
 
 -- Add comments to document the columns
 COMMENT ON COLUMN public.profiles.radio_skin IS 'Radio player UI skin: iphone (modern), vinyl (retro), or ipod (classic)';
@@ -44,25 +52,26 @@ CREATE TABLE IF NOT EXISTS public.user_radio_playlists (
 -- Add RLS policies for user_radio_playlists
 ALTER TABLE public.user_radio_playlists ENABLE ROW LEVEL SECURITY;
 
--- Users can view their own playlists
+-- Drop policies if they exist (for idempotency) then recreate
+DROP POLICY IF EXISTS "Users can view their own radio playlists" ON public.user_radio_playlists;
 CREATE POLICY "Users can view their own radio playlists"
   ON public.user_radio_playlists
   FOR SELECT
   USING (auth.uid() = user_id);
 
--- Users can create their own playlists
+DROP POLICY IF EXISTS "Users can create their own radio playlists" ON public.user_radio_playlists;
 CREATE POLICY "Users can create their own radio playlists"
   ON public.user_radio_playlists
   FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
--- Users can update their own playlists
+DROP POLICY IF EXISTS "Users can update their own radio playlists" ON public.user_radio_playlists;
 CREATE POLICY "Users can update their own radio playlists"
   ON public.user_radio_playlists
   FOR UPDATE
   USING (auth.uid() = user_id);
 
--- Users can delete their own playlists
+DROP POLICY IF EXISTS "Users can delete their own radio playlists" ON public.user_radio_playlists;
 CREATE POLICY "Users can delete their own radio playlists"
   ON public.user_radio_playlists
   FOR DELETE
@@ -80,6 +89,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS update_radio_playlist_timestamp ON public.user_radio_playlists;
 CREATE TRIGGER update_radio_playlist_timestamp
   BEFORE UPDATE ON public.user_radio_playlists
   FOR EACH ROW
