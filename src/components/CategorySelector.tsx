@@ -1,4 +1,4 @@
-import { Bike, Home, Bike as Motorcycle, Briefcase } from 'lucide-react';
+import { Bike, Home, CircleDot, Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
@@ -22,7 +22,7 @@ export function CategorySelector({
 }: CategorySelectorProps) {
   const categories = [
     { value: 'property' as Category, label: 'Properties', icon: Home },
-    { value: 'motorcycle' as Category, label: 'Motorcycles', icon: Motorcycle },
+    { value: 'motorcycle' as Category, label: 'Motorcycles', icon: CircleDot },
     { value: 'bicycle' as Category, label: 'Bicycles', icon: Bike },
     { value: 'worker' as Category, label: 'Workers', icon: Briefcase },
   ];
