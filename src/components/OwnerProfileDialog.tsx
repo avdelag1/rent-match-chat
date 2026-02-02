@@ -135,15 +135,15 @@ function OwnerProfileDialogComponent({ open, onOpenChange }: Props) {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <Label className="text-white text-lg sm:text-xl font-bold">📸 Business Photos</Label>
-                  <p className="text-white/60 text-xs sm:text-sm mt-1">Add photos of your business • Up to 10 photos</p>
+                  <Label className="text-white text-lg sm:text-xl font-bold">📸 Business Photo</Label>
+                  <p className="text-white/60 text-xs sm:text-sm mt-1">Add 1 photo of your business</p>
                 </div>
                 <Badge variant="secondary" className="bg-red-500/20 text-red-400 border-red-400">
-                  {profileImages.length}/10
+                  {profileImages.length}/1
                 </Badge>
               </div>
               <PhotoUploadManager
-                maxPhotos={10}
+                maxPhotos={1}
                 currentPhotos={profileImages}
                 onPhotosChange={setProfileImages}
                 uploadType="profile"

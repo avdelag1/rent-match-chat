@@ -44,8 +44,21 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
   const [location, setLocation] = useState<{ lat?: number; lng?: number }>({});
   const [formData, setFormData] = useState<Record<string, unknown>>({});
   const [editingId, setEditingId] = useState<string | null>(null);
-  
+
   const queryClient = useQueryClient();
+
+  // Get max photos based on category
+  const getMaxPhotos = () => {
+    switch (selectedCategory) {
+      case 'property': return 15;
+      case 'motorcycle': return 5;
+      case 'bicycle': return 5;
+      case 'worker': return 10;
+      default: return 15;
+    }
+  };
+
+  const maxPhotos = getMaxPhotos();
 
   useEffect(() => {
     if (!isOpen) return;
@@ -267,8 +280,8 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
 
   const handleImageAdd = () => {
     const totalImages = images.length + imageFiles.length;
-    if (totalImages >= 30) {
-      toast({ title: "Maximum Photos Reached", description: "You can upload up to 30 photos.", variant: "destructive" });
+    if (totalImages >= maxPhotos) {
+      toast({ title: "Maximum Photos Reached", description: `You can upload up to ${maxPhotos} photos.`, variant: "destructive" });
       return;
     }
 
@@ -281,7 +294,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
       const files = Array.from((e.target as HTMLInputElement).files || []);
       if (files.length === 0) return;
 
-      const availableSlots = 30 - totalImages;
+      const availableSlots = maxPhotos - totalImages;
       if (files.length > availableSlots) {
         toast({ title: "Too Many Photos", description: `You can only add ${availableSlots} more.`, variant: "destructive" });
         files.splice(availableSlots);
@@ -382,7 +395,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
             <Card>
               <CardHeader>
                 <CardTitle>
-                  Photos * (min 1, max 30)
+                  Photos * (min 1, max {maxPhotos})
                   {(images.length + imageFiles.length) < 1 && (
                     <span className="text-destructive text-sm font-normal ml-2">- Need at least 1 photo</span>
                   )}
@@ -408,10 +421,10 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
                   ))}
                 </div>
                 
-                {(images.length + imageFiles.length) < 30 && (
+                {(images.length + imageFiles.length) < maxPhotos && (
                   <Button onClick={handleImageAdd} variant="outline" className="w-full">
                     <Upload className="mr-2 h-4 w-4" />
-                    Add Photos ({images.length + imageFiles.length}/30)
+                    Add Photos ({images.length + imageFiles.length}/{maxPhotos})
                   </Button>
                 )}
               </CardContent>
