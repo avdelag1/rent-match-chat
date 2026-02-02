@@ -22,7 +22,7 @@ interface ModernSkinProps {
 }
 
 // Cities available for toggle (as requested)
-const CITY_GROUPS: CityLocation[] = ['california', 'texas', 'new-york', 'tulum', 'french', 'podcasts'];
+const CITY_GROUPS: CityLocation[] = ['miami', 'ibiza', 'california', 'texas', 'new-york', 'tulum', 'french', 'podcasts'];
 
 export function ModernSkin({
   station,
