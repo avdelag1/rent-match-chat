@@ -12,7 +12,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Separator } from "@/components/ui/separator";
 import {
   LogOut, User, Camera, Sparkles, Crown, ArrowLeft,
-  Share2, Flame,
+  Share2, Flame, Radio,
   Settings as SettingsIcon, Palette, Scale, FileText, Heart
 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -260,6 +260,13 @@ const ClientProfileNew = () => {
           >
             <Card className="bg-card border-border">
               <CardContent className="p-0">
+                <button
+                  onClick={() => navigate('/radio')}
+                  className="w-full flex items-center gap-3 p-4 hover:bg-muted/50 transition-colors border-b border-border"
+                >
+                  <Radio className="w-5 h-5 text-emerald-500" />
+                  <span className="flex-1 text-left text-foreground">Radio Player</span>
+                </button>
                 <button
                   onClick={() => navigate('/client/contracts')}
                   className="w-full flex items-center gap-3 p-4 hover:bg-muted/50 transition-colors border-b border-border"
