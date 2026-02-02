@@ -15,7 +15,7 @@ export function useRadioPlayer() {
     currentCity: 'tulum',
     volume: 0.7,
     isShuffle: false,
-    skin: 'iphone',
+    skin: 'modern',
     favorites: []
   });
 
@@ -80,7 +80,7 @@ export function useRadioPlayer() {
 
         setState(prev => ({
           ...prev,
-          skin: (data.radio_skin as RadioSkin) || 'iphone',
+          skin: (data.radio_skin as RadioSkin) || 'modern',
           currentCity: (data.radio_current_city as CityLocation) || 'tulum',
           currentStation: currentStation || null,
           volume: data.radio_volume || 0.7,

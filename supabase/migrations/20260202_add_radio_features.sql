@@ -3,7 +3,7 @@
 -- Date: 2026-02-02
 
 -- Add radio preferences to profiles table (columns without inline CHECK)
-ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS radio_skin TEXT DEFAULT 'iphone';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS radio_skin TEXT DEFAULT 'modern';
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS radio_current_city TEXT DEFAULT 'tulum';
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS radio_current_station_id TEXT;
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS radio_volume DECIMAL(3, 2) DEFAULT 0.7;
@@ -13,7 +13,7 @@ ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS radio_favorite_stations TEX
 -- Add CHECK constraints separately (drop first to make idempotent)
 DO $$ BEGIN
   ALTER TABLE public.profiles DROP CONSTRAINT IF EXISTS check_radio_skin;
-  ALTER TABLE public.profiles ADD CONSTRAINT check_radio_skin CHECK (radio_skin IN ('iphone', 'vinyl', 'ipod'));
+  ALTER TABLE public.profiles ADD CONSTRAINT check_radio_skin CHECK (radio_skin IN ('modern', 'vinyl', 'retro'));
 EXCEPTION WHEN others THEN NULL;
 END $$;
 
@@ -30,7 +30,7 @@ EXCEPTION WHEN others THEN NULL;
 END $$;
 
 -- Add comments to document the columns
-COMMENT ON COLUMN public.profiles.radio_skin IS 'Radio player UI skin: iphone (modern), vinyl (retro), or ipod (classic)';
+COMMENT ON COLUMN public.profiles.radio_skin IS 'Radio player UI skin: modern (minimalist FM), vinyl (record player), or retro (cassette/boombox)';
 COMMENT ON COLUMN public.profiles.radio_current_city IS 'Current city/location for radio stations';
 COMMENT ON COLUMN public.profiles.radio_current_station_id IS 'ID of the currently playing station';
 COMMENT ON COLUMN public.profiles.radio_volume IS 'Radio player volume level (0.0 to 1.0)';
