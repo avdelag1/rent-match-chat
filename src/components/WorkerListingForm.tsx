@@ -224,15 +224,6 @@ export function WorkerListingForm({ onDataChange, initialData = {} }: WorkerList
                         <Input {...register('title')} placeholder="e.g., Experienced Yoga Instructor" />
                         {errors.title && <p className="text-sm text-destructive mt-1">{errors.title.message}</p>}
                     </div>
-
-                    <div>
-                        <Label>Description</Label>
-                        <Controller
-                            name="description"
-                            control={control}
-                            render={({ field }) => <Textarea {...field} placeholder="Describe your service..." rows={3} />}
-                        />
-                    </div>
                 </CardContent>
             </Card>
 

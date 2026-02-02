@@ -119,61 +119,23 @@ function DepthParallaxBackgroundComponent({ enabled = true }: DepthParallaxBackg
   if (!isSupported || !enabled) {
     return (
       <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
-        {/* Static subtle gradient - no animation */}
-        <div 
-          className="absolute inset-0"
-          style={{
-            background: 'radial-gradient(ellipse 80% 60% at 50% 40%, hsl(0 70% 50% / 0.03) 0%, transparent 70%)',
-          }}
-        />
+        {/* Clean background - no gradients */}
       </div>
     );
   }
 
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
-      {/* Parallax layer - moves with swipe */}
+      {/* Clean parallax layer - no colored gradients */}
       <div
         ref={layerRef}
         className="absolute will-change-transform"
         style={{
-          inset: '-20px', // Extend beyond viewport to hide edges during movement
+          inset: '-20px',
           transform: 'translate3d(0, 0, 0)',
         }}
       >
-        {/* Primary depth gradient - warm glow - MORE VISIBLE */}
-        <div 
-          className="absolute inset-0"
-          style={{
-            background: 'radial-gradient(ellipse 90% 70% at 30% 30%, hsl(0 70% 50% / 0.08) 0%, transparent 60%)',
-          }}
-        />
-        
-        {/* Secondary depth gradient - cooler accent */}
-        <div 
-          className="absolute inset-0"
-          style={{
-            background: 'radial-gradient(ellipse 70% 80% at 70% 70%, hsl(25 80% 50% / 0.06) 0%, transparent 55%)',
-          }}
-        />
-        
-        {/* Tertiary subtle purple for depth */}
-        <div 
-          className="absolute inset-0"
-          style={{
-            background: 'radial-gradient(ellipse 60% 50% at 80% 20%, hsl(270 60% 50% / 0.04) 0%, transparent 50%)',
-          }}
-        />
-        
-        {/* Ultra-subtle noise texture for premium feel */}
-        <div 
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-            opacity: 0.015,
-            mixBlendMode: 'overlay',
-          }}
-        />
+        {/* No gradients - clean background */}
       </div>
     </div>
   );

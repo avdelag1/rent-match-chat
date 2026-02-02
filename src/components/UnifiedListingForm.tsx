@@ -171,9 +171,8 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
           listing_type: selectedMode === 'rent' ? 'rent' : 'buy',
         });
       } else if (selectedCategory === 'worker') {
-        // Remove languages field - doesn't exist in production DB
+        // Remove languages and description fields - using structured data only
         Object.assign(listingData, {
-          description: formData.description,
           service_category: formData.service_category,
           custom_service_name: formData.custom_service_name,
           pricing_unit: formData.pricing_unit,
