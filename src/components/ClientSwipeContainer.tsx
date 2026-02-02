@@ -559,7 +559,6 @@ const ClientSwipeContainerComponent = ({
 
     try {
       await refetch();
-      sonnerToast.success('New profiles loaded');
     } catch (err) {
       sonnerToast.error('Refresh failed', { description: 'Please try again.' });
     } finally {
