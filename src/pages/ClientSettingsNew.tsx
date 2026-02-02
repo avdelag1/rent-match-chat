@@ -2,11 +2,12 @@
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Shield, FileText, HelpCircle, Info, ChevronRight, Scale } from "lucide-react";
+import { ArrowLeft, Shield, FileText, HelpCircle, Info, ChevronRight, Scale, Volume2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { AccountSecurity } from "@/components/AccountSecurity";
 import { DeleteAccountSection } from "@/components/DeleteAccountSection";
+import { SwipeSoundSettings } from "@/components/SwipeSoundSettings";
 import { useState } from "react";
 import { Separator } from "@/components/ui/separator";
 
@@ -23,6 +24,13 @@ const ClientSettingsNew = () => {
       description: 'Password, 2FA, and account security',
       color: 'text-green-500',
       section: 'security'
+    },
+    {
+      icon: Volume2,
+      label: 'Preferences',
+      description: 'Customize sounds and app behavior',
+      color: 'text-blue-500',
+      section: 'preferences'
     },
     {
       icon: FileText,
@@ -101,6 +109,37 @@ const ClientSettingsNew = () => {
               </div>
               <DeleteAccountSection />
             </div>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
+
+  if (activeSection === 'preferences') {
+    return (
+      <div className="w-full min-h-full overflow-y-auto px-5 py-4 pb-32">
+        <div className="max-w-3xl mx-auto">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setActiveSection(null)}
+            className="mb-4 text-muted-foreground hover:text-foreground"
+          >
+            Back
+          </Button>
+
+          <PageHeader
+            title="Preferences"
+            subtitle="Customize your app experience"
+          />
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={fastSpring}
+            className="space-y-6"
+          >
+            <SwipeSoundSettings />
           </motion.div>
         </div>
       </div>
