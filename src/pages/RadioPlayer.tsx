@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRadioPlayer } from '@/hooks/useRadioPlayer';
 import { IPhoneSkin } from '@/components/radio/skins/IPhoneSkin';
+import { VinylSkin } from '@/components/radio/skins/VinylSkin';
+import { IPodSkin } from '@/components/radio/skins/IPodSkin';
 import { PlaylistDialog } from '@/components/radio/PlaylistDialog';
 import { getAllCities, cityThemes } from '@/data/radioStations';
 import { CityLocation, RadioSkin } from '@/types/radio';
@@ -23,12 +25,14 @@ export default function RadioPlayer() {
     toggleShuffle,
     toggleFavorite,
     setSkin,
+    setVolume,
     isStationFavorite
   } = useRadioPlayer();
 
   const [showSkinSelector, setShowSkinSelector] = useState(false);
   const [skinTheme, setSkinTheme] = useState<'light' | 'dark' | 'vibrant'>('dark');
   const [showPlaylistDialog, setShowPlaylistDialog] = useState(false);
+  const [addingToPlaylist, setAddingToPlaylist] = useState(false);
 
   const cities = getAllCities();
   const currentCityTheme = cityThemes[state.currentCity];
@@ -175,68 +179,80 @@ export default function RadioPlayer() {
               isShuffle={state.isShuffle}
               isFavorite={state.currentStation ? isStationFavorite(state.currentStation.id) : false}
               currentCity={state.currentCity}
+              volume={state.volume}
               onPlayPause={togglePlayPause}
               onPrevious={() => changeStation('prev')}
               onNext={() => changeStation('next')}
               onToggleShuffle={toggleShuffle}
               onToggleFavorite={handleToggleFavorite}
               onCityChange={handleCityChange}
-              onAddToPlaylist={() => toast.info('Playlist feature coming soon!')}
+              onVolumeChange={setVolume}
+              onAddToPlaylist={() => {
+                setAddingToPlaylist(true);
+                setShowPlaylistDialog(true);
+              }}
               theme={skinTheme}
             />
           </motion.div>
         )}
 
-        {/* Placeholder for Vinyl skin */}
+        {/* Vinyl Skin */}
         {state.skin === 'vinyl' && (
           <motion.div
             key="vinyl"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="min-h-screen bg-gradient-to-br from-amber-900 to-orange-950 flex items-center justify-center p-6"
           >
-            <div className="text-center text-white">
-              <div className="text-6xl mb-4">🎵</div>
-              <div className="text-2xl font-bold mb-2">Vinyl Skin</div>
-              <div className="text-lg mb-4">Coming Soon!</div>
-              <div className="text-sm opacity-70">
-                Retro turntable with spinning record animation
-              </div>
-              <Button
-                onClick={() => setSkin('iphone')}
-                className="mt-4"
-                variant="secondary"
-              >
-                Switch to iPhone Skin
-              </Button>
-            </div>
+            <VinylSkin
+              station={state.currentStation}
+              isPlaying={state.isPlaying}
+              isShuffle={state.isShuffle}
+              isFavorite={state.currentStation ? isStationFavorite(state.currentStation.id) : false}
+              currentCity={state.currentCity}
+              volume={state.volume}
+              onPlayPause={togglePlayPause}
+              onPrevious={() => changeStation('prev')}
+              onNext={() => changeStation('next')}
+              onToggleShuffle={toggleShuffle}
+              onToggleFavorite={handleToggleFavorite}
+              onCityChange={handleCityChange}
+              onVolumeChange={setVolume}
+              onAddToPlaylist={() => {
+                setAddingToPlaylist(true);
+                setShowPlaylistDialog(true);
+              }}
+            />
           </motion.div>
         )}
 
-        {/* Placeholder for iPod skin */}
+        {/* iPod Skin */}
         {state.skin === 'ipod' && (
           <motion.div
             key="ipod"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="min-h-screen bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center p-6"
           >
-            <div className="text-center text-gray-900">
-              <div className="text-6xl mb-4">🎧</div>
-              <div className="text-2xl font-bold mb-2">iPod Classic Skin</div>
-              <div className="text-lg mb-4">Coming Soon!</div>
-              <div className="text-sm opacity-70">
-                Nostalgic click-wheel interface
-              </div>
-              <Button
-                onClick={() => setSkin('iphone')}
-                className="mt-4"
-              >
-                Switch to iPhone Skin
-              </Button>
-            </div>
+            <IPodSkin
+              station={state.currentStation}
+              isPlaying={state.isPlaying}
+              isShuffle={state.isShuffle}
+              isFavorite={state.currentStation ? isStationFavorite(state.currentStation.id) : false}
+              currentCity={state.currentCity}
+              volume={state.volume}
+              onPlayPause={togglePlayPause}
+              onPrevious={() => changeStation('prev')}
+              onNext={() => changeStation('next')}
+              onToggleShuffle={toggleShuffle}
+              onToggleFavorite={handleToggleFavorite}
+              onCityChange={handleCityChange}
+              onVolumeChange={setVolume}
+              onAddToPlaylist={() => {
+                setAddingToPlaylist(true);
+                setShowPlaylistDialog(true);
+              }}
+            />
           </motion.div>
         )}
       </AnimatePresence>
@@ -244,12 +260,17 @@ export default function RadioPlayer() {
       {/* Playlist Dialog */}
       <PlaylistDialog
         isOpen={showPlaylistDialog}
-        onClose={() => setShowPlaylistDialog(false)}
+        onClose={() => {
+          setShowPlaylistDialog(false);
+          setAddingToPlaylist(false);
+        }}
         currentStation={state.currentStation}
         onPlayStation={(station) => {
           play(station);
           setShowPlaylistDialog(false);
+          setAddingToPlaylist(false);
         }}
+        addingMode={addingToPlaylist}
       />
     </div>
   );

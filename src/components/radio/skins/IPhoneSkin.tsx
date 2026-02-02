@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Grid, Star, Globe, Plus } from 'lucide-react';
+import { Shuffle, Star, Globe, Plus, Volume2, VolumeX } from 'lucide-react';
 import { FrequencyDial } from '../FrequencyDial';
 import { PlayerControls } from '../PlayerControls';
 import { RadioStation, CityLocation } from '@/types/radio';
@@ -11,12 +11,14 @@ interface IPhoneSkinProps {
   isShuffle: boolean;
   isFavorite: boolean;
   currentCity: CityLocation;
+  volume: number;
   onPlayPause: () => void;
   onPrevious: () => void;
   onNext: () => void;
   onToggleShuffle: () => void;
   onToggleFavorite: () => void;
   onCityChange: () => void;
+  onVolumeChange: (volume: number) => void;
   onAddToPlaylist?: () => void;
   theme?: 'light' | 'dark' | 'vibrant';
 }
@@ -27,12 +29,14 @@ export function IPhoneSkin({
   isShuffle,
   isFavorite,
   currentCity,
+  volume,
   onPlayPause,
   onPrevious,
   onNext,
   onToggleShuffle,
   onToggleFavorite,
   onCityChange,
+  onVolumeChange,
   onAddToPlaylist,
   theme = 'light'
 }: IPhoneSkinProps) {
@@ -94,7 +98,7 @@ export function IPhoneSkin({
           className={`p-2 rounded-full ${isShuffle ? 'bg-white/20' : 'bg-transparent'} transition-colors`}
           aria-label="Toggle shuffle"
         >
-          <Grid className={`w-5 h-5 ${iconColor[theme]}`} />
+          <Shuffle className={`w-5 h-5 ${isShuffle ? 'text-green-400' : iconColor[theme]}`} />
         </motion.button>
 
         <motion.button
@@ -180,8 +184,11 @@ export function IPhoneSkin({
               <div className="text-white font-semibold text-sm truncate">
                 {station.description || 'Now Playing'}
               </div>
-              <div className="text-white/70 text-xs truncate">
-                {station.genre}
+              <div className="text-white/70 text-xs truncate flex items-center gap-2">
+                <span className="bg-white/20 px-2 py-0.5 rounded-full text-[10px] uppercase font-medium">
+                  {cityTheme.name}
+                </span>
+                <span>{station.genre}</span>
               </div>
             </div>
 
@@ -205,12 +212,59 @@ export function IPhoneSkin({
             {isPlaying && (
               <motion.div
                 className="h-full bg-gradient-to-r from-red-500 to-pink-500"
-                initial={{ width: '0%' }}
-                animate={{ width: '40%' }}
-                transition={{ duration: 2, ease: 'linear' }}
+                animate={{
+                  width: ['0%', '100%'],
+                  opacity: [0.5, 1, 0.5]
+                }}
+                transition={{
+                  duration: 8,
+                  repeat: Infinity,
+                  ease: 'linear'
+                }}
               />
             )}
           </div>
+        </div>
+
+        {/* Volume Control */}
+        <div className="w-full max-w-xs flex items-center gap-3">
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => onVolumeChange(volume === 0 ? 0.7 : 0)}
+            className="p-1"
+          >
+            {volume === 0 ? (
+              <VolumeX className={`w-5 h-5 ${iconColor[theme]}`} />
+            ) : (
+              <Volume2 className={`w-5 h-5 ${iconColor[theme]}`} />
+            )}
+          </motion.button>
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            value={volume}
+            onChange={(e) => onVolumeChange(parseFloat(e.target.value))}
+            className="flex-1 h-1 bg-white/20 rounded-full appearance-none cursor-pointer
+              [&::-webkit-slider-thumb]:appearance-none
+              [&::-webkit-slider-thumb]:w-4
+              [&::-webkit-slider-thumb]:h-4
+              [&::-webkit-slider-thumb]:rounded-full
+              [&::-webkit-slider-thumb]:bg-white
+              [&::-webkit-slider-thumb]:shadow-lg
+              [&::-webkit-slider-thumb]:cursor-pointer
+              [&::-moz-range-thumb]:w-4
+              [&::-moz-range-thumb]:h-4
+              [&::-moz-range-thumb]:rounded-full
+              [&::-moz-range-thumb]:bg-white
+              [&::-moz-range-thumb]:border-0
+              [&::-moz-range-thumb]:cursor-pointer"
+            aria-label="Volume"
+          />
+          <span className={`text-xs font-medium ${secondaryText[theme]} w-8`}>
+            {Math.round(volume * 100)}%
+          </span>
         </div>
       </div>
 
