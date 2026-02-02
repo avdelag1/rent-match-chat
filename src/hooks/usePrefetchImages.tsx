@@ -15,20 +15,20 @@ interface PrefetchOptions {
 }
 
 /**
- * Optimized image prefetching - balances speed with mobile performance
+ * Optimized image prefetching - ensures next 2-3 cards are always ready
  *
  * PERFORMANCE FIXES:
- * - Only next 2 profiles (not 5) to prevent network saturation
- * - Only first 2 images per profile (hero + next)
- * - Uses requestIdleCallback for non-critical prefetches
+ * - Preload next 3 profiles (current visible + 2 backup) with HIGH priority
+ * - First 2 images per profile (hero + next)
+ * - First 2 cards load immediately, 3rd uses requestIdleCallback
  * - Tracks by item ID (not index) to handle deck truncation correctly
- * - No aggressive decode() - let browser handle naturally
+ * - Aggressive priority for next 2 cards to prevent swipe delays
  * - Added trigger parameter to ensure effect runs when refs change
  */
 export function usePrefetchImages({
   currentIndex,
   profiles,
-  prefetchCount = 2,
+  prefetchCount = 3,
   trigger = 0
 }: PrefetchOptions) {
   // FIX: Track by item ID, not index - handles deck truncation correctly
@@ -96,8 +96,9 @@ export function usePrefetchImages({
 
             const img = new Image();
 
-            // Only first image of first profile gets high priority
-            (img as any).fetchPriority = (offset === 0 && imgIndex === 0) ? 'high' : 'low';
+            // HIGH priority for next 2 cards to ensure they're always ready
+            // This prevents any delay when swiping
+            (img as any).fetchPriority = (offset <= 1 && imgIndex === 0) ? 'high' : 'low';
             img.decoding = 'async';
 
             // Store in cache to prevent re-fetching
@@ -107,8 +108,8 @@ export function usePrefetchImages({
         });
       };
 
-      // First profile prefetches immediately, others use idle time
-      if (offset === 0) {
+      // First 2 profiles prefetch immediately (next card + backup), 3rd uses idle time
+      if (offset <= 1) {
         prefetchImages();
       } else if ('requestIdleCallback' in window) {
         (window as any).requestIdleCallback(prefetchImages, { timeout: 2000 });

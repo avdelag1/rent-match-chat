@@ -328,21 +328,30 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   );
   const hasAnimatedOnceRef = useRef(isReturningRef.current);
 
-  // PERF FIX: Eagerly preload top 4 cards' images when we have hydrated deck data
+  // PERF FIX: Eagerly preload top 5 cards' images when we have hydrated deck data
   // This runs SYNCHRONOUSLY during component initialization (before first paint)
   // The images will be in cache when TinderSwipeCard renders, preventing any flash
+  // ALWAYS keep 2-3 cards preloaded to prevent swipe delays
   const eagerPreloadInitiatedRef = useRef(false);
   if (!eagerPreloadInitiatedRef.current && deckQueueRef.current.length > 0) {
     eagerPreloadInitiatedRef.current = true;
     const currentIdx = currentIndexRef.current;
 
-    // Preload current + next 3 card images with decode (4 total for smooth swiping)
-    [0, 1, 2, 3].forEach((offset) => {
+    // Preload current + next 4 card images with decode (5 total for smooth swiping)
+    // This ensures the next 2 cards are always ready when swiping
+    const imagesToPreload: string[] = [];
+    [0, 1, 2, 3, 4].forEach((offset) => {
       const cardImages = deckQueueRef.current[currentIdx + offset]?.images;
       if (cardImages?.[0]) {
+        imagesToPreload.push(cardImages[0]);
         preloadImageToCache(cardImages[0]);
       }
     });
+
+    // Also batch preload with ImagePreloadController for decode support
+    if (imagesToPreload.length > 0) {
+      imagePreloadController.preloadBatch(imagesToPreload);
+    }
   }
 
   // PERF: Throttled prefetch scheduler
@@ -825,19 +834,21 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     // The next card will show with skeleton placeholder until image loads
     executeSwipe(direction);
 
-    // BACKGROUND PREFETCH: Opportunistically prefetch next 3-4 cards in background
-    // This doesn't block the swipe - images load with graceful skeleton fallback
-    // Use BOTH preloaders for maximum cache coverage
+    // AGGRESSIVE PREFETCH: Immediately preload next 5 cards to maintain buffer
+    // Always keep 2-3 cards ready behind the visible next card
+    // Use BOTH preloaders for maximum cache coverage and instant display
     const imagesToPreload: string[] = [];
-    [1, 2, 3, 4].forEach((offset) => {
+    [1, 2, 3, 4, 5].forEach((offset) => {
       const futureCard = deckQueueRef.current[currentIndexRef.current + offset];
       if (futureCard?.images?.[0]) {
         imagesToPreload.push(futureCard.images[0]);
+        // Also preload to basic cache
         preloadImageToCache(futureCard.images[0]);
       }
     });
 
     // Batch preload with ImagePreloadController (decodes images for instant display)
+    // First 3 get high priority, rest get low priority
     if (imagesToPreload.length > 0) {
       imagePreloadController.preloadBatch(imagesToPreload);
     }

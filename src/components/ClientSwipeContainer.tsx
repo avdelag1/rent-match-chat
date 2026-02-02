@@ -228,16 +228,18 @@ const ClientSwipeContainerComponent = ({
   );
   const hasAnimatedOnceRef = useRef(isReturningRef.current);
 
-  // PERF FIX: Eagerly preload top 3 cards' images when we have hydrated deck data
+  // PERF FIX: Eagerly preload top 5 cards' images when we have hydrated deck data
   // This runs SYNCHRONOUSLY during component initialization (before first paint)
   // The images will be in cache when OwnerClientTinderCard renders, preventing any flash
+  // ALWAYS keep 2-3 cards preloaded to prevent swipe delays
   const eagerPreloadInitiatedRef = useRef(false);
   if (!eagerPreloadInitiatedRef.current && deckQueueRef.current.length > 0) {
     eagerPreloadInitiatedRef.current = true;
     const currentIdx = currentIndexRef.current;
 
-    // Preload current, next, and next-next card images with decode
-    [0, 1, 2].forEach((offset) => {
+    // Preload current + next 4 card images (5 total for smooth swiping)
+    // This ensures the next 2 cards are always ready when swiping
+    [0, 1, 2, 3, 4].forEach((offset) => {
       const profile = deckQueueRef.current[currentIdx + offset];
       const firstImage = profile?.profile_images?.[0] || profile?.avatar_url;
       if (firstImage) {
@@ -520,12 +522,7 @@ const ClientSwipeContainerComponent = ({
       setPage(p => p + 1);
     }
 
-    // Eagerly preload next card's image
-    const nextNextProfile = deckQueueRef.current[newIndex + 1];
-    const nextNextImage = nextNextProfile?.profile_images?.[0] || nextNextProfile?.avatar_url;
-    if (nextNextImage) {
-      preloadClientImageToCache(nextNextImage);
-    }
+    // Note: Image preloading is handled in handleSwipe (next 5 cards)
   }, [swipeMutation, recordSwipe, recordProfileView, markOwnerSwiped, category, dismissTarget]);
 
   const handleSwipe = useCallback((direction: 'left' | 'right') => {
@@ -546,18 +543,15 @@ const ClientSwipeContainerComponent = ({
     // The next card will show with skeleton placeholder until image loads
     executeSwipe(direction);
 
-    // BACKGROUND PREFETCH: Opportunistically prefetch next 2-3 cards in background
-    // This doesn't block the swipe - images load with graceful skeleton fallback
-    const nextProfile = deckQueueRef.current[currentIndexRef.current + 1];
-    const nextImage = nextProfile?.profile_images?.[0] || nextProfile?.avatar_url;
-    if (nextImage) {
-      preloadClientImageToCache(nextImage);
-    }
-    const nextNextProfile = deckQueueRef.current[currentIndexRef.current + 2];
-    const nextNextImage = nextNextProfile?.profile_images?.[0] || nextNextProfile?.avatar_url;
-    if (nextNextImage) {
-      preloadClientImageToCache(nextNextImage);
-    }
+    // AGGRESSIVE PREFETCH: Immediately preload next 5 cards to maintain buffer
+    // Always keep 2-3 cards ready behind the visible next card
+    [1, 2, 3, 4, 5].forEach((offset) => {
+      const futureProfile = deckQueueRef.current[currentIndexRef.current + offset];
+      const futureImage = futureProfile?.profile_images?.[0] || futureProfile?.avatar_url;
+      if (futureImage) {
+        preloadClientImageToCache(futureImage);
+      }
+    });
   }, [executeSwipe, playSwipeSound]);
 
   const handleRefresh = useCallback(async () => {
