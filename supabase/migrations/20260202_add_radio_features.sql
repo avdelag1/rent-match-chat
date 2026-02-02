@@ -4,19 +4,16 @@
 
 -- Add radio preferences to profiles table
 ALTER TABLE public.profiles
-ADD COLUMN IF NOT EXISTS radio_skin TEXT DEFAULT 'iphone'
-CHECK (radio_skin IN ('iphone', 'vinyl', 'ipod'));
+ADD COLUMN IF NOT EXISTS radio_skin TEXT DEFAULT 'iphone' CHECK (radio_skin IN ('iphone', 'vinyl', 'ipod'));
 
 ALTER TABLE public.profiles
-ADD COLUMN IF NOT EXISTS radio_current_city TEXT DEFAULT 'tulum'
-CHECK (radio_current_city IN ('new-york', 'miami', 'ibiza', 'tulum', 'california', 'texas', 'french', 'podcasts'));
+ADD COLUMN IF NOT EXISTS radio_current_city TEXT DEFAULT 'tulum' CHECK (radio_current_city IN ('new-york', 'miami', 'ibiza', 'tulum', 'california', 'texas', 'french', 'podcasts'));
 
 ALTER TABLE public.profiles
 ADD COLUMN IF NOT EXISTS radio_current_station_id TEXT;
 
 ALTER TABLE public.profiles
-ADD COLUMN IF NOT EXISTS radio_volume DECIMAL(3, 2) DEFAULT 0.7
-CHECK (radio_volume >= 0 AND radio_volume <= 1);
+ADD COLUMN IF NOT EXISTS radio_volume DECIMAL(3, 2) DEFAULT 0.7 CHECK (radio_volume >= 0 AND radio_volume <= 1);
 
 ALTER TABLE public.profiles
 ADD COLUMN IF NOT EXISTS radio_shuffle_mode BOOLEAN DEFAULT FALSE;
