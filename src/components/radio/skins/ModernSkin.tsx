@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion';
-import { Play, Pause, SkipBack, SkipForward, Radio, Heart, Shuffle } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Radio, Heart, Shuffle, Volume2 } from 'lucide-react';
 import { RadioStation, CityLocation } from '@/types/radio';
-import { useState, useEffect } from 'react';
+import { cityThemes } from '@/data/radioStations';
+import { useState, useEffect, useRef } from 'react';
 
 interface ModernSkinProps {
   station: RadioStation | null;
@@ -9,28 +10,65 @@ interface ModernSkinProps {
   isShuffle: boolean;
   isFavorite: boolean;
   currentCity: CityLocation;
+  volume: number;
   onPlayPause: () => void;
   onPrevious: () => void;
   onNext: () => void;
   onToggleShuffle: () => void;
   onToggleFavorite: () => void;
-  onCityChange: () => void;
+  onCitySelect: (city: CityLocation) => void;
+  onVolumeChange: (volume: number) => void;
   theme?: 'light' | 'dark';
 }
+
+// Cities available for toggle (as requested)
+const CITY_GROUPS: CityLocation[] = ['california', 'texas', 'new-york', 'french', 'podcasts'];
 
 export function ModernSkin({
   station,
   isPlaying,
   isShuffle,
   isFavorite,
+  currentCity,
+  volume,
   onPlayPause,
   onPrevious,
   onNext,
   onToggleShuffle,
   onToggleFavorite,
+  onCitySelect,
+  onVolumeChange,
   theme = 'light'
 }: ModernSkinProps) {
   const [frequencyNum, setFrequencyNum] = useState(99.2);
+  const volumeRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  // Handle volume change via touch/mouse (horizontal slider)
+  const handleVolumeInteraction = (clientX: number) => {
+    if (!volumeRef.current) return;
+    const rect = volumeRef.current.getBoundingClientRect();
+    const width = rect.width;
+    const offsetX = clientX - rect.left;
+    const newVolume = Math.max(0, Math.min(1, offsetX / width));
+    onVolumeChange(newVolume);
+  };
+
+  const handleVolumeStart = (e: React.MouseEvent | React.TouchEvent) => {
+    setIsDragging(true);
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    handleVolumeInteraction(clientX);
+  };
+
+  const handleVolumeMove = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!isDragging) return;
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    handleVolumeInteraction(clientX);
+  };
+
+  const handleVolumeEnd = () => {
+    setIsDragging(false);
+  };
 
   // Extract numeric frequency from station
   useEffect(() => {
@@ -137,8 +175,30 @@ export function ModernSkin({
         </div>
       </div>
 
+      {/* City Toggle Buttons */}
+      <div className="w-full max-w-md mb-6">
+        <div className="flex flex-wrap justify-center gap-2">
+          {CITY_GROUPS.map((city) => (
+            <motion.button
+              key={city}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => onCitySelect(city)}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                currentCity === city
+                  ? theme === 'dark'
+                    ? 'bg-rose-500 text-white shadow-lg'
+                    : 'bg-rose-500 text-white shadow-lg'
+                  : buttonBg + ' ' + secondaryText
+              }`}
+            >
+              {cityThemes[city].name}
+            </motion.button>
+          ))}
+        </div>
+      </div>
+
       {/* Bottom Controls */}
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md space-y-6">
         <div className="flex items-center justify-center gap-8">
           {/* Previous Button */}
           <motion.button
@@ -170,6 +230,32 @@ export function ModernSkin({
           >
             <SkipForward className={`w-6 h-6 ${textColor}`} fill="currentColor" />
           </motion.button>
+        </div>
+
+        {/* Volume Slider - Touch friendly */}
+        <div className="flex items-center gap-3 px-4">
+          <Volume2 className={`w-5 h-5 ${secondaryText}`} />
+          <div
+            ref={volumeRef}
+            className={`flex-1 h-3 ${dialBg} rounded-full relative cursor-pointer touch-none`}
+            onMouseDown={handleVolumeStart}
+            onMouseMove={handleVolumeMove}
+            onMouseUp={handleVolumeEnd}
+            onMouseLeave={handleVolumeEnd}
+            onTouchStart={handleVolumeStart}
+            onTouchMove={handleVolumeMove}
+            onTouchEnd={handleVolumeEnd}
+          >
+            <motion.div
+              className="absolute left-0 top-0 h-full bg-rose-500 rounded-full"
+              style={{ width: `${volume * 100}%` }}
+            />
+            <motion.div
+              className={`absolute top-1/2 -translate-y-1/2 w-5 h-5 rounded-full shadow-lg ${theme === 'dark' ? 'bg-white' : 'bg-gray-900'}`}
+              style={{ left: `calc(${volume * 100}% - 10px)` }}
+            />
+          </div>
+          <span className={`${secondaryText} text-sm w-10`}>{Math.round(volume * 100)}%</span>
         </div>
       </div>
     </div>
