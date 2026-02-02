@@ -67,7 +67,12 @@ export function useRadioPlayer() {
         .eq('id', user.id)
         .single();
 
-      if (error) throw error;
+      // If columns don't exist or query fails, use defaults (radio feature not yet deployed)
+      if (error) {
+        logger.info('[RadioPlayer] Using default preferences (columns may not exist yet)');
+        setLoading(false);
+        return;
+      }
 
       if (data) {
         const currentStationId = data.radio_current_station_id;
@@ -84,8 +89,8 @@ export function useRadioPlayer() {
         }));
       }
     } catch (err) {
-      logger.error('[RadioPlayer] Failed to load preferences:', err);
-      setError('Failed to load radio preferences');
+      // Silently use defaults if preferences can't be loaded
+      logger.info('[RadioPlayer] Using default preferences:', err);
     } finally {
       setLoading(false);
     }
@@ -109,9 +114,13 @@ export function useRadioPlayer() {
         .update(dbUpdates)
         .eq('id', user.id);
 
-      if (error) throw error;
+      // Silently ignore errors (columns may not exist yet)
+      if (error) {
+        logger.info('[RadioPlayer] Could not save preferences (columns may not exist yet)');
+      }
     } catch (err) {
-      logger.error('[RadioPlayer] Failed to save preferences:', err);
+      // Silently ignore - preferences will work locally until migration is applied
+      logger.info('[RadioPlayer] Preferences saved locally only:', err);
     }
   };
 
