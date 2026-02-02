@@ -444,14 +444,14 @@ function ClientProfileDialogComponent({ open, onOpenChange }: Props) {
               <div className="flex items-center justify-between">
                 <div>
                   <Label className="text-white text-lg sm:text-xl font-bold">📸 Profile Photos</Label>
-                  <p className="text-white/60 text-xs sm:text-sm mt-1">Add up to 10 photos • First photo is your main photo</p>
+                  <p className="text-white/60 text-xs sm:text-sm mt-1">Add up to 5 photos • First photo is your main photo</p>
                 </div>
                 <Badge variant="secondary" className="bg-red-500/20 text-red-400 border-red-400">
-                  {profileImages.length}/10
+                  {profileImages.length}/5
                 </Badge>
               </div>
               <PhotoUploadManager
-                maxPhotos={10}
+                maxPhotos={5}
                 currentPhotos={profileImages}
                 onPhotosChange={setProfileImages}
                 uploadType="profile"
