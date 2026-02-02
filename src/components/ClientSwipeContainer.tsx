@@ -94,6 +94,19 @@ const ClientSwipeContainerComponent = ({
   const navigate = useNavigate();
   // PERF: Get userId from auth to pass to query (avoids getUser() inside queryFn)
   const { user } = useAuth();
+
+  // Dynamic labels based on category
+  const getCategoryLabel = () => {
+    switch (category) {
+      case 'property': return { singular: 'Property', plural: 'Properties', searchText: 'Searching for Properties' };
+      case 'bicycle': return { singular: 'Bicycle', plural: 'Bicycles', searchText: 'Searching for Bicycles' };
+      case 'motorcycle': return { singular: 'Motorcycle', plural: 'Motorcycles', searchText: 'Searching for Motorcycles' };
+      case 'worker': return { singular: 'Job', plural: 'Jobs', searchText: 'Searching for Jobs' };
+      default: return { singular: 'Client', plural: 'Clients', searchText: 'Searching for Listings' };
+    }
+  };
+
+  const labels = getCategoryLabel();
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
@@ -715,7 +728,7 @@ const ClientSwipeContainerComponent = ({
           <div className="space-y-2">
             <h3 className="text-xl font-semibold text-foreground">All Caught Up!</h3>
             <p className="text-muted-foreground text-sm max-w-xs mx-auto">
-              You've seen all available clients. Check back later or refresh for new profiles.
+              You've seen all available {labels.plural.toLowerCase()}. Check back later or refresh for new listings.
             </p>
           </div>
           <div className="flex flex-col gap-3">
@@ -730,10 +743,10 @@ const ClientSwipeContainerComponent = ({
                 ) : (
                   <RefreshCw className="w-5 h-5" />
                 )}
-                {String(isRefreshing ? 'Scanning for Clients...' : 'Discover More')}
+                {String(isRefreshing ? `Scanning for ${labels.plural}...` : 'Discover More')}
               </Button>
             </motion.div>
-            <p className="text-xs text-muted-foreground">New clients are joining daily</p>
+            <p className="text-xs text-muted-foreground">New {labels.plural.toLowerCase()} are added daily</p>
           </div>
         </motion.div>
       </div>
@@ -779,9 +792,9 @@ const ClientSwipeContainerComponent = ({
           />
 
           <div className="space-y-2">
-            <h3 className="text-xl font-semibold text-foreground">No Clients Found</h3>
+            <h3 className="text-xl font-semibold text-foreground">No {labels.plural} Found</h3>
             <p className="text-muted-foreground text-sm max-w-xs mx-auto">
-              Try adjusting your filters or refresh to discover new clients
+              Try adjusting your filters or refresh to discover new {labels.plural.toLowerCase()}
             </p>
           </div>
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
@@ -795,7 +808,7 @@ const ClientSwipeContainerComponent = ({
               ) : (
                 <RefreshCw className="w-4 h-4" />
               )}
-              {isRefreshing ? 'Scanning...' : 'Refresh Clients'}
+              {isRefreshing ? 'Scanning...' : `Refresh ${labels.plural}`}
             </Button>
           </motion.div>
         </motion.div>
