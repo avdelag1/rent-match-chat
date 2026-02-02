@@ -144,7 +144,7 @@ export function LikedPropertiesDialog({ isOpen, onClose, onPropertySelect }: Lik
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="absolute top-2 right-2 z-10 bg-white/80 hover:bg-white opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-2 right-2 z-10 bg-background hover:bg-destructive hover:text-destructive-foreground opacity-0 group-hover:opacity-100 transition-all shadow-md"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleRemoveLike(property.id);
