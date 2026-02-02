@@ -3,7 +3,7 @@
  * Types and interfaces for the location-themed radio player
  */
 
-export type RadioSkin = 'iphone' | 'vinyl' | 'ipod';
+export type RadioSkin = 'modern' | 'vinyl' | 'retro';
 
 export type CityLocation =
   | 'new-york'
