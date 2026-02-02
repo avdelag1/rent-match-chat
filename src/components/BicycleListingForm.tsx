@@ -63,7 +63,8 @@ export function BicycleListingForm({ onDataChange, initialData }: BicycleListing
   const isElectric = watch('electric_assist');
 
   useEffect(() => {
-    if (formData.title) {
+    // Only validate title if it has actual content (not empty or just whitespace)
+    if (formData.title && formData.title.trim().length > 0) {
       const error = validateNoContactInfo(formData.title);
       if (error) {
         toast({

@@ -51,7 +51,8 @@ export function MotorcycleListingForm({ onDataChange, initialData }: MotorcycleL
   const formData = watch();
 
   useEffect(() => {
-    if (formData.title) {
+    // Only validate title if it has actual content (not empty or just whitespace)
+    if (formData.title && formData.title.trim().length > 0) {
       const error = validateNoContactInfo(formData.title);
       if (error) {
         toast({
