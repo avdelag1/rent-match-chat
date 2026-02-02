@@ -2,7 +2,7 @@ name: Deploy Supabase Migrations
 
 on:
   push:
-    branches: [main, 'claude/*']
+    branches: [main]
     paths:
       - 'supabase/migrations/**'
       - 'supabase/**'
