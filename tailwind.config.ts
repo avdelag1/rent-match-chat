@@ -36,6 +36,12 @@ export default {
 			'brand': ['Quicksand', 'Poppins', 'system-ui', 'sans-serif'],
 			'inter': ['Inter', 'system-ui', 'sans-serif'],
 		},
+			transitionDuration: {
+				'50': '50ms',
+			},
+			transitionTimingFunction: {
+				'ios': 'cubic-bezier(0.25, 0.1, 0.25, 1)',
+			},
 			colors: {
 				// Modern theme system with CSS variables - using HSL format
 				'theme-primary': 'hsl(var(--bg-primary))',

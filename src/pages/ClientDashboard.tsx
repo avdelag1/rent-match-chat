@@ -1,10 +1,12 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, lazy, Suspense } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { TinderentSwipeContainer } from '@/components/TinderentSwipeContainer';
-import { PropertyInsightsDialog } from '@/components/PropertyInsightsDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { ListingFilters } from '@/hooks/useSmartMatching';
 import { Listing } from '@/hooks/useListings';
+
+// Lazy load PropertyInsightsDialog to reduce bundle size
+const PropertyInsightsDialog = lazy(() => import('@/components/PropertyInsightsDialog').then(m => ({ default: m.PropertyInsightsDialog })));
 
 interface ClientDashboardProps {
   onPropertyInsights?: (listingId: string) => void;
@@ -59,11 +61,13 @@ export default function ClientDashboard({ onPropertyInsights, onMessageClick, fi
         filters={filters}
       />
 
-      <PropertyInsightsDialog
-        open={insightsOpen}
-        onOpenChange={setInsightsOpen}
-        listing={selectedListing ?? null}
-      />
+      <Suspense fallback={null}>
+        <PropertyInsightsDialog
+          open={insightsOpen}
+          onOpenChange={setInsightsOpen}
+          listing={selectedListing ?? null}
+        />
+      </Suspense>
     </>
   );
 }

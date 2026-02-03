@@ -46,50 +46,50 @@ const FAQClientPage = lazy(() => import("./pages/FAQClientPage"));
 const FAQOwnerPage = lazy(() => import("./pages/FAQOwnerPage"));
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// INSTANT NAVIGATION: ALL core routes are DIRECT IMPORTS
-// Lazy loading causes delay on first tap - we want INSTANT navigation
+// OPTIMIZED LOADING: Lazy load routes to reduce initial bundle size
+// Suspense provides instant feedback, and modern React lazy loading is fast
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-// Client routes - ALL direct imports for instant navigation
-import ClientDashboard from "./pages/ClientDashboard";
-import ClientProfile from "./pages/ClientProfileNew";
-import ClientProfileSetup from "./pages/ClientProfileSetup";
-import ClientSettings from "./pages/ClientSettingsNew";
-import ClientLikedProperties from "./pages/ClientLikedProperties";
-import ClientWhoLikedYou from "./pages/ClientWhoLikedYou";
-import ClientSavedSearches from "./pages/ClientSavedSearches";
-import ClientSecurity from "./pages/ClientSecurity";
-import ClientWorkerDiscovery from "./pages/ClientWorkerDiscovery";
-import ClientContracts from "./pages/ClientContracts";
-import ClientLawyerServices from "./pages/ClientLawyerServices";
+// Client routes - lazy loaded to reduce bundle
+const ClientDashboard = lazy(() => import("./pages/ClientDashboard"));
+const ClientProfile = lazy(() => import("./pages/ClientProfileNew"));
+const ClientProfileSetup = lazy(() => import("./pages/ClientProfileSetup"));
+const ClientSettings = lazy(() => import("./pages/ClientSettingsNew"));
+const ClientLikedProperties = lazy(() => import("./pages/ClientLikedProperties"));
+const ClientWhoLikedYou = lazy(() => import("./pages/ClientWhoLikedYou"));
+const ClientSavedSearches = lazy(() => import("./pages/ClientSavedSearches"));
+const ClientSecurity = lazy(() => import("./pages/ClientSecurity"));
+const ClientWorkerDiscovery = lazy(() => import("./pages/ClientWorkerDiscovery"));
+const ClientContracts = lazy(() => import("./pages/ClientContracts"));
+const ClientLawyerServices = lazy(() => import("./pages/ClientLawyerServices"));
 
-// Owner routes - ALL direct imports for instant navigation
-import EnhancedOwnerDashboard from "./components/EnhancedOwnerDashboard";
-import OwnerProfile from "./pages/OwnerProfileNew";
-import OwnerSettings from "./pages/OwnerSettingsNew";
-import OwnerProperties from "./pages/OwnerProperties";
-import OwnerNewListing from "./pages/OwnerNewListing";
-import OwnerLikedClients from "./pages/OwnerLikedClients";
-import OwnerInterestedClients from "./pages/OwnerInterestedClients";
-import OwnerContracts from "./pages/OwnerContracts";
-import OwnerSavedSearches from "./pages/OwnerSavedSearches";
-import OwnerSecurity from "./pages/OwnerSecurity";
-import OwnerPropertyClientDiscovery from "./pages/OwnerPropertyClientDiscovery";
-import OwnerMotoClientDiscovery from "./pages/OwnerMotoClientDiscovery";
-import OwnerBicycleClientDiscovery from "./pages/OwnerBicycleClientDiscovery";
-import OwnerViewClientProfile from "./pages/OwnerViewClientProfile";
-import OwnerFiltersExplore from "./pages/OwnerFiltersExplore";
-import OwnerLawyerServices from "./pages/OwnerLawyerServices";
+// Owner routes - lazy loaded to reduce bundle
+const EnhancedOwnerDashboard = lazy(() => import("./components/EnhancedOwnerDashboard"));
+const OwnerProfile = lazy(() => import("./pages/OwnerProfileNew"));
+const OwnerSettings = lazy(() => import("./pages/OwnerSettingsNew"));
+const OwnerProperties = lazy(() => import("./pages/OwnerProperties"));
+const OwnerNewListing = lazy(() => import("./pages/OwnerNewListing"));
+const OwnerLikedClients = lazy(() => import("./pages/OwnerLikedClients"));
+const OwnerInterestedClients = lazy(() => import("./pages/OwnerInterestedClients"));
+const OwnerContracts = lazy(() => import("./pages/OwnerContracts"));
+const OwnerSavedSearches = lazy(() => import("./pages/OwnerSavedSearches"));
+const OwnerSecurity = lazy(() => import("./pages/OwnerSecurity"));
+const OwnerPropertyClientDiscovery = lazy(() => import("./pages/OwnerPropertyClientDiscovery"));
+const OwnerMotoClientDiscovery = lazy(() => import("./pages/OwnerMotoClientDiscovery"));
+const OwnerBicycleClientDiscovery = lazy(() => import("./pages/OwnerBicycleClientDiscovery"));
+const OwnerViewClientProfile = lazy(() => import("./pages/OwnerViewClientProfile"));
+const OwnerFiltersExplore = lazy(() => import("./pages/OwnerFiltersExplore"));
+const OwnerLawyerServices = lazy(() => import("./pages/OwnerLawyerServices"));
 
-// Filter pages - direct imports for instant navigation
-import ClientFilters from "./pages/ClientFilters";
-import OwnerFilters from "./pages/OwnerFilters";
+// Filter pages - lazy loaded to reduce bundle
+const ClientFilters = lazy(() => import("./pages/ClientFilters"));
+const OwnerFilters = lazy(() => import("./pages/OwnerFilters"));
 
-// Shared routes - direct imports for instant navigation
-import { MessagingDashboard } from "./pages/MessagingDashboard";
-import NotificationsPage from "./pages/NotificationsPage";
-import SubscriptionPackagesPage from "./pages/SubscriptionPackagesPage";
-import RadioPlayer from "./pages/RadioPlayer";
+// Shared routes - lazy loaded to reduce bundle
+const MessagingDashboard = lazy(() => import("./pages/MessagingDashboard").then(m => ({ default: m.MessagingDashboard })));
+const NotificationsPage = lazy(() => import("./pages/NotificationsPage"));
+const SubscriptionPackagesPage = lazy(() => import("./pages/SubscriptionPackagesPage"));
+const RadioPlayer = lazy(() => import("./pages/RadioPlayer"));
 
 // Rare pages - lazy loaded (payment, camera, legal, public previews)
 const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
