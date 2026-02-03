@@ -39,6 +39,9 @@ const Index = () => {
 
   const isNewUser = userAgeMs < 60000; // Less than 60 seconds since registration (increased from 30s)
 
+  // Track polling start time to prevent infinite loops
+  const roleQueryStartTimeRef = useRef(Date.now());
+
   const {
     data: userRole,
     isLoading: profileLoading,
@@ -59,26 +62,35 @@ const Index = () => {
       return data?.role;
     },
     enabled: !!user && initialized,
-    retry: 5, // Reduced from 10 to prevent excessive retries
-    retryDelay: (attemptIndex) => Math.min(500 * 2 ** attemptIndex, 3000),
+    retry: 3, // Reduced to prevent excessive retries
+    retryDelay: (attemptIndex) => Math.min(300 * 2 ** attemptIndex, 2000),
     staleTime: 30000,
     gcTime: 300000,
     refetchOnWindowFocus: false,
     refetchOnMount: true,
-    // Poll for role until we have one (not based on user age - that can cause issues)
-    // Stop polling after 30 seconds to prevent infinite polling
+    // Poll for role but with strong safety guards
     refetchInterval: (query) => {
       const role = query.state.data as string | null | undefined;
-      // Stop if no user, or we have a role
-      if (!user || role) return false;
-      // Stop polling after 30 seconds (user age check)
-      if (userAgeMs > 30000) return false;
-      // Limit refetch attempts to prevent infinite loops
-      const refetchCount = query.state.fetchMeta?.refetchCount || 0;
-      if (refetchCount > 50) {
-        logger.warn('[Index] Stopping role polling after 50 attempts');
+
+      // Stop if we have a role
+      if (role) return false;
+
+      // Stop if no user
+      if (!user) return false;
+
+      // Maximum polling duration: 25 seconds
+      const elapsedMs = Date.now() - roleQueryStartTimeRef.current;
+      if (elapsedMs > 25000) {
+        logger.warn('[Index] Stopping role polling after 25 seconds');
         return false;
       }
+
+      // Only poll new users - existing users should have role in metadata
+      if (!isNewUser) {
+        logger.warn('[Index] Not polling role for existing user - will use metadata');
+        return false;
+      }
+
       return 800; // Poll every 800ms while waiting for role
     },
   });
