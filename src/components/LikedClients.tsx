@@ -203,7 +203,7 @@ export function LikedClients() {
 
       // Return the client profiles with like data
       const likedClientsList = profiles.map(profile => {
-        const like = ownerLikes.find((l: any) => l.client_id === profile.id);
+        const like = ownerLikes.find((l: any) => l.target_id === profile.id);
         return {
           id: profile.id,
           user_id: profile.id,

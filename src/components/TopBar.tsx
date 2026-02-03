@@ -16,7 +16,7 @@ const MessageActivationText = () => (
     <span className="hidden sm:inline font-bold text-sm tracking-tight bg-gradient-to-r from-yellow-300 via-orange-400 to-yellow-300 bg-clip-text text-transparent whitespace-nowrap">
       Message Activation
     </span>
-    <Zap className="sm:hidden h-5 w-5 text-yellow-400" />
+    <Zap className="sm:hidden h-5 w-5 text-yellow-300 drop-shadow-[0_0_6px_rgba(253,224,71,0.6)]" />
   </>
 );
 
@@ -93,7 +93,7 @@ function TopBarComponent({
           {/* UPGRADED BRIGHTNESS: Added a subtle background glow on hover */}
           <Button
             variant="ghost"
-            className="relative h-9 sm:h-10 md:h-11 px-2 sm:px-3 md:px-4 hover:bg-white/5 rounded-xl transition-all duration-200 flex items-center"
+            className="relative h-9 sm:h-10 md:h-11 px-2 sm:px-3 md:px-4 hover:bg-white/10 rounded-xl transition-all duration-200 flex items-center"
             onClick={onMessageActivationsClick}
             aria-label="Message activations"
           >
@@ -103,7 +103,7 @@ function TopBarComponent({
           <Button
             variant="ghost"
             size="icon"
-            className="relative h-9 w-9 sm:h-10 sm:w-10 md:h-11 md:w-11 hover:bg-white/5 rounded-xl transition-all duration-200 group flex-shrink-0"
+            className="relative h-9 w-9 sm:h-10 sm:w-10 md:h-11 md:w-11 hover:bg-white/10 rounded-xl transition-all duration-200 group flex-shrink-0"
             onClick={() => navigate('/radio')}
             aria-label="Radio Player"
           >
@@ -112,14 +112,14 @@ function TopBarComponent({
               whileTap={{ scale: 0.95 }}
               transition={{ type: 'spring', stiffness: 400, damping: 17 }}
             >
-              <Radio className="h-5 w-5 sm:h-6 sm:w-6 text-gray-200 group-hover:text-white" />
+              <Radio className="h-5 w-5 sm:h-6 sm:w-6 text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.4)] group-hover:text-orange-300 group-hover:drop-shadow-[0_0_8px_rgba(253,186,116,0.6)]" />
             </motion.div>
           </Button>
 
           <Button
             variant="ghost"
             size="icon"
-            className="relative h-9 w-9 sm:h-10 sm:w-10 md:h-11 md:w-11 hover:bg-white/5 rounded-xl transition-all duration-200 group flex-shrink-0"
+            className="relative h-9 w-9 sm:h-10 sm:w-10 md:h-11 md:w-11 hover:bg-white/10 rounded-xl transition-all duration-200 group flex-shrink-0"
             onClick={onNotificationsClick}
             aria-label={`Notifications${notificationCount > 0 ? ` (${notificationCount} unread)` : ''}`}
           >
@@ -132,10 +132,10 @@ function TopBarComponent({
               {/* UPGRADED BRIGHTNESS: Icon is now brighter and more visible */}
               <Bell
                 className={cn(
-                  "h-5 w-5 sm:h-6 sm:w-6 transition-colors duration-200",
+                  "h-5 w-5 sm:h-6 sm:w-6 transition-all duration-200",
                   notificationCount > 0
-                    ? "text-amber-400 group-hover:text-amber-300"
-                    : "text-gray-200 group-hover:text-white"
+                    ? "text-amber-300 drop-shadow-[0_0_8px_rgba(252,211,77,0.6)] group-hover:text-amber-200"
+                    : "text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.4)] group-hover:text-orange-300 group-hover:drop-shadow-[0_0_8px_rgba(253,186,116,0.6)]"
                 )}
               />
               <AnimatePresence>
