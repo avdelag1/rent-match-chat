@@ -10,13 +10,13 @@ import { QuickFilterDropdown } from './QuickFilterDropdown';
 import { ModeSwitcher } from './ModeSwitcher';
 import { useScrollDirection } from '@/hooks/useScrollDirection';
 
-// UPGRADED BRIGHTNESS: Text is now a brighter, more vibrant gradient
+// UPGRADED BRIGHTNESS: Text is now a brighter, more vibrant gradient with glow effect
 const MessageActivationText = () => (
   <>
-    <span className="hidden sm:inline font-bold text-sm tracking-tight bg-gradient-to-r from-yellow-300 via-orange-400 to-yellow-300 bg-clip-text text-transparent whitespace-nowrap">
+    <span className="hidden sm:inline font-bold text-sm tracking-tight bg-gradient-to-r from-yellow-200 via-orange-300 to-yellow-200 bg-clip-text text-transparent whitespace-nowrap drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]">
       Message Activation
     </span>
-    <Zap className="sm:hidden h-5 w-5 text-yellow-400" />
+    <Zap className="sm:hidden h-5 w-5 text-yellow-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]" />
   </>
 );
 
@@ -93,7 +93,7 @@ function TopBarComponent({
           {/* UPGRADED BRIGHTNESS: Added a subtle background glow on hover */}
           <Button
             variant="ghost"
-            className="relative h-9 sm:h-10 md:h-11 px-2 sm:px-3 md:px-4 hover:bg-white/5 rounded-xl transition-all duration-200 flex items-center"
+            className="relative h-9 sm:h-10 md:h-11 px-2 sm:px-3 md:px-4 hover:bg-white/10 rounded-xl transition-all duration-200 flex items-center"
             onClick={onMessageActivationsClick}
             aria-label="Message activations"
           >
@@ -103,7 +103,7 @@ function TopBarComponent({
           <Button
             variant="ghost"
             size="icon"
-            className="relative h-9 w-9 sm:h-10 sm:w-10 md:h-11 md:w-11 hover:bg-white/5 rounded-xl transition-all duration-200 group flex-shrink-0"
+            className="relative h-9 w-9 sm:h-10 sm:w-10 md:h-11 md:w-11 hover:bg-white/10 rounded-xl transition-all duration-200 group flex-shrink-0"
             onClick={() => navigate('/radio')}
             aria-label="Radio Player"
           >
@@ -112,14 +112,14 @@ function TopBarComponent({
               whileTap={{ scale: 0.95 }}
               transition={{ type: 'spring', stiffness: 400, damping: 17 }}
             >
-              <Radio className="h-5 w-5 sm:h-6 sm:w-6 text-gray-200 group-hover:text-white" />
+              <Radio className="h-5 w-5 sm:h-6 sm:w-6 text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.5)] group-hover:text-white group-hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]" />
             </motion.div>
           </Button>
 
           <Button
             variant="ghost"
             size="icon"
-            className="relative h-9 w-9 sm:h-10 sm:w-10 md:h-11 md:w-11 hover:bg-white/5 rounded-xl transition-all duration-200 group flex-shrink-0"
+            className="relative h-9 w-9 sm:h-10 sm:w-10 md:h-11 md:w-11 hover:bg-white/10 rounded-xl transition-all duration-200 group flex-shrink-0"
             onClick={onNotificationsClick}
             aria-label={`Notifications${notificationCount > 0 ? ` (${notificationCount} unread)` : ''}`}
           >
@@ -129,13 +129,13 @@ function TopBarComponent({
               whileTap={{ scale: 0.95 }}
               transition={{ type: 'spring', stiffness: 400, damping: 17 }}
             >
-              {/* UPGRADED BRIGHTNESS: Icon is now brighter and more visible */}
+              {/* UPGRADED BRIGHTNESS: Icon is now brighter and more visible with glow effect */}
               <Bell
                 className={cn(
                   "h-5 w-5 sm:h-6 sm:w-6 transition-colors duration-200",
                   notificationCount > 0
-                    ? "text-amber-400 group-hover:text-amber-300"
-                    : "text-gray-200 group-hover:text-white"
+                    ? "text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.7)] group-hover:text-amber-200 group-hover:drop-shadow-[0_0_12px_rgba(251,191,36,0.9)]"
+                    : "text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.5)] group-hover:text-white group-hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]"
                 )}
               />
               <AnimatePresence>
