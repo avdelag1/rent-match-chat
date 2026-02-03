@@ -59,8 +59,8 @@ const Index = () => {
       return data?.role;
     },
     enabled: !!user && initialized,
-    retry: 10, // More retries for reliability
-    retryDelay: (attemptIndex) => Math.min(500 * 2 ** attemptIndex, 5000),
+    retry: 5, // Reduced from 10 to prevent excessive retries
+    retryDelay: (attemptIndex) => Math.min(500 * 2 ** attemptIndex, 3000),
     staleTime: 30000,
     gcTime: 300000,
     refetchOnWindowFocus: false,
@@ -73,6 +73,12 @@ const Index = () => {
       if (!user || role) return false;
       // Stop polling after 30 seconds (user age check)
       if (userAgeMs > 30000) return false;
+      // Limit refetch attempts to prevent infinite loops
+      const refetchCount = query.state.fetchMeta?.refetchCount || 0;
+      if (refetchCount > 50) {
+        logger.warn('[Index] Stopping role polling after 50 attempts');
+        return false;
+      }
       return 800; // Poll every 800ms while waiting for role
     },
   });

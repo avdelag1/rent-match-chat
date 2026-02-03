@@ -42,7 +42,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Initialize auth state from Supabase session storage
     const initializeAuth = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+        // Add timeout to prevent hanging on slow/unresponsive Supabase
+        const sessionPromise = supabase.auth.getSession();
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Session check timeout')), 8000)
+        );
+
+        let session = null;
+        let error = null;
+
+        try {
+          const result = await Promise.race([sessionPromise, timeoutPromise]) as any;
+          session = result.data?.session;
+          error = result.error;
+        } catch (timeoutError) {
+          logger.warn('[Auth] Session check timed out after 8s, treating as no session');
+          session = null;
+        }
 
         if (error) {
           logger.error('[Auth] Session retrieval error:', error);

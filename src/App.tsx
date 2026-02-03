@@ -154,7 +154,6 @@ const App = () => (
             <PWAProvider>
             <RadioProvider>
             <ResponsiveProvider>
-            <RadioProvider>
             <UpdateWrapper>
               <NotificationWrapper>
                 {/* Global ambient parallax background - mounted once, persists across screens */}
@@ -259,7 +258,6 @@ const App = () => (
               </AppLayout>
             </NotificationWrapper>
             </UpdateWrapper>
-            </RadioProvider>
             </ResponsiveProvider>
             </RadioProvider>
             </PWAProvider>
