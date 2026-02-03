@@ -134,10 +134,10 @@ export function ModernSkin({
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className={`absolute top-20 left-4 right-4 z-50 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-2xl p-4 shadow-2xl`}
+            className={`absolute top-20 left-4 right-4 z-50 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-2xl p-4 shadow-2xl max-w-md mx-auto`}
           >
             <div className={`${secondaryText} text-xs uppercase tracking-wider mb-3 text-center`}>Select City</div>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               {allCities.map((city) => {
                 const cTheme = cityThemes[city];
                 const isSelected = city === currentCity;
@@ -149,10 +149,10 @@ export function ModernSkin({
                       onCitySelect(city);
                       setShowCitySelector(false);
                     }}
-                    className={`p-2 rounded-xl transition-all ${
+                    className={`px-4 py-3 rounded-xl transition-all text-left ${
                       isSelected
                         ? 'ring-2 ring-rose-500 shadow-lg'
-                        : theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
+                        : theme === 'dark' ? 'hover:bg-gray-700 bg-gray-700/50' : 'hover:bg-gray-100 bg-gray-50'
                     }`}
                     style={{
                       background: isSelected
@@ -160,18 +160,18 @@ export function ModernSkin({
                         : undefined
                     }}
                   >
-                    <div className="text-2xl mb-1">
-                      {city === 'new-york' && '🗽'}
-                      {city === 'miami' && '🌴'}
-                      {city === 'ibiza' && '🎧'}
-                      {city === 'tulum' && '🏝️'}
-                      {city === 'california' && '🌊'}
-                      {city === 'texas' && '🤠'}
-                      {city === 'french' && '🗼'}
-                      {city === 'podcasts' && '🎙️'}
-                    </div>
-                    <div className={`text-[10px] font-medium ${isSelected ? 'text-white' : secondaryText}`}>
+                    <div className={`text-sm font-semibold ${isSelected ? 'text-white' : textColor}`}>
                       {cTheme.name}
+                    </div>
+                    <div className={`text-xs ${isSelected ? 'text-white/80' : secondaryText} mt-0.5`}>
+                      {city === 'new-york' && 'New York Vibes'}
+                      {city === 'miami' && 'Tropical Beats'}
+                      {city === 'ibiza' && 'Electronic Party'}
+                      {city === 'tulum' && 'Beach Ambient'}
+                      {city === 'california' && 'West Coast'}
+                      {city === 'texas' && 'Lone Star'}
+                      {city === 'french' && 'French Culture'}
+                      {city === 'podcasts' && 'Talk & Stories'}
                     </div>
                   </motion.button>
                 );

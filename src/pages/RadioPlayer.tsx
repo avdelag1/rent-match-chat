@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRadioContext } from '@/contexts/RadioContext';
 import { ModernSkin } from '@/components/radio/skins/ModernSkin';
@@ -28,6 +28,13 @@ export default function RadioPlayer() {
     setVolume,
     isStationFavorite
   } = useRadioContext();
+
+  // Show error toast when error occurs
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
 
   const [showSkinSelector, setShowSkinSelector] = useState(false);
   const [showPlaylistDialog, setShowPlaylistDialog] = useState(false);

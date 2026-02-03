@@ -92,7 +92,7 @@ export function RetroSkin({
               <div className="text-cyan-400 text-xs uppercase tracking-wider mb-3 text-center font-mono">
                 Select City Station
               </div>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 {allCities.map((city) => {
                   const cTheme = cityThemes[city];
                   const isSelected = city === currentCity;
@@ -104,29 +104,29 @@ export function RetroSkin({
                         onCitySelect(city);
                         setShowCitySelector(false);
                       }}
-                      className={`p-2 rounded-lg transition-all ${
+                      className={`px-4 py-3 rounded-lg transition-all text-left ${
                         isSelected
                           ? 'ring-2 ring-cyan-400 shadow-lg'
-                          : 'hover:bg-gray-700'
+                          : 'hover:bg-gray-700 bg-gray-700/50'
                       }`}
                       style={{
                         background: isSelected
                           ? `linear-gradient(135deg, ${cTheme.primaryColor}, ${cTheme.secondaryColor})`
-                          : 'rgba(55, 65, 81, 0.5)'
+                          : undefined
                       }}
                     >
-                      <div className="text-xl mb-1">
-                        {city === 'new-york' && '🗽'}
-                        {city === 'miami' && '🌴'}
-                        {city === 'ibiza' && '🎧'}
-                        {city === 'tulum' && '🏝️'}
-                        {city === 'california' && '🌊'}
-                        {city === 'texas' && '🤠'}
-                        {city === 'french' && '🗼'}
-                        {city === 'podcasts' && '🎙️'}
-                      </div>
-                      <div className={`text-[9px] font-medium ${isSelected ? 'text-white' : 'text-gray-400'}`}>
+                      <div className={`text-sm font-semibold ${isSelected ? 'text-white' : 'text-cyan-300'}`}>
                         {cTheme.name}
+                      </div>
+                      <div className={`text-xs ${isSelected ? 'text-white/80' : 'text-gray-400'} mt-0.5`}>
+                        {city === 'new-york' && 'New York Vibes'}
+                        {city === 'miami' && 'Tropical Beats'}
+                        {city === 'ibiza' && 'Electronic Party'}
+                        {city === 'tulum' && 'Beach Ambient'}
+                        {city === 'california' && 'West Coast'}
+                        {city === 'texas' && 'Lone Star'}
+                        {city === 'french' && 'French Culture'}
+                        {city === 'podcasts' && 'Talk & Stories'}
                       </div>
                     </motion.button>
                   );

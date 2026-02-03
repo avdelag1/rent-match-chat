@@ -340,31 +340,31 @@ export const radioStations: RadioStation[] = [
 
   // Ibiza - Electronic Paradise
   {
-    id: 'ibiza-global',
-    name: 'Ibiza Global Radio',
+    id: 'ibiza-spacesta',
+    name: 'Space Station Soma',
     frequency: '97.6 FM',
-    streamUrl: 'https://ibizaglobalradio.streaming-pro.com/ibizaglobalradio.mp3',
+    streamUrl: 'https://ice1.somafm.com/spacestation-128-mp3',
     city: 'ibiza',
-    genre: 'Electronic',
-    description: 'The worlds most iconic electronic music station'
+    genre: 'Ambient Electronic',
+    description: 'Spaced-out ambient and mid-tempo electronica'
   },
   {
-    id: 'ibiza-sonica',
-    name: 'Ibiza Sonica',
+    id: 'ibiza-suburbs',
+    name: 'Suburbs of Goa',
     frequency: '95.2 FM',
-    streamUrl: 'https://s3.radio.co/s69777f731/listen',
+    streamUrl: 'https://ice1.somafm.com/suburbsofgoa-128-mp3',
     city: 'ibiza',
-    genre: 'Deep House',
-    description: 'Pure Ibiza underground sounds'
+    genre: 'Psybient',
+    description: 'Desi-influenced Asian world beats and beyond'
   },
   {
-    id: 'ibiza-live',
-    name: 'Ibiza Live Radio',
+    id: 'ibiza-dronezone',
+    name: 'Drone Zone',
     frequency: '103.2 FM',
-    streamUrl: 'https://cloudup.net/8240/stream',
+    streamUrl: 'https://ice1.somafm.com/dronezone-128-mp3',
     city: 'ibiza',
-    genre: 'House',
-    description: 'Live from the white isle'
+    genre: 'Ambient',
+    description: 'Atmospheric ambient perfect for Ibiza sunsets'
   },
   {
     id: 'ibiza-thetrip',
