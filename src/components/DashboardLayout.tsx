@@ -449,6 +449,9 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   // Camera routes are now INSIDE layout to prevent dashboard remount on navigate back
   const isCameraRoute = location.pathname.includes('/camera');
 
+  // Radio routes are fullscreen - hide TopBar/BottomNav so the player fills the viewport
+  const isRadioRoute = location.pathname.startsWith('/radio');
+
   // IMMERSIVE MODE: Detect swipe dashboard routes for full-bleed card experience
   // On these routes, TopBar becomes transparent and content extends behind it
   const isImmersiveDashboard = useMemo(() => {
@@ -475,9 +478,9 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           in App.tsx. This prevents race conditions and UI flickers from multiple handlers
           firing on the same conversation_messages INSERT event. */}
 
-      {/* Top Bar - Fixed with safe-area-top. Hidden on camera routes for fullscreen UX */}
+      {/* Top Bar - Fixed with safe-area-top. Hidden on camera/radio routes for fullscreen UX */}
       {/* Hides smoothly on scroll down and reappears on scroll up for all routes */}
-      {!isCameraRoute && (
+      {!isCameraRoute && !isRadioRoute && (
         <TopBar
           onNotificationsClick={handleNotificationsClick}
           onMessageActivationsClick={handleMessageActivationsClick}
@@ -494,10 +497,10 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         id="dashboard-scroll-container"
         className="absolute inset-0 overflow-y-auto overflow-x-hidden scroll-area-momentum"
         style={{
-          paddingTop: (isCameraRoute || isImmersiveDashboard) 
-            ? 'var(--safe-top)' 
+          paddingTop: (isCameraRoute || isRadioRoute || isImmersiveDashboard)
+            ? 'var(--safe-top)'
             : `calc(${topBarHeight}px + var(--safe-top))`,
-          paddingBottom: isCameraRoute ? 'var(--safe-bottom)' : `calc(${bottomNavHeight}px + var(--safe-bottom))`,
+          paddingBottom: (isCameraRoute || isRadioRoute) ? 'var(--safe-bottom)' : `calc(${bottomNavHeight}px + var(--safe-bottom))`,
           paddingLeft: 'max(var(--safe-left), 0px)',
           paddingRight: 'max(var(--safe-right), 0px)',
           width: '100%',
@@ -512,8 +515,8 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         {enhancedChildren}
       </main>
 
-      {/* Bottom Navigation - Fixed with safe-area-bottom. Hidden on camera routes for fullscreen UX */}
-      {!isCameraRoute && (
+      {/* Bottom Navigation - Fixed with safe-area-bottom. Hidden on camera/radio routes for fullscreen UX */}
+      {!isCameraRoute && !isRadioRoute && (
         <BottomNavigation
           userRole={userRole}
           onFilterClick={handleFilterClick}

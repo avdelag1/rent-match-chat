@@ -88,7 +88,7 @@ export default function RadioPlayer() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black flex items-center justify-center">
+      <div className="h-dvh bg-gradient-to-br from-gray-900 to-black flex items-center justify-center">
         <div className="text-white text-center">
           <div className="text-2xl font-bold mb-4">Loading Radio...</div>
           <div className="animate-pulse">🎵</div>
@@ -112,7 +112,7 @@ export default function RadioPlayer() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative h-dvh overflow-hidden">
       {/* Back Button */}
       <motion.button
         whileTap={{ scale: 0.95 }}
