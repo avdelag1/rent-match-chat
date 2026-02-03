@@ -125,6 +125,16 @@ export function ModernSkin({
     }
   }, [station]);
 
+  // Calculate red line position based on frequency (88-108 FM range)
+  const getDialPosition = () => {
+    if (frequencyNum === null) return 50; // Default to center
+    const minFreq = 88;
+    const maxFreq = 108;
+    const range = maxFreq - minFreq;
+    const position = ((frequencyNum - minFreq) / range) * 100;
+    return Math.max(10, Math.min(90, position)); // Clamp between 10% and 90%
+  };
+
   // Close city selector when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -151,25 +161,25 @@ export function ModernSkin({
   const buttonBg = theme === 'dark' ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-100 hover:bg-gray-200';
 
   return (
-    <div className={`h-screen ${bgColor} flex flex-col items-center justify-between p-3 pb-4 relative overflow-hidden`}>
+    <div className={`h-screen ${bgColor} flex flex-col items-center justify-between p-2 pb-3 relative overflow-hidden`}>
       {/* Top Icons */}
-      <div className="w-full max-w-md flex justify-between items-start pt-12">
+      <div className="w-full max-w-md flex justify-between items-start pt-14">
         <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={onToggleShuffle}
-          className={`p-3 rounded-full ${buttonBg} transition-colors`}
+          className={`p-2 rounded-full ${buttonBg} transition-colors`}
         >
-          <Shuffle className={`w-5 h-5 ${isShuffle ? accentColor : secondaryText}`} />
+          <Shuffle className={`w-4 h-4 ${isShuffle ? accentColor : secondaryText}`} />
         </motion.button>
 
-        <div className="flex gap-3">
+        <div className="flex gap-2">
           {/* City Selector Button */}
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={() => setShowCitySelector(!showCitySelector)}
-            className={`p-3 rounded-full ${buttonBg} transition-colors flex items-center gap-1`}
+            className={`p-2 rounded-full ${buttonBg} transition-colors flex items-center gap-1`}
           >
-            <Globe className={`w-5 h-5 ${secondaryText}`} />
+            <Globe className={`w-4 h-4 ${secondaryText}`} />
             <span className={`text-xs ${textColor}`}>{cityTheme.name.slice(0, 4)}</span>
             <ChevronDown className={`w-3 h-3 ${secondaryText} ${showCitySelector ? 'rotate-180' : ''} transition-transform`} />
           </motion.button>
@@ -177,10 +187,10 @@ export function ModernSkin({
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={onToggleFavorite}
-            className={`p-3 rounded-full ${buttonBg} transition-colors`}
+            className={`p-2 rounded-full ${buttonBg} transition-colors`}
           >
             <Heart
-              className={`w-5 h-5 ${isFavorite ? 'text-red-500 fill-red-500' : secondaryText}`}
+              className={`w-4 h-4 ${isFavorite ? 'text-red-500 fill-red-500' : secondaryText}`}
             />
           </motion.button>
         </div>
@@ -242,29 +252,29 @@ export function ModernSkin({
       </AnimatePresence>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center justify-center w-full max-w-md space-y-3">
+      <div className="flex-1 flex flex-col items-center justify-center w-full max-w-md space-y-2">
         {/* Large Frequency Display */}
         <div className="text-center">
           <motion.div
-            className={`text-5xl font-light ${textColor} mb-0 tracking-tighter`}
+            className={`text-4xl font-light ${textColor} mb-0 tracking-tighter`}
             animate={{ opacity: [0.8, 1, 0.8] }}
             transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
           >
             {frequencyNum !== null ? frequencyNum.toFixed(1) : '--.-'}
           </motion.div>
-          <div className={`text-xl font-light ${secondaryText} -mt-1`}>FM</div>
+          <div className={`text-lg font-light ${secondaryText} -mt-1`}>FM</div>
         </div>
 
         {/* Station Info */}
         {station && (
-          <div className="text-center space-y-0.5">
-            <div className={`text-xs font-medium ${accentColor} flex items-center justify-center gap-1.5`}>
-              <Radio className="w-3.5 h-3.5" />
+          <div className="text-center space-y-0">
+            <div className={`text-xs font-medium ${accentColor} flex items-center justify-center gap-1`}>
+              <Radio className="w-3 h-3" />
               {isPlaying ? 'PLAYING' : 'PAUSED'}
             </div>
-            <div className={`text-lg font-medium ${textColor}`}>{station.name}</div>
-            <div className={`text-xs ${secondaryText} flex items-center justify-center gap-2`}>
-              <span className={`px-2 py-0.5 rounded-full text-xs ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'}`}>
+            <div className={`text-base font-medium ${textColor}`}>{station.name}</div>
+            <div className={`text-xs ${secondaryText} flex items-center justify-center gap-1.5`}>
+              <span className={`px-1.5 py-0.5 rounded-full text-xs ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'}`}>
                 {cityTheme.name}
               </span>
               <span>{station.genre}</span>
@@ -273,10 +283,10 @@ export function ModernSkin({
         )}
 
         {/* Horizontal Frequency Dial */}
-        <div className="w-full space-y-2">
+        <div className="w-full space-y-1">
           <div
             ref={dialRef}
-            className={`w-full h-14 ${dialBg} rounded-xl relative overflow-hidden cursor-pointer touch-none select-none ${isDialDragging ? 'scale-[1.02]' : ''} transition-transform`}
+            className={`w-full h-12 ${dialBg} rounded-xl relative overflow-hidden cursor-pointer touch-none select-none ${isDialDragging ? 'scale-[1.02]' : ''} transition-transform`}
             onMouseDown={handleDialStart}
             onMouseMove={handleDialMove}
             onMouseUp={handleDialEnd}
@@ -298,10 +308,15 @@ export function ModernSkin({
                   ))}
                 </div>
 
-                {/* Current frequency indicator (red line) */}
-                <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-center justify-center">
-                  <div className="w-1 h-14 bg-gradient-to-b from-transparent via-rose-500 to-transparent" />
-                </div>
+                {/* Current frequency indicator (red line) - Animated based on frequency */}
+                <motion.div
+                  className="absolute top-0 bottom-0 flex flex-col items-center justify-center"
+                  animate={{ left: `${getDialPosition()}%` }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                  style={{ transform: 'translateX(-50%)' }}
+                >
+                  <div className="w-1 h-12 bg-gradient-to-b from-transparent via-rose-500 to-transparent shadow-lg shadow-rose-500/50" />
+                </motion.div>
 
                 {/* Animated waves when playing */}
                 {isPlaying && (
@@ -321,14 +336,14 @@ export function ModernSkin({
       </div>
 
       {/* City Toggle Buttons */}
-      <div className="w-full max-w-md mb-2">
+      <div className="w-full max-w-md mb-1">
         <div className="flex flex-wrap justify-center gap-1">
           {CITY_GROUPS.map((city) => (
             <motion.button
               key={city}
               whileTap={{ scale: 0.95 }}
               onClick={() => onCitySelect(city)}
-              className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
+              className={`px-2 py-0.5 rounded-full text-xs font-medium transition-all ${
                 currentCity === city
                   ? theme === 'dark'
                     ? 'bg-rose-500 text-white shadow-lg'
@@ -343,27 +358,27 @@ export function ModernSkin({
       </div>
 
       {/* Bottom Controls */}
-      <div className="w-full max-w-md space-y-2">
-        <div className="flex items-center justify-center gap-4">
+      <div className="w-full max-w-md space-y-1.5">
+        <div className="flex items-center justify-center gap-3">
           {/* Previous Button */}
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={onPrevious}
-            className={`p-2.5 rounded-full ${buttonBg} transition-colors`}
+            className={`p-2 rounded-full ${buttonBg} transition-colors`}
           >
-            <SkipBack className={`w-5 h-5 ${textColor}`} fill="currentColor" />
+            <SkipBack className={`w-4 h-4 ${textColor}`} fill="currentColor" />
           </motion.button>
 
           {/* Play/Pause Button */}
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={onPlayPause}
-            className={`p-5 rounded-full ${theme === 'dark' ? 'bg-white' : 'bg-gray-900'} shadow-xl transition-all`}
+            className={`p-4 rounded-full ${theme === 'dark' ? 'bg-white' : 'bg-gray-900'} shadow-xl transition-all`}
           >
             {isPlaying ? (
-              <Pause className={`w-6 h-6 ${theme === 'dark' ? 'text-gray-900' : 'text-white'}`} fill="currentColor" />
+              <Pause className={`w-5 h-5 ${theme === 'dark' ? 'text-gray-900' : 'text-white'}`} fill="currentColor" />
             ) : (
-              <Play className={`w-6 h-6 ${theme === 'dark' ? 'text-gray-900' : 'text-white'} ml-1`} fill="currentColor" />
+              <Play className={`w-5 h-5 ${theme === 'dark' ? 'text-gray-900' : 'text-white'} ml-0.5`} fill="currentColor" />
             )}
           </motion.button>
 
@@ -371,18 +386,18 @@ export function ModernSkin({
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={onNext}
-            className={`p-2.5 rounded-full ${buttonBg} transition-colors`}
+            className={`p-2 rounded-full ${buttonBg} transition-colors`}
           >
-            <SkipForward className={`w-5 h-5 ${textColor}`} fill="currentColor" />
+            <SkipForward className={`w-4 h-4 ${textColor}`} fill="currentColor" />
           </motion.button>
         </div>
 
         {/* Volume Slider - Touch friendly */}
-        <div className="flex items-center gap-2 px-2">
-          <Volume2 className={`w-4 h-4 ${secondaryText}`} />
+        <div className="flex items-center gap-1.5 px-2">
+          <Volume2 className={`w-3.5 h-3.5 ${secondaryText}`} />
           <div
             ref={volumeRef}
-            className={`flex-1 h-2 ${dialBg} rounded-full relative cursor-pointer touch-none`}
+            className={`flex-1 h-1.5 ${dialBg} rounded-full relative cursor-pointer touch-none`}
             onMouseDown={handleVolumeStart}
             onMouseMove={handleVolumeMove}
             onMouseUp={handleVolumeEnd}
@@ -396,11 +411,11 @@ export function ModernSkin({
               style={{ width: `${volume * 100}%` }}
             />
             <motion.div
-              className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full shadow-lg ${theme === 'dark' ? 'bg-white' : 'bg-gray-900'}`}
-              style={{ left: `calc(${volume * 100}% - 8px)` }}
+              className={`absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full shadow-lg ${theme === 'dark' ? 'bg-white' : 'bg-gray-900'}`}
+              style={{ left: `calc(${volume * 100}% - 6px)` }}
             />
           </div>
-          <span className={`${secondaryText} text-xs w-8`}>{Math.round(volume * 100)}%</span>
+          <span className={`${secondaryText} text-xs w-7`}>{Math.round(volume * 100)}%</span>
         </div>
       </div>
     </div>
