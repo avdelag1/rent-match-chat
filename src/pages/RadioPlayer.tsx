@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRadioContext } from '@/contexts/RadioContext';
 import { ModernSkin } from '@/components/radio/skins/ModernSkin';
@@ -8,7 +8,7 @@ import { PlaylistDialog } from '@/components/radio/PlaylistDialog';
 import { cityThemes } from '@/data/radioStations';
 import { CityLocation, RadioSkin } from '@/types/radio';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, List } from 'lucide-react';
+import { ArrowLeft, List, Palette } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -39,6 +39,26 @@ export default function RadioPlayer() {
   const [showSkinSelector, setShowSkinSelector] = useState(false);
   const [showPlaylistDialog, setShowPlaylistDialog] = useState(false);
   const [addingToPlaylist, setAddingToPlaylist] = useState(false);
+
+  const skinSelectorRef = useRef<HTMLDivElement>(null);
+
+  // Close skin selector when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (skinSelectorRef.current && !skinSelectorRef.current.contains(event.target as Node)) {
+        // Check if the click is on the button itself
+        const target = event.target as HTMLElement;
+        if (!target.closest('[aria-label="Change skin"]')) {
+          setShowSkinSelector(false);
+        }
+      }
+    };
+
+    if (showSkinSelector) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showSkinSelector]);
 
   const handleCitySelect = (city: CityLocation) => {
     setCity(city);
@@ -118,13 +138,14 @@ export default function RadioPlayer() {
         className="fixed top-20 right-16 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg"
         aria-label="Change skin"
       >
-        <span className="text-lg">🎨</span>
+        <Palette className="w-5 h-5" />
       </motion.button>
 
       {/* Skin Selector Dropdown */}
       <AnimatePresence>
         {showSkinSelector && (
           <motion.div
+            ref={skinSelectorRef}
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
