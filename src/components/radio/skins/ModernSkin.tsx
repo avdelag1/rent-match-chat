@@ -299,7 +299,7 @@ export function ModernSkin({
               <span className={`px-1.5 py-0.5 rounded-full text-xs ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'}`}>
                 {cityTheme.name}
               </span>
-              <span>{station.genre}</span>
+              <span>{station.genre || 'Radio'}</span>
             </div>
           </div>
         )}

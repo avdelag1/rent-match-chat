@@ -109,7 +109,7 @@ export function IPodSkin({
                   {station.name}
                 </div>
                 <div className="text-gray-400 text-xs truncate mt-1">
-                  {cityTheme.name} - {station.genre}
+                  {cityTheme.name} - {station.genre || 'Radio'}
                 </div>
                 <div className="text-gray-500 text-[10px] mt-1">
                   {station.frequency}

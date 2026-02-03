@@ -274,7 +274,7 @@ export function VinylSkin({
             <div className="text-white/70 text-sm mb-1">{station.frequency}</div>
             <div className="text-white/50 text-xs flex items-center justify-center gap-2">
               <span className="bg-amber-500/20 px-2 py-0.5 rounded-full">{cityTheme.name}</span>
-              <span>{station.genre}</span>
+              <span>{station.genre || 'Radio'}</span>
             </div>
           </motion.div>
         )}
