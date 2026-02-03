@@ -90,6 +90,7 @@ const MessagingDashboard = lazy(() => import("./pages/MessagingDashboard").then(
 const NotificationsPage = lazy(() => import("./pages/NotificationsPage"));
 const SubscriptionPackagesPage = lazy(() => import("./pages/SubscriptionPackagesPage"));
 const RadioPlayer = lazy(() => import("./pages/RadioPlayer"));
+const RadioStationsBrowser = lazy(() => import("./pages/RadioStationsBrowser"));
 
 // Rare pages - lazy loaded (payment, camera, legal, public previews)
 const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
@@ -228,6 +229,7 @@ const App = () => (
                       <Route path="/notifications" element={<NotificationsPage />} />
                       <Route path="/subscription-packages" element={<SubscriptionPackagesPage />} />
                       <Route path="/radio" element={<RadioPlayer />} />
+                      <Route path="/radio/stations" element={<RadioStationsBrowser />} />
                     </Route>
 
                     {/* Payment routes - outside layout */}

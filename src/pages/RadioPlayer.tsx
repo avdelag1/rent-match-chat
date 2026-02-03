@@ -121,11 +121,21 @@ export default function RadioPlayer() {
         <ArrowLeft className="w-5 h-5" />
       </motion.button>
 
+      {/* Browse Stations Button */}
+      <motion.button
+        whileTap={{ scale: 0.95 }}
+        onClick={() => navigate('/radio/stations')}
+        className="fixed top-20 right-4 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg"
+        aria-label="Browse all stations"
+      >
+        <Radio className="w-5 h-5" />
+      </motion.button>
+
       {/* Playlist Button */}
       <motion.button
         whileTap={{ scale: 0.95 }}
         onClick={() => setShowPlaylistDialog(true)}
-        className="fixed top-20 right-4 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg"
+        className="fixed top-20 right-16 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg"
         aria-label="Open playlists"
       >
         <List className="w-5 h-5" />
@@ -135,7 +145,7 @@ export default function RadioPlayer() {
       <motion.button
         whileTap={{ scale: 0.95 }}
         onClick={() => setShowSkinSelector(!showSkinSelector)}
-        className="fixed top-20 right-16 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg"
+        className="fixed top-20 right-28 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg"
         aria-label="Change skin"
       >
         <Palette className="w-5 h-5" />

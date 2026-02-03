@@ -44,6 +44,8 @@ export function ModernSkin({
   const volumeRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [showCitySelector, setShowCitySelector] = useState(false);
+  const cachedRectRef = useRef<{ left: number; width: number } | null>(null);
+  const rafRef = useRef<number | null>(null);
 
   // Touch/swipe state for frequency dial
   const dialRef = useRef<HTMLDivElement>(null);
@@ -57,18 +59,32 @@ export function ModernSkin({
   const cityTheme = cityThemes[currentCity];
   const allCities = getAllCities();
 
-  // Handle volume change via touch/mouse (horizontal slider)
+  // Handle volume change via touch/mouse (horizontal slider) - optimized version
   const handleVolumeInteraction = (clientX: number) => {
-    if (!volumeRef.current) return;
-    const rect = volumeRef.current.getBoundingClientRect();
-    const width = rect.width;
-    const offsetX = clientX - rect.left;
+    if (!cachedRectRef.current) return;
+    const { left, width } = cachedRectRef.current;
+    const offsetX = clientX - left;
     const newVolume = Math.max(0, Math.min(1, offsetX / width));
-    onVolumeChange(newVolume);
+
+    // Cancel any pending animation frame
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+    }
+
+    // Use requestAnimationFrame for smooth updates
+    rafRef.current = requestAnimationFrame(() => {
+      onVolumeChange(newVolume);
+      rafRef.current = null;
+    });
   };
 
   const handleVolumeStart = (e: React.MouseEvent | React.TouchEvent) => {
     setIsDragging(true);
+    // Cache the bounding rect once on start
+    if (volumeRef.current) {
+      const rect = volumeRef.current.getBoundingClientRect();
+      cachedRectRef.current = { left: rect.left, width: rect.width };
+    }
     const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
     handleVolumeInteraction(clientX);
   };
@@ -81,6 +97,12 @@ export function ModernSkin({
 
   const handleVolumeEnd = () => {
     setIsDragging(false);
+    cachedRectRef.current = null;
+    // Clean up any pending animation frame
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
   };
 
   // Handle frequency dial swipe
