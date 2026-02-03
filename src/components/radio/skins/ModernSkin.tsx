@@ -116,36 +116,36 @@ export function ModernSkin({
   const buttonBg = theme === 'dark' ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-100 hover:bg-gray-200';
 
   return (
-    <div className={`h-screen ${bgColor} flex flex-col items-center justify-between p-4 pb-6 relative overflow-hidden`}>
+    <div className={`h-screen ${bgColor} flex flex-col items-center justify-between p-3 pb-4 relative overflow-hidden`}>
       {/* Top Icons */}
-      <div className="w-full max-w-md flex justify-between items-start">
+      <div className="w-full max-w-md flex justify-between items-center flex-shrink-0">
         <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={onToggleShuffle}
-          className={`p-3 rounded-full ${buttonBg} transition-colors`}
+          className={`p-2.5 rounded-full ${buttonBg} transition-colors`}
         >
-          <Shuffle className={`w-5 h-5 ${isShuffle ? accentColor : secondaryText}`} />
+          <Shuffle className={`w-4 h-4 ${isShuffle ? accentColor : secondaryText}`} />
         </motion.button>
 
-        <div className="flex gap-3">
+        <div className="flex gap-2">
           {/* Category Filter Button (only for podcasts) */}
           {isPodcastMode && (
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={() => setShowCategoryFilter(!showCategoryFilter)}
-              className={`p-3 rounded-full ${buttonBg} transition-colors`}
+              className={`p-2.5 rounded-full ${buttonBg} transition-colors`}
             >
-              <Filter className={`w-5 h-5 ${showCategoryFilter ? accentColor : secondaryText}`} />
+              <Filter className={`w-4 h-4 ${showCategoryFilter ? accentColor : secondaryText}`} />
             </motion.button>
           )}
 
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={onToggleFavorite}
-            className={`p-3 rounded-full ${buttonBg} transition-colors`}
+            className={`p-2.5 rounded-full ${buttonBg} transition-colors`}
           >
             <Heart
-              className={`w-5 h-5 ${isFavorite ? 'text-red-500 fill-red-500' : secondaryText}`}
+              className={`w-4 h-4 ${isFavorite ? 'text-red-500 fill-red-500' : secondaryText}`}
             />
           </motion.button>
         </div>
@@ -190,11 +190,11 @@ export function ModernSkin({
       </AnimatePresence>
 
       {/* Main Content - Scrolling Station Banner */}
-      <div className="flex-1 flex flex-col items-center justify-center w-full max-w-2xl space-y-8">
+      <div className="flex-1 flex flex-col items-center justify-center w-full max-w-2xl space-y-4 overflow-hidden">
         {/* Playing Status */}
         {station && (
-          <div className={`text-sm font-medium ${accentColor} flex items-center justify-center gap-2`}>
-            <Radio className="w-4 h-4" />
+          <div className={`text-xs font-medium ${accentColor} flex items-center justify-center gap-1.5`}>
+            <Radio className="w-3.5 h-3.5" />
             {isPlaying ? 'PLAYING' : 'PAUSED'}
           </div>
         )}
@@ -202,7 +202,7 @@ export function ModernSkin({
         {/* Scrolling Station Name Banner */}
         <div className="w-full overflow-hidden relative">
           <motion.div
-            className={`text-5xl md:text-7xl font-bold ${textColor} whitespace-nowrap inline-block`}
+            className={`text-3xl md:text-5xl font-bold ${textColor} whitespace-nowrap inline-block`}
             animate={isPlaying ? {
               x: ['0%', '-50%']
             } : {}}
@@ -219,14 +219,14 @@ export function ModernSkin({
         </div>
 
         {/* Genre/Category Badges */}
-        <div className="flex flex-wrap gap-2 justify-center">
+        <div className="flex flex-wrap gap-1.5 justify-center">
           {station?.genre && (
-            <div className={`px-4 py-2 rounded-full text-sm ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'} ${textColor}`}>
+            <div className={`px-3 py-1.5 rounded-full text-xs ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'} ${textColor}`}>
               {station.genre}
             </div>
           )}
           {isPodcastMode && currentStationCategory && (
-            <div className="px-4 py-2 rounded-full text-sm bg-gradient-to-r from-purple-600 to-pink-500 text-white">
+            <div className="px-3 py-1.5 rounded-full text-xs bg-gradient-to-r from-purple-600 to-pink-500 text-white">
               📂 {PODCAST_CATEGORIES[currentStationCategory]}
             </div>
           )}
@@ -234,13 +234,13 @@ export function ModernSkin({
       </div>
 
       {/* Bottom Controls */}
-      <div className="w-full max-w-md space-y-3">
-        <div className="flex items-center justify-center gap-6">
+      <div className="w-full max-w-md space-y-2 flex-shrink-0">
+        <div className="flex items-center justify-center gap-4">
           {/* Previous Button */}
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={onPrevious}
-            className={`p-3 rounded-full ${buttonBg} transition-colors`}
+            className={`p-2.5 rounded-full ${buttonBg} transition-colors`}
           >
             <SkipBack className={`w-5 h-5 ${textColor}`} fill="currentColor" />
           </motion.button>
@@ -249,12 +249,12 @@ export function ModernSkin({
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={onPlayPause}
-            className={`p-6 rounded-full ${theme === 'dark' ? 'bg-white' : 'bg-gray-900'} shadow-xl transition-all`}
+            className={`p-5 rounded-full ${theme === 'dark' ? 'bg-white' : 'bg-gray-900'} shadow-xl transition-all`}
           >
             {isPlaying ? (
-              <Pause className={`w-7 h-7 ${theme === 'dark' ? 'text-gray-900' : 'text-white'}`} fill="currentColor" />
+              <Pause className={`w-6 h-6 ${theme === 'dark' ? 'text-gray-900' : 'text-white'}`} fill="currentColor" />
             ) : (
-              <Play className={`w-7 h-7 ${theme === 'dark' ? 'text-gray-900' : 'text-white'} ml-1`} fill="currentColor" />
+              <Play className={`w-6 h-6 ${theme === 'dark' ? 'text-gray-900' : 'text-white'} ml-0.5`} fill="currentColor" />
             )}
           </motion.button>
 
@@ -262,7 +262,7 @@ export function ModernSkin({
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={onNext}
-            className={`p-3 rounded-full ${buttonBg} transition-colors`}
+            className={`p-2.5 rounded-full ${buttonBg} transition-colors`}
           >
             <SkipForward className={`w-5 h-5 ${textColor}`} fill="currentColor" />
           </motion.button>
