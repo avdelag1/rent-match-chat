@@ -94,7 +94,7 @@ export function MiniRadioPlayer({
             {/* Station Info */}
             <div className="p-4">
               <div className="text-white font-semibold truncate">{station.name}</div>
-              <div className="text-white/70 text-sm truncate">{station.genre}</div>
+              <div className="text-white/70 text-sm truncate">{station.genre || 'Radio'}</div>
               <div className="text-white/50 text-xs mt-1">{station.frequency}</div>
             </div>
 

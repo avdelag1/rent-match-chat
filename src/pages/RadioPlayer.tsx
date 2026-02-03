@@ -9,7 +9,7 @@ import { AllStationsDialog } from '@/components/radio/AllStationsDialog';
 import { cityThemes } from '@/data/radioStations';
 import { CityLocation, RadioSkin } from '@/types/radio';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, List, Palette } from 'lucide-react';
+import { ArrowLeft, List, Palette, Radio } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 

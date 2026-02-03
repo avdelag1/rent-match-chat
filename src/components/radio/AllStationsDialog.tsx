@@ -30,7 +30,7 @@ export function AllStationsDialog({
 
   // Get unique genres
   const allGenres = useMemo(() => {
-    const genres = new Set(radioStations.map(s => s.genre));
+    const genres = new Set(radioStations.map(s => s.genre).filter((g): g is string => Boolean(g)));
     return Array.from(genres).sort();
   }, []);
 
@@ -40,14 +40,14 @@ export function AllStationsDialog({
       // Search filter
       const matchesSearch = searchQuery === '' ||
         station.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        station.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        station.genre.toLowerCase().includes(searchQuery.toLowerCase());
+        station.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        station.genre?.toLowerCase().includes(searchQuery.toLowerCase());
 
       // City filter
       const matchesCity = selectedCity === 'all' || station.city === selectedCity;
 
       // Genre filter
-      const matchesGenre = selectedGenre === 'all' || station.genre === selectedGenre;
+      const matchesGenre = selectedGenre === 'all' || (station.genre && station.genre === selectedGenre);
 
       return matchesSearch && matchesCity && matchesGenre;
     });
@@ -231,7 +231,7 @@ export function AllStationsDialog({
                                   {station.name}
                                 </h4>
                                 <p className="text-xs text-gray-400 truncate">
-                                  {station.description}
+                                  {station.description || 'No description'}
                                 </p>
                               </div>
 
@@ -256,9 +256,11 @@ export function AllStationsDialog({
                               <span className="px-2 py-0.5 bg-gray-700 rounded text-xs text-gray-300">
                                 {station.frequency}
                               </span>
-                              <span className="px-2 py-0.5 bg-gray-700 rounded text-xs text-gray-300">
-                                {station.genre}
-                              </span>
+                              {station.genre && (
+                                <span className="px-2 py-0.5 bg-gray-700 rounded text-xs text-gray-300">
+                                  {station.genre}
+                                </span>
+                              )}
                               {isPlaying && (
                                 <span className="px-2 py-0.5 bg-rose-500 rounded text-xs text-white">
                                   Now Playing

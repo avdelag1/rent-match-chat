@@ -164,7 +164,7 @@ export function IPhoneSkin({
                     {station.name.slice(0, 2).toUpperCase()}
                   </div>
                   <div className={`text-sm ${secondaryText[theme]}`}>
-                    {station.genre}
+                    {station.genre || 'Radio'}
                   </div>
                 </div>
               )}
@@ -188,7 +188,7 @@ export function IPhoneSkin({
                 <span className="bg-white/20 px-2 py-0.5 rounded-full text-[10px] uppercase font-medium">
                   {cityTheme.name}
                 </span>
-                <span>{station.genre}</span>
+                <span>{station.genre || 'Radio'}</span>
               </div>
             </div>
 
