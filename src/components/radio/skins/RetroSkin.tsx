@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Pause, SkipBack, SkipForward, Heart, Shuffle, Volume2, VolumeX, Globe, Plus } from 'lucide-react';
 import { RadioStation, CityLocation } from '@/types/radio';
-import { cityThemes, getAllCities } from '@/data/radioStations';
+import { cityThemes } from '@/data/radioStations';
+import { useRef, useState } from 'react';
 
 interface RetroSkinProps {
   station: RadioStation | null;
@@ -16,11 +17,12 @@ interface RetroSkinProps {
   onNext: () => void;
   onToggleShuffle: () => void;
   onToggleFavorite: () => void;
-  onCityChange: () => void;
-  onSelectCity: (city: CityLocation) => void;
+  onCitySelect: (city: CityLocation) => void;
   onVolumeChange: (volume: number) => void;
-  onAddToPlaylist?: () => void;
 }
+
+// Cities available for toggle (as requested)
+const CITY_GROUPS: CityLocation[] = ['miami', 'ibiza', 'california', 'texas', 'new-york', 'tulum', 'french', 'podcasts'];
 
 export function RetroSkin({
   station,
@@ -34,14 +36,39 @@ export function RetroSkin({
   onNext,
   onToggleShuffle,
   onToggleFavorite,
-  onCityChange,
-  onSelectCity,
-  onVolumeChange,
-  onAddToPlaylist
+  onCitySelect,
+  onVolumeChange
 }: RetroSkinProps) {
   const [showCitySelector, setShowCitySelector] = useState(false);
   const cityTheme = cityThemes[currentCity];
-  const allCities = getAllCities();
+  const volumeRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  // Handle volume change via touch/mouse (horizontal slider)
+  const handleVolumeInteraction = (clientX: number) => {
+    if (!volumeRef.current) return;
+    const rect = volumeRef.current.getBoundingClientRect();
+    const width = rect.width;
+    const offsetX = clientX - rect.left;
+    const newVolume = Math.max(0, Math.min(1, offsetX / width));
+    onVolumeChange(newVolume);
+  };
+
+  const handleVolumeStart = (e: React.MouseEvent | React.TouchEvent) => {
+    setIsDragging(true);
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    handleVolumeInteraction(clientX);
+  };
+
+  const handleVolumeMove = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!isDragging) return;
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    handleVolumeInteraction(clientX);
+  };
+
+  const handleVolumeEnd = () => {
+    setIsDragging(false);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 flex flex-col items-center justify-center p-4 relative">
@@ -291,51 +318,50 @@ export function RetroSkin({
               )}
             </div>
 
-            {/* Volume Slider */}
+            {/* Volume Slider - Touch friendly */}
             <div className="flex items-center gap-2">
-              <motion.button
-                whileTap={{ scale: 0.9 }}
-                onClick={() => onVolumeChange(volume === 0 ? 0.7 : 0)}
-                className="p-1"
+              <Volume2 className="w-4 h-4 text-gray-400" />
+              <div
+                ref={volumeRef}
+                className="flex-1 h-3 bg-gray-800 rounded-full overflow-hidden relative cursor-pointer touch-none"
+                onMouseDown={handleVolumeStart}
+                onMouseMove={handleVolumeMove}
+                onMouseUp={handleVolumeEnd}
+                onMouseLeave={handleVolumeEnd}
+                onTouchStart={handleVolumeStart}
+                onTouchMove={handleVolumeMove}
+                onTouchEnd={handleVolumeEnd}
               >
-                {volume === 0 ? (
-                  <VolumeX className="w-4 h-4 text-gray-400" />
-                ) : (
-                  <Volume2 className="w-4 h-4 text-gray-400" />
-                )}
-              </motion.button>
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.01"
-                value={volume}
-                onChange={(e) => onVolumeChange(parseFloat(e.target.value))}
-                className="flex-1 h-2 bg-gray-800 rounded-full appearance-none cursor-pointer
-                  [&::-webkit-slider-thumb]:appearance-none
-                  [&::-webkit-slider-thumb]:w-4
-                  [&::-webkit-slider-thumb]:h-4
-                  [&::-webkit-slider-thumb]:rounded-full
-                  [&::-webkit-slider-thumb]:bg-gradient-to-r
-                  [&::-webkit-slider-thumb]:from-green-500
-                  [&::-webkit-slider-thumb]:to-cyan-500
-                  [&::-webkit-slider-thumb]:shadow-lg
-                  [&::-webkit-slider-thumb]:cursor-pointer
-                  [&::-moz-range-thumb]:w-4
-                  [&::-moz-range-thumb]:h-4
-                  [&::-moz-range-thumb]:rounded-full
-                  [&::-moz-range-thumb]:bg-gradient-to-r
-                  [&::-moz-range-thumb]:from-green-500
-                  [&::-moz-range-thumb]:to-cyan-500
-                  [&::-moz-range-thumb]:border-0
-                  [&::-moz-range-thumb]:cursor-pointer"
-                aria-label="Volume"
-              />
-              <span className="text-xs font-mono text-gray-400 w-8">
-                {Math.round(volume * 100)}%
-              </span>
+                <motion.div
+                  className="h-full bg-gradient-to-r from-green-500 to-cyan-500"
+                  style={{ width: `${volume * 100}%` }}
+                />
+                <motion.div
+                  className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-lg"
+                  style={{ left: `calc(${volume * 100}% - 8px)` }}
+                />
+              </div>
+              <span className="text-gray-400 text-xs w-8">{Math.round(volume * 100)}%</span>
             </div>
           </div>
+        </div>
+
+        {/* City Toggle Buttons */}
+        <div className="mt-6 flex flex-wrap justify-center gap-2 max-w-96">
+          {CITY_GROUPS.map((city) => (
+            <motion.button
+              key={city}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => onCitySelect(city)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                currentCity === city
+                  ? 'bg-cyan-500 text-white shadow-lg'
+                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+              }`}
+            >
+              {cityThemes[city].name}
+            </motion.button>
+          ))}
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, Zap } from 'lucide-react';
+import { Bell, Zap, Radio } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useUnreadNotifications } from '@/hooks/useUnreadNotifications';
@@ -98,6 +98,22 @@ function TopBarComponent({
             aria-label="Message activations"
           >
             <MessageActivationText />
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative h-9 w-9 sm:h-10 sm:w-10 md:h-11 md:w-11 hover:bg-white/5 rounded-xl transition-all duration-200 group flex-shrink-0"
+            onClick={() => navigate('/radio')}
+            aria-label="Radio Player"
+          >
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+            >
+              <Radio className="h-5 w-5 sm:h-6 sm:w-6 text-gray-200 group-hover:text-white" />
+            </motion.div>
           </Button>
 
           <Button

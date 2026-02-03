@@ -174,51 +174,33 @@ export const radioStations: RadioStation[] = [
     description: 'Indie folk, alt-folk and the occasional classic'
   },
 
-  // Miami - Dance/Electronic vibes
+  // Miami - Tropical & Dance Vibes
   {
-    id: 'miami-beatblender',
-    name: 'Beat Blender',
-    frequency: '100.7 FM',
+    id: 'miami-global',
+    name: 'Miami Global Radio',
+    frequency: '93.1 FM',
+    streamUrl: 'https://miamiglobalradio.stream.publicradio.pro/miamiglobalradio',
+    city: 'miami',
+    genre: 'House/Deep House',
+    description: 'The sound of Miami Beach'
+  },
+  {
+    id: 'miami-beach',
+    name: 'Miami Beach Radio',
+    frequency: '98.7 FM',
     streamUrl: 'https://ice1.somafm.com/beatblender-128-mp3',
     city: 'miami',
     genre: 'Electronic',
     description: 'A late night blend of deep-house and downtempo chill'
   },
   {
-    id: 'miami-deepspace',
-    name: 'Deep Space One',
-    frequency: '94.9 FM',
-    streamUrl: 'https://ice1.somafm.com/deepspaceone-128-mp3',
-    city: 'miami',
-    genre: 'Ambient',
-    description: 'Deep ambient electronic, experimental and space music'
-  },
-  {
-    id: 'miami-dronezone',
-    name: 'Drone Zone',
-    frequency: '96.5 FM',
-    streamUrl: 'https://ice1.somafm.com/dronezone-128-mp3',
-    city: 'miami',
-    genre: 'Ambient',
-    description: 'Served best chilled, safe with most medications'
-  },
-  {
-    id: 'miami-spacestationsoma',
-    name: 'Space Station Soma',
-    frequency: '97.3 FM',
-    streamUrl: 'https://ice1.somafm.com/spacestation-128-mp3',
-    city: 'miami',
-    genre: 'Ambient',
-    description: 'Tune in, turn on, space out'
-  },
-  {
-    id: 'miami-lush',
-    name: 'Lush',
-    frequency: '105.9 FM',
+    id: 'miami-latin',
+    name: 'Miami Latin Hits',
+    frequency: '107.5 FM',
     streamUrl: 'https://ice1.somafm.com/lush-128-mp3',
     city: 'miami',
     genre: 'Chillout',
-    description: 'Sensuous and mellow vocals, mostly female'
+    description: 'Sensuous and mellow vocals with tropical vibes'
   },
   {
     id: 'miami-cliqhop',
@@ -266,51 +248,33 @@ export const radioStations: RadioStation[] = [
     description: 'Psybient and downtempo with a Miami sunset vibe'
   },
 
-  // Ibiza - Electronic/Dance
+  // Ibiza - Electronic Paradise
   {
-    id: 'ibiza-dubstep',
-    name: 'Dub Step Beyond',
+    id: 'ibiza-global',
+    name: 'Ibiza Global Radio',
     frequency: '97.6 FM',
-    streamUrl: 'https://ice1.somafm.com/dubstep-128-mp3',
-    city: 'ibiza',
-    genre: 'Dubstep',
-    description: 'Dubstep, Dub and Deep Bass'
-  },
-  {
-    id: 'ibiza-seveni',
-    name: 'Seven Inch Soul',
-    frequency: '95.2 FM',
-    streamUrl: 'https://ice1.somafm.com/7soul-128-mp3',
-    city: 'ibiza',
-    genre: 'Soul',
-    description: 'Vintage soul tracks from the original 45 RPM vinyl'
-  },
-  {
-    id: 'ibiza-mission',
-    name: 'Mission Control',
-    frequency: '95.2 FM',
-    streamUrl: 'https://ice1.somafm.com/missioncontrol-128-mp3',
+    streamUrl: 'https://ibizaglobalradio.streaming-pro.com/ibizaglobalradio.mp3',
     city: 'ibiza',
     genre: 'Electronic',
-    description: 'Celebrating NASA and Space Explorers'
+    description: 'The worlds most iconic electronic music station'
   },
   {
-    id: 'ibiza-digitalis',
-    name: 'Digitalis',
-    frequency: '96.8 FM',
-    streamUrl: 'https://ice1.somafm.com/digitalis-128-mp3',
+    id: 'ibiza-sonica',
+    name: 'Ibiza Sonica',
+    frequency: '95.2 FM',
+    streamUrl: 'https://s3.radio.co/s69777f731/listen',
     city: 'ibiza',
-    genre: 'IDM',
-    description: 'Digitally affected analog rock to calm the agitated heart'
+    genre: 'Deep House',
+    description: 'Pure Ibiza underground sounds'
   },
   {
-    id: 'ibiza-bootliquor',
-    name: 'Boot Liquor',
-    frequency: '98.5 FM',
-    streamUrl: 'https://ice1.somafm.com/bootliquor-128-mp3',
+    id: 'ibiza-live',
+    name: 'Ibiza Live Radio',
+    frequency: '103.2 FM',
+    streamUrl: 'https://cloudup.net/8240/stream',
     city: 'ibiza',
-    genre: 'Americana',
-    description: 'Americana Roots music for Cowhands, Cowpokes and Cowpunks'
+    genre: 'House',
+    description: 'Live from the white isle'
   },
   {
     id: 'ibiza-thetrip',
