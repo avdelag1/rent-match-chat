@@ -5,10 +5,11 @@ import { ModernSkin } from '@/components/radio/skins/ModernSkin';
 import { VinylSkin } from '@/components/radio/skins/VinylSkin';
 import { RetroSkin } from '@/components/radio/skins/RetroSkin';
 import { PlaylistDialog } from '@/components/radio/PlaylistDialog';
+import { AllStationsDialog } from '@/components/radio/AllStationsDialog';
 import { cityThemes } from '@/data/radioStations';
 import { CityLocation, RadioSkin } from '@/types/radio';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, List } from 'lucide-react';
+import { ArrowLeft, List, Radio } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -38,6 +39,7 @@ export default function RadioPlayer() {
 
   const [showSkinSelector, setShowSkinSelector] = useState(false);
   const [showPlaylistDialog, setShowPlaylistDialog] = useState(false);
+  const [showAllStationsDialog, setShowAllStationsDialog] = useState(false);
   const [addingToPlaylist, setAddingToPlaylist] = useState(false);
 
   const handleCitySelect = (city: CityLocation) => {
@@ -101,11 +103,21 @@ export default function RadioPlayer() {
         <ArrowLeft className="w-5 h-5" />
       </motion.button>
 
+      {/* All Stations Button */}
+      <motion.button
+        whileTap={{ scale: 0.95 }}
+        onClick={() => setShowAllStationsDialog(true)}
+        className="fixed top-20 right-4 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg"
+        aria-label="Browse all stations"
+      >
+        <Radio className="w-5 h-5" />
+      </motion.button>
+
       {/* Playlist Button */}
       <motion.button
         whileTap={{ scale: 0.95 }}
         onClick={() => setShowPlaylistDialog(true)}
-        className="fixed top-20 right-4 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg"
+        className="fixed top-20 right-16 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg"
         aria-label="Open playlists"
       >
         <List className="w-5 h-5" />
@@ -115,7 +127,7 @@ export default function RadioPlayer() {
       <motion.button
         whileTap={{ scale: 0.95 }}
         onClick={() => setShowSkinSelector(!showSkinSelector)}
-        className="fixed top-20 right-16 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg"
+        className="fixed top-20 right-28 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg"
         aria-label="Change skin"
       >
         <span className="text-lg">🎨</span>
@@ -245,6 +257,23 @@ export default function RadioPlayer() {
           setAddingToPlaylist(false);
         }}
         addingMode={addingToPlaylist}
+      />
+
+      {/* All Stations Dialog */}
+      <AllStationsDialog
+        isOpen={showAllStationsDialog}
+        onClose={() => setShowAllStationsDialog(false)}
+        currentStation={state.currentStation}
+        onPlayStation={(station) => {
+          play(station);
+          toast.success(`Now playing ${station.name}`);
+        }}
+        onToggleFavorite={(stationId) => {
+          toggleFavorite(stationId);
+          const isFav = isStationFavorite(stationId);
+          toast.success(isFav ? 'Added to favorites' : 'Removed from favorites');
+        }}
+        favoriteStations={state.favorites}
       />
     </div>
   );
