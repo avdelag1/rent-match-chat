@@ -112,10 +112,21 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
 
       const allImages = [...images, ...uploadedImageUrls];
 
+      // Determine listing_type based on category and mode
+      let listing_type = 'rent';
+      if (selectedCategory === 'worker') {
+        listing_type = 'service';
+      } else if (selectedMode === 'sale') {
+        listing_type = 'buy';
+      } else if (selectedMode === 'both') {
+        listing_type = 'rent'; // Default to rent for 'both' mode
+      }
+
       const listingData: Record<string, unknown> = {
         owner_id: user.user.id,
         category: selectedCategory,
-        listing_type: selectedMode === 'rent' ? 'rent' : selectedMode === 'sale' ? 'buy' : 'service',
+        mode: selectedCategory === 'worker' ? null : selectedMode,
+        listing_type: listing_type,
         status: 'active' as const,
         is_active: true,
         images: allImages,
@@ -169,11 +180,11 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
           includes_pump: formData.includes_pump,
         });
       } else if (selectedCategory === 'property') {
-        // Remove bathrooms field - doesn't exist in production DB
         Object.assign(listingData, {
           address: formData.address,
           property_type: typeof formData.property_type === 'string' ? formData.property_type.toLowerCase() : formData.property_type,
-          bedrooms: formData.beds,
+          beds: formData.beds,
+          baths: formData.baths,
           square_footage: formData.square_footage,
           furnished: formData.furnished,
           pet_friendly: formData.pet_friendly,
@@ -181,10 +192,8 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
           services_included: formData.services_included,
           house_rules: formData.house_rules,
           rental_duration_type: formData.rental_duration_type,
-          listing_type: selectedMode === 'rent' ? 'rent' : 'buy',
         });
       } else if (selectedCategory === 'worker') {
-        // Remove languages and description fields - using structured data only
         Object.assign(listingData, {
           service_category: formData.service_category,
           custom_service_name: formData.custom_service_name,
@@ -204,7 +213,6 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
           offers_emergency_service: formData.offers_emergency_service,
           background_check_verified: formData.background_check_verified,
           insurance_verified: formData.insurance_verified,
-          listing_type: 'service',
         });
       }
 
