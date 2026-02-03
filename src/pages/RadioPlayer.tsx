@@ -21,7 +21,7 @@ export default function RadioPlayer() {
     play,
     togglePlayPause,
     changeStation,
-    setCity,
+    selectCity: setCity,
     toggleShuffle,
     toggleFavorite,
     setSkin,
@@ -35,11 +35,6 @@ export default function RadioPlayer() {
 
   const handleCitySelect = (city: CityLocation) => {
     setCity(city);
-    toast.success(`Switched to ${cityThemes[city].name}`);
-  };
-
-  const handleSelectCity = (city: CityLocation) => {
-    selectCity(city);
     toast.success(`Switched to ${cityThemes[city].name}`);
   };
 

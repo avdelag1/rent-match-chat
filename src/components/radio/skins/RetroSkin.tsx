@@ -1,9 +1,8 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Pause, SkipBack, SkipForward, Heart, Shuffle, Volume2, VolumeX, Globe, Plus } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Heart, Shuffle, Volume2, VolumeX, Globe, Plus, ChevronDown } from 'lucide-react';
 import { RadioStation, CityLocation } from '@/types/radio';
-import { cityThemes } from '@/data/radioStations';
-import { useRef, useState } from 'react';
+import { cityThemes, getAllCities } from '@/data/radioStations';
 
 interface RetroSkinProps {
   station: RadioStation | null;
@@ -41,6 +40,7 @@ export function RetroSkin({
 }: RetroSkinProps) {
   const [showCitySelector, setShowCitySelector] = useState(false);
   const cityTheme = cityThemes[currentCity];
+  const allCities = getAllCities();
   const volumeRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -71,7 +71,7 @@ export function RetroSkin({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 flex flex-col items-center justify-center p-4 relative">
+    <div className="h-screen bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 flex flex-col items-center justify-center p-4 relative overflow-hidden">
       {/* City Selector Modal */}
       <AnimatePresence>
         {showCitySelector && (
