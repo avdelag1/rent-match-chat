@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Pause, SkipBack, SkipForward, Heart, Shuffle, Volume2, VolumeX, Globe, Plus, ChevronDown } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Heart, Shuffle, Volume2, Globe, ChevronDown } from 'lucide-react';
 import { RadioStation, CityLocation } from '@/types/radio';
 import { cityThemes, getAllCities } from '@/data/radioStations';
 
@@ -101,7 +101,7 @@ export function RetroSkin({
                       key={city}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => {
-                        onSelectCity(city);
+                        onCitySelect(city);
                         setShowCitySelector(false);
                       }}
                       className={`p-2 rounded-lg transition-all ${
@@ -306,16 +306,6 @@ export function RetroSkin({
                   className={`w-3 h-3 sm:w-4 sm:h-4 ${isFavorite ? 'text-white fill-white' : 'text-gray-400'}`}
                 />
               </motion.button>
-
-              {onAddToPlaylist && (
-                <motion.button
-                  whileTap={{ scale: 0.95 }}
-                  onClick={onAddToPlaylist}
-                  className="p-1.5 sm:p-2 rounded bg-gray-800 hover:bg-gray-700 transition-colors"
-                >
-                  <Plus className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
-                </motion.button>
-              )}
             </div>
 
             {/* Volume Slider - Touch friendly */}
