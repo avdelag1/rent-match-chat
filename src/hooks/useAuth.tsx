@@ -165,7 +165,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Non-blocking OAuth user setup
-  const handleOAuthUserSetupAsync = async (user: User) => {
+  const handleOAuthUserSetupAsync = async (oauthUser: User) => {
     try {
       // Check localStorage first, then URL params
       const pendingRole = localStorage.getItem('pendingOAuthRole') as 'client' | 'owner' | null;
@@ -175,11 +175,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const roleToUse = pendingRole || roleFromUrl;
 
       if (roleToUse) {
-        // Clear pending role
+        // CRITICAL: Update user metadata with role IMMEDIATELY so Index.tsx can navigate
+        // Don't wait for profile/role creation - this unblocks the loading page
+        try {
+          await supabase.auth.updateUser({ data: { role: roleToUse } });
+          // Re-fetch session so the in-memory user object has the updated metadata
+          const { data: refreshed } = await supabase.auth.getSession();
+          if (refreshed?.session?.user) {
+            setUser(refreshed.session.user);
+            setSession(refreshed.session);
+          }
+        } catch (metadataError) {
+          logger.warn('[Auth] Failed to set role metadata early:', metadataError);
+        }
+
+        // Clear pending role from localStorage (Index.tsx already read it if needed)
         localStorage.removeItem('pendingOAuthRole');
 
         // Use enhanced account linking
-        const linkingResult = await linkOAuthAccount(user, roleToUse);
+        const linkingResult = await linkOAuthAccount(oauthUser, roleToUse);
 
         if (linkingResult.success) {
           // Clear URL params
@@ -192,20 +206,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const finalRole = linkingResult.existingProfile?.role || roleToUse;
 
           // Create profile if missing
-          await createProfileIfMissing(user, finalRole);
+          await createProfileIfMissing(oauthUser, finalRole);
 
           // Invalidate role cache after OAuth setup
-          queryClient.invalidateQueries({ queryKey: ['user-role', user.id] });
+          queryClient.invalidateQueries({ queryKey: ['user-role', oauthUser.id] });
         } else {
           logger.error('[Auth] OAuth account linking failed');
         }
       } else {
         // Try metadata role
-        const role = user.user_metadata?.role as 'client' | 'owner' | undefined;
+        const role = oauthUser.user_metadata?.role as 'client' | 'owner' | undefined;
         if (role) {
-          await createProfileIfMissing(user, role);
+          await createProfileIfMissing(oauthUser, role);
           // Invalidate role cache after profile creation
-          queryClient.invalidateQueries({ queryKey: ['user-role', user.id] });
+          queryClient.invalidateQueries({ queryKey: ['user-role', oauthUser.id] });
         }
       }
     } catch (error) {
@@ -291,33 +305,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           description: "Setting up your profile.",
         });
 
-        // Create profile
-        const profileResult = await createProfileIfMissing(data.user, role);
+        // Create profile in background - don't block navigation
+        const profilePromise = createProfileIfMissing(data.user, role);
 
-        if (!profileResult) {
-          logger.error('[Auth] Profile creation failed');
-          await supabase.auth.signOut();
-          toast({
-            title: "Setup Failed",
-            description: "Could not complete account setup. Please try again.",
-            variant: "destructive"
-          });
-          return { error: new Error('Failed to complete account setup') };
+        // Race: navigate immediately or wait max 3s for profile creation
+        const timeoutPromise = new Promise<null>((resolve) =>
+          setTimeout(() => resolve(null), 3000)
+        );
+
+        const profileResult = await Promise.race([profilePromise, timeoutPromise]);
+
+        if (profileResult) {
+          // Profile created successfully, invalidate cache
+          queryClient.invalidateQueries({ queryKey: ['user-role', data.user.id] });
+        } else {
+          // Profile creation still in progress or failed - still navigate
+          // Profile setup will complete in background via onAuthStateChange
+          logger.warn('[Auth] Profile creation slow/failed, navigating anyway with metadata role');
         }
-
-        // Invalidate role query cache to ensure fresh data
-        queryClient.invalidateQueries({ queryKey: ['user-role', data.user.id] });
-
-        // Brief wait for cache invalidation to propagate
-        await new Promise(resolve => setTimeout(resolve, 200));
 
         toast({
           title: "Welcome to Zwipes!",
           description: "Loading your dashboard...",
         });
 
-        // Navigation will be handled by Index.tsx using metadata role
-        // This ensures a single navigation point and prevents race conditions
+        // Navigate directly to dashboard - don't rely on Index.tsx
+        const targetPath = role === 'client' ? '/client/dashboard' : '/owner/dashboard';
+        navigate(targetPath, { replace: true });
       }
 
       return { error: null };
