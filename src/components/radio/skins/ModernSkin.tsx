@@ -185,7 +185,7 @@ export function ModernSkin({
   return (
     <div className={`h-dvh ${bgColor} flex flex-col items-center justify-between p-2 pb-3 relative overflow-hidden`}>
       {/* Top Icons */}
-      <div className="w-full max-w-md flex justify-between items-start pt-12">
+      <div className="w-full max-w-md flex justify-between items-start pt-14">
         <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={onToggleShuffle}
