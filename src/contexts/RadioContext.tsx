@@ -260,6 +260,10 @@ export function RadioProvider({ children }: RadioProviderProps) {
 
   const setVolume = useCallback((volume: number) => {
     const clampedVolume = Math.max(0, Math.min(1, volume));
+    // Update audio element immediately for instant response
+    if (audioRef.current) {
+      audioRef.current.volume = clampedVolume;
+    }
     setState(prev => ({ ...prev, volume: clampedVolume }));
     savePreferences({ volume: clampedVolume });
   }, []);

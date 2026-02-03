@@ -33,8 +33,6 @@ function OwnerProfileDialogComponent({ open, onOpenChange }: Props) {
 
   const [businessName, setBusinessName] = useState<string>('');
   const [businessLocation, setBusinessLocation] = useState<string>('');
-  const [contactEmail, setContactEmail] = useState<string>('');
-  const [contactPhone, setContactPhone] = useState<string>('');
   const [profileImages, setProfileImages] = useState<string[]>([]);
   const [serviceOfferings, setServiceOfferings] = useState<string[]>([]);
 
@@ -42,8 +40,6 @@ function OwnerProfileDialogComponent({ open, onOpenChange }: Props) {
     if (!data) return;
     setBusinessName(data.business_name ?? '');
     setBusinessLocation(data.business_location ?? '');
-    setContactEmail(data.contact_email ?? '');
-    setContactPhone(data.contact_phone ?? '');
     setProfileImages(data.profile_images ?? []);
     setServiceOfferings(data.service_offerings ?? []);
   }, [data]);
@@ -79,8 +75,6 @@ function OwnerProfileDialogComponent({ open, onOpenChange }: Props) {
     const payload = {
       business_name: businessName || null,
       business_location: businessLocation || null,
-      contact_email: contactEmail || null,
-      contact_phone: contactPhone || null,
       profile_images: profileImages,
       service_offerings: serviceOfferings,
     };
@@ -108,10 +102,9 @@ function OwnerProfileDialogComponent({ open, onOpenChange }: Props) {
   };
 
   const completionPercentage = Math.round(
-    ((businessName ? 20 : 0) +
-     (serviceOfferings.length > 0 ? 30 : 0) +
-     (businessLocation ? 15 : 0) +
-     (contactEmail ? 15 : 0) +
+    ((businessName ? 25 : 0) +
+     (serviceOfferings.length > 0 ? 35 : 0) +
+     (businessLocation ? 20 : 0) +
      (profileImages.length > 0 ? 20 : 0))
   );
 
@@ -234,35 +227,6 @@ function OwnerProfileDialogComponent({ open, onOpenChange }: Props) {
               {serviceOfferings.length === 0 && (
                 <p className="text-orange-400 text-sm">Select at least one service to continue</p>
               )}
-            </div>
-
-            {/* Contact Info Section */}
-            <div className="space-y-4">
-              <Label className="text-white text-lg sm:text-xl font-bold">📞 Contact Information</Label>
-
-              <div className="space-y-2">
-                <Label htmlFor="contact_email" className="text-white/90 text-sm sm:text-base">Contact Email</Label>
-                <Input
-                  id="contact_email"
-                  type="email"
-                  value={contactEmail}
-                  onChange={(e) => setContactEmail(e.target.value)}
-                  placeholder="business@example.com"
-                  className="h-12 text-base bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-red-400"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="contact_phone" className="text-white/90 text-sm sm:text-base">Contact Phone</Label>
-                <Input
-                  id="contact_phone"
-                  type="tel"
-                  value={contactPhone}
-                  onChange={(e) => setContactPhone(e.target.value)}
-                  placeholder="+1 (555) 000-0000"
-                  className="h-12 text-base bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-red-400"
-                />
-              </div>
             </div>
           </div>
         </ScrollArea>
