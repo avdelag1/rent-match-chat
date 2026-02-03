@@ -416,7 +416,9 @@ export function useSmartListingMatching(
           query = query.not('id', 'in', `(${idsToExclude.map(id => `"${id}"`).join(',')})`);
         }
 
-        query = query.order('created_at', { ascending: false }); // Newest first
+        // Order by updated_at DESC to show recently updated listings first
+        // This ensures listings that were just updated appear at the top of swipe cards
+        query = query.order('updated_at', { ascending: false, nullsFirst: false });
 
         // Apply filter-based query constraints
         if (filters) {
@@ -1088,6 +1090,10 @@ export function useSmartClientMatching(
           const idsToExclude = Array.from(swipedProfileIds);
           profileQuery = profileQuery.not('id', 'in', `(${idsToExclude.map(id => `"${id}"`).join(',')})`);
         }
+
+        // Order by updated_at DESC to show recently updated profiles first
+        // This ensures users who just updated their profile appear at the top of swipe cards
+        profileQuery = profileQuery.order('updated_at', { ascending: false, nullsFirst: false });
 
         const start = page * pageSize;
         const end = start + pageSize - 1;

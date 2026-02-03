@@ -153,20 +153,22 @@ export function useSaveClientProfile() {
         syncPayload.longitude = updates.longitude;
       }
 
-      // Only update if we have fields to sync
-      if (Object.keys(syncPayload).length > 0) {
-        const { data: syncData, error: syncError } = await supabase
-          .from('profiles')
-          .update(syncPayload)
-          .eq('id', uid)
-          .select();
+      // CRITICAL: Always set updated_at to NOW() to ensure profile appears first in swipe cards
+      // This ensures that any profile update (even minor changes) pushes the profile to the top
+      syncPayload.updated_at = new Date().toISOString();
 
-        if (syncError) {
-          logger.error('[PROFILE SYNC] Error:', syncError);
-        } else {
-          // Invalidate profiles_public cache immediately after sync
-          qc.invalidateQueries({ queryKey: ['profiles_public'] });
-        }
+      // Always update profiles table to ensure updated_at is refreshed
+      const { data: syncData, error: syncError } = await supabase
+        .from('profiles')
+        .update(syncPayload)
+        .eq('id', uid)
+        .select();
+
+      if (syncError) {
+        logger.error('[PROFILE SYNC] Error:', syncError);
+      } else {
+        // Invalidate profiles_public cache immediately after sync
+        qc.invalidateQueries({ queryKey: ['profiles_public'] });
       }
 
       return profileData;
