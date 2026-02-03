@@ -132,7 +132,7 @@ function TopBarComponent({
               {/* UPGRADED BRIGHTNESS: Icon is now brighter and more visible with glow effect */}
               <Bell
                 className={cn(
-                  "h-5 w-5 sm:h-6 sm:w-6 transition-colors duration-200",
+                  "h-5 w-5 sm:h-6 sm:w-6 transition-all duration-200",
                   notificationCount > 0
                     ? "text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.7)] group-hover:text-amber-200 group-hover:drop-shadow-[0_0_12px_rgba(251,191,36,0.9)]"
                     : "text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.5)] group-hover:text-white group-hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]"

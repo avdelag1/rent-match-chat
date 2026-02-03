@@ -179,7 +179,7 @@ export default function NotificationsPage() {
                      n.type === 'super_like' ? 'Super Like!' : 'Notification',
               message: (n.message as string) || '',
               created_at: n.created_at as string,
-              read: (n.read as boolean) || false,
+              read: (n.is_read as boolean) || false,
               link_url: n.link_url as string | null,
               related_user_id: n.related_user_id as string | null,
               metadata: n.metadata,
@@ -188,9 +188,9 @@ export default function NotificationsPage() {
           } else if (payload.eventType === 'DELETE') {
             setNotifications(prev => prev.filter(n => n.id !== (payload.old as { id: string }).id));
           } else if (payload.eventType === 'UPDATE') {
-            const updated = payload.new as { id: string; read: boolean };
+            const updated = payload.new as { id: string; is_read: boolean };
             setNotifications(prev =>
-              prev.map(n => n.id === updated.id ? { ...n, read: updated.read } : n)
+              prev.map(n => n.id === updated.id ? { ...n, read: updated.is_read } : n)
             );
           }
         }
@@ -238,7 +238,7 @@ export default function NotificationsPage() {
                n.type === 'super_like' ? 'Super Like!' : 'Notification',
         message: (n.message as string) || '',
         created_at: n.created_at as string,
-        read: (n.read as boolean) || false,
+        read: (n.is_read as boolean) || false,
         link_url: n.link_url as string | null,
         related_user_id: n.related_user_id as string | null,
         metadata: n.metadata,
@@ -365,6 +365,7 @@ export default function NotificationsPage() {
     switch (category) {
       case 'yacht': return <Ship className="w-3.5 h-3.5" />;
       case 'bicycle': return <Bike className="w-3.5 h-3.5" />;
+      case 'motorcycle': return <Car className="w-3.5 h-3.5" />;
       case 'vehicle': return <Car className="w-3.5 h-3.5" />;
       default: return <Home className="w-3.5 h-3.5" />;
     }

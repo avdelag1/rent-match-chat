@@ -156,7 +156,7 @@ const ClientWhoLikedYou = () => {
       const result = await startConversation.mutateAsync({
         otherUserId: selectedOwner.owner_id,
         initialMessage: `Hi ${selectedOwner.owner_name}! Thanks for showing interest in my profile. I'd love to connect!`,
-        canStartNewConversation: true,
+        canStartNewConversation,
       });
 
       if (result?.conversationId) {

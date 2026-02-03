@@ -116,7 +116,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
         {/* UPGRADED BRIGHTNESS: Brighter text and active state */}
         <div className={cn(
           'relative z-10 flex items-center gap-1.5 px-2 py-0.5 rounded-full transition-colors duration-200',
-          activeMode === 'client' ? 'text-white font-semibold' : 'text-gray-400'
+          activeMode === 'client' ? 'text-white font-semibold' : 'text-gray-300'
         )}>
           <Search className="h-3.5 w-3.5" />
           <span className="font-bold">I Do</span>
@@ -124,7 +124,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
 
         <div className={cn(
           'relative z-10 flex items-center gap-1.5 px-2 py-0.5 rounded-full transition-colors duration-200',
-          activeMode === 'owner' ? 'text-teal-300 font-semibold' : 'text-gray-400'
+          activeMode === 'owner' ? 'text-teal-300 font-semibold' : 'text-gray-300'
         )}>
           <Briefcase className="h-3.5 w-3.5" />
           <span className="font-bold">I own</span>
@@ -188,7 +188,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
         </motion.div>
       </AnimatePresence>
 
-      <ArrowLeftRight className="h-3 w-3 text-gray-400" />
+      <ArrowLeftRight className="h-3 w-3 text-white/70 drop-shadow-[0_0_4px_rgba(255,255,255,0.3)]" />
     </motion.button>
   );
 }

@@ -514,7 +514,7 @@ export const MessagingInterface = memo(({ conversationId, otherUser, listing, cu
       <MessageActivationPackages
         isOpen={showUpgradeDialog}
         onClose={() => setShowUpgradeDialog(false)}
-        userRole={otherUser.role === 'client' ? 'owner' : 'client'}
+        userRole={currentUserRole}
       />
 
       {/* Profile/Listing Preview Sheet */}

@@ -458,7 +458,7 @@ export function MessagingDashboard() {
                   const getCategoryIcon = (category?: string) => {
                     switch (category) {
                       case 'yacht': return <Ship className="w-3 h-3" />;
-                      case 'motorcycle': return <Car className="w-3 h-3" />;
+                      case 'motorcycle': return <Bike className="w-3 h-3" />;
                       case 'bicycle': return <Bike className="w-3 h-3" />;
                       case 'vehicle': return <Car className="w-3 h-3" />;
                       default: return <Home className="w-3 h-3" />;
