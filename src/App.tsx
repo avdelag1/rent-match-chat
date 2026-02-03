@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { ResponsiveProvider } from "@/contexts/ResponsiveContext";
+import { RadioProvider } from "@/contexts/RadioContext";
 import { ActiveModeProvider } from "@/hooks/useActiveMode";
 import { PWAProvider } from "@/hooks/usePWAMode";
 import { RadioProvider } from "@/contexts/RadioContext";
@@ -153,6 +154,7 @@ const App = () => (
             <PWAProvider>
             <RadioProvider>
             <ResponsiveProvider>
+            <RadioProvider>
             <UpdateWrapper>
               <NotificationWrapper>
                 {/* Global ambient parallax background - mounted once, persists across screens */}
@@ -257,6 +259,7 @@ const App = () => (
               </AppLayout>
             </NotificationWrapper>
             </UpdateWrapper>
+            </RadioProvider>
             </ResponsiveProvider>
             </RadioProvider>
             </PWAProvider>

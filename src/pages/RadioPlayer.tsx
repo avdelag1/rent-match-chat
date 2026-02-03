@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useRadioPlayer } from '@/hooks/useRadioPlayer';
+import { useRadioContext } from '@/contexts/RadioContext';
 import { ModernSkin } from '@/components/radio/skins/ModernSkin';
 import { VinylSkin } from '@/components/radio/skins/VinylSkin';
 import { RetroSkin } from '@/components/radio/skins/RetroSkin';
@@ -27,7 +27,7 @@ export default function RadioPlayer() {
     setSkin,
     setVolume,
     isStationFavorite
-  } = useRadioPlayer();
+  } = useRadioContext();
 
   const [showSkinSelector, setShowSkinSelector] = useState(false);
   const [showPlaylistDialog, setShowPlaylistDialog] = useState(false);
