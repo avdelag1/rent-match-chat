@@ -68,18 +68,18 @@ async function generateMaskableIcon(size, filename) {
     const contentSize = Math.round(size * 0.8);
     const padding = Math.round((size - contentSize) / 2);
 
-    // Create a black background with the icon centered
+    // Create a dark navy blue background (#0F1123) with the icon centered
     await sharp(SVG_SOURCE, { density: 300 })
       .resize(contentSize, contentSize, {
         fit: 'contain',
-        background: { r: 0, g: 0, b: 0, alpha: 1 }
+        background: { r: 15, g: 17, b: 35, alpha: 1 }
       })
       .extend({
         top: padding,
         bottom: padding,
         left: padding,
         right: padding,
-        background: { r: 0, g: 0, b: 0, alpha: 1 }
+        background: { r: 15, g: 17, b: 35, alpha: 1 }
       })
       .png()
       .toFile(path.join(OUTPUT_DIR, filename));
