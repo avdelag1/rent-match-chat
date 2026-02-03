@@ -1,4 +1,4 @@
-import { Bike, Home, CircleDot, Briefcase } from 'lucide-react';
+import { Bike, Home, CircleDot, Briefcase, Percent, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
@@ -28,8 +28,8 @@ export function CategorySelector({
   ];
 
   const modes = [
-    { value: 'rent' as Mode, label: 'For Rent', emoji: '🏠' },
-    { value: 'sale' as Mode, label: 'For Sale', emoji: '💰' },
+    { value: 'rent' as Mode, label: 'For Rent', icon: Percent },
+    { value: 'sale' as Mode, label: 'For Sale', icon: DollarSign },
   ];
 
   return (
@@ -51,14 +51,15 @@ export function CategorySelector({
 
       {/* Mode Toggle */}
       <div className="flex gap-2">
-        {modes.map(({ value, label, emoji }) => (
+        {modes.map(({ value, label, icon: Icon }) => (
           <Badge
             key={value}
             variant={selectedMode === value || selectedMode === 'both' ? 'default' : 'outline'}
-            className="cursor-pointer px-4 py-2 text-sm transition-all hover:scale-105"
+            className="cursor-pointer px-4 py-2 text-sm transition-all hover:scale-105 flex items-center gap-1.5"
             onClick={() => onModeChange(value)}
           >
-            {emoji} {label}
+            <Icon className="w-3.5 h-3.5" />
+            {label}
           </Badge>
         ))}
       </div>

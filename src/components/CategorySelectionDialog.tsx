@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { Home, Bike, CircleDot, ArrowRight, Sparkles, Briefcase } from "lucide-react";
+import { Home, Bike, CircleDot, ArrowRight, Sparkles, Briefcase, Percent, DollarSign, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useRef, useEffect } from "react";
@@ -62,9 +62,9 @@ const categories: Category[] = [
 ];
 
 const modes = [
-  { id: 'rent' as const, label: 'For Rent', emoji: '🏠', description: 'Monthly or short-term rental' },
-  { id: 'sale' as const, label: 'For Sale', emoji: '💰', description: 'One-time purchase' },
-  { id: 'both' as const, label: 'Both Options', emoji: '✨', description: 'Rent & sale available' },
+  { id: 'rent' as const, label: 'For Rent', icon: <Percent className="w-5 h-5" />, description: 'Monthly or short-term rental' },
+  { id: 'sale' as const, label: 'For Sale', icon: <DollarSign className="w-5 h-5" />, description: 'One-time purchase' },
+  { id: 'both' as const, label: 'Both Options', icon: <Zap className="w-5 h-5" />, description: 'Rent & sale available' },
 ];
 
 export function CategorySelectionDialog({ 
@@ -264,7 +264,9 @@ export function CategorySelectionDialog({
                           "border-border/50 bg-card"
                         )}
                       >
-                        <span className="text-2xl sm:text-3xl">{mode.emoji}</span>
+                        <div className="p-2 rounded-lg bg-primary/10 text-primary shrink-0">
+                          {mode.icon}
+                        </div>
                         <div className="flex-1">
                           <h3 className="font-semibold text-foreground text-sm sm:text-base group-hover:text-primary transition-colors">
                             {mode.label}
