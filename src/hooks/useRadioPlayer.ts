@@ -209,6 +209,19 @@ export function useRadioPlayer() {
     }
   }, [state.currentCity, play]);
 
+  const selectCity = useCallback((city: CityLocation) => {
+    if (city === state.currentCity) return;
+
+    setState(prev => ({ ...prev, currentCity: city, isPlaying: false }));
+    savePreferences({ currentCity: city });
+
+    // Auto-play first station of new city
+    const stations = getStationsByCity(city);
+    if (stations.length > 0) {
+      play(stations[0]);
+    }
+  }, [state.currentCity, play]);
+
   const setVolume = useCallback((volume: number) => {
     const clampedVolume = Math.max(0, Math.min(1, volume));
     setState(prev => ({ ...prev, volume: clampedVolume }));
@@ -259,6 +272,7 @@ export function useRadioPlayer() {
     togglePlayPause,
     changeStation,
     changeCity,
+    selectCity,
     setVolume,
     toggleShuffle,
     setSkin,

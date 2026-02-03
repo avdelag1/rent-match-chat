@@ -1,7 +1,8 @@
-import { motion } from 'framer-motion';
-import { Play, Pause, SkipBack, SkipForward, Radio, Heart, Shuffle } from 'lucide-react';
-import { RadioStation, CityLocation } from '@/types/radio';
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Play, Pause, SkipBack, SkipForward, Radio, Heart, Shuffle, Volume2, VolumeX, Globe, ChevronDown, Plus } from 'lucide-react';
+import { RadioStation, CityLocation } from '@/types/radio';
+import { cityThemes, getAllCities } from '@/data/radioStations';
 
 interface ModernSkinProps {
   station: RadioStation | null;
@@ -9,12 +10,16 @@ interface ModernSkinProps {
   isShuffle: boolean;
   isFavorite: boolean;
   currentCity: CityLocation;
+  volume: number;
   onPlayPause: () => void;
   onPrevious: () => void;
   onNext: () => void;
   onToggleShuffle: () => void;
   onToggleFavorite: () => void;
   onCityChange: () => void;
+  onSelectCity: (city: CityLocation) => void;
+  onVolumeChange: (volume: number) => void;
+  onAddToPlaylist?: () => void;
   theme?: 'light' | 'dark';
 }
 
@@ -23,14 +28,23 @@ export function ModernSkin({
   isPlaying,
   isShuffle,
   isFavorite,
+  currentCity,
+  volume,
   onPlayPause,
   onPrevious,
   onNext,
   onToggleShuffle,
   onToggleFavorite,
+  onCityChange,
+  onSelectCity,
+  onVolumeChange,
+  onAddToPlaylist,
   theme = 'light'
 }: ModernSkinProps) {
   const [frequencyNum, setFrequencyNum] = useState(99.2);
+  const [showCitySelector, setShowCitySelector] = useState(false);
+  const cityTheme = cityThemes[currentCity];
+  const allCities = getAllCities();
 
   // Extract numeric frequency from station
   useEffect(() => {
@@ -62,6 +76,17 @@ export function ModernSkin({
         </motion.button>
 
         <div className="flex gap-3">
+          {/* City Selector Button */}
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowCitySelector(!showCitySelector)}
+            className={`p-3 rounded-full ${buttonBg} transition-colors flex items-center gap-1`}
+          >
+            <Globe className={`w-5 h-5 ${secondaryText}`} />
+            <span className={`text-xs ${textColor}`}>{cityTheme.name.slice(0, 4)}</span>
+            <ChevronDown className={`w-3 h-3 ${secondaryText} ${showCitySelector ? 'rotate-180' : ''} transition-transform`} />
+          </motion.button>
+
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={onToggleFavorite}
@@ -71,8 +96,72 @@ export function ModernSkin({
               className={`w-5 h-5 ${isFavorite ? 'text-red-500 fill-red-500' : secondaryText}`}
             />
           </motion.button>
+
+          {onAddToPlaylist && (
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={onAddToPlaylist}
+              className={`p-3 rounded-full ${buttonBg} transition-colors`}
+            >
+              <Plus className={`w-5 h-5 ${secondaryText}`} />
+            </motion.button>
+          )}
         </div>
       </div>
+
+      {/* City Selector Dropdown */}
+      <AnimatePresence>
+        {showCitySelector && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className={`absolute top-20 left-4 right-4 z-50 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-2xl p-4 shadow-2xl`}
+          >
+            <div className={`${secondaryText} text-xs uppercase tracking-wider mb-3 text-center`}>Select City</div>
+            <div className="grid grid-cols-4 gap-2">
+              {allCities.map((city) => {
+                const cTheme = cityThemes[city];
+                const isSelected = city === currentCity;
+                return (
+                  <motion.button
+                    key={city}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      onSelectCity(city);
+                      setShowCitySelector(false);
+                    }}
+                    className={`p-2 rounded-xl transition-all ${
+                      isSelected
+                        ? 'ring-2 ring-rose-500 shadow-lg'
+                        : theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
+                    }`}
+                    style={{
+                      background: isSelected
+                        ? `linear-gradient(135deg, ${cTheme.primaryColor}, ${cTheme.secondaryColor})`
+                        : undefined
+                    }}
+                  >
+                    <div className="text-2xl mb-1">
+                      {city === 'new-york' && '🗽'}
+                      {city === 'miami' && '🌴'}
+                      {city === 'ibiza' && '🎧'}
+                      {city === 'tulum' && '🏝️'}
+                      {city === 'california' && '🌊'}
+                      {city === 'texas' && '🤠'}
+                      {city === 'french' && '🗼'}
+                      {city === 'podcasts' && '🎙️'}
+                    </div>
+                    <div className={`text-[10px] font-medium ${isSelected ? 'text-white' : secondaryText}`}>
+                      {cTheme.name}
+                    </div>
+                  </motion.button>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col items-center justify-center w-full max-w-md space-y-12">
@@ -96,7 +185,12 @@ export function ModernSkin({
               {isPlaying ? 'PLAYING' : 'PAUSED'}
             </div>
             <div className={`text-xl font-medium ${textColor}`}>{station.name}</div>
-            <div className={`text-sm ${secondaryText}`}>{station.genre}</div>
+            <div className={`text-sm ${secondaryText} flex items-center justify-center gap-2`}>
+              <span className={`px-2 py-0.5 rounded-full text-xs ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'}`}>
+                {cityTheme.name}
+              </span>
+              <span>{station.genre}</span>
+            </div>
           </div>
         )}
 
@@ -133,6 +227,47 @@ export function ModernSkin({
                 )}
               </div>
             </div>
+          </div>
+
+          {/* Volume Control */}
+          <div className="flex items-center gap-3 px-2">
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={() => onVolumeChange(volume === 0 ? 0.7 : 0)}
+              className="p-1"
+            >
+              {volume === 0 ? (
+                <VolumeX className={`w-5 h-5 ${secondaryText}`} />
+              ) : (
+                <Volume2 className={`w-5 h-5 ${secondaryText}`} />
+              )}
+            </motion.button>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value={volume}
+              onChange={(e) => onVolumeChange(parseFloat(e.target.value))}
+              className={`flex-1 h-1 ${dialBg} rounded-full appearance-none cursor-pointer
+                [&::-webkit-slider-thumb]:appearance-none
+                [&::-webkit-slider-thumb]:w-4
+                [&::-webkit-slider-thumb]:h-4
+                [&::-webkit-slider-thumb]:rounded-full
+                [&::-webkit-slider-thumb]:bg-rose-500
+                [&::-webkit-slider-thumb]:shadow-lg
+                [&::-webkit-slider-thumb]:cursor-pointer
+                [&::-moz-range-thumb]:w-4
+                [&::-moz-range-thumb]:h-4
+                [&::-moz-range-thumb]:rounded-full
+                [&::-moz-range-thumb]:bg-rose-500
+                [&::-moz-range-thumb]:border-0
+                [&::-moz-range-thumb]:cursor-pointer`}
+              aria-label="Volume"
+            />
+            <span className={`text-xs font-medium ${secondaryText} w-8`}>
+              {Math.round(volume * 100)}%
+            </span>
           </div>
         </div>
       </div>

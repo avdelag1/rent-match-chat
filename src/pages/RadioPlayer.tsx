@@ -22,6 +22,7 @@ export default function RadioPlayer() {
     togglePlayPause,
     changeStation,
     changeCity,
+    selectCity,
     toggleShuffle,
     toggleFavorite,
     setSkin,
@@ -44,6 +45,16 @@ export default function RadioPlayer() {
 
     changeCity('next', cities);
     toast.success(`Switched to ${cityThemes[nextCity].name}`);
+  };
+
+  const handleSelectCity = (city: CityLocation) => {
+    selectCity(city);
+    toast.success(`Switched to ${cityThemes[city].name}`);
+  };
+
+  const handleAddToPlaylist = () => {
+    setAddingToPlaylist(true);
+    setShowPlaylistDialog(true);
   };
 
   const handleToggleFavorite = () => {
@@ -188,6 +199,9 @@ export default function RadioPlayer() {
               onToggleShuffle={toggleShuffle}
               onToggleFavorite={handleToggleFavorite}
               onCityChange={handleCityChange}
+              onSelectCity={handleSelectCity}
+              onVolumeChange={setVolume}
+              onAddToPlaylist={handleAddToPlaylist}
               theme={skinTheme === 'vibrant' ? 'light' : skinTheme}
             />
           </motion.div>
@@ -206,12 +220,16 @@ export default function RadioPlayer() {
               isShuffle={state.isShuffle}
               isFavorite={state.currentStation ? isStationFavorite(state.currentStation.id) : false}
               currentCity={state.currentCity}
+              volume={state.volume}
               onPlayPause={togglePlayPause}
               onPrevious={() => changeStation('prev')}
               onNext={() => changeStation('next')}
               onToggleShuffle={toggleShuffle}
               onToggleFavorite={handleToggleFavorite}
               onCityChange={handleCityChange}
+              onSelectCity={handleSelectCity}
+              onVolumeChange={setVolume}
+              onAddToPlaylist={handleAddToPlaylist}
             />
           </motion.div>
         )}
@@ -229,12 +247,16 @@ export default function RadioPlayer() {
               isShuffle={state.isShuffle}
               isFavorite={state.currentStation ? isStationFavorite(state.currentStation.id) : false}
               currentCity={state.currentCity}
+              volume={state.volume}
               onPlayPause={togglePlayPause}
               onPrevious={() => changeStation('prev')}
               onNext={() => changeStation('next')}
               onToggleShuffle={toggleShuffle}
               onToggleFavorite={handleToggleFavorite}
               onCityChange={handleCityChange}
+              onSelectCity={handleSelectCity}
+              onVolumeChange={setVolume}
+              onAddToPlaylist={handleAddToPlaylist}
             />
           </motion.div>
         )}
