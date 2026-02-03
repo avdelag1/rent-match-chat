@@ -5,7 +5,7 @@ import { RadioStation, CityLocation, RadioSkin, RadioPlayerState } from '@/types
 import { getStationsByCity, getStationById, getRandomStation } from '@/data/radioStations';
 import { logger } from '@/utils/prodLogger';
 
-interface RadioContextType {
+interface RadioContextValue {
   state: RadioPlayerState;
   loading: boolean;
   error: string | null;
@@ -13,17 +13,24 @@ interface RadioContextType {
   pause: () => void;
   togglePlayPause: () => void;
   changeStation: (direction: 'next' | 'prev') => void;
-  setCity: (city: CityLocation) => void;
+  changeCity: (direction: 'next' | 'prev', cities: CityLocation[]) => void;
+  selectCity: (city: CityLocation) => void;
   setVolume: (volume: number) => void;
   toggleShuffle: () => void;
   setSkin: (skin: RadioSkin) => void;
   toggleFavorite: (stationId: string) => void;
   isStationFavorite: (stationId: string) => boolean;
+  closePlayer: () => void;
+  showMiniPlayer: boolean;
 }
 
-const RadioContext = createContext<RadioContextType | undefined>(undefined);
+const RadioContext = createContext<RadioContextValue | undefined>(undefined);
 
-export function RadioProvider({ children }: { children: React.ReactNode }) {
+interface RadioProviderProps {
+  children: React.ReactNode;
+}
+
+export function RadioProvider({ children }: RadioProviderProps) {
   const { user } = useAuth();
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -39,40 +46,29 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showMiniPlayer, setShowMiniPlayer] = useState(false);
 
-  // Initialize audio element once
+  // Load user preferences from Supabase
+  useEffect(() => {
+    loadUserPreferences();
+  }, [user?.id]);
+
+  // Initialize audio element ONCE (persists across navigation)
   useEffect(() => {
     if (!audioRef.current) {
       audioRef.current = new Audio();
       audioRef.current.volume = state.volume;
       audioRef.current.preload = 'auto';
 
-      const handleTrackEnded = () => {
-        // Auto-advance to next station
-        changeStation('next');
-      };
-
-      const handleAudioError = (e: Event) => {
-        logger.error('[RadioPlayer] Audio error:', e);
-        setError('Stream unavailable');
-        // Try next station
-        changeStation('next');
-      };
-
+      // Handle audio events
       audioRef.current.addEventListener('ended', handleTrackEnded);
       audioRef.current.addEventListener('error', handleAudioError);
     }
 
     return () => {
-      // We don't pause here because we want it to persist
-      // Only cleanup listeners if the provider is unmounted (which is never in our app)
+      // Don't cleanup on unmount - we want audio to persist
     };
   }, []);
-
-  // Load user preferences from Supabase
-  useEffect(() => {
-    loadUserPreferences();
-  }, [user?.id]);
 
   // Update audio volume when state changes
   useEffect(() => {
@@ -81,8 +77,16 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
     }
   }, [state.volume]);
 
+  // Show mini player when playing and station is set
+  useEffect(() => {
+    if (state.isPlaying && state.currentStation) {
+      setShowMiniPlayer(true);
+    }
+  }, [state.isPlaying, state.currentStation]);
+
   const loadUserPreferences = async () => {
     if (!user?.id) {
+      // Set default station for non-logged in users
       const stations = getStationsByCity('tulum');
       if (stations.length > 0) {
         setState(prev => ({ ...prev, currentStation: stations[0] }));
@@ -99,7 +103,7 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
         .single();
 
       if (error) {
-        logger.info('[RadioPlayer] Using default preferences');
+        logger.info('[RadioContext] Using default preferences (columns may not exist yet)');
         setLoading(false);
         return;
       }
@@ -109,6 +113,7 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
         const currentStationId = data.radio_current_station_id;
         let currentStation = currentStationId ? getStationById(currentStationId) : null;
 
+        // If no saved station, use first station from city
         if (!currentStation) {
           const stations = getStationsByCity(city);
           currentStation = stations.length > 0 ? stations[0] : null;
@@ -125,7 +130,7 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
         }));
       }
     } catch (err) {
-      logger.info('[RadioPlayer] Error loading preferences:', err);
+      logger.info('[RadioContext] Using default preferences:', err);
     } finally {
       setLoading(false);
     }
@@ -133,8 +138,10 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
 
   const savePreferences = async (updates: Partial<RadioPlayerState>) => {
     if (!user?.id) return;
+
     try {
       const dbUpdates: any = {};
+
       if (updates.skin !== undefined) dbUpdates.radio_skin = updates.skin;
       if (updates.currentCity !== undefined) dbUpdates.radio_current_city = updates.currentCity;
       if (updates.currentStation !== undefined) dbUpdates.radio_current_station_id = updates.currentStation?.id || null;
@@ -142,9 +149,16 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
       if (updates.isShuffle !== undefined) dbUpdates.radio_shuffle_mode = updates.isShuffle;
       if (updates.favorites !== undefined) dbUpdates.radio_favorite_stations = updates.favorites;
 
-      await supabase.from('profiles').update(dbUpdates).eq('id', user.id);
+      const { error } = await supabase
+        .from('profiles')
+        .update(dbUpdates)
+        .eq('id', user.id);
+
+      if (error) {
+        logger.info('[RadioContext] Could not save preferences (columns may not exist yet)');
+      }
     } catch (err) {
-      logger.info('[RadioPlayer] Error saving preferences:', err);
+      logger.info('[RadioContext] Preferences saved locally only:', err);
     }
   };
 
@@ -153,7 +167,7 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
     if (!targetStation || !audioRef.current) return;
 
     try {
-      if (audioRef.current.src !== targetStation.streamUrl) {
+      if (state.currentStation?.id !== targetStation.id) {
         audioRef.current.src = targetStation.streamUrl;
         audioRef.current.load();
         setState(prev => ({ ...prev, currentStation: targetStation }));
@@ -162,9 +176,10 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
 
       await audioRef.current.play();
       setState(prev => ({ ...prev, isPlaying: true }));
+      setShowMiniPlayer(true);
       setError(null);
     } catch (err) {
-      logger.error('[RadioPlayer] Playback error:', err);
+      logger.error('[RadioContext] Playback error:', err);
       setError('Failed to play station');
     }
   }, [state.currentStation]);
@@ -185,18 +200,21 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
   }, [state.isPlaying, play, pause]);
 
   const changeStation = useCallback((direction: 'next' | 'prev') => {
-    const city = state.currentCity;
-    const stations = getStationsByCity(city);
-    if (stations.length === 0) return;
+    if (!state.currentStation) {
+      const stations = getStationsByCity(state.currentCity);
+      if (stations.length > 0) {
+        play(stations[0]);
+      }
+      return;
+    }
 
     if (state.isShuffle) {
       play(getRandomStation());
       return;
     }
 
-    const currentIndex = state.currentStation 
-      ? stations.findIndex(s => s.id === state.currentStation?.id)
-      : -1;
+    const stations = getStationsByCity(state.currentCity);
+    const currentIndex = stations.findIndex(s => s.id === state.currentStation?.id);
 
     let nextIndex: number;
     if (direction === 'next') {
@@ -208,11 +226,33 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
     play(stations[nextIndex]);
   }, [state.currentStation, state.currentCity, state.isShuffle, play]);
 
-  const setCity = useCallback((city: CityLocation) => {
+  const changeCity = useCallback((direction: 'next' | 'prev', cities: CityLocation[]) => {
+    const currentIndex = cities.indexOf(state.currentCity);
+    let nextIndex: number;
+
+    if (direction === 'next') {
+      nextIndex = (currentIndex + 1) % cities.length;
+    } else {
+      nextIndex = (currentIndex - 1 + cities.length) % cities.length;
+    }
+
+    const newCity = cities[nextIndex];
+    setState(prev => ({ ...prev, currentCity: newCity }));
+    savePreferences({ currentCity: newCity });
+
+    const stations = getStationsByCity(newCity);
+    if (stations.length > 0) {
+      play(stations[0]);
+    }
+  }, [state.currentCity, play]);
+
+  const selectCity = useCallback((city: CityLocation) => {
     if (city === state.currentCity) return;
-    const stations = getStationsByCity(city);
+
     setState(prev => ({ ...prev, currentCity: city }));
     savePreferences({ currentCity: city });
+
+    const stations = getStationsByCity(city);
     if (stations.length > 0) {
       play(stations[0]);
     }
@@ -241,12 +281,32 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
       const newFavorites = isFavorite
         ? prev.favorites.filter(id => id !== stationId)
         : [...prev.favorites, stationId];
+
       savePreferences({ favorites: newFavorites });
       return { ...prev, favorites: newFavorites };
     });
   }, []);
 
-  const value = {
+  const handleTrackEnded = useCallback(() => {
+    changeStation('next');
+  }, [changeStation]);
+
+  const handleAudioError = useCallback((e: Event) => {
+    logger.error('[RadioContext] Audio error:', e);
+    setError('Stream unavailable');
+    changeStation('next');
+  }, [changeStation]);
+
+  const closePlayer = useCallback(() => {
+    pause();
+    setShowMiniPlayer(false);
+  }, [pause]);
+
+  const isStationFavorite = useCallback((stationId: string) => {
+    return state.favorites.includes(stationId);
+  }, [state.favorites]);
+
+  const value: RadioContextValue = {
     state,
     loading,
     error,
@@ -254,21 +314,36 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
     pause,
     togglePlayPause,
     changeStation,
-    setCity,
+    changeCity,
+    selectCity,
     setVolume,
     toggleShuffle,
     setSkin,
     toggleFavorite,
-    isStationFavorite: (stationId: string) => state.favorites.includes(stationId)
+    isStationFavorite,
+    closePlayer,
+    showMiniPlayer
   };
 
-  return <RadioContext.Provider value={value}>{children}</RadioContext.Provider>;
+  return (
+    <RadioContext.Provider value={value}>
+      {children}
+    </RadioContext.Provider>
+  );
 }
 
-export function useRadio() {
+export function useRadioContext(): RadioContextValue {
   const context = useContext(RadioContext);
   if (context === undefined) {
-    throw new Error('useRadio must be used within a RadioProvider');
+    throw new Error('useRadioContext must be used within a RadioProvider');
   }
   return context;
+}
+
+// Alias for compatibility
+export const useRadio = useRadioContext;
+
+// Optional hook that returns undefined if not within provider (for MiniPlayer)
+export function useRadioContextOptional(): RadioContextValue | undefined {
+  return useContext(RadioContext);
 }

@@ -7,7 +7,9 @@ import { useOfflineDetection } from '@/hooks/useOfflineDetection';
 import { useErrorReporting } from '@/hooks/useErrorReporting';
 import { useViewTransitions } from '@/hooks/useViewTransitions';
 import { useResponsiveContext } from '@/contexts/ResponsiveContext';
+import { useRadioContextOptional } from '@/contexts/RadioContext';
 import { GradientMaskTop, GradientMaskBottom } from '@/components/ui/GradientMasks';
+import { MiniRadioPlayer } from '@/components/radio/MiniRadioPlayer';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -133,6 +135,9 @@ export function AppLayout({ children }: AppLayoutProps) {
   // Get responsive state for adaptive behavior
   const responsive = useResponsiveContext();
 
+  // Get radio context for mini player (optional - may not be in provider yet)
+  const radio = useRadioContextOptional();
+
   // Initialize app features
   useKeyboardShortcuts();
   useFocusManagement();
@@ -212,6 +217,21 @@ export function AppLayout({ children }: AppLayoutProps) {
           </motion.div>
         </AnimatePresence>
       </main>
+
+      {/* Floating Mini Radio Player - persists across navigation */}
+      {radio && radio.showMiniPlayer && (
+        <MiniRadioPlayer
+          station={radio.state.currentStation}
+          isPlaying={radio.state.isPlaying}
+          currentCity={radio.state.currentCity}
+          volume={radio.state.volume}
+          onPlayPause={radio.togglePlayPause}
+          onPrevious={() => radio.changeStation('prev')}
+          onNext={() => radio.changeStation('next')}
+          onVolumeChange={radio.setVolume}
+          onClose={radio.closePlayer}
+        />
+      )}
     </div>
   );
 }
