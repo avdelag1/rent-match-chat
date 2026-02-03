@@ -38,6 +38,7 @@ export function VinylSkin({
   onCitySelect,
   onVolumeChange
 }: VinylSkinProps) {
+  const [showCitySelector, setShowCitySelector] = useState(false);
   const cityTheme = cityThemes[currentCity];
   const volumeRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -69,12 +70,12 @@ export function VinylSkin({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 flex flex-col items-center justify-center p-8 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 flex flex-col items-center justify-between p-6 relative overflow-hidden">
       {/* Wood grain texture overlay */}
       <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJub2lzZSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuOCIgbnVtT2N0YXZlcz0iNCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNub2lzZSkiIG9wYWNpdHk9IjAuMyIvPjwvc3ZnPg==')]" />
 
       {/* Top Icons */}
-      <div className="w-full max-w-lg flex justify-between items-start mb-8 z-10">
+      <div className="w-full max-w-lg flex justify-between items-start z-10">
         <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={onToggleShuffle}
@@ -83,24 +84,101 @@ export function VinylSkin({
           <Shuffle className={`w-5 h-5 ${isShuffle ? 'text-amber-400' : 'text-white/70'}`} />
         </motion.button>
 
-        <motion.button
-          whileTap={{ scale: 0.95 }}
-          onClick={onToggleFavorite}
-          className={`p-3 rounded-full ${isFavorite ? 'bg-red-500/20' : 'bg-white/10'} backdrop-blur-sm transition-colors`}
-        >
-          <Heart
-            className={`w-5 h-5 ${isFavorite ? 'text-red-500 fill-red-500' : 'text-white/70'}`}
-          />
-        </motion.button>
+        <div className="flex gap-2">
+          {/* City Selector Button */}
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowCitySelector(!showCitySelector)}
+            className="p-3 rounded-full bg-white/10 backdrop-blur-sm transition-colors flex items-center gap-1"
+          >
+            <Globe className="w-5 h-5 text-amber-200" />
+            <span className="text-xs text-white">{cityTheme.name.slice(0, 4)}</span>
+            <ChevronDown className={`w-3 h-3 text-amber-200 ${showCitySelector ? 'rotate-180' : ''} transition-transform`} />
+          </motion.button>
+
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={onToggleFavorite}
+            className={`p-3 rounded-full ${isFavorite ? 'bg-red-500/20' : 'bg-white/10'} backdrop-blur-sm transition-colors`}
+          >
+            <Heart
+              className={`w-5 h-5 ${isFavorite ? 'text-red-500 fill-red-500' : 'text-white/70'}`}
+            />
+          </motion.button>
+
+          {onAddToPlaylist && (
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={onAddToPlaylist}
+              className="p-3 rounded-full bg-white/10 backdrop-blur-sm transition-colors"
+            >
+              <Plus className="w-5 h-5 text-white/70" />
+            </motion.button>
+          )}
+        </div>
       </div>
 
+      {/* City Selector Dropdown */}
+      <AnimatePresence>
+        {showCitySelector && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="absolute top-20 left-4 right-4 z-50 bg-gray-900/95 backdrop-blur-xl rounded-2xl p-4 shadow-2xl border border-amber-500/20"
+          >
+            <div className="text-amber-200/70 text-xs uppercase tracking-wider mb-3 text-center">Select City</div>
+            <div className="grid grid-cols-4 gap-2">
+              {allCities.map((city) => {
+                const cTheme = cityThemes[city];
+                const isSelected = city === currentCity;
+                return (
+                  <motion.button
+                    key={city}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      onSelectCity(city);
+                      setShowCitySelector(false);
+                    }}
+                    className={`p-2 rounded-xl transition-all ${
+                      isSelected
+                        ? 'ring-2 ring-amber-400 shadow-lg'
+                        : 'hover:bg-gray-800'
+                    }`}
+                    style={{
+                      background: isSelected
+                        ? `linear-gradient(135deg, ${cTheme.primaryColor}, ${cTheme.secondaryColor})`
+                        : undefined
+                    }}
+                  >
+                    <div className="text-2xl mb-1">
+                      {city === 'new-york' && '🗽'}
+                      {city === 'miami' && '🌴'}
+                      {city === 'ibiza' && '🎧'}
+                      {city === 'tulum' && '🏝️'}
+                      {city === 'california' && '🌊'}
+                      {city === 'texas' && '🤠'}
+                      {city === 'french' && '🗼'}
+                      {city === 'podcasts' && '🎙️'}
+                    </div>
+                    <div className={`text-[10px] font-medium ${isSelected ? 'text-white' : 'text-amber-200/70'}`}>
+                      {cTheme.name}
+                    </div>
+                  </motion.button>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Vinyl Record */}
-      <div className="relative z-10">
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center">
         {/* Record player base/platter */}
         <div className="w-80 h-80 rounded-full bg-gradient-to-br from-gray-600 to-gray-800 shadow-2xl flex items-center justify-center relative">
           {/* Vinyl Record - only this rotates */}
           <motion.div
-            className="w-72 h-72 rounded-full bg-gradient-to-br from-gray-900 to-black shadow-inner flex items-center justify-center relative overflow-hidden"
+            className="w-64 h-64 rounded-full bg-gradient-to-br from-gray-900 to-black shadow-inner flex items-center justify-center relative overflow-hidden"
             animate={{ rotate: isPlaying ? 360 : 0 }}
             transition={{ duration: 3, repeat: isPlaying ? Infinity : 0, ease: 'linear' }}
           >
@@ -110,25 +188,29 @@ export function VinylSkin({
                 key={i}
                 className="absolute rounded-full border border-white/5"
                 style={{
-                  width: `${280 - i * 30}px`,
-                  height: `${280 - i * 30}px`,
+                  width: `${250 - i * 28}px`,
+                  height: `${250 - i * 28}px`,
                 }}
               />
             ))}
 
-            {/* Center label with retro stripes */}
-            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-yellow-400 via-orange-400 to-red-400 shadow-lg flex items-center justify-center relative overflow-hidden">
-              {/* Retro stripes */}
-              <div className="absolute inset-0 flex flex-col justify-center">
-                <div className="h-4 bg-yellow-300 opacity-50" />
-                <div className="h-4 bg-orange-300 opacity-50" />
-                <div className="h-4 bg-red-300 opacity-50" />
-                <div className="h-4 bg-blue-300 opacity-50" />
-                <div className="h-4 bg-cyan-300 opacity-50" />
+            {/* Center label with city theme colors */}
+            <div
+              className="w-28 h-28 rounded-full shadow-lg flex items-center justify-center relative overflow-hidden"
+              style={{
+                background: `linear-gradient(135deg, ${cityTheme.primaryColor}, ${cityTheme.secondaryColor})`
+              }}
+            >
+              <div className="text-center text-white z-10">
+                <div className="text-xs font-bold truncate max-w-20 px-1">
+                  {station?.name?.slice(0, 10) || 'RADIO'}
+                </div>
+                <div className="text-[8px] opacity-80">
+                  {cityTheme.name}
+                </div>
               </div>
-
               {/* Center hole */}
-              <div className="w-8 h-8 rounded-full bg-gray-900 shadow-inner z-10" />
+              <div className="absolute w-4 h-4 rounded-full bg-gray-900 shadow-inner" />
             </div>
           </motion.div>
 
@@ -167,7 +249,7 @@ export function VinylSkin({
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-8 bg-black/40 backdrop-blur-lg rounded-2xl p-6 text-center border border-white/10"
+            className="mt-6 bg-black/40 backdrop-blur-lg rounded-2xl p-4 text-center border border-white/10 w-full max-w-xs"
           >
             <div className="flex items-center justify-center gap-2 mb-2">
               <Disc3 className="w-4 h-4 text-amber-400" />
@@ -175,9 +257,12 @@ export function VinylSkin({
                 {isPlaying ? 'NOW SPINNING' : 'PAUSED'}
               </div>
             </div>
-            <div className="text-white text-2xl font-bold mb-1">{station.name}</div>
-            <div className="text-white/70 text-sm mb-2">{station.frequency}</div>
-            <div className="text-white/50 text-xs">{station.genre}</div>
+            <div className="text-white text-xl font-bold mb-1">{station.name}</div>
+            <div className="text-white/70 text-sm mb-1">{station.frequency}</div>
+            <div className="text-white/50 text-xs flex items-center justify-center gap-2">
+              <span className="bg-amber-500/20 px-2 py-0.5 rounded-full">{cityTheme.name}</span>
+              <span>{station.genre}</span>
+            </div>
           </motion.div>
         )}
       </div>
@@ -210,25 +295,36 @@ export function VinylSkin({
           <SkipBack className="w-6 h-6 text-white" fill="currentColor" />
         </motion.button>
 
-        <motion.button
-          whileTap={{ scale: 0.95 }}
-          onClick={onPlayPause}
-          className="p-6 rounded-full bg-amber-500 hover:bg-amber-600 shadow-xl transition-colors"
-        >
-          {isPlaying ? (
-            <Pause className="w-8 h-8 text-gray-900" fill="currentColor" />
-          ) : (
-            <Play className="w-8 h-8 text-gray-900 ml-1" fill="currentColor" />
-          )}
-        </motion.button>
+        {/* Controls */}
+        <div className="flex items-center justify-center gap-6">
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={onPrevious}
+            className="p-4 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-colors"
+          >
+            <SkipBack className="w-6 h-6 text-white" fill="currentColor" />
+          </motion.button>
 
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          onClick={onNext}
-          className="p-4 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-colors"
-        >
-          <SkipForward className="w-6 h-6 text-white" fill="currentColor" />
-        </motion.button>
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={onPlayPause}
+            className="p-6 rounded-full bg-amber-500 hover:bg-amber-600 shadow-xl transition-colors"
+          >
+            {isPlaying ? (
+              <Pause className="w-8 h-8 text-gray-900" fill="currentColor" />
+            ) : (
+              <Play className="w-8 h-8 text-gray-900 ml-1" fill="currentColor" />
+            )}
+          </motion.button>
+
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={onNext}
+            className="p-4 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-colors"
+          >
+            <SkipForward className="w-6 h-6 text-white" fill="currentColor" />
+          </motion.button>
+        </div>
       </div>
 
       {/* Volume Slider - Touch friendly */}

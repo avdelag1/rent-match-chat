@@ -38,6 +38,16 @@ export default function RadioPlayer() {
     toast.success(`Switched to ${cityThemes[city].name}`);
   };
 
+  const handleSelectCity = (city: CityLocation) => {
+    selectCity(city);
+    toast.success(`Switched to ${cityThemes[city].name}`);
+  };
+
+  const handleAddToPlaylist = () => {
+    setAddingToPlaylist(true);
+    setShowPlaylistDialog(true);
+  };
+
   const handleToggleFavorite = () => {
     if (state.currentStation) {
       toggleFavorite(state.currentStation.id);
