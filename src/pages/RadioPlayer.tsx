@@ -5,6 +5,7 @@ import { ModernSkin } from '@/components/radio/skins/ModernSkin';
 import { VinylSkin } from '@/components/radio/skins/VinylSkin';
 import { RetroSkin } from '@/components/radio/skins/RetroSkin';
 import { PlaylistDialog } from '@/components/radio/PlaylistDialog';
+import { AllStationsDialog } from '@/components/radio/AllStationsDialog';
 import { cityThemes } from '@/data/radioStations';
 import { CityLocation, RadioSkin } from '@/types/radio';
 import { Button } from '@/components/ui/button';
@@ -38,6 +39,7 @@ export default function RadioPlayer() {
 
   const [showSkinSelector, setShowSkinSelector] = useState(false);
   const [showPlaylistDialog, setShowPlaylistDialog] = useState(false);
+  const [showAllStationsDialog, setShowAllStationsDialog] = useState(false);
   const [addingToPlaylist, setAddingToPlaylist] = useState(false);
 
   const skinSelectorRef = useRef<HTMLDivElement>(null);
@@ -276,6 +278,23 @@ export default function RadioPlayer() {
           setAddingToPlaylist(false);
         }}
         addingMode={addingToPlaylist}
+      />
+
+      {/* All Stations Dialog */}
+      <AllStationsDialog
+        isOpen={showAllStationsDialog}
+        onClose={() => setShowAllStationsDialog(false)}
+        currentStation={state.currentStation}
+        onPlayStation={(station) => {
+          play(station);
+          toast.success(`Now playing ${station.name}`);
+        }}
+        onToggleFavorite={(stationId) => {
+          toggleFavorite(stationId);
+          const isFav = isStationFavorite(stationId);
+          toast.success(isFav ? 'Added to favorites' : 'Removed from favorites');
+        }}
+        favoriteStations={state.favorites}
       />
     </div>
   );
