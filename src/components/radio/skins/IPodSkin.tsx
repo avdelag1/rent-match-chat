@@ -39,7 +39,7 @@ export function IPodSkin({
   const cityTheme = cityThemes[currentCity];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-200 to-gray-400 flex items-center justify-center p-6">
+    <div className="h-dvh bg-gradient-to-b from-gray-200 to-gray-400 flex items-center justify-center p-6">
       {/* iPod Body */}
       <div className="w-80 bg-gradient-to-b from-gray-100 to-gray-300 rounded-[2rem] p-6 shadow-2xl relative">
         {/* Chrome bezel */}
