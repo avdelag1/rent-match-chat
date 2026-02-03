@@ -108,7 +108,7 @@ export function PlaylistDialog({ isOpen, onClose, currentStation, onPlayStation,
                       >
                         <div className="flex-1">
                           <div className="font-semibold text-gray-900">{station.name}</div>
-                          <div className="text-sm text-gray-600">{station.genre} • {station.frequency}</div>
+                          <div className="text-sm text-gray-600">{station.genre || 'Radio'} • {station.frequency}</div>
                         </div>
                         <div className="flex gap-2">
                           <button

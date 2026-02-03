@@ -10,13 +10,13 @@ import { QuickFilterDropdown } from './QuickFilterDropdown';
 import { ModeSwitcher } from './ModeSwitcher';
 import { useScrollDirection } from '@/hooks/useScrollDirection';
 
-// UPGRADED BRIGHTNESS: Text is now a brighter, more vibrant gradient
+// UPGRADED BRIGHTNESS: Text is now a brighter, more vibrant gradient with glow effect
 const MessageActivationText = () => (
   <>
-    <span className="hidden sm:inline font-bold text-sm tracking-tight bg-gradient-to-r from-yellow-300 via-orange-400 to-yellow-300 bg-clip-text text-transparent whitespace-nowrap">
+    <span className="hidden sm:inline font-bold text-sm tracking-tight bg-gradient-to-r from-yellow-200 via-orange-300 to-yellow-200 bg-clip-text text-transparent whitespace-nowrap drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]">
       Message Activation
     </span>
-    <Zap className="sm:hidden h-5 w-5 text-yellow-300 drop-shadow-[0_0_6px_rgba(253,224,71,0.6)]" />
+    <Zap className="sm:hidden h-5 w-5 text-yellow-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]" />
   </>
 );
 
@@ -112,7 +112,7 @@ function TopBarComponent({
               whileTap={{ scale: 0.95 }}
               transition={{ type: 'spring', stiffness: 400, damping: 17 }}
             >
-              <Radio className="h-5 w-5 sm:h-6 sm:w-6 text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.4)] group-hover:text-orange-300 group-hover:drop-shadow-[0_0_8px_rgba(253,186,116,0.6)]" />
+              <Radio className="h-5 w-5 sm:h-6 sm:w-6 text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.5)] group-hover:text-white group-hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]" />
             </motion.div>
           </Button>
 
@@ -129,13 +129,13 @@ function TopBarComponent({
               whileTap={{ scale: 0.95 }}
               transition={{ type: 'spring', stiffness: 400, damping: 17 }}
             >
-              {/* UPGRADED BRIGHTNESS: Icon is now brighter and more visible */}
+              {/* UPGRADED BRIGHTNESS: Icon is now brighter and more visible with glow effect */}
               <Bell
                 className={cn(
                   "h-5 w-5 sm:h-6 sm:w-6 transition-all duration-200",
                   notificationCount > 0
-                    ? "text-amber-300 drop-shadow-[0_0_8px_rgba(252,211,77,0.6)] group-hover:text-amber-200"
-                    : "text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.4)] group-hover:text-orange-300 group-hover:drop-shadow-[0_0_8px_rgba(253,186,116,0.6)]"
+                    ? "text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.7)] group-hover:text-amber-200 group-hover:drop-shadow-[0_0_12px_rgba(251,191,36,0.9)]"
+                    : "text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.5)] group-hover:text-white group-hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]"
                 )}
               />
               <AnimatePresence>

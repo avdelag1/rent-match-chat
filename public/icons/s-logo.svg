@@ -1,42 +1,30 @@
 <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#000000;stop-opacity:1"/>
-    </linearGradient>
+    <!-- Gradient from pink (top) to orange to yellow (bottom) -->
     <linearGradient id="sGradient" x1="50%" y1="0%" x2="50%" y2="100%">
-      <stop offset="0%" style="stop-color:#FF8E53;stop-opacity:1"/>
-      <stop offset="50%" style="stop-color:#FF6B35;stop-opacity:1"/>
-      <stop offset="100%" style="stop-color:#FF5722;stop-opacity:1"/>
+      <stop offset="0%" style="stop-color:#FF1493;stop-opacity:1"/>
+      <stop offset="30%" style="stop-color:#FF6B4A;stop-opacity:1"/>
+      <stop offset="60%" style="stop-color:#FF9500;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#FFD700;stop-opacity:1"/>
     </linearGradient>
   </defs>
 
-  <!-- Black Background -->
-  <rect width="1024" height="1024" rx="224" fill="url(#bgGradient)"/>
+  <!-- Dark Navy Blue Background -->
+  <rect width="1024" height="1024" fill="#0F1123"/>
 
-  <!-- Orange S Letter -->
+  <!-- Bold Gradient S Letter -->
   <path
-    d="M672 288
-       C672 288, 608 224, 480 224
-       C352 224, 256 288, 256 384
-       C256 480, 320 528, 432 560
-       L576 608
-       C672 640, 752 704, 752 800
-       C752 912, 640 976, 512 976
-       C384 976, 288 912, 224 832
-
-       L224 832
-       C288 944, 400 1024, 528 1024
-       C704 1024, 832 928, 832 784
-       C832 672, 736 608, 608 560
-       L464 512
-       C368 480, 320 432, 320 368
-       C320 304, 384 256, 480 256
-       C592 256, 672 304, 704 352"
+    d="M680 280
+       C680 280, 600 200, 512 200
+       C400 200, 300 270, 300 380
+       C300 490, 400 540, 512 580
+       C624 620, 724 680, 724 780
+       C724 880, 620 940, 512 940
+       C404 940, 320 880, 280 800"
     fill="none"
     stroke="url(#sGradient)"
-    stroke-width="96"
+    stroke-width="120"
     stroke-linecap="round"
     stroke-linejoin="round"
-    transform="translate(32, -80)"
   />
 </svg>
