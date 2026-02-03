@@ -54,6 +54,7 @@ const FAQOwnerPage = lazy(() => import("./pages/FAQOwnerPage"));
 // Client routes - ALL direct imports for instant navigation
 import ClientDashboard from "./pages/ClientDashboard";
 import ClientProfile from "./pages/ClientProfileNew";
+import ClientProfileSetup from "./pages/ClientProfileSetup";
 import ClientSettings from "./pages/ClientSettingsNew";
 import ClientLikedProperties from "./pages/ClientLikedProperties";
 import ClientWhoLikedYou from "./pages/ClientWhoLikedYou";
@@ -190,6 +191,7 @@ const App = () => (
                       {/* Client routes */}
                       <Route path="/client/dashboard" element={<ClientDashboard />} />
                       <Route path="/client/profile" element={<ClientProfile />} />
+                      <Route path="/client/profile/setup" element={<ClientProfileSetup />} />
                       <Route path="/client/settings" element={<ClientSettings />} />
                       <Route path="/client/liked-properties" element={<ClientLikedProperties />} />
                       <Route path="/client/who-liked-you" element={<ClientWhoLikedYou />} />

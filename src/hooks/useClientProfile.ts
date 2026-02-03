@@ -19,8 +19,17 @@ export type ClientProfileLite = {
   neighborhood?: string | null;
   latitude?: number | null;
   longitude?: number | null;
-  // Intentions
+  // Intentions and needs
   intentions?: string[] | null;
+  services_needed?: string[] | null;
+  // Budget and timeline
+  budget_range?: string | null;
+  move_in_timeline?: string | null;
+  // Location preferences
+  location_city?: string | null;
+  location_country?: string | null;
+  // Occupation
+  occupation?: string | null;
 };
 
 // Type for database operations (excluding id)

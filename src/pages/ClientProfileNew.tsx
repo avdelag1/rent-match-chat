@@ -122,12 +122,28 @@ const ClientProfileNew = () => {
             </div>
           </motion.div>
 
+          {/* Edit Profile Button */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ ...fastSpring, delay: 0.05 }}
+          >
+            <Button
+              onClick={() => navigate('/client/profile/setup')}
+              className="w-full h-12 gap-2"
+              variant="default"
+            >
+              <User className="w-5 h-5" />
+              Edit Profile & Preferences
+            </Button>
+          </motion.div>
+
           {/* Profile Completion */}
           {completionPercent < 100 && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ ...fastSpring, delay: 0.05 }}
+              transition={{ ...fastSpring, delay: 0.08 }}
             >
               <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
                 <CardContent className="p-4">
