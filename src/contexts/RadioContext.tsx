@@ -292,9 +292,34 @@ export function RadioProvider({ children }: RadioProviderProps) {
   }, [changeStation]);
 
   const handleAudioError = useCallback((e: Event) => {
-    logger.error('[RadioContext] Audio error:', e);
-    setError('Stream unavailable');
-    changeStation('next');
+    const target = e.target as HTMLAudioElement;
+    const errorCode = target.error?.code;
+    let errorMessage = 'Stream unavailable';
+
+    switch (errorCode) {
+      case MediaError.MEDIA_ERR_ABORTED:
+        errorMessage = 'Playback aborted';
+        break;
+      case MediaError.MEDIA_ERR_NETWORK:
+        errorMessage = 'Network error - check your connection';
+        break;
+      case MediaError.MEDIA_ERR_DECODE:
+        errorMessage = 'Stream format not supported';
+        break;
+      case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+        errorMessage = 'Station stream unavailable';
+        break;
+      default:
+        errorMessage = 'Playback error';
+    }
+
+    logger.error('[RadioContext] Audio error:', errorCode, errorMessage);
+    setError(errorMessage);
+
+    // Auto-skip to next station after a brief delay
+    setTimeout(() => {
+      changeStation('next');
+    }, 1500);
   }, [changeStation]);
 
   const closePlayer = useCallback(() => {

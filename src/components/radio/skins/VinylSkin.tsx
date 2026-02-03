@@ -119,7 +119,7 @@ export function VinylSkin({
             className="absolute top-20 left-4 right-4 z-50 bg-gray-900/95 backdrop-blur-xl rounded-2xl p-4 shadow-2xl border border-amber-500/20"
           >
             <div className="text-amber-200/70 text-xs uppercase tracking-wider mb-3 text-center">Select City</div>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               {allCities.map((city) => {
                 const cTheme = cityThemes[city];
                 const isSelected = city === currentCity;
@@ -131,10 +131,10 @@ export function VinylSkin({
                       onCitySelect(city);
                       setShowCitySelector(false);
                     }}
-                    className={`p-2 rounded-xl transition-all ${
+                    className={`px-4 py-3 rounded-xl transition-all text-left ${
                       isSelected
                         ? 'ring-2 ring-amber-400 shadow-lg'
-                        : 'hover:bg-gray-800'
+                        : 'hover:bg-gray-800 bg-gray-800/50'
                     }`}
                     style={{
                       background: isSelected
@@ -142,18 +142,18 @@ export function VinylSkin({
                         : undefined
                     }}
                   >
-                    <div className="text-2xl mb-1">
-                      {city === 'new-york' && '🗽'}
-                      {city === 'miami' && '🌴'}
-                      {city === 'ibiza' && '🎧'}
-                      {city === 'tulum' && '🏝️'}
-                      {city === 'california' && '🌊'}
-                      {city === 'texas' && '🤠'}
-                      {city === 'french' && '🗼'}
-                      {city === 'podcasts' && '🎙️'}
-                    </div>
-                    <div className={`text-[10px] font-medium ${isSelected ? 'text-white' : 'text-amber-200/70'}`}>
+                    <div className={`text-sm font-semibold ${isSelected ? 'text-white' : 'text-amber-200'}`}>
                       {cTheme.name}
+                    </div>
+                    <div className={`text-xs ${isSelected ? 'text-white/80' : 'text-amber-200/60'} mt-0.5`}>
+                      {city === 'new-york' && 'New York Vibes'}
+                      {city === 'miami' && 'Tropical Beats'}
+                      {city === 'ibiza' && 'Electronic Party'}
+                      {city === 'tulum' && 'Beach Ambient'}
+                      {city === 'california' && 'West Coast'}
+                      {city === 'texas' && 'Lone Star'}
+                      {city === 'french' && 'French Culture'}
+                      {city === 'podcasts' && 'Talk & Stories'}
                     </div>
                   </motion.button>
                 );
