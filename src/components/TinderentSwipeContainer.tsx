@@ -38,6 +38,7 @@ import { MessageConfirmationDialog } from './MessageConfirmationDialog';
 import { DirectMessageDialog } from './DirectMessageDialog';
 import { isDirectMessagingListing } from '@/utils/directMessaging';
 import { useQueryClient } from '@tanstack/react-query';
+import { useRealtimeSwipeSync } from '@/hooks/useRealtimeSwipeSync';
 
 // Custom motorcycle icon
 const MotorcycleIcon = ({ className }: { className?: string }) => (
@@ -208,10 +209,17 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   const [messageDialogOpen, setMessageDialogOpen] = useState(false);
   const [directMessageDialogOpen, setDirectMessageDialogOpen] = useState(false);
   const [selectedListing, setSelectedListing] = useState<any | null>(null);
+  // Incremented after new/updated listings are written to deckQueueRef so the
+  // component re-renders and the "All Caught Up" screen disappears.
+  const [, setDeckTick] = useState(0);
 
   // PERF: Get userId from auth to pass to query (avoids getUser() inside queryFn)
   const { user } = useAuth();
   const queryClient = useQueryClient();
+
+  // Real-time: invalidate smart-listings cache whenever any listing is
+  // created or updated so swipe cards pick up new/edited data automatically.
+  useRealtimeSwipeSync('client');
 
   // PERF: Use selective subscriptions to prevent re-renders on unrelated store changes
   // Only subscribe to actions (stable references) - NOT to clientDeck object
@@ -609,6 +617,14 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     // Reset the new listings flag
     hasNewListingsRef.current = false;
 
+    // Refresh existing cards in-place with the latest data from the refetch.
+    // This ensures that any edits (title, price, photos …) made by an owner
+    // are immediately visible on cards already sitting in the deck.
+    const freshById = new Map(smartListings.map(l => [l.id, l]));
+    deckQueueRef.current = deckQueueRef.current.map(existing =>
+      freshById.get(existing.id) || existing
+    );
+
     const existingIds = new Set(deckQueueRef.current.map(l => l.id));
     const dismissedSet = new Set(dismissedIds);
     const newListings = smartListings.filter(l =>
@@ -636,6 +652,11 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
         markClientReady();
       }
     }
+
+    // Force a re-render so the component picks up the updated deckQueueRef.
+    // Critical path: without this, "All Caught Up" stays visible even after
+    // new listings are appended to the ref.
+    setDeckTick(t => t + 1);
 
     isFetchingMore.current = false;
   }, [listingIdsSignature, isLoading, isFetching, smartListings, setClientDeck, isClientReady, markClientReady, dismissedIds]);
