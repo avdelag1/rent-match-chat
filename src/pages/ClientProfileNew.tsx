@@ -1,10 +1,12 @@
 /** SPEED OF LIGHT: DashboardLayout is now rendered at route level */
-import { ClientProfileDialog } from "@/components/ClientProfileDialog";
 import { PhotoPreview } from "@/components/PhotoPreview";
 import { ShareDialog } from "@/components/ShareDialog";
 import { SharedProfileSection } from "@/components/SharedProfileSection";
 import { ThemeSelector } from "@/components/ThemeSelector";
-import { useState, useCallback } from "react";
+import { useState, useCallback, lazy, Suspense } from "react";
+
+// Lazy load ClientProfileDialog to reduce bundle size
+const ClientProfileDialog = lazy(() => import("@/components/ClientProfileDialog").then(m => ({ default: m.ClientProfileDialog })));
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useClientProfile } from "@/hooks/useClientProfile";
@@ -343,10 +345,12 @@ const ClientProfileNew = () => {
         </div>
       </div>
 
-      <ClientProfileDialog
-        open={showEditDialog}
-        onOpenChange={setShowEditDialog}
-      />
+      <Suspense fallback={null}>
+        <ClientProfileDialog
+          open={showEditDialog}
+          onOpenChange={setShowEditDialog}
+        />
+      </Suspense>
 
       <PhotoPreview
         photos={profile?.profile_images || []}
