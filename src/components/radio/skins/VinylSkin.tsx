@@ -106,16 +106,6 @@ export function VinylSkin({
               className={`w-5 h-5 ${isFavorite ? 'text-red-500 fill-red-500' : 'text-white/70'}`}
             />
           </motion.button>
-
-          {onAddToPlaylist && (
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={onAddToPlaylist}
-              className="p-3 rounded-full bg-white/10 backdrop-blur-sm transition-colors"
-            >
-              <Plus className="w-5 h-5 text-white/70" />
-            </motion.button>
-          )}
         </div>
       </div>
 
@@ -138,7 +128,7 @@ export function VinylSkin({
                     key={city}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => {
-                      onSelectCity(city);
+                      onCitySelect(city);
                       setShowCitySelector(false);
                     }}
                     className={`p-2 rounded-xl transition-all ${
@@ -296,36 +286,25 @@ export function VinylSkin({
           <SkipBack className="w-6 h-6 text-white" fill="currentColor" />
         </motion.button>
 
-        {/* Controls */}
-        <div className="flex items-center justify-center gap-6">
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={onPrevious}
-            className="p-4 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-colors"
-          >
-            <SkipBack className="w-6 h-6 text-white" fill="currentColor" />
-          </motion.button>
+        <motion.button
+          whileTap={{ scale: 0.95 }}
+          onClick={onPlayPause}
+          className="p-6 rounded-full bg-amber-500 hover:bg-amber-600 shadow-xl transition-colors"
+        >
+          {isPlaying ? (
+            <Pause className="w-8 h-8 text-gray-900" fill="currentColor" />
+          ) : (
+            <Play className="w-8 h-8 text-gray-900 ml-1" fill="currentColor" />
+          )}
+        </motion.button>
 
-          <motion.button
-            whileTap={{ scale: 0.95 }}
-            onClick={onPlayPause}
-            className="p-6 rounded-full bg-amber-500 hover:bg-amber-600 shadow-xl transition-colors"
-          >
-            {isPlaying ? (
-              <Pause className="w-8 h-8 text-gray-900" fill="currentColor" />
-            ) : (
-              <Play className="w-8 h-8 text-gray-900 ml-1" fill="currentColor" />
-            )}
-          </motion.button>
-
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={onNext}
-            className="p-4 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-colors"
-          >
-            <SkipForward className="w-6 h-6 text-white" fill="currentColor" />
-          </motion.button>
-        </div>
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          onClick={onNext}
+          className="p-4 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-colors"
+        >
+          <SkipForward className="w-6 h-6 text-white" fill="currentColor" />
+        </motion.button>
       </div>
 
       {/* Volume Slider - Touch friendly */}

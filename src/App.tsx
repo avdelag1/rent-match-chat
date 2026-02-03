@@ -8,7 +8,6 @@ import { ResponsiveProvider } from "@/contexts/ResponsiveContext";
 import { RadioProvider } from "@/contexts/RadioContext";
 import { ActiveModeProvider } from "@/hooks/useActiveMode";
 import { PWAProvider } from "@/hooks/usePWAMode";
-import { RadioProvider } from "@/contexts/RadioContext";
 import { useNotifications } from "@/hooks/useNotifications";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/AppLayout";
