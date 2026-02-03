@@ -1,7 +1,37 @@
-import { motion } from 'framer-motion';
-import { Play, Pause, SkipBack, SkipForward, Radio, Heart, Shuffle, Volume2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Play, Pause, SkipBack, SkipForward, Radio, Heart, Shuffle, Volume2, Filter } from 'lucide-react';
 import { RadioStation, CityLocation } from '@/types/radio';
 import { useState, useRef } from 'react';
+
+// Podcast categories for organization
+const PODCAST_CATEGORIES = {
+  'all': 'All Podcasts',
+  'news': 'News & Talk',
+  'jazz': 'Jazz & Soul',
+  'indie': 'Indie & Alternative',
+  'folk': 'Folk & Americana',
+  'eclectic': 'Eclectic & World'
+} as const;
+
+type PodcastCategory = keyof typeof PODCAST_CATEGORIES;
+
+// Map genres to categories
+const GENRE_TO_CATEGORY: Record<string, PodcastCategory> = {
+  'World News': 'news',
+  'News & Culture': 'news',
+  'Culture & Ideas': 'news',
+  'Jazz Variety': 'jazz',
+  'Soul': 'jazz',
+  'Indie Pop': 'indie',
+  'Cover Songs': 'indie',
+  'Folk & Americana': 'folk',
+  'Americana': 'folk',
+  'Eclectic Radio': 'eclectic',
+  'Eclectic Mix': 'eclectic',
+  'Eclectic': 'eclectic',
+  'Mellow Mix': 'eclectic',
+  'Rock Mix': 'eclectic'
+};
 
 interface ModernSkinProps {
   station: RadioStation | null;
@@ -38,6 +68,19 @@ export function ModernSkin({
 }: ModernSkinProps) {
   const volumeRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [selectedPodcastCategory, setSelectedPodcastCategory] = useState<PodcastCategory>('all');
+  const [showCategoryFilter, setShowCategoryFilter] = useState(false);
+
+  // Check if we're in podcast mode
+  const isPodcastMode = currentCity === 'podcasts';
+
+  // Get the category for the current podcast station
+  const getCurrentStationCategory = (): PodcastCategory | null => {
+    if (!isPodcastMode || !station?.genre) return null;
+    return GENRE_TO_CATEGORY[station.genre] || null;
+  };
+
+  const currentStationCategory = getCurrentStationCategory();
 
   // Handle volume change via touch/mouse (horizontal slider)
   const handleVolumeInteraction = (clientX: number) => {
@@ -84,16 +127,67 @@ export function ModernSkin({
           <Shuffle className={`w-5 h-5 ${isShuffle ? accentColor : secondaryText}`} />
         </motion.button>
 
-        <motion.button
-          whileTap={{ scale: 0.95 }}
-          onClick={onToggleFavorite}
-          className={`p-3 rounded-full ${buttonBg} transition-colors`}
-        >
-          <Heart
-            className={`w-5 h-5 ${isFavorite ? 'text-red-500 fill-red-500' : secondaryText}`}
-          />
-        </motion.button>
+        <div className="flex gap-3">
+          {/* Category Filter Button (only for podcasts) */}
+          {isPodcastMode && (
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowCategoryFilter(!showCategoryFilter)}
+              className={`p-3 rounded-full ${buttonBg} transition-colors`}
+            >
+              <Filter className={`w-5 h-5 ${showCategoryFilter ? accentColor : secondaryText}`} />
+            </motion.button>
+          )}
+
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={onToggleFavorite}
+            className={`p-3 rounded-full ${buttonBg} transition-colors`}
+          >
+            <Heart
+              className={`w-5 h-5 ${isFavorite ? 'text-red-500 fill-red-500' : secondaryText}`}
+            />
+          </motion.button>
+        </div>
       </div>
+
+      {/* Podcast Category Filter Dropdown */}
+      <AnimatePresence>
+        {isPodcastMode && showCategoryFilter && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className={`absolute top-20 left-4 right-4 z-50 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-2xl p-4 shadow-2xl max-w-md mx-auto`}
+          >
+            <div className={`${secondaryText} text-xs uppercase tracking-wider mb-3 text-center`}>Podcast Categories</div>
+            <div className="grid grid-cols-2 gap-2">
+              {(Object.keys(PODCAST_CATEGORIES) as PodcastCategory[]).map((category) => {
+                const isSelected = category === selectedPodcastCategory;
+                return (
+                  <motion.button
+                    key={category}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      setSelectedPodcastCategory(category);
+                      setShowCategoryFilter(false);
+                    }}
+                    className={`px-4 py-3 rounded-xl transition-all text-left ${
+                      isSelected
+                        ? 'bg-gradient-to-r from-purple-600 to-pink-500 text-white shadow-lg'
+                        : theme === 'dark' ? 'hover:bg-gray-700 bg-gray-700/50' : 'hover:bg-gray-100 bg-gray-50'
+                    }`}
+                  >
+                    <div className={`text-sm font-semibold ${isSelected ? 'text-white' : textColor}`}>
+                      {PODCAST_CATEGORIES[category]}
+                    </div>
+                  </motion.button>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Main Content - Scrolling Station Banner */}
       <div className="flex-1 flex flex-col items-center justify-center w-full max-w-2xl space-y-8">
@@ -106,29 +200,37 @@ export function ModernSkin({
         )}
 
         {/* Scrolling Station Name Banner */}
-        <div className="w-full overflow-hidden">
+        <div className="w-full overflow-hidden relative">
           <motion.div
-            className={`text-5xl md:text-7xl font-bold ${textColor} whitespace-nowrap`}
-            animate={isPlaying ? { x: [0, -1000] } : {}}
+            className={`text-5xl md:text-7xl font-bold ${textColor} whitespace-nowrap inline-block`}
+            animate={isPlaying ? {
+              x: ['0%', '-50%']
+            } : {}}
             transition={{
-              x: {
-                repeat: Infinity,
-                repeatType: "loop",
-                duration: 15,
-                ease: "linear"
-              }
+              duration: 20,
+              repeat: Infinity,
+              repeatType: "loop",
+              ease: "linear"
             }}
+            style={{ willChange: 'transform' }}
           >
-            {station ? `${station.name}  •  ${station.name}  •  ${station.name}  •  ${station.name}  •  ${station.name}` : 'No Station Selected'}
+            {station ? `${station.name}  •  ${station.name}  •  ${station.name}  •  ${station.name}  •  ${station.name}  •  ${station.name}  •  ` : 'No Station Selected'}
           </motion.div>
         </div>
 
-        {/* Genre Badge (if available) */}
-        {station?.genre && (
-          <div className={`px-4 py-2 rounded-full text-sm ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'} ${textColor}`}>
-            {station.genre}
-          </div>
-        )}
+        {/* Genre/Category Badges */}
+        <div className="flex flex-wrap gap-2 justify-center">
+          {station?.genre && (
+            <div className={`px-4 py-2 rounded-full text-sm ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'} ${textColor}`}>
+              {station.genre}
+            </div>
+          )}
+          {isPodcastMode && currentStationCategory && (
+            <div className="px-4 py-2 rounded-full text-sm bg-gradient-to-r from-purple-600 to-pink-500 text-white">
+              📂 {PODCAST_CATEGORIES[currentStationCategory]}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Bottom Controls */}
