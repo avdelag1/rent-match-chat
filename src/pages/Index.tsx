@@ -1,11 +1,10 @@
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 
 import LegendaryLandingPage from "@/components/LegendaryLandingPage";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/hooks/use-toast";
 import { logger } from "@/utils/prodLogger";
 import { STORAGE } from "@/constants/app";
 
@@ -14,6 +13,7 @@ const Index = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const hasNavigated = useRef(false);
+  const navigationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Capture referral code from URL if present (works for app-wide referral links)
   useEffect(() => {
@@ -46,7 +46,6 @@ const Index = () => {
     data: userRole,
     isLoading: profileLoading,
     isFetching,
-    error,
   } = useQuery({
     queryKey: ["user-role", user?.id],
     queryFn: async () => {
@@ -97,49 +96,60 @@ const Index = () => {
 
   const isLoadingRole = (profileLoading || isFetching) && userRole === undefined;
 
-  // CRITICAL FIX: Navigate as soon as we have role, don't wait
+  // Helper: resolve role from all available sources
+  const resolveRole = (): 'client' | 'owner' | null => {
+    // 1. DB role (most authoritative)
+    if (userRole) return userRole as 'client' | 'owner';
+    // 2. User metadata role (set during signup)
+    const metadataRole = user?.user_metadata?.role as 'client' | 'owner' | undefined;
+    if (metadataRole) return metadataRole;
+    // 3. Pending OAuth role from localStorage (set before OAuth redirect)
+    const pendingOAuthRole = localStorage.getItem('pendingOAuthRole') as 'client' | 'owner' | null;
+    if (pendingOAuthRole) return pendingOAuthRole;
+    return null;
+  };
+
+  // CRITICAL FIX: Navigate as soon as we have role from ANY source
   useEffect(() => {
     if (hasNavigated.current) return;
-    if (!initialized) return; // Wait for auth to initialize
+    if (!initialized) return;
     if (loading) return;
-
-    // Not logged in - show landing page
     if (!user) return;
 
-    // PRIORITY 1: For new users, use metadata role immediately (don't wait for DB query)
-    // This prevents the loading screen hang after signup
-    if (isNewUser && !userRole) {
-      const metadataRole = user.user_metadata?.role as 'client' | 'owner' | undefined;
-      if (metadataRole) {
-        hasNavigated.current = true;
-        const targetPath = metadataRole === "client" ? "/client/dashboard" : "/owner/dashboard";
-        logger.log("[Index] New user - using metadata role, navigating to:", targetPath);
-        navigate(targetPath, { replace: true });
-        return;
-      }
-    }
+    const role = resolveRole();
 
-    // PRIORITY 2: Have role from DB - navigate immediately
-    if (userRole) {
+    if (role) {
       hasNavigated.current = true;
-      const targetPath = userRole === "client" ? "/client/dashboard" : "/owner/dashboard";
-      logger.log("[Index] Navigating to:", targetPath);
+      // Clean up pendingOAuthRole if it was used
+      localStorage.removeItem('pendingOAuthRole');
+      const targetPath = role === "client" ? "/client/dashboard" : "/owner/dashboard";
+      logger.log("[Index] Navigating to:", targetPath, "(source: role resolved)");
       navigate(targetPath, { replace: true });
       return;
     }
 
-    // PRIORITY 3: If not new user and role query failed after timeout, try metadata as last resort
-    if (!isNewUser && !userRole && !isLoadingRole) {
-      const metadataRole = user.user_metadata?.role as 'client' | 'owner' | undefined;
-      if (metadataRole) {
+    // No role from any source yet - for new users, set a short timeout fallback
+    // to prevent getting stuck forever on the loading page
+    if (!navigationTimeoutRef.current) {
+      navigationTimeoutRef.current = setTimeout(() => {
+        if (hasNavigated.current) return;
+        // Last resort: default to 'client' so user isn't stuck on loading forever
         hasNavigated.current = true;
-        const targetPath = metadataRole === "client" ? "/client/dashboard" : "/owner/dashboard";
-        logger.log("[Index] Fallback - using metadata role, navigating to:", targetPath);
-        navigate(targetPath, { replace: true });
-        return;
-      }
+        logger.warn("[Index] Fallback timeout - no role found, defaulting to client");
+        navigate("/client/dashboard", { replace: true });
+      }, 8000); // 8 second max wait
     }
   }, [user, userRole, loading, initialized, isLoadingRole, isNewUser, navigate]);
+
+  // Clean up timeout on unmount or when user changes
+  useEffect(() => {
+    return () => {
+      if (navigationTimeoutRef.current) {
+        clearTimeout(navigationTimeoutRef.current);
+        navigationTimeoutRef.current = null;
+      }
+    };
+  }, []);
 
   // Reset navigation flag when user changes
   useEffect(() => {
@@ -158,30 +168,9 @@ const Index = () => {
     );
   }
 
-  // User exists but still loading role - show loading
-  // But if polling has timed out (user age > 30s) and still no role, show error
-  if (user && (isLoadingRole || (isNewUser && !userRole))) {
-    // If user is too old and still no role, something went wrong
-    if (userAgeMs > 30000 && !userRole && !isLoadingRole) {
-      return (
-        <div className="min-h-screen min-h-dvh flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
-          <div className="text-center space-y-4 p-4 max-w-md">
-            <div className="text-orange-500 text-4xl">⚠️</div>
-            <h2 className="text-white text-lg font-semibold">Setup Taking Longer Than Expected</h2>
-            <p className="text-white/70 text-sm">
-              Your account setup is taking longer than usual. Please refresh the page to continue.
-            </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="mt-4 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors"
-            >
-              Refresh Page
-            </button>
-          </div>
-        </div>
-      );
-    }
-
+  // User exists but navigation hasn't happened yet - show brief loading
+  // CRITICAL: If hasNavigated is true, skip this entirely (navigate is in progress)
+  if (user && !hasNavigated.current && !resolveRole()) {
     return (
       <div className="min-h-screen min-h-dvh flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
         <div className="text-center space-y-4">
