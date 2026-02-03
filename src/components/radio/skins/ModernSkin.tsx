@@ -1,8 +1,7 @@
-import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Pause, SkipBack, SkipForward, Radio, Heart, Shuffle, Volume2, VolumeX, Globe, ChevronDown } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Play, Pause, SkipBack, SkipForward, Radio, Heart, Shuffle, Volume2 } from 'lucide-react';
 import { RadioStation, CityLocation } from '@/types/radio';
-import { cityThemes, getAllCities } from '@/data/radioStations';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 
 interface ModernSkinProps {
   station: RadioStation | null;
@@ -21,9 +20,6 @@ interface ModernSkinProps {
   theme?: 'light' | 'dark';
 }
 
-// Cities available for toggle (as requested)
-const CITY_GROUPS: CityLocation[] = ['miami', 'ibiza', 'california', 'texas', 'new-york', 'tulum', 'french', 'podcasts'];
-
 export function ModernSkin({
   station,
   isPlaying,
@@ -40,13 +36,8 @@ export function ModernSkin({
   onVolumeChange,
   theme = 'light'
 }: ModernSkinProps) {
-  const [frequencyNum, setFrequencyNum] = useState<number | null>(null);
   const volumeRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [showCitySelector, setShowCitySelector] = useState(false);
-
-  const cityTheme = cityThemes[currentCity];
-  const allCities = getAllCities();
 
   // Handle volume change via touch/mouse (horizontal slider)
   const handleVolumeInteraction = (clientX: number) => {
@@ -74,16 +65,6 @@ export function ModernSkin({
     setIsDragging(false);
   };
 
-  // Extract numeric frequency from station
-  useEffect(() => {
-    if (station?.frequency) {
-      const match = station.frequency.match(/(\d+\.?\d*)/);
-      if (match) {
-        setFrequencyNum(parseFloat(match[1]));
-      }
-    }
-  }, [station]);
-
   const bgColor = theme === 'dark' ? 'bg-gray-900' : 'bg-white';
   const textColor = theme === 'dark' ? 'text-white' : 'text-gray-900';
   const secondaryText = theme === 'dark' ? 'text-gray-400' : 'text-gray-500';
@@ -103,173 +84,51 @@ export function ModernSkin({
           <Shuffle className={`w-5 h-5 ${isShuffle ? accentColor : secondaryText}`} />
         </motion.button>
 
-        <div className="flex gap-3">
-          {/* City Selector Button */}
-          <motion.button
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setShowCitySelector(!showCitySelector)}
-            className={`p-3 rounded-full ${buttonBg} transition-colors flex items-center gap-1`}
-          >
-            <Globe className={`w-5 h-5 ${secondaryText}`} />
-            <span className={`text-xs ${textColor}`}>{cityTheme.name.slice(0, 4)}</span>
-            <ChevronDown className={`w-3 h-3 ${secondaryText} ${showCitySelector ? 'rotate-180' : ''} transition-transform`} />
-          </motion.button>
-
-          <motion.button
-            whileTap={{ scale: 0.95 }}
-            onClick={onToggleFavorite}
-            className={`p-3 rounded-full ${buttonBg} transition-colors`}
-          >
-            <Heart
-              className={`w-5 h-5 ${isFavorite ? 'text-red-500 fill-red-500' : secondaryText}`}
-            />
-          </motion.button>
-        </div>
+        <motion.button
+          whileTap={{ scale: 0.95 }}
+          onClick={onToggleFavorite}
+          className={`p-3 rounded-full ${buttonBg} transition-colors`}
+        >
+          <Heart
+            className={`w-5 h-5 ${isFavorite ? 'text-red-500 fill-red-500' : secondaryText}`}
+          />
+        </motion.button>
       </div>
 
-      {/* City Selector Dropdown */}
-      <AnimatePresence>
-        {showCitySelector && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className={`absolute top-20 left-4 right-4 z-50 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-2xl p-4 shadow-2xl max-w-md mx-auto`}
-          >
-            <div className={`${secondaryText} text-xs uppercase tracking-wider mb-3 text-center`}>Select City</div>
-            <div className="grid grid-cols-2 gap-2">
-              {allCities.map((city) => {
-                const cTheme = cityThemes[city];
-                const isSelected = city === currentCity;
-                return (
-                  <motion.button
-                    key={city}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => {
-                      onCitySelect(city);
-                      setShowCitySelector(false);
-                    }}
-                    className={`px-4 py-3 rounded-xl transition-all text-left ${
-                      isSelected
-                        ? 'ring-2 ring-rose-500 shadow-lg'
-                        : theme === 'dark' ? 'hover:bg-gray-700 bg-gray-700/50' : 'hover:bg-gray-100 bg-gray-50'
-                    }`}
-                    style={{
-                      background: isSelected
-                        ? `linear-gradient(135deg, ${cTheme.primaryColor}, ${cTheme.secondaryColor})`
-                        : undefined
-                    }}
-                  >
-                    <div className={`text-sm font-semibold ${isSelected ? 'text-white' : textColor}`}>
-                      {cTheme.name}
-                    </div>
-                    <div className={`text-xs ${isSelected ? 'text-white/80' : secondaryText} mt-0.5`}>
-                      {city === 'new-york' && 'New York Vibes'}
-                      {city === 'miami' && 'Tropical Beats'}
-                      {city === 'ibiza' && 'Electronic Party'}
-                      {city === 'tulum' && 'Beach Ambient'}
-                      {city === 'california' && 'West Coast'}
-                      {city === 'texas' && 'Lone Star'}
-                      {city === 'french' && 'French Culture'}
-                      {city === 'podcasts' && 'Talk & Stories'}
-                    </div>
-                  </motion.button>
-                );
-              })}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center justify-center w-full max-w-md space-y-6">
-        {/* Large Frequency Display */}
-        <div className="text-center">
-          <motion.div
-            className={`text-6xl font-light ${textColor} mb-1 tracking-tighter`}
-            animate={{ opacity: [0.8, 1, 0.8] }}
-            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-          >
-            {frequencyNum !== null ? frequencyNum.toFixed(1) : '--.-'}
-          </motion.div>
-          <div className={`text-2xl font-light ${secondaryText} -mt-1`}>FM</div>
-        </div>
-
-        {/* Station Info */}
+      {/* Main Content - Scrolling Station Banner */}
+      <div className="flex-1 flex flex-col items-center justify-center w-full max-w-2xl space-y-8">
+        {/* Playing Status */}
         {station && (
-          <div className="text-center space-y-1">
-            <div className={`text-sm font-medium ${accentColor} flex items-center justify-center gap-2`}>
-              <Radio className="w-4 h-4" />
-              {isPlaying ? 'PLAYING' : 'PAUSED'}
-            </div>
-            <div className={`text-xl font-medium ${textColor}`}>{station.name}</div>
-            <div className={`text-sm ${secondaryText} flex items-center justify-center gap-2`}>
-              <span className={`px-2 py-0.5 rounded-full text-xs ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'}`}>
-                {cityTheme.name}
-              </span>
-              <span>{station.genre}</span>
-            </div>
+          <div className={`text-sm font-medium ${accentColor} flex items-center justify-center gap-2`}>
+            <Radio className="w-4 h-4" />
+            {isPlaying ? 'PLAYING' : 'PAUSED'}
           </div>
         )}
 
-        {/* Horizontal Frequency Dial */}
-        <div className="w-full space-y-3">
-          <div className={`w-full h-16 ${dialBg} rounded-xl relative overflow-hidden`}>
-            {/* Frequency Scale */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-full h-full relative px-6">
-                {/* Frequency markers */}
-                <div className="absolute top-4 left-0 right-0 flex justify-between px-6">
-                  {[88, 92, 96, 100, 104, 108].map((freq) => (
-                    <div key={freq} className="flex flex-col items-center">
-                      <div className={`text-xs ${secondaryText} font-medium`}>{freq}</div>
-                      <div className={`w-px h-3 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'} mt-1`} />
-                    </div>
-                  ))}
-                </div>
+        {/* Scrolling Station Name Banner */}
+        <div className="w-full overflow-hidden">
+          <motion.div
+            className={`text-5xl md:text-7xl font-bold ${textColor} whitespace-nowrap`}
+            animate={isPlaying ? { x: [0, -1000] } : {}}
+            transition={{
+              x: {
+                repeat: Infinity,
+                repeatType: "loop",
+                duration: 15,
+                ease: "linear"
+              }
+            }}
+          >
+            {station ? `${station.name}  •  ${station.name}  •  ${station.name}  •  ${station.name}  •  ${station.name}` : 'No Station Selected'}
+          </motion.div>
+        </div>
 
-                {/* Current frequency indicator (red line) */}
-                <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-center justify-center">
-                  <div className="w-1 h-16 bg-gradient-to-b from-transparent via-rose-500 to-transparent" />
-                </div>
-
-                {/* Animated waves when playing */}
-                {isPlaying && (
-                  <motion.div
-                    className="absolute inset-0 flex items-center justify-center"
-                    animate={{ opacity: [0.3, 0.6, 0.3] }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
-                  >
-                    <div className="w-full h-1 bg-gradient-to-r from-transparent via-rose-500/30 to-transparent" />
-                  </motion.div>
-                )}
-              </div>
-            </div>
+        {/* Genre Badge (if available) */}
+        {station?.genre && (
+          <div className={`px-4 py-2 rounded-full text-sm ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'} ${textColor}`}>
+            {station.genre}
           </div>
-
-        </div>
-      </div>
-
-      {/* City Toggle Buttons */}
-      <div className="w-full max-w-md mb-3">
-        <div className="flex flex-wrap justify-center gap-1.5">
-          {CITY_GROUPS.map((city) => (
-            <motion.button
-              key={city}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => onCitySelect(city)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                currentCity === city
-                  ? theme === 'dark'
-                    ? 'bg-rose-500 text-white shadow-lg'
-                    : 'bg-rose-500 text-white shadow-lg'
-                  : buttonBg + ' ' + secondaryText
-              }`}
-            >
-              {cityThemes[city].name}
-            </motion.button>
-          ))}
-        </div>
+        )}
       </div>
 
       {/* Bottom Controls */}
