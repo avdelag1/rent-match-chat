@@ -93,7 +93,7 @@ export function RetroSkin({
   };
 
   return (
-    <div className="h-dvh bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 flex flex-col items-center justify-between p-3 relative overflow-hidden">
+    <div className="h-dvh bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 flex flex-col items-center justify-between px-3 pt-14 pb-3 relative overflow-hidden">
       {/* City Selector Modal */}
       <AnimatePresence>
         {showCitySelector && (
