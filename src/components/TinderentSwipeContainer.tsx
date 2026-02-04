@@ -30,6 +30,8 @@ import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { RotateCcw, RefreshCw, Home, Bike, Briefcase } from 'lucide-react';
 import { RadarSearchEffect, RadarSearchIcon } from '@/components/ui/RadarSearchEffect';
+import { FilterLoadingAnimation } from '@/components/ui/FilterLoadingAnimation';
+import { getFilterSearchDescription } from '@/components/FilterSearchDescriptions';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -1139,6 +1141,16 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   if (currentIndex > 0 && currentIndex >= deckQueue.length) {
     const categoryInfo = getActiveCategoryInfo(filters);
     const categoryLabel = String(categoryInfo?.plural || 'Listings');
+
+    // Get active category for filter-specific animation
+    const activeCategory = (() => {
+      const categories = filters?.categories;
+      if (Array.isArray(categories) && categories.length > 0) {
+        return categories[0];
+      }
+      return filters?.category || 'property';
+    })();
+
     return (
       <div className="relative w-full h-full flex-1 flex items-center justify-center px-4">
         {/* UNIFIED animation - all elements animate together, no staggered pop-in */}
@@ -1146,18 +1158,18 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
-          className="text-center space-y-6 p-8"
+          className="text-center space-y-6 p-8 max-w-md mx-auto"
         >
-          {/* RADAR SEARCH EFFECT - Premium futuristic refresh animation */}
-          <RadarSearchEffect
-            size={100}
-            color="hsl(var(--primary))"
+          {/* FILTER-SPECIFIC LOADING ANIMATION with heartbeat effect */}
+          <FilterLoadingAnimation
+            category={activeCategory as any}
+            size={120}
             isActive={isRefreshing}
           />
 
           <div className="space-y-2">
             <h3 className="text-xl font-semibold text-foreground">All Caught Up!</h3>
-            <p className="text-muted-foreground text-sm max-w-xs mx-auto">
+            <p className="text-muted-foreground text-sm leading-relaxed">
               You've seen all available {categoryLabel.toLowerCase()}. Check back later or refresh for new listings.
             </p>
           </div>
@@ -1207,7 +1219,22 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   // Empty state - dynamic based on category (no cards fetched yet)
   if (deckQueue.length === 0) {
     const categoryInfo = getActiveCategoryInfo(filters);
-    const categoryLabel = String(categoryInfo?.plural || 'Listings');
+
+    // Get active category for filter-specific content
+    const activeCategory = (() => {
+      const categories = filters?.categories;
+      if (Array.isArray(categories) && categories.length > 0) {
+        return categories[0];
+      }
+      return filters?.category || 'property';
+    })();
+
+    // Get filter-specific descriptions
+    const searchDescription = getFilterSearchDescription(
+      activeCategory as any,
+      filters?.listingType || 'both'
+    );
+
     return (
       <div className="relative w-full h-full flex-1 flex items-center justify-center px-4">
         {/* UNIFIED animation - all elements animate together, no staggered pop-in */}
@@ -1215,21 +1242,24 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
-          className="text-center space-y-6 p-8"
+          className="text-center space-y-6 p-8 max-w-md mx-auto"
         >
-          {/* RADAR SEARCH EFFECT - Calm futuristic scanning animation */}
-          <RadarSearchEffect
-            size={100}
-            color="hsl(var(--primary))"
+          {/* FILTER-SPECIFIC LOADING ANIMATION with heartbeat effect */}
+          <FilterLoadingAnimation
+            category={activeCategory as any}
+            size={120}
             isActive={isRefreshing}
           />
 
-          <div className="space-y-2">
-            <h3 className="text-xl font-semibold text-foreground">No {categoryLabel} Found</h3>
-            <p className="text-muted-foreground text-sm max-w-xs mx-auto">
-              Try adjusting your filters or refresh to discover new listings
+          <div className="space-y-3">
+            <h3 className="text-xl font-semibold text-foreground">
+              {isRefreshing ? searchDescription.searchingTitle : searchDescription.title}
+            </h3>
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              {isRefreshing ? searchDescription.searchingDescription : searchDescription.description}
             </p>
           </div>
+
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
             <Button
               onClick={handleRefresh}
@@ -1241,7 +1271,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
               ) : (
                 <RefreshCw className="w-4 h-4" />
               )}
-              {isRefreshing ? 'Scanning...' : `Refresh ${categoryLabel}`}
+              {isRefreshing ? 'Scanning...' : searchDescription.refreshButtonText}
             </Button>
           </motion.div>
         </motion.div>
