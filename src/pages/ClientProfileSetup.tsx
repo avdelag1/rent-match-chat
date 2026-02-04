@@ -117,8 +117,8 @@ const ClientProfileSetup = () => {
   // Calculate completion percentage
   const calculateCompletion = () => {
     let completed = 0;
-    const total = 7;
-    if (photos.length > 0) completed++;
+    const total = 6; // Removed photo requirement
+    // Photo upload removed from calculation
     if (formData.name) completed++;
     if (formData.age) completed++;
     if (formData.bio) completed++;
@@ -189,14 +189,7 @@ const ClientProfileSetup = () => {
       return;
     }
 
-    if (photos.length === 0) {
-      toast({
-        title: 'Photo required',
-        description: 'Please upload at least one photo',
-        variant: 'destructive',
-      });
-      return;
-    }
+    // Photo upload is now optional during signup
 
     setIsUploading(true);
 
@@ -282,8 +275,8 @@ const ClientProfileSetup = () => {
           </CardContent>
         </Card>
 
-        {/* Photo Upload Section */}
-        <Card>
+        {/* Photo Upload Section - Hidden during signup */}
+        {/* <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Camera className="w-5 h-5" />
@@ -295,7 +288,7 @@ const ClientProfileSetup = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {/* Photo Grid */}
+              {/* Photo Grid
               {photos.length > 0 && (
                 <Reorder.Group
                   axis="y"
@@ -340,7 +333,7 @@ const ClientProfileSetup = () => {
                 </Reorder.Group>
               )}
 
-              {/* Upload Button */}
+              {/* Upload Button
               {photos.length < MAX_PHOTOS && (
                 <label className="block">
                   <input
@@ -358,10 +351,10 @@ const ClientProfileSetup = () => {
                     </p>
                   </div>
                 </label>
-              )}
+              )} */}
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* Basic Information */}
         <Card>

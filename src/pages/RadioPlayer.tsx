@@ -4,12 +4,11 @@ import { useRadioContext } from '@/contexts/RadioContext';
 import { ModernSkin } from '@/components/radio/skins/ModernSkin';
 import { VinylSkin } from '@/components/radio/skins/VinylSkin';
 import { RetroSkin } from '@/components/radio/skins/RetroSkin';
-import { PlaylistDialog } from '@/components/radio/PlaylistDialog';
 import { AllStationsDialog } from '@/components/radio/AllStationsDialog';
 import { cityThemes } from '@/data/radioStations';
 import { CityLocation, RadioSkin } from '@/types/radio';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, List, Palette, Radio } from 'lucide-react';
+import { ArrowLeft, Palette, Radio } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -38,9 +37,7 @@ export default function RadioPlayer() {
   }, [error]);
 
   const [showSkinSelector, setShowSkinSelector] = useState(false);
-  const [showPlaylistDialog, setShowPlaylistDialog] = useState(false);
   const [showAllStationsDialog, setShowAllStationsDialog] = useState(false);
-  const [addingToPlaylist, setAddingToPlaylist] = useState(false);
 
   const skinSelectorRef = useRef<HTMLDivElement>(null);
 
@@ -65,11 +62,6 @@ export default function RadioPlayer() {
   const handleCitySelect = (city: CityLocation) => {
     setCity(city);
     toast.success(`Switched to ${cityThemes[city].name}`);
-  };
-
-  const handleAddToPlaylist = () => {
-    setAddingToPlaylist(true);
-    setShowPlaylistDialog(true);
   };
 
   const handleToggleFavorite = () => {
@@ -133,21 +125,11 @@ export default function RadioPlayer() {
         <Radio className="w-5 h-5" />
       </motion.button>
 
-      {/* Playlist Button */}
-      <motion.button
-        whileTap={{ scale: 0.95 }}
-        onClick={() => setShowPlaylistDialog(true)}
-        className="fixed top-20 right-16 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg"
-        aria-label="Open playlists"
-      >
-        <List className="w-5 h-5" />
-      </motion.button>
-
       {/* Skin Selector Button */}
       <motion.button
         whileTap={{ scale: 0.95 }}
         onClick={() => setShowSkinSelector(!showSkinSelector)}
-        className="fixed top-20 right-28 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg"
+        className="fixed top-20 right-16 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg"
         aria-label="Change skin"
       >
         <Palette className="w-5 h-5" />
@@ -263,22 +245,6 @@ export default function RadioPlayer() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Playlist Dialog */}
-      <PlaylistDialog
-        isOpen={showPlaylistDialog}
-        onClose={() => {
-          setShowPlaylistDialog(false);
-          setAddingToPlaylist(false);
-        }}
-        currentStation={state.currentStation}
-        onPlayStation={(station) => {
-          play(station);
-          setShowPlaylistDialog(false);
-          setAddingToPlaylist(false);
-        }}
-        addingMode={addingToPlaylist}
-      />
 
       {/* All Stations Dialog */}
       <AllStationsDialog

@@ -183,9 +183,9 @@ export function ModernSkin({
   const buttonBg = theme === 'dark' ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-100 hover:bg-gray-200';
 
   return (
-    <div className={`h-screen ${bgColor} flex flex-col items-center justify-between p-2 pb-3 relative overflow-hidden`}>
+    <div className={`h-screen ${bgColor} flex flex-col items-center justify-between p-2 pb-2 relative overflow-hidden`}>
       {/* Top Icons */}
-      <div className="w-full max-w-md flex justify-between items-start pt-14">
+      <div className="w-full max-w-md flex justify-between items-start pt-16">
         <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={onToggleShuffle}
@@ -274,13 +274,13 @@ export function ModernSkin({
       </AnimatePresence>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center justify-center w-full max-w-md space-y-2">
+      <div className="flex-1 flex flex-col items-center justify-center w-full max-w-md space-y-1">
         {/* Large Frequency Display */}
         <div className="text-center">
           <motion.div
             className={`text-4xl font-light ${textColor} mb-0 tracking-tighter`}
             animate={{ opacity: [0.8, 1, 0.8] }}
-            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
           >
             {frequencyNum !== null ? frequencyNum.toFixed(1) : '--.-'}
           </motion.div>
@@ -334,7 +334,7 @@ export function ModernSkin({
                 <motion.div
                   className="absolute top-0 bottom-0 flex flex-col items-center justify-center"
                   animate={{ left: `${getDialPosition()}%` }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                   style={{ transform: 'translateX(-50%)' }}
                 >
                   <div className="w-1 h-12 bg-gradient-to-b from-transparent via-rose-500 to-transparent shadow-lg shadow-rose-500/50" />
@@ -345,7 +345,7 @@ export function ModernSkin({
                   <motion.div
                     className="absolute inset-0 flex items-center justify-center"
                     animate={{ opacity: [0.3, 0.6, 0.3] }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
+                    transition={{ duration: 1, repeat: Infinity }}
                   >
                     <div className="w-full h-1 bg-gradient-to-r from-transparent via-rose-500/30 to-transparent" />
                   </motion.div>
@@ -358,7 +358,7 @@ export function ModernSkin({
       </div>
 
       {/* City Toggle Buttons */}
-      <div className="w-full max-w-md mb-1">
+      <div className="w-full max-w-md mb-0.5">
         <div className="flex flex-wrap justify-center gap-1">
           {CITY_GROUPS.map((city) => (
             <motion.button
@@ -380,7 +380,7 @@ export function ModernSkin({
       </div>
 
       {/* Bottom Controls */}
-      <div className="w-full max-w-md space-y-1.5">
+      <div className="w-full max-w-md space-y-1">
         <div className="flex items-center justify-center gap-3">
           {/* Previous Button */}
           <motion.button
