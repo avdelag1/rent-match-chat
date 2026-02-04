@@ -183,7 +183,7 @@ export function ModernSkin({
   const buttonBg = theme === 'dark' ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-100 hover:bg-gray-200';
 
   return (
-    <div className={`h-dvh ${bgColor} flex flex-col items-center justify-between p-2 pb-3 relative overflow-hidden`}>
+    <div className={`h-screen ${bgColor} flex flex-col items-center justify-between p-2 pb-3 relative overflow-hidden`}>
       {/* Top Icons */}
       <div className="w-full max-w-md flex justify-between items-start pt-16">
         <motion.button
