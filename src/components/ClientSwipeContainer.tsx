@@ -26,6 +26,7 @@ import { useStartConversation } from '@/hooks/useConversations';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { logger } from '@/utils/prodLogger';
+import { useRealtimeSwipeSync } from '@/hooks/useRealtimeSwipeSync';
 
 /**
  * PrefetchScheduler - Throttles prefetch operations to prevent competition with image decoding
@@ -114,6 +115,9 @@ const ClientSwipeContainerComponent = ({
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [messageDialogOpen, setMessageDialogOpen] = useState(false);
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
+  // Incremented after new/updated profiles are written to deckQueueRef so the
+  // component re-renders and the "All Caught Up" screen disappears.
+  const [, setDeckTick] = useState(0);
   const [matchCelebration, setMatchCelebration] = useState<{
     isOpen: boolean;
     clientProfile?: any;
@@ -300,6 +304,10 @@ const ClientSwipeContainerComponent = ({
   const recordProfileView = useRecordProfileView();
   const { playSwipeSound } = useSwipeSounds();
 
+  // Real-time: invalidate smart-clients cache whenever any profile is
+  // created or updated so swipe cards pick up new/edited data automatically.
+  useRealtimeSwipeSync('owner');
+
   // Swipe dismissal tracking for client profiles
   const { dismissedIds, dismissTarget, filterDismissed } = useSwipeDismissal('client');
 
@@ -363,9 +371,17 @@ const ClientSwipeContainerComponent = ({
   // CONSTANT-TIME: Append new unique profiles to queue AND persist to store
   useEffect(() => {
     if (clientProfiles.length > 0 && !isLoading) {
+      // Refresh existing cards in-place with the latest data from the refetch.
+      // This ensures that any edits (name, photos, bio …) made by a client
+      // are immediately visible on cards already sitting in the deck.
+      const freshByUserId = new Map(clientProfiles.map(p => [p.user_id, p]));
+      deckQueueRef.current = deckQueueRef.current.map(existing =>
+        freshByUserId.get(existing.user_id) || existing
+      );
+
       const existingIds = new Set(deckQueueRef.current.map(p => p.user_id));
       const dismissedSet = new Set(dismissedIds);
-      
+
       // CRITICAL: Filter out current user's own profile AND dismissed/swiped profiles
       const newProfiles = clientProfiles.filter(p => {
         // NEVER show user their own profile (defense in depth)
@@ -397,6 +413,12 @@ const ClientSwipeContainerComponent = ({
           markOwnerReady(category);
         }
       }
+
+      // Force a re-render so the component picks up the updated deckQueueRef.
+      // Critical path: without this, "All Caught Up" stays visible even after
+      // new profiles are appended to the ref.
+      setDeckTick(t => t + 1);
+
       isFetchingMore.current = false;
     }
   }, [clientProfiles, isLoading, setOwnerDeck, category, isOwnerReady, markOwnerReady, dismissedIds, user?.id]);

@@ -93,7 +93,7 @@ export function VinylSkin({
   };
 
   return (
-    <div className="h-screen bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 flex flex-col items-center justify-between p-4 relative overflow-hidden">
+    <div className="h-dvh bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 flex flex-col items-center justify-between px-4 pt-14 pb-4 relative overflow-hidden">
       {/* Wood grain texture overlay */}
       <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJub2lzZSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuOCIgbnVtT2N0YXZlcz0iNCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNub2lzZSkiIG9wYWNpdHk9IjAuMyIvPjwvc3ZnPg==')]" />
 
@@ -186,72 +186,72 @@ export function VinylSkin({
       </AnimatePresence>
 
       {/* Vinyl Record */}
-      <div className="relative z-10 flex-1 flex flex-col items-center justify-center">
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center min-h-0">
         {/* Record player base/platter */}
-        <div className="w-80 h-80 rounded-full bg-gradient-to-br from-gray-600 to-gray-800 shadow-2xl flex items-center justify-center relative">
+        <div className="w-44 h-44 rounded-full bg-gradient-to-br from-gray-600 to-gray-800 shadow-2xl flex items-center justify-center relative">
           {/* Vinyl Record - only this rotates */}
           <motion.div
-            className="w-64 h-64 rounded-full bg-gradient-to-br from-gray-900 to-black shadow-inner flex items-center justify-center relative overflow-hidden"
+            className="w-36 h-36 rounded-full bg-gradient-to-br from-gray-900 to-black shadow-inner flex items-center justify-center relative overflow-hidden"
             animate={{ rotate: isPlaying ? 360 : 0 }}
             transition={{ duration: 3, repeat: isPlaying ? Infinity : 0, ease: 'linear' }}
           >
             {/* Record grooves */}
-            {[...Array(8)].map((_, i) => (
+            {[...Array(6)].map((_, i) => (
               <div
                 key={i}
                 className="absolute rounded-full border border-white/5"
                 style={{
-                  width: `${250 - i * 28}px`,
-                  height: `${250 - i * 28}px`,
+                  width: `${134 - i * 18}px`,
+                  height: `${134 - i * 18}px`,
                 }}
               />
             ))}
 
             {/* Center label with city theme colors */}
             <div
-              className="w-28 h-28 rounded-full shadow-lg flex items-center justify-center relative overflow-hidden"
+              className="w-14 h-14 rounded-full shadow-lg flex items-center justify-center relative overflow-hidden"
               style={{
                 background: `linear-gradient(135deg, ${cityTheme.primaryColor}, ${cityTheme.secondaryColor})`
               }}
             >
               <div className="text-center text-white z-10">
-                <div className="text-xs font-bold truncate max-w-20 px-1">
-                  {station?.name?.slice(0, 10) || 'RADIO'}
+                <div className="text-[9px] font-bold truncate max-w-12 px-0.5">
+                  {station?.name?.slice(0, 8) || 'RADIO'}
                 </div>
-                <div className="text-[8px] opacity-80">
+                <div className="text-[7px] opacity-80">
                   {cityTheme.name}
                 </div>
               </div>
               {/* Center hole */}
-              <div className="absolute w-4 h-4 rounded-full bg-gray-900 shadow-inner" />
+              <div className="absolute w-3 h-3 rounded-full bg-gray-900 shadow-inner" />
             </div>
           </motion.div>
 
           {/* Spindle */}
-          <div className="absolute w-4 h-4 rounded-full bg-gray-700 shadow-lg z-20" />
+          <div className="absolute w-3 h-3 rounded-full bg-gray-700 shadow-lg z-20" />
 
           {/* Tonearm - FIXED to base, does not rotate with vinyl */}
           <motion.div
-            className="absolute -right-4 -top-4 z-30"
+            className="absolute -right-3 -top-3 z-30"
             initial={{ rotate: -45 }}
             animate={{ rotate: isPlaying ? -25 : -45 }}
             transition={{ duration: 0.5, ease: 'easeOut' }}
           >
             {/* Tonearm pivot base */}
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-500 to-gray-700 shadow-lg flex items-center justify-center">
-              <div className="w-4 h-4 rounded-full bg-gray-800" />
+            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-gray-500 to-gray-700 shadow-lg flex items-center justify-center">
+              <div className="w-3 h-3 rounded-full bg-gray-800" />
             </div>
             {/* Tonearm */}
             <div
-              className="absolute top-3 left-3 w-36 h-2 bg-gradient-to-r from-gray-500 via-gray-400 to-gray-300 rounded-full shadow-md origin-left"
+              className="absolute top-2 left-2 w-24 h-1.5 bg-gradient-to-r from-gray-500 via-gray-400 to-gray-300 rounded-full shadow-md origin-left"
               style={{ transform: 'rotate(35deg)' }}
             >
               {/* Headshell */}
-              <div className="absolute -right-1 -top-1 w-6 h-4 bg-gradient-to-r from-gray-400 to-gray-500 rounded-sm shadow-md transform -rotate-12">
+              <div className="absolute -right-1 -top-0.5 w-4 h-3 bg-gradient-to-r from-gray-400 to-gray-500 rounded-sm shadow-md transform -rotate-12">
                 {/* Cartridge */}
-                <div className="absolute right-0 top-1 w-3 h-2 bg-gray-700 rounded-sm" />
+                <div className="absolute right-0 top-0.5 w-2 h-1.5 bg-gray-700 rounded-sm" />
                 {/* Stylus/Needle */}
-                <div className="absolute right-0.5 bottom-0 w-0.5 h-2 bg-gray-300" />
+                <div className="absolute right-0.5 bottom-0 w-0.5 h-1.5 bg-gray-300" />
               </div>
             </div>
           </motion.div>
@@ -262,16 +262,15 @@ export function VinylSkin({
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-6 bg-black/40 backdrop-blur-lg rounded-2xl p-4 text-center border border-white/10 w-full max-w-xs"
+            className="mt-2 bg-black/40 backdrop-blur-lg rounded-xl p-2 text-center border border-white/10 w-full max-w-xs"
           >
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <Disc3 className="w-4 h-4 text-amber-400" />
-              <div className="text-amber-400 text-sm font-medium">
+            <div className="flex items-center justify-center gap-1.5 mb-0.5">
+              <Disc3 className="w-3 h-3 text-amber-400" />
+              <div className="text-amber-400 text-xs font-medium">
                 {isPlaying ? 'NOW SPINNING' : 'PAUSED'}
               </div>
             </div>
-            <div className="text-white text-xl font-bold mb-1">{station.name}</div>
-            <div className="text-white/70 text-sm mb-1">{station.frequency}</div>
+            <div className="text-white text-base font-bold">{station.name}</div>
             <div className="text-white/50 text-xs flex items-center justify-center gap-2">
               <span className="bg-amber-500/20 px-2 py-0.5 rounded-full">{cityTheme.name}</span>
               <span>{station.genre || 'Radio'}</span>
@@ -281,13 +280,13 @@ export function VinylSkin({
       </div>
 
       {/* City Toggle Buttons */}
-      <div className="mt-8 flex flex-wrap justify-center gap-2 z-10 max-w-md">
+      <div className="mt-2 flex flex-wrap justify-center gap-1.5 z-10 max-w-md">
         {CITY_GROUPS.map((city) => (
           <motion.button
             key={city}
             whileTap={{ scale: 0.95 }}
             onClick={() => onCitySelect(city)}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+            className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
               currentCity === city
                 ? 'bg-amber-500 text-gray-900 shadow-lg'
                 : 'bg-white/10 text-white/70 hover:bg-white/20'
@@ -299,42 +298,42 @@ export function VinylSkin({
       </div>
 
       {/* Controls */}
-      <div className="mt-8 flex items-center justify-center gap-6 z-10">
+      <div className="mt-2 flex items-center justify-center gap-4 z-10">
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={onPrevious}
-          className="p-4 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-colors"
+          className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-colors"
         >
-          <SkipBack className="w-6 h-6 text-white" fill="currentColor" />
+          <SkipBack className="w-5 h-5 text-white" fill="currentColor" />
         </motion.button>
 
         <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={onPlayPause}
-          className="p-6 rounded-full bg-amber-500 hover:bg-amber-600 shadow-xl transition-colors"
+          className="p-4 rounded-full bg-amber-500 hover:bg-amber-600 shadow-xl transition-colors"
         >
           {isPlaying ? (
-            <Pause className="w-8 h-8 text-gray-900" fill="currentColor" />
+            <Pause className="w-6 h-6 text-gray-900" fill="currentColor" />
           ) : (
-            <Play className="w-8 h-8 text-gray-900 ml-1" fill="currentColor" />
+            <Play className="w-6 h-6 text-gray-900 ml-0.5" fill="currentColor" />
           )}
         </motion.button>
 
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={onNext}
-          className="p-4 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-colors"
+          className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-colors"
         >
-          <SkipForward className="w-6 h-6 text-white" fill="currentColor" />
+          <SkipForward className="w-5 h-5 text-white" fill="currentColor" />
         </motion.button>
       </div>
 
       {/* Volume Slider - Touch friendly */}
-      <div className="mt-6 flex items-center gap-3 z-10">
-        <Volume2 className="w-5 h-5 text-white/70" />
+      <div className="mt-2 flex items-center gap-2 z-10">
+        <Volume2 className="w-4 h-4 text-white/70" />
         <div
           ref={volumeRef}
-          className="w-48 h-3 bg-white/10 rounded-full relative cursor-pointer touch-none"
+          className="w-40 h-2 bg-white/10 rounded-full relative cursor-pointer touch-none"
           onMouseDown={handleVolumeStart}
           onMouseMove={handleVolumeMove}
           onMouseUp={handleVolumeEnd}
@@ -348,11 +347,11 @@ export function VinylSkin({
             style={{ width: `${volume * 100}%` }}
           />
           <motion.div
-            className="absolute top-1/2 -translate-y-1/2 w-5 h-5 bg-white rounded-full shadow-lg"
-            style={{ left: `calc(${volume * 100}% - 10px)` }}
+            className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-lg"
+            style={{ left: `calc(${volume * 100}% - 8px)` }}
           />
         </div>
-        <span className="text-white/70 text-sm w-10">{Math.round(volume * 100)}%</span>
+        <span className="text-white/70 text-xs w-8">{Math.round(volume * 100)}%</span>
       </div>
     </div>
   );

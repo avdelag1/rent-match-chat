@@ -74,7 +74,7 @@ export function IPhoneSkin({
   };
 
   return (
-    <div className={`min-h-screen ${bgColors[theme]} flex flex-col items-center justify-between p-6 relative overflow-hidden`}>
+    <div className={`h-dvh ${bgColors[theme]} flex flex-col items-center justify-between p-6 relative overflow-hidden`}>
       {/* Background Animation */}
       {isPlaying && (
         <motion.div

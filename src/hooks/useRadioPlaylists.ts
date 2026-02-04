@@ -32,7 +32,6 @@ export function useRadioPlaylists() {
       if (error) {
         logger.error('[RadioPlaylists] Error loading playlists:', error);
         setError('Failed to load playlists');
-        toast.error('Could not load playlists');
         return;
       }
 
@@ -47,7 +46,6 @@ export function useRadioPlaylists() {
 
   const createPlaylist = async (name: string, description?: string) => {
     if (!user?.id) {
-      toast.error('You must be logged in to create playlists');
       return null;
     }
 

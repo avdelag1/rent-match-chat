@@ -80,7 +80,7 @@ export default function RadioPlayer() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black flex items-center justify-center">
+      <div className="h-dvh bg-gradient-to-br from-gray-900 to-black flex items-center justify-center">
         <div className="text-white text-center">
           <div className="text-2xl font-bold mb-4">Loading Radio...</div>
           <div className="animate-pulse">🎵</div>
@@ -104,12 +104,12 @@ export default function RadioPlayer() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative h-dvh overflow-hidden z-[10001]">
       {/* Back Button */}
       <motion.button
         whileTap={{ scale: 0.95 }}
         onClick={() => navigate(-1)}
-        className="fixed top-20 left-4 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg"
+        className="absolute top-4 left-4 z-50 w-9 h-9 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg"
         aria-label="Go back"
       >
         <ArrowLeft className="w-5 h-5" />
@@ -119,17 +119,27 @@ export default function RadioPlayer() {
       <motion.button
         whileTap={{ scale: 0.95 }}
         onClick={() => navigate('/radio/stations')}
-        className="fixed top-20 right-4 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg"
+        className="absolute top-4 right-4 z-50 w-9 h-9 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg"
         aria-label="Browse all stations"
       >
         <Radio className="w-5 h-5" />
+      </motion.button>
+
+      {/* Playlist Button */}
+      <motion.button
+        whileTap={{ scale: 0.95 }}
+        onClick={() => setShowPlaylistDialog(true)}
+        className="absolute top-4 right-14 z-50 w-9 h-9 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg"
+        aria-label="Open playlists"
+      >
+        <List className="w-5 h-5" />
       </motion.button>
 
       {/* Skin Selector Button */}
       <motion.button
         whileTap={{ scale: 0.95 }}
         onClick={() => setShowSkinSelector(!showSkinSelector)}
-        className="fixed top-20 right-16 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg"
+        className="absolute top-4 right-24 z-50 w-9 h-9 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg"
         aria-label="Change skin"
       >
         <Palette className="w-5 h-5" />
@@ -143,7 +153,7 @@ export default function RadioPlayer() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-32 right-4 z-50 bg-white rounded-lg shadow-2xl p-4 min-w-[150px]"
+            className="absolute top-14 right-4 z-50 bg-white rounded-lg shadow-2xl p-4 min-w-[150px]"
           >
             <div className="text-sm font-semibold mb-2 text-gray-900">Select Skin</div>
             <div className="space-y-2">
