@@ -8,7 +8,7 @@ import { AllStationsDialog } from '@/components/radio/AllStationsDialog';
 import { cityThemes } from '@/data/radioStations';
 import { CityLocation, RadioSkin } from '@/types/radio';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Palette, Radio } from 'lucide-react';
+import { ArrowLeft, Palette, Radio, Heart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -108,32 +108,45 @@ export default function RadioPlayer() {
       {/* Back Button */}
       <motion.button
         whileTap={{ scale: 0.95 }}
-        onClick={() => navigate(-1)}
-        className="absolute top-4 left-4 z-50 w-9 h-9 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg"
-        aria-label="Go back"
+        onClick={() => navigate('/radio')}
+        className="absolute top-4 left-4 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg hover:bg-black/60 transition-colors"
+        aria-label="Back to radio home"
       >
         <ArrowLeft className="w-5 h-5" />
       </motion.button>
 
-      {/* Browse Stations Button */}
-      <motion.button
-        whileTap={{ scale: 0.95 }}
-        onClick={() => navigate('/radio/stations')}
-        className="absolute top-4 right-4 z-50 w-9 h-9 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg"
-        aria-label="Browse all stations"
-      >
-        <Radio className="w-5 h-5" />
-      </motion.button>
+      {/* Top Right Buttons */}
+      <div className="absolute top-4 right-4 z-50 flex gap-2">
+        {/* Liked Stations Button */}
+        <motion.button
+          whileTap={{ scale: 0.95 }}
+          onClick={() => navigate('/radio/favorites')}
+          className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg hover:bg-black/60 transition-colors"
+          aria-label="Liked stations"
+        >
+          <Heart className="w-5 h-5" />
+        </motion.button>
 
-      {/* Skin Selector Button */}
-      <motion.button
-        whileTap={{ scale: 0.95 }}
-        onClick={() => setShowSkinSelector(!showSkinSelector)}
-        className="absolute top-4 right-14 z-50 w-9 h-9 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg"
-        aria-label="Change skin"
-      >
-        <Palette className="w-5 h-5" />
-      </motion.button>
+        {/* Browse Stations Button */}
+        <motion.button
+          whileTap={{ scale: 0.95 }}
+          onClick={() => navigate('/radio/stations')}
+          className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg hover:bg-black/60 transition-colors"
+          aria-label="Browse all stations"
+        >
+          <Radio className="w-5 h-5" />
+        </motion.button>
+
+        {/* Skin Selector Button */}
+        <motion.button
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setShowSkinSelector(!showSkinSelector)}
+          className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg hover:bg-black/60 transition-colors"
+          aria-label="Change skin"
+        >
+          <Palette className="w-5 h-5" />
+        </motion.button>
+      </div>
 
       {/* Skin Selector Dropdown */}
       <AnimatePresence>

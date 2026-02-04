@@ -183,9 +183,9 @@ export function ModernSkin({
   const buttonBg = theme === 'dark' ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-100 hover:bg-gray-200';
 
   return (
-    <div className={`h-screen ${bgColor} flex flex-col items-center justify-between p-2 pb-3 relative overflow-hidden`}>
+    <div className={`min-h-screen ${bgColor} flex flex-col items-center justify-center p-4 relative overflow-hidden`}>
       {/* Top Icons */}
-      <div className="w-full max-w-md flex justify-between items-start pt-16">
+      <div className="w-full max-w-md flex justify-between items-center mb-8">
         <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={onToggleShuffle}
@@ -274,7 +274,7 @@ export function ModernSkin({
       </AnimatePresence>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center justify-center w-full max-w-md space-y-1">
+      <div className="flex flex-col items-center justify-center w-full max-w-md space-y-6 my-8">
         {/* Large Frequency Display */}
         <div className="text-center">
           <motion.div
@@ -358,14 +358,14 @@ export function ModernSkin({
       </div>
 
       {/* City Toggle Buttons */}
-      <div className="w-full max-w-md mb-0.5">
-        <div className="flex flex-wrap justify-center gap-1">
+      <div className="w-full max-w-md mb-6">
+        <div className="flex flex-wrap justify-center gap-2">
           {CITY_GROUPS.map((city) => (
             <motion.button
               key={city}
               whileTap={{ scale: 0.95 }}
               onClick={() => onCitySelect(city)}
-              className={`px-2 py-0.5 rounded-full text-xs font-medium transition-all ${
+              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
                 currentCity === city
                   ? theme === 'dark'
                     ? 'bg-rose-500 text-white shadow-lg'
@@ -380,7 +380,7 @@ export function ModernSkin({
       </div>
 
       {/* Bottom Controls */}
-      <div className="w-full max-w-md space-y-1">
+      <div className="w-full max-w-md space-y-4">
         <div className="flex items-center justify-center gap-3">
           {/* Previous Button */}
           <motion.button
