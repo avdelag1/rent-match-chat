@@ -279,18 +279,22 @@ function ClientProfileDialogComponent({ open, onOpenChange }: Props) {
       const fileName = `${uniqueId}.${fileExt}`;
       const filePath = `${user.data.user.id}/${fileName}`;
 
-
       const { data, error } = await supabase.storage
         .from('profile-images')
-        .upload(filePath, file);
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false,
+        });
 
       if (error) {
-        if (import.meta.env.DEV) {
-          logger.error('Storage upload error:', error);
-        }
+        logger.error('Storage upload error:', error);
+        toast({
+          title: 'Upload Failed',
+          description: error.message || 'Could not upload image. Please try again.',
+          variant: 'destructive'
+        });
         throw error;
       }
-
 
       const { data: { publicUrl } } = supabase.storage
         .from('profile-images')
@@ -298,9 +302,7 @@ function ClientProfileDialogComponent({ open, onOpenChange }: Props) {
 
       return publicUrl;
     } catch (error) {
-      if (import.meta.env.DEV) {
-        logger.error('Error uploading image:', error);
-      }
+      logger.error('Error uploading image:', error);
       throw error;
     }
   };
@@ -349,9 +351,7 @@ function ClientProfileDialogComponent({ open, onOpenChange }: Props) {
       toast({ title: 'Profile saved', description: 'Your comprehensive profile has been updated.' });
       onOpenChange(false);
     } catch (error) {
-      if (import.meta.env.DEV) {
-        logger.error('Error saving profile:', error);
-      }
+      logger.error('Error saving profile:', error);
       toast({
         title: 'Error saving profile',
         description: error instanceof Error ? error.message : 'Please try again',
