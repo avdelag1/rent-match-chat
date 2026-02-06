@@ -1160,11 +1160,10 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
           transition={{ duration: 0.2, ease: "easeOut" }}
           className="text-center space-y-6 p-8 max-w-md mx-auto"
         >
-          {/* FILTER-SPECIFIC LOADING ANIMATION with heartbeat effect */}
+          {/* FILTER-SPECIFIC LOADING ANIMATION - Always breathing */}
           <FilterLoadingAnimation
             category={activeCategory as any}
             size={120}
-            isActive={isRefreshing}
           />
 
           <div className="space-y-2">
@@ -1244,11 +1243,10 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
           transition={{ duration: 0.2, ease: "easeOut" }}
           className="text-center space-y-6 p-8 max-w-md mx-auto"
         >
-          {/* FILTER-SPECIFIC LOADING ANIMATION with heartbeat effect */}
+          {/* FILTER-SPECIFIC LOADING ANIMATION - Always breathing */}
           <FilterLoadingAnimation
             category={activeCategory as any}
             size={120}
-            isActive={isRefreshing}
           />
 
           <div className="space-y-3">
