@@ -19,6 +19,8 @@ interface RadioContextType {
   setSkin: (skin: RadioSkin) => void;
   toggleFavorite: (stationId: string) => void;
   isStationFavorite: (stationId: string) => boolean;
+  playPlaylist: (stationIds: string[]) => void;
+  playFavorites: () => void;
 }
 
 const RadioContext = createContext<RadioContextType | undefined>(undefined);
@@ -46,28 +48,35 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
       audioRef.current = new Audio();
       audioRef.current.volume = state.volume;
       audioRef.current.preload = 'auto';
+    }
+  }, []);
 
-      const handleTrackEnded = () => {
-        // Auto-advance to next station
-        changeStation('next');
-      };
+  // Update listeners when state changes to have access to latest state
+  useEffect(() => {
+    if (!audioRef.current) return;
 
-      const handleAudioError = (e: Event) => {
+    const handleTrackEnded = () => {
+      changeStation('next');
+    };
+
+    const handleAudioError = (e: Event) => {
+      if (audioRef.current?.paused === false) {
         logger.error('[RadioPlayer] Audio error:', e);
         setError('Stream unavailable');
-        // Try next station
-        changeStation('next');
-      };
+        setTimeout(() => {
+          changeStation('next');
+        }, 3000);
+      }
+    };
 
-      audioRef.current.addEventListener('ended', handleTrackEnded);
-      audioRef.current.addEventListener('error', handleAudioError);
-    }
+    audioRef.current.addEventListener('ended', handleTrackEnded);
+    audioRef.current.addEventListener('error', handleAudioError);
 
     return () => {
-      // We don't pause here because we want it to persist
-      // Only cleanup listeners if the provider is unmounted (which is never in our app)
+      audioRef.current?.removeEventListener('ended', handleTrackEnded);
+      audioRef.current?.removeEventListener('error', handleAudioError);
     };
-  }, []);
+  }, [state.isPlaying, state.currentStation, state.isShuffle, state.currentCity]);
 
   // Load user preferences from Supabase
   useEffect(() => {
@@ -246,6 +255,18 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  const playPlaylist = useCallback((stationIds: string[]) => {
+    if (stationIds.length === 0) return;
+    const firstStation = getStationById(stationIds[0]);
+    if (firstStation) {
+      play(firstStation);
+    }
+  }, [play]);
+
+  const playFavorites = useCallback(() => {
+    playPlaylist(state.favorites);
+  }, [state.favorites, playPlaylist]);
+
   const value = {
     state,
     loading,
@@ -259,7 +280,9 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
     toggleShuffle,
     setSkin,
     toggleFavorite,
-    isStationFavorite: (stationId: string) => state.favorites.includes(stationId)
+    isStationFavorite: (stationId: string) => state.favorites.includes(stationId),
+    playPlaylist,
+    playFavorites
   };
 
   return <RadioContext.Provider value={value}>{children}</RadioContext.Provider>;

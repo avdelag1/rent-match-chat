@@ -134,7 +134,7 @@ export const radioStations: RadioStation[] = [
     id: 'miami-global',
     name: 'Miami Global Radio',
     frequency: '93.1 FM',
-    streamUrl: 'https://miamiglobalradio.stream.publicradio.pro/miamiglobalradio',
+    streamUrl: 'https://miamiglobalradio.stream.publicradio.pro/miamiglobalradio.mp3',
     city: 'miami',
     genre: 'House/Deep House',
     description: 'The sound of Miami Beach'
@@ -181,7 +181,7 @@ export const radioStations: RadioStation[] = [
     id: 'ibiza-live',
     name: 'Ibiza Live Radio',
     frequency: '103.2 FM',
-    streamUrl: 'https://cloudup.net/8240/stream',
+    streamUrl: 'https://stream.ibizalive-radio.com/stream',
     city: 'ibiza',
     genre: 'House',
     description: 'Live from the white isle'
