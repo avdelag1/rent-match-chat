@@ -88,7 +88,6 @@ const QuickFilterText = ({ hasActiveFilters }: { hasActiveFilters: boolean }) =>
 
 function QuickFilterDropdownComponent({ userRole, className }: QuickFilterDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [hoveredCategory, setHoveredCategory] = useState<QuickFilterCategory | null>(null);
   const [clickedCategory, setClickedCategory] = useState<QuickFilterCategory | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -130,7 +129,6 @@ function QuickFilterDropdownComponent({ userRole, className }: QuickFilterDropdo
         !buttonRef.current.contains(event.target as Node)
       ) {
         setIsOpen(false);
-        setHoveredCategory(null);
         setClickedCategory(null);
       }
     };
@@ -148,7 +146,6 @@ function QuickFilterDropdownComponent({ userRole, className }: QuickFilterDropdo
     setCategories([categoryId]);
     setListingType(selectedListingType);
     setIsOpen(false);
-    setHoveredCategory(null);
     setClickedCategory(null);
   };
 
@@ -167,7 +164,6 @@ function QuickFilterDropdownComponent({ userRole, className }: QuickFilterDropdo
       resetOwnerFilters();
     }
     setIsOpen(false);
-    setHoveredCategory(null);
     setClickedCategory(null);
   };
 
@@ -247,10 +243,8 @@ function QuickFilterDropdownComponent({ userRole, className }: QuickFilterDropdo
 
   // Render client filters dropdown (categories) - MOBILE OPTIMIZED
   const renderClientFilters = () => {
-    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-
     return (
-      <div className="bg-background border border-white/10 rounded-2xl shadow-lg overflow-hidden w-[calc(100vw-2rem)] sm:min-w-[280px] sm:w-auto max-w-[400px]">
+      <div className="bg-background border border-white/10 rounded-2xl shadow-lg overflow-hidden w-[min(calc(100vw-2rem),400px)]">
         {/* Header */}
         <div className="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 border-b border-white/5">
           <span className="text-sm sm:text-base font-semibold text-foreground">Select Category</span>
@@ -266,7 +260,7 @@ function QuickFilterDropdownComponent({ userRole, className }: QuickFilterDropdo
           )}
         </div>
 
-        {/* Category Options */}
+        {/* Category Options - always inline (no flyout) */}
         <div className="py-2 max-h-[60vh] overflow-y-auto">
           {categoryOptions.map((category, index) => (
             <motion.div
@@ -275,8 +269,6 @@ function QuickFilterDropdownComponent({ userRole, className }: QuickFilterDropdo
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.05 }}
               className="relative"
-              onMouseEnter={() => !isMobile && category.hasSubOptions && setHoveredCategory(category.id)}
-              onMouseLeave={() => !isMobile && setHoveredCategory(null)}
             >
               <button
                 onClick={() => handleCategoryClick(category.id)}
@@ -306,44 +298,34 @@ function QuickFilterDropdownComponent({ userRole, className }: QuickFilterDropdo
                 )}
               </button>
 
-              {/* Sub-menu for listing type - MOBILE: appears below, DESKTOP: appears to the right */}
+              {/* Sub-menu for listing type - always inline below */}
               <AnimatePresence>
-                {(hoveredCategory === category.id || clickedCategory === category.id) && category.hasSubOptions && (
+                {clickedCategory === category.id && category.hasSubOptions && (
                   <motion.div
-                    initial={{ opacity: 0, y: isMobile ? -10 : 0, x: isMobile ? 0 : -10 }}
-                    animate={{ opacity: 1, y: 0, x: 0 }}
-                    exit={{ opacity: 0, y: isMobile ? -10 : 0, x: isMobile ? 0 : -10 }}
-                    transition={{ type: 'spring', stiffness: 600, damping: 25 }}
-                    className={cn(
-                      isMobile
-                        ? "pl-8 sm:pl-12 pb-2" // Mobile: indented submenu below
-                        : "absolute left-full top-0 ml-1 z-[10003]" // Desktop: flyout to the right
-                    )}
-                    onMouseEnter={() => !isMobile && setHoveredCategory(category.id)}
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ type: 'spring', stiffness: 600, damping: 30 }}
+                    className="overflow-hidden"
                   >
-                    <div className={cn(
-                      "bg-background border border-white/10 rounded-xl shadow-lg overflow-hidden",
-                      isMobile ? "w-full" : "min-w-[160px]"
-                    )}>
-                      <div className="py-1 sm:py-2">
-                        {listingTypeOptions.map((ltOption, ltIndex) => (
-                          <motion.button
-                            key={ltOption.id}
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: ltIndex * 0.05 }}
-                            onClick={() => handleCategorySelect(category.id, ltOption.id)}
-                            className={cn(
-                              'w-full flex items-center px-4 sm:px-5 py-2.5 sm:py-3 text-sm transition-all duration-200 touch-manipulation min-h-[48px]',
-                              categories.includes(category.id) && listingType === ltOption.id
-                                ? `bg-gradient-to-r ${category.color} text-white`
-                                : 'text-foreground/80 hover:bg-white/5'
-                            )}
-                          >
-                            <span className="font-medium text-sm sm:text-base">{ltOption.label}</span>
-                          </motion.button>
-                        ))}
-                      </div>
+                    <div className="pl-12 sm:pl-14 pr-4 pb-2">
+                      {listingTypeOptions.map((ltOption, ltIndex) => (
+                        <motion.button
+                          key={ltOption.id}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: ltIndex * 0.05 }}
+                          onClick={() => handleCategorySelect(category.id, ltOption.id)}
+                          className={cn(
+                            'w-full flex items-center px-4 py-2.5 rounded-xl text-sm transition-all duration-200 touch-manipulation min-h-[44px] mb-1',
+                            categories.includes(category.id) && listingType === ltOption.id
+                              ? `bg-gradient-to-r ${category.color} text-white`
+                              : 'text-foreground/80 hover:bg-white/5 bg-white/[0.03]'
+                          )}
+                        >
+                          <span className="font-medium text-sm sm:text-base">{ltOption.label}</span>
+                        </motion.button>
+                      ))}
                     </div>
                   </motion.div>
                 )}
@@ -399,18 +381,18 @@ function QuickFilterDropdownComponent({ userRole, className }: QuickFilterDropdo
               className="fixed inset-0 z-[10001]"
               onClick={() => {
                 setIsOpen(false);
-                setHoveredCategory(null);
+                setClickedCategory(null);
               }}
             />
 
-            {/* Main dropdown - MOBILE OPTIMIZED POSITIONING */}
+            {/* Main dropdown - FIXED centered on mobile, absolute on desktop */}
             <motion.div
               ref={dropdownRef}
               initial={{ opacity: 0, y: -10, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ type: 'spring', stiffness: 600, damping: 25 }}
-              className="absolute left-1/2 -translate-x-1/2 sm:left-0 sm:translate-x-0 top-full mt-2 z-[10002]"
+              className="fixed left-1/2 -translate-x-1/2 top-16 sm:absolute sm:left-0 sm:translate-x-0 sm:top-full sm:mt-2 z-[10002]"
             >
               {userRole === 'owner' ? renderOwnerFilters() : renderClientFilters()}
             </motion.div>
