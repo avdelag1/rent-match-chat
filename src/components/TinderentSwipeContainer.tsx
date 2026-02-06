@@ -226,6 +226,10 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   // Local state for immediate UI updates - drives the swipe animation
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  // FIX: Track deck length in state to force re-render when listings are appended
+  // Without this, appending to deckQueueRef doesn't trigger re-render and empty state persists
+  const [deckLength, setDeckLength] = useState(0);
+
   // =============================================================================
   // FIX #1: SWIPE PHASE ISOLATION - DOM moves first, React cleans up after
   // This is the key to "Tinder-level" feel: freeze React during the swipe gesture
@@ -308,6 +312,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
       // Reset local state and refs
       currentIndexRef.current = 0;
       setCurrentIndex(0);
+      setDeckLength(0);
       deckQueueRef.current = [];
       swipedIdsRef.current.clear();
       setPage(0);
@@ -380,6 +385,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
           const newIndex = storeState.clientDeck.currentIndex;
           currentIndexRef.current = newIndex;
           setCurrentIndex(newIndex);
+          setDeckLength(items.length);
           swipedIdsRef.current = new Set(storeState.clientDeck.swipedIds);
         }
       }
@@ -518,6 +524,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     // Force UI update
     currentIndexRef.current = 0;
     setCurrentIndex(0);
+    setDeckLength(0);
   }, [filterSignature, resetClientDeck]);
 
   // Get listings with filters - PERF: pass userId to avoid getUser() inside queryFn
@@ -625,6 +632,11 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
         currentIndexRef.current = newIndex;
         setCurrentIndex(newIndex);
       }
+
+      // FIX: Force re-render when deck goes from empty to populated
+      // Without this, the "No Listings Found" empty state persists because
+      // appending to deckQueueRef alone doesn't trigger a React re-render
+      setDeckLength(deckQueueRef.current.length);
 
       // PERSIST: Save to store and session for navigation survival
       setClientDeck(deckQueueRef.current, true);
@@ -875,6 +887,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     // Reset local state and refs
     currentIndexRef.current = 0;
     setCurrentIndex(0);
+    setDeckLength(0);
     deckQueueRef.current = [];
     swipedIdsRef.current.clear();
     setPage(0);
@@ -884,9 +897,11 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
 
     try {
       await refetchSmart();
+      const refreshCategoryInfo = getActiveCategoryInfo(filters);
+      const refreshLabel = String(refreshCategoryInfo?.plural || 'Listings').toLowerCase();
       toast({
-        title: 'Properties Refreshed',
-        description: 'Showing properties you passed on. Liked ones stay saved!',
+        title: `${String(refreshCategoryInfo?.plural || 'Listings')} Refreshed`,
+        description: `Showing ${refreshLabel} you passed on. Liked ones stay saved!`,
       });
     } catch (err) {
       toast({
@@ -1118,6 +1133,8 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   if (currentIndex > 0 && currentIndex >= deckQueue.length) {
     const categoryInfo = getActiveCategoryInfo(filters);
     const categoryLabel = String(categoryInfo?.plural || 'Listings');
+    const CategoryIcon = categoryInfo?.icon || Home;
+    const iconColor = categoryInfo?.color || 'text-primary';
     return (
       <div className="relative w-full h-full flex-1 flex items-center justify-center px-4">
         {/* UNIFIED animation - all elements animate together, no staggered pop-in */}
@@ -1127,12 +1144,16 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
           transition={{ duration: 0.2, ease: "easeOut" }}
           className="text-center space-y-6 p-8"
         >
-          {/* RADAR SEARCH EFFECT - Premium futuristic refresh animation */}
-          <RadarSearchEffect
-            size={100}
-            color="hsl(var(--primary))"
-            isActive={isRefreshing}
-          />
+          {/* Category-specific icon with heartbeat pulse animation */}
+          <div className="flex justify-center">
+            <motion.div
+              animate={isRefreshing ? { rotate: 360 } : { scale: [1, 1.15, 1, 1.1, 1] }}
+              transition={isRefreshing ? { duration: 1, repeat: Infinity, ease: "linear" } : { duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+              className={`w-20 h-20 rounded-full border-2 border-current flex items-center justify-center ${iconColor}`}
+            >
+              <CategoryIcon className="w-10 h-10" />
+            </motion.div>
+          </div>
 
           <div className="space-y-2">
             <h3 className="text-xl font-semibold text-foreground">All Caught Up!</h3>
@@ -1187,6 +1208,8 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   if (deckQueue.length === 0) {
     const categoryInfo = getActiveCategoryInfo(filters);
     const categoryLabel = String(categoryInfo?.plural || 'Listings');
+    const CategoryIcon = categoryInfo?.icon || Home;
+    const iconColor = categoryInfo?.color || 'text-primary';
     return (
       <div className="relative w-full h-full flex-1 flex items-center justify-center px-4">
         {/* UNIFIED animation - all elements animate together, no staggered pop-in */}
@@ -1196,17 +1219,21 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
           transition={{ duration: 0.2, ease: "easeOut" }}
           className="text-center space-y-6 p-8"
         >
-          {/* RADAR SEARCH EFFECT - Calm futuristic scanning animation */}
-          <RadarSearchEffect
-            size={100}
-            color="hsl(var(--primary))"
-            isActive={isRefreshing}
-          />
+          {/* Category-specific icon with heartbeat pulse animation */}
+          <div className="flex justify-center">
+            <motion.div
+              animate={{ scale: [1, 1.15, 1, 1.1, 1] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+              className={`w-20 h-20 rounded-full border-2 border-current flex items-center justify-center ${iconColor}`}
+            >
+              <CategoryIcon className="w-10 h-10" />
+            </motion.div>
+          </div>
 
           <div className="space-y-2">
             <h3 className="text-xl font-semibold text-foreground">No {categoryLabel} Found</h3>
             <p className="text-muted-foreground text-sm max-w-xs mx-auto">
-              Try adjusting your filters or refresh to discover new listings
+              Searching for {categoryLabel.toLowerCase()} to browse. Expand your filters or check back regularly for new opportunities.
             </p>
           </div>
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>

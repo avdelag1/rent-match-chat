@@ -67,16 +67,8 @@ function TopBarComponent({
       )}
     >
       <div className="flex items-center justify-between h-12 max-w-screen-xl mx-auto gap-2">
-        <div className="flex items-center gap-3 min-w-0 flex-shrink">
-          <motion.div
-            className="flex items-center gap-0.5 select-none cursor-pointer flex-shrink-0"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={handleLogoClick}
-          >
-            <SwipessLogo size="xs" />
-          </motion.div>
-
+        {/* Left section: Mode switcher + filters */}
+        <div className="flex items-center gap-2 min-w-0 flex-shrink flex-1">
           <div className="flex-shrink-0">
             <ModeSwitcher variant="pill" size="sm" className="md:hidden" />
             <ModeSwitcher variant="pill" size="md" className="hidden md:flex" />
@@ -89,7 +81,18 @@ function TopBarComponent({
           )}
         </div>
 
-        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+        {/* Center section: Logo */}
+        <motion.div
+          className="flex items-center justify-center select-none cursor-pointer flex-shrink-0"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={handleLogoClick}
+        >
+          <SwipessLogo size="xs" />
+        </motion.div>
+
+        {/* Right section: Actions */}
+        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0 flex-1 justify-end">
           {/* UPGRADED BRIGHTNESS: Added a subtle background glow on hover */}
           <Button
             variant="ghost"

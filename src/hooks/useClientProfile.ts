@@ -21,6 +21,21 @@ export type ClientProfileLite = {
   longitude?: number | null;
   // Intentions
   intentions?: string[] | null;
+  // Demographic fields
+  nationality?: string | null;
+  languages?: string[] | null;
+  relationship_status?: string | null;
+  has_children?: boolean | null;
+  // Lifestyle habit fields
+  smoking_habit?: string | null;
+  drinking_habit?: string | null;
+  cleanliness_level?: string | null;
+  noise_tolerance?: string | null;
+  work_schedule?: string | null;
+  // Cultural and personality fields
+  dietary_preferences?: string[] | null;
+  personality_traits?: string[] | null;
+  interest_categories?: string[] | null;
 };
 
 // Type for database operations (excluding id)
@@ -134,6 +149,11 @@ export function useSaveClientProfile() {
       // Sync preferred activities
       if (updates.preferred_activities !== undefined) {
         syncPayload.preferred_activities = updates.preferred_activities;
+      }
+
+      // Sync gender
+      if (updates.gender !== undefined) {
+        syncPayload.gender = updates.gender;
       }
 
       // Sync location fields
