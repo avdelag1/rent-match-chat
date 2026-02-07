@@ -2,14 +2,18 @@ import { useState, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { TinderentSwipeContainer } from '@/components/TinderentSwipeContainer';
 import { PropertyInsightsDialog } from '@/components/PropertyInsightsDialog';
+import { GetStartedCTA } from '@/components/GetStartedCTA';
 import { supabase } from '@/integrations/supabase/client';
 import { ListingFilters } from '@/hooks/useSmartMatching';
 import { Listing } from '@/hooks/useListings';
+import { useAuth } from '@/hooks/useAuth';
 
 interface ClientDashboardProps {
   onPropertyInsights?: (listingId: string) => void;
   onMessageClick?: () => void;
-  filters?: ListingFilters; // Filters passed from DashboardLayout
+  filters?: ListingFilters;
+  onGetStartedClick?: () => void;
+  showGetStarted?: boolean;
 }
 
 /**
@@ -17,13 +21,17 @@ interface ClientDashboardProps {
  * DashboardLayout is now rendered ONCE at route level via PersistentDashboardLayout
  * This component only renders its inner content
  */
-export default function ClientDashboard({ onPropertyInsights, onMessageClick, filters }: ClientDashboardProps) {
+export default function ClientDashboard({ 
+  onPropertyInsights, 
+  onMessageClick, 
+  filters,
+  onGetStartedClick,
+  showGetStarted 
+}: ClientDashboardProps) {
   const [insightsOpen, setInsightsOpen] = useState(false);
   const [selectedListingId, setSelectedListingId] = useState<string | null>(null);
 
   // PERFORMANCE: Only fetch the selected listing when dialog opens
-  // This eliminates redundant fetch that was happening on every render
-  // FIX #4: React Query optimizations to prevent refetching during swipes
   const { data: selectedListing } = useQuery({
     queryKey: ['listing-detail', selectedListingId],
     queryFn: async () => {
@@ -37,11 +45,11 @@ export default function ClientDashboard({ onPropertyInsights, onMessageClick, fi
       return data as Listing;
     },
     enabled: !!selectedListingId && insightsOpen,
-    staleTime: 5 * 60 * 1000, // Cache for 5 min
-    gcTime: 30 * 60 * 1000, // Keep in memory for 30 min
-    refetchOnWindowFocus: false, // Don't refetch on tab switch
-    refetchOnMount: false, // Don't refetch when component remounts
-    refetchOnReconnect: false, // Don't refetch on network reconnect
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
   });
 
   const handleListingTap = useCallback((listingId: string) => {
@@ -52,6 +60,8 @@ export default function ClientDashboard({ onPropertyInsights, onMessageClick, fi
 
   return (
     <>
+      <GetStartedCTA onClick={onGetStartedClick || (() => {})} visible={showGetStarted} />
+      
       <TinderentSwipeContainer
         onListingTap={handleListingTap}
         onInsights={handleListingTap}
