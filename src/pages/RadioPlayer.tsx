@@ -86,7 +86,7 @@ export default function RadioPlayer() {
       <div className="flex-1 flex flex-col items-center justify-center px-4">
         {/* Vinyl Record */}
         <motion.div
-          className="w-36 h-36 rounded-full relative mb-4"
+          className="w-24 h-24 rounded-full relative mb-3"
           style={{
             background: 'linear-gradient(135deg, #222 0%, #111 50%, #222 100%)',
             border: '1px solid #333'
@@ -95,25 +95,24 @@ export default function RadioPlayer() {
           transition={{ duration: state.isPlaying ? 4 : 0, repeat: Infinity, ease: "linear" }}
         >
           {/* Vinyl grooves */}
-          <div className="absolute inset-1.5 rounded-full border border-white/10" />
-          <div className="absolute inset-3 rounded-full border border-white/5" />
-          <div className="absolute inset-5 rounded-full border border-white/5" />
+          <div className="absolute inset-1 rounded-full border border-white/10" />
+          <div className="absolute inset-2 rounded-full border border-white/5" />
 
           {/* Center label - Station info */}
-          <div className="absolute inset-8 rounded-full bg-white flex flex-col items-center justify-center">
-            <span className="text-xs font-bold text-black">{state.currentStation?.frequency || '--.-'}</span>
-            <span className="text-[8px] text-black/60 uppercase">{state.currentStation?.genre || '---'}</span>
+          <div className="absolute inset-6 rounded-full bg-white flex flex-col items-center justify-center">
+            <span className="text-[10px] font-bold text-black">{state.currentStation?.frequency || '--.-'}</span>
+            <span className="text-[7px] text-black/60 uppercase">{state.currentStation?.genre || '---'}</span>
           </div>
 
           {/* Center hole */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-1.5 h-1.5 rounded-full bg-black" />
+            <div className="w-1 h-1 rounded-full bg-black" />
           </div>
         </motion.div>
 
         {/* Station Name */}
-        <h1 className="text-lg font-bold text-white mb-1">{state.currentStation?.name || 'Select Station'}</h1>
-        <p className="text-white/40 text-xs mb-4">{cityThemes[state.currentCity].name}</p>
+        <h1 className="text-base font-bold text-white mb-0.5">{state.currentStation?.name || 'Select Station'}</h1>
+        <p className="text-white/40 text-xs mb-3">{cityThemes[state.currentCity].name}</p>
 
         {/* Station Dial */}
         <div className="w-full max-w-xs mb-4">
