@@ -1,6 +1,7 @@
 
 import React, { ReactNode, useState, useEffect, useCallback, useMemo, lazy, Suspense, useRef } from 'react'
 import { useAuth } from "@/hooks/useAuth"
+import { useAnonymousDrafts } from "@/hooks/useAnonymousDrafts"
 import { supabase } from '@/integrations/supabase/client'
 import { toast } from '@/hooks/use-toast'
 import { useNavigate, useLocation } from 'react-router-dom'
@@ -147,6 +148,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const navigate = useNavigate()
   const location = useLocation()
   const { user } = useAuth()
+  const { restoreDrafts } = useAnonymousDrafts()
   const responsive = useResponsiveContext()
 
   // PERF: Extract stable userId to prevent re-renders when user object reference changes
@@ -270,6 +272,27 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       return () => clearTimeout(timeoutId);
     }
   }, [userId, onboardingChecked]);
+
+  // Restore anonymous drafts after signup/login
+  useEffect(() => {
+    if (userId) {
+      // Check if there's a pending auth action
+      const pendingAction = sessionStorage.getItem('pending_auth_action');
+      if (pendingAction) {
+        try {
+          const action = JSON.parse(pendingAction);
+          const age = Date.now() - action.timestamp;
+          // Only restore if action is recent (within 24 hours)
+          if (age < 24 * 60 * 60 * 1000) {
+            restoreDrafts();
+          }
+          sessionStorage.removeItem('pending_auth_action');
+        } catch {
+          sessionStorage.removeItem('pending_auth_action');
+        }
+      }
+    }
+  }, [userId, restoreDrafts]);
 
   // PERFORMANCE FIX: Welcome check now handled by useWelcomeState hook
   // This ensures welcome shows only on first signup, never on subsequent sign-ins
