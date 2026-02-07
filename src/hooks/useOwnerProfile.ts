@@ -90,11 +90,47 @@ export function useSaveOwnerProfile() {
         profileData = data as OwnerProfile;
       }
 
+      // SYNC to profiles table - so owner info shows in messages/public profiles
+      const syncPayload: any = {};
+
+      if (updates.profile_images !== undefined && updates.profile_images.length > 0) {
+        syncPayload.images = updates.profile_images;
+      }
+
+      if (updates.business_name !== undefined) {
+        syncPayload.full_name = updates.business_name;
+      }
+
+      if (updates.business_location !== undefined) {
+        syncPayload.city = updates.business_location;
+      }
+
+      if (updates.contact_email !== undefined) {
+        syncPayload.email = updates.contact_email;
+      }
+
+      if (updates.contact_phone !== undefined) {
+        syncPayload.phone = updates.contact_phone;
+      }
+
+      // Only update if we have fields to sync
+      if (Object.keys(syncPayload).length > 0) {
+        const { error: syncError } = await supabase
+          .from('profiles')
+          .update(syncPayload)
+          .eq('id', uid);
+
+        if (syncError) {
+          logger.error('[OWNER PROFILE SYNC] Error syncing to profiles:', syncError);
+        }
+      }
+
       return profileData;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['owner-profile-own'] });
       qc.invalidateQueries({ queryKey: ['owner-profiles'] });
+      qc.invalidateQueries({ queryKey: ['profiles_public'] });
     },
   });
 }

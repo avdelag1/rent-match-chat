@@ -123,7 +123,7 @@ export function useSaveClientProfile() {
         profileData = data as ClientProfileLite;
       }
 
-      // SYNC to profiles table - so owner sees updated data!
+      // SYNC to profiles table - so owner sees updated data on swipe cards!
       const syncPayload: any = {};
 
       // Sync images
@@ -146,11 +146,6 @@ export function useSaveClientProfile() {
         syncPayload.interests = updates.interests;
       }
 
-      // Sync preferred activities
-      if (updates.preferred_activities !== undefined) {
-        syncPayload.preferred_activities = updates.preferred_activities;
-      }
-
       // Sync gender
       if (updates.gender !== undefined) {
         syncPayload.gender = updates.gender;
@@ -166,11 +161,31 @@ export function useSaveClientProfile() {
       if (updates.neighborhood !== undefined) {
         syncPayload.neighborhood = updates.neighborhood;
       }
-      if (updates.latitude !== undefined) {
-        syncPayload.latitude = updates.latitude;
+
+      // Sync lifestyle fields so owner swipe cards show full client data
+      if (updates.smoking_habit !== undefined) {
+        syncPayload.smoking = updates.smoking_habit !== 'Non-Smoker';
       }
-      if (updates.longitude !== undefined) {
-        syncPayload.longitude = updates.longitude;
+
+      if (updates.nationality !== undefined) {
+        syncPayload.nationality = updates.nationality;
+      }
+
+      if (updates.languages !== undefined) {
+        syncPayload.languages_spoken = updates.languages;
+      }
+
+      if (updates.work_schedule !== undefined) {
+        syncPayload.work_schedule = updates.work_schedule;
+      }
+
+      // Build lifestyle_tags from interests + preferred_activities + personality traits
+      const lifestyleTags: string[] = [];
+      if (updates.interests) lifestyleTags.push(...updates.interests);
+      if (updates.preferred_activities) lifestyleTags.push(...updates.preferred_activities);
+      if (updates.personality_traits) lifestyleTags.push(...updates.personality_traits);
+      if (lifestyleTags.length > 0) {
+        syncPayload.lifestyle_tags = lifestyleTags;
       }
 
       // Only update if we have fields to sync

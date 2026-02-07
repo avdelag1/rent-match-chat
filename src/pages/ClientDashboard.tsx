@@ -2,18 +2,14 @@ import { useState, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { TinderentSwipeContainer } from '@/components/TinderentSwipeContainer';
 import { PropertyInsightsDialog } from '@/components/PropertyInsightsDialog';
-import { GetStartedCTA } from '@/components/GetStartedCTA';
 import { supabase } from '@/integrations/supabase/client';
 import { ListingFilters } from '@/hooks/useSmartMatching';
 import { Listing } from '@/hooks/useListings';
-import { useAuth } from '@/hooks/useAuth';
 
 interface ClientDashboardProps {
   onPropertyInsights?: (listingId: string) => void;
   onMessageClick?: () => void;
   filters?: ListingFilters;
-  onGetStartedClick?: () => void;
-  showGetStarted?: boolean;
 }
 
 /**
@@ -24,9 +20,7 @@ interface ClientDashboardProps {
 export default function ClientDashboard({ 
   onPropertyInsights, 
   onMessageClick, 
-  filters,
-  onGetStartedClick,
-  showGetStarted 
+  filters 
 }: ClientDashboardProps) {
   const [insightsOpen, setInsightsOpen] = useState(false);
   const [selectedListingId, setSelectedListingId] = useState<string | null>(null);
@@ -60,8 +54,6 @@ export default function ClientDashboard({
 
   return (
     <>
-      <GetStartedCTA onClick={onGetStartedClick || (() => {})} visible={showGetStarted} />
-      
       <TinderentSwipeContainer
         onListingTap={handleListingTap}
         onInsights={handleListingTap}

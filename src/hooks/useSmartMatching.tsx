@@ -63,9 +63,14 @@ export interface MatchedClientProfile {
   matchReasons: string[];
   incompatibleReasons: string[];
   city?: string;
+  country?: string;
   avatar_url?: string;
   verified?: boolean;
-  
+  work_schedule?: string;
+  nationality?: string;
+  languages?: string[];
+  neighborhood?: string;
+
   // Category-specific preferences
   moto_types?: string[];
   bicycle_types?: string[];
@@ -1057,20 +1062,21 @@ export function useSmartClientMatching(
           age,
           gender,
           city,
+          country,
           images,
           avatar_url,
           verified,
           budget_min,
           budget_max,
-          monthly_income,
           interests,
-          preferred_activities,
           lifestyle_tags,
           has_pets,
           smoking,
           party_friendly,
-          preferred_listing_type,
-          preferred_property_types,
+          work_schedule,
+          nationality,
+          languages_spoken,
+          neighborhood,
           user_roles!inner(role)
         `;
 
@@ -1315,19 +1321,24 @@ export function useSmartClientMatching(
             age: profile.age || 0,
             gender: profile.gender || '',
             interests: profile.interests || [],
-            preferred_activities: profile.preferred_activities || [],
+            preferred_activities: [],
             location: profile.city ? { city: profile.city } : {},
             lifestyle_tags: profile.lifestyle_tags || [],
             profile_images: profile.images || [],
-            preferred_listing_types: profile.preferred_listing_types || ['rent'],
+            preferred_listing_types: [],
             budget_min: profile.budget_min || 0,
             budget_max: profile.budget_max || 100000,
             matchPercentage: match.percentage,
             matchReasons: match.reasons,
             incompatibleReasons: match.incompatible,
             city: profile.city || undefined,
+            country: profile.country || undefined,
             avatar_url: profile.avatar_url || undefined,
-            verified: profile.verified || false
+            verified: profile.verified || false,
+            work_schedule: profile.work_schedule || undefined,
+            nationality: profile.nationality || undefined,
+            languages: profile.languages_spoken || undefined,
+            neighborhood: profile.neighborhood || undefined,
           } as MatchedClientProfile;
         });
 
