@@ -203,7 +203,7 @@ const App = () => (
                       <Route path="/client/filters" element={<ClientFilters />} />
 
                       {/* Owner routes */}
-                      <Route path="/owner/dashboard" element={<EnhancedOwnerDashboard />} />
+                      <Route path="/owner/dashboard" element={<OwnerDashboardNew />} />
                       <Route path="/owner/profile" element={<OwnerProfile />} />
                       <Route path="/owner/settings" element={<OwnerSettings />} />
                       <Route path="/owner/properties" element={<OwnerProperties />} />

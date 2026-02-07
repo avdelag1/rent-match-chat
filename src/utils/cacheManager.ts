@@ -1,31 +1,12 @@
 // Cache management utilities for immediate updates
-import { logger } from '@/utils/prodLogger';
+// Note: clearAllCaches is imported from useAutomaticUpdates for centralization
 
 /**
  * Clear all browser caches (Cache API)
+ * NOTE: This function is centralized in useAutomaticUpdates.tsx
+ * Kept here for backward compatibility - imports from there
  */
-export function clearAllCaches(): Promise<void> {
-  return new Promise((resolve) => {
-    if ('caches' in window) {
-      caches.keys()
-        .then(names => {
-          return Promise.all(names.map(name => caches.delete(name)));
-        })
-        .then(() => {
-          console.log('[CacheManager] All caches cleared');
-          resolve();
-        })
-        .catch((error) => {
-          if (import.meta.env.DEV) {
-            logger.error('Failed to clear caches:', error);
-          }
-          resolve(); // Resolve anyway to not block app flow
-        });
-    } else {
-      resolve();
-    }
-  });
-}
+export { clearAllCaches } from '@/hooks/useAutomaticUpdates';
 
 /**
  * Clear all local storage data related to the app
