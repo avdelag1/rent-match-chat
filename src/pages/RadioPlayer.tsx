@@ -8,7 +8,7 @@ import { PlaylistDialog } from '@/components/radio/PlaylistDialog';
 import { cityThemes } from '@/data/radioStations';
 import { CityLocation, RadioSkin } from '@/types/radio';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, List } from 'lucide-react';
+import { ArrowLeft, ListMusic, Palette, Plus, Heart, Shuffle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -52,6 +52,16 @@ export default function RadioPlayer() {
     toast.success(`Changed to ${skin} skin`);
   };
 
+  const handleAddToPlaylist = () => {
+    setAddingToPlaylist(true);
+    setShowPlaylistDialog(true);
+  };
+
+  const handleCreatePlaylist = () => {
+    setAddingToPlaylist(false);
+    setShowPlaylistDialog(true);
+  };
+
   if (loading) {
     return (
       <div className="fixed inset-0 bg-gradient-to-br from-gray-900 to-black flex items-center justify-center -mt-12">
@@ -69,9 +79,7 @@ export default function RadioPlayer() {
         <div className="text-white text-center max-w-md">
           <div className="text-2xl font-bold mb-4 text-red-500">Error</div>
           <div className="mb-6">{error}</div>
-          <Button onClick={() => window.location.reload()}>
-            Retry
-          </Button>
+          <Button onClick={() => window.location.reload()}>Retry</Button>
         </div>
       </div>
     );
@@ -79,35 +87,49 @@ export default function RadioPlayer() {
 
   return (
     <div className="fixed inset-0 overflow-hidden bg-gradient-to-br from-gray-900 to-black -mt-12">
-      {/* Back Button */}
-      <motion.button
-        whileTap={{ scale: 0.95 }}
-        onClick={() => navigate(-1)}
-        className="fixed top-14 left-4 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg"
-        aria-label="Go back"
-      >
-        <ArrowLeft className="w-5 h-5" />
-      </motion.button>
+      {/* Header Bar */}
+      <div className="flex items-center justify-between px-4 pt-14">
+        <motion.button
+          whileTap={{ scale: 0.95 }}
+          onClick={() => navigate(-1)}
+          className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white"
+          aria-label="Go back"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </motion.button>
 
-      {/* Playlist Button */}
-      <motion.button
-        whileTap={{ scale: 0.95 }}
-        onClick={() => setShowPlaylistDialog(true)}
-        className="fixed top-14 right-4 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg"
-        aria-label="Open playlists"
-      >
-        <List className="w-5 h-5" />
-      </motion.button>
+        <div className="flex items-center gap-2">
+          {/* Add to Playlist Button */}
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={handleAddToPlaylist}
+            className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white"
+            aria-label="Add to playlist"
+          >
+            <Plus className="w-5 h-5" />
+          </motion.button>
 
-      {/* Skin Selector Button */}
-      <motion.button
-        whileTap={{ scale: 0.95 }}
-        onClick={() => setShowSkinSelector(!showSkinSelector)}
-        className="fixed top-14 right-16 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg"
-        aria-label="Change skin"
-      >
-        <span className="text-lg">🎨</span>
-      </motion.button>
+          {/* Create Playlist Button */}
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={handleCreatePlaylist}
+            className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white"
+            aria-label="Create playlist"
+          >
+            <ListMusic className="w-5 h-5" />
+          </motion.button>
+
+          {/* Skin Selector */}
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowSkinSelector(!showSkinSelector)}
+            className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white"
+            aria-label="Change skin"
+          >
+            <Palette className="w-5 h-5" />
+          </motion.button>
+        </div>
+      </div>
 
       {/* Skin Selector Dropdown */}
       <AnimatePresence>
@@ -116,23 +138,24 @@ export default function RadioPlayer() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-26 right-4 z-50 bg-white rounded-lg shadow-2xl p-4 min-w-[150px]"
+            className="fixed top-32 right-4 z-50 bg-gray-800 rounded-xl shadow-2xl p-3 min-w-[160px]"
           >
-            <div className="text-sm font-semibold mb-2 text-gray-900">Select Skin</div>
-            <div className="space-y-2">
+            <div className="text-xs font-semibold mb-2 text-gray-400 uppercase tracking-wider">Choose Skin</div>
+            <div className="space-y-1">
               {(['modern', 'vinyl', 'retro'] as RadioSkin[]).map((skin) => (
                 <button
                   key={skin}
                   onClick={() => handleSkinChange(skin)}
-                  className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
                     state.skin === skin
                       ? 'bg-blue-500 text-white'
-                      : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
+                      : 'bg-gray-700 text-gray-200 hover:bg-gray-600'
                   }`}
                 >
-                  {skin === 'modern' && '📻 Modern FM'}
-                  {skin === 'vinyl' && '💿 Vinyl Record'}
-                  {skin === 'retro' && '📼 Retro Cassette'}
+                  {skin === 'modern' && <div className="w-5 h-5 rounded bg-gradient-to-br from-blue-400 to-blue-600" />}
+                  {skin === 'vinyl' && <div className="w-5 h-5 rounded-full bg-gradient-to-br from-purple-400 to-pink-600" />}
+                  {skin === 'retro' && <div className="w-5 h-5 rounded bg-gradient-to-br from-amber-400 to-orange-500" />}
+                  <span className="capitalize">{skin}</span>
                 </button>
               ))}
             </div>

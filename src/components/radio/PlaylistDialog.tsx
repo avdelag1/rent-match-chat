@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Plus, Music, Trash2, Play, Heart, Shuffle } from 'lucide-react';
+import { X, Plus, Music, Trash2, Play, Heart, Shuffle, Check } from 'lucide-react';
 import { useRadioPlaylists } from '@/hooks/useRadioPlaylists';
 import { useRadio } from '@/contexts/RadioContext';
 import { RadioStation } from '@/types/radio';
@@ -24,24 +24,35 @@ export function PlaylistDialog({ isOpen, onClose, currentStation, onPlayStation,
   const [newPlaylistName, setNewPlaylistName] = useState('');
   const [selectedPlaylistId, setSelectedPlaylistId] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [addedPlaylistId, setAddedPlaylistId] = useState<string | null>(null);
+
+  // Reset state when dialog opens/closes
+  useEffect(() => {
+    if (isOpen) {
+      setActiveTab('playlists');
+      setSelectedPlaylistId(null);
+      setAddedPlaylistId(null);
+    }
+  }, [isOpen]);
 
   const handleCreatePlaylist = async () => {
     if (!newPlaylistName.trim()) return;
     await createPlaylist(newPlaylistName.trim());
     setNewPlaylistName('');
     setShowAddForm(false);
+    toast.success('Playlist created!');
   };
 
   const handleAddStation = async (playlistId: string) => {
     if (!currentStation) return;
     await addStationToPlaylist(playlistId, currentStation.id);
+    setAddedPlaylistId(playlistId);
+    toast.success('Station added to playlist!');
   };
 
   const handleShufflePlay = (stationIds: string[]) => {
     if (stationIds.length === 0) return;
     if (!state.isShuffle) toggleShuffle();
-    
-    // Pick a random station to start
     const randomId = stationIds[Math.floor(Math.random() * stationIds.length)];
     const station = getStationById(randomId);
     if (station) onPlayStation(station);
@@ -72,7 +83,7 @@ export function PlaylistDialog({ isOpen, onClose, currentStation, onPlayStation,
           <div className="p-6 border-b border-white/5">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-white">
-                {selectedPlaylist ? selectedPlaylist.name : 'Library'}
+                {addingMode ? 'Add to Playlist' : selectedPlaylist ? selectedPlaylist.name : 'Library'}
               </h2>
               <button
                 onClick={selectedPlaylist ? () => setSelectedPlaylistId(null) : onClose}
@@ -98,7 +109,7 @@ export function PlaylistDialog({ isOpen, onClose, currentStation, onPlayStation,
                     activeTab === 'liked' ? 'bg-white/10 text-white shadow-lg' : 'text-white/40 hover:text-white/60'
                   }`}
                 >
-                  Liked Stations
+                  Liked
                 </button>
               </div>
             )}
@@ -229,12 +240,24 @@ export function PlaylistDialog({ isOpen, onClose, currentStation, onPlayStation,
                     {playlists.map(playlist => (
                       <div
                         key={playlist.id}
-                        onClick={() => setSelectedPlaylistId(playlist.id)}
-                        className="group flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 rounded-2xl transition-all cursor-pointer border border-transparent hover:border-white/10"
+                        onClick={() => addingMode ? handleAddStation(playlist.id) : setSelectedPlaylistId(playlist.id)}
+                        className={`group flex items-center justify-between p-4 rounded-2xl transition-all cursor-pointer border ${
+                          addedPlaylistId === playlist.id
+                            ? 'bg-green-500/10 border-green-500/30'
+                            : 'bg-white/5 hover:bg-white/10 border-transparent hover:border-white/10'
+                        }`}
                       >
                         <div className="flex items-center gap-4">
-                          <div className="w-14 h-14 bg-gradient-to-br from-gray-700 to-gray-800 rounded-2xl flex items-center justify-center text-white/40 group-hover:text-white transition-colors shadow-xl">
-                            <Music className="w-7 h-7" />
+                          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-xl ${
+                            addedPlaylistId === playlist.id
+                              ? 'bg-gradient-to-br from-green-500 to-green-600'
+                              : 'bg-gradient-to-br from-gray-700 to-gray-800 group-hover:from-gray-600 group-hover:to-gray-700'
+                          }`}>
+                            {addedPlaylistId === playlist.id ? (
+                              <Check className="w-7 h-7 text-white" />
+                            ) : (
+                              <Music className="w-7 h-7 text-white/40 group-hover:text-white transition-colors" />
+                            )}
                           </div>
                           <div>
                             <div className="font-bold text-white text-lg">{playlist.name}</div>
@@ -243,8 +266,12 @@ export function PlaylistDialog({ isOpen, onClose, currentStation, onPlayStation,
                             </div>
                           </div>
                         </div>
-                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          {currentStation && (
+                        <div className={`flex gap-2 ${addingMode ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}>
+                          {addingMode ? (
+                            <span className="text-sm text-green-400 font-medium px-2">
+                              {addedPlaylistId === playlist.id ? 'Added!' : 'Add'}
+                            </span>
+                          ) : currentStation && (
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -256,15 +283,17 @@ export function PlaylistDialog({ isOpen, onClose, currentStation, onPlayStation,
                               <Plus className="w-5 h-5" />
                             </button>
                           )}
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              deletePlaylist(playlist.id);
-                            }}
-                            className="p-2 bg-red-500/20 hover:bg-red-500/40 rounded-full text-red-400 transition-colors"
-                          >
-                            <Trash2 className="w-5 h-5" />
-                          </button>
+                          {!addingMode && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deletePlaylist(playlist.id);
+                              }}
+                              className="p-2 bg-red-500/20 hover:bg-red-500/40 rounded-full text-red-400 transition-colors"
+                            >
+                              <Trash2 className="w-5 h-5" />
+                            </button>
+                          )}
                         </div>
                       </div>
                     ))}
