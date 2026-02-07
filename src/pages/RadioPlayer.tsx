@@ -59,9 +59,9 @@ export default function RadioPlayer() {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 bg-gradient-to-br from-gray-900 to-black flex items-center justify-center -mt-12">
+      <div className="h-full bg-gradient-to-br from-gray-900 to-black flex items-center justify-center">
         <div className="text-white text-center">
-          <div className="text-2xl font-bold mb-4">Loading Radio...</div>
+          <div className="text-lg font-bold mb-3">Loading Radio...</div>
           <div className="animate-pulse">🎵</div>
         </div>
       </div>
@@ -70,58 +70,58 @@ export default function RadioPlayer() {
 
   if (error) {
     return (
-      <div className="fixed inset-0 bg-gradient-to-br from-gray-900 to-black flex items-center justify-center p-6 -mt-12">
+      <div className="h-full bg-gradient-to-br from-gray-900 to-black flex items-center justify-center p-4">
         <div className="text-white text-center max-w-md">
-          <div className="text-2xl font-bold mb-4 text-red-500">Error</div>
-          <div className="mb-6">{error}</div>
-          <Button onClick={() => window.location.reload()}>Retry</Button>
+          <div className="text-lg font-bold mb-3 text-red-500">Error</div>
+          <div className="mb-4 text-sm">{error}</div>
+          <Button onClick={() => window.location.reload()} size="sm">Retry</Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 overflow-hidden bg-gradient-to-br from-gray-900 to-black -mt-12">
-      {/* Header Actions */}
-      <div className="flex justify-between items-center p-4">
+    <div className="h-full bg-gradient-to-br from-gray-900 to-black overflow-hidden">
+      {/* Compact Header Actions */}
+      <div className="flex justify-between items-center px-3 py-2">
         <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={() => navigate(-1)}
-          className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white"
+          className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white"
           aria-label="Go back"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-4 h-4" />
         </motion.button>
 
-        <div className="flex gap-2">
+        <div className="flex gap-1">
           {/* Add to Playlist Button */}
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={handleAddToPlaylist}
-            className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white"
+            className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white"
             aria-label="Add to playlist"
           >
-            <Plus className="w-5 h-5" />
+            <Plus className="w-4 h-4" />
           </motion.button>
 
           {/* Skin Selector */}
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={() => setShowSkinSelector(!showSkinSelector)}
-            className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white"
+            className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white"
             aria-label="Change skin"
           >
-            <span className="text-lg">🎨</span>
+            <span className="text-sm">🎨</span>
           </motion.button>
 
           {/* Playlist Button */}
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={() => setShowPlaylistDialog(true)}
-            className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white"
+            className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white"
             aria-label="Open playlists"
           >
-            <List className="w-5 h-5" />
+            <List className="w-4 h-4" />
           </motion.button>
         </div>
       </div>
@@ -133,23 +133,23 @@ export default function RadioPlayer() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-20 right-4 z-50 bg-gray-800 rounded-lg shadow-2xl p-4 min-w-[150px]"
+            className="absolute top-10 right-4 z-50 bg-gray-800 rounded-lg shadow-xl p-2 min-w-[120px]"
           >
-            <div className="text-sm font-semibold mb-2 text-gray-300">Select Skin</div>
-            <div className="space-y-2">
+            <div className="text-xs font-semibold mb-2 text-gray-400 px-2">Skin</div>
+            <div className="space-y-1">
               {(['modern', 'vinyl', 'retro'] as RadioSkin[]).map((skin) => (
                 <button
                   key={skin}
                   onClick={() => handleSkinChange(skin)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
+                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-all text-sm ${
                     state.skin === skin
                       ? 'bg-blue-500 text-white'
                       : 'bg-gray-700 text-gray-200 hover:bg-gray-600'
                   }`}
                 >
-                  {skin === 'modern' && <div className="w-5 h-5 rounded bg-gradient-to-br from-blue-400 to-blue-600" />}
-                  {skin === 'vinyl' && <div className="w-5 h-5 rounded-full bg-gradient-to-br from-purple-400 to-pink-600" />}
-                  {skin === 'retro' && <div className="w-5 h-5 rounded bg-gradient-to-br from-amber-400 to-orange-500" />}
+                  {skin === 'modern' && <div className="w-4 h-4 rounded bg-gradient-to-br from-blue-400 to-blue-600" />}
+                  {skin === 'vinyl' && <div className="w-4 h-4 rounded-full bg-gradient-to-br from-purple-400 to-pink-600" />}
+                  {skin === 'retro' && <div className="w-4 h-4 rounded bg-gradient-to-br from-amber-400 to-orange-500" />}
                   <span className="capitalize">{skin}</span>
                 </button>
               ))}
