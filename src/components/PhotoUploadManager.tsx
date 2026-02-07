@@ -3,10 +3,11 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Upload, X, Image, Star, Camera } from 'lucide-react';
+import { Upload, X, Image, Star, Camera, MoveVertical } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { validateImageFile, formatFileSize, FILE_SIZE_LIMITS } from '@/utils/fileValidation';
 import { logger } from '@/utils/prodLogger';
+import { motion, Reorder } from 'framer-motion';
 
 interface PhotoUploadManagerProps {
   maxPhotos: number; // 30 for properties, 10 for clients
@@ -204,23 +205,36 @@ export function PhotoUploadManager({
         <div className="space-y-3">
           <div className="flex items-center justify-between px-1">
             <p className="text-sm font-medium text-white/90">
-              Your Photos ({currentPhotos.length}/{maxPhotos})
+              Your Photos ({currentPhotos.length}/{maxPhotos}){currentPhotos.length > 1 && ' • Drag to reorder'}
             </p>
             <Badge variant="secondary" className="bg-white/10 text-white border-white/20">
               {currentPhotos.length >= maxPhotos ? 'Full' : `${maxPhotos - currentPhotos.length} left`}
             </Badge>
           </div>
           
-          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3">
+          <Reorder.Group
+            axis="x"
+            values={currentPhotos}
+            onReorder={onPhotosChange}
+            className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3 list-none p-0 m-0"
+          >
             {currentPhotos.map((photo, index) => (
-              <div key={`photo-${photo}-${index}`} className="relative group">
-                <div className="aspect-square relative rounded-lg overflow-hidden border-2 border-white/20">
+              <Reorder.Item
+                key={photo}
+                value={photo}
+                className="relative group list-none"
+              >
+                <motion.div
+                  className="aspect-square relative rounded-lg overflow-hidden border-2 border-white/20 cursor-grab active:cursor-grabbing"
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.95 }}
+                >
                   <img
                     src={photo}
                     alt={`${uploadType} photo ${index + 1}`}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover pointer-events-none"
                   />
-                  
+
                   {/* Main Photo Badge */}
                   {index === 0 && (
                     <div className="absolute top-1 left-1">
@@ -228,6 +242,15 @@ export function PhotoUploadManager({
                         <Star className="w-2.5 h-2.5 mr-0.5 fill-current" />
                         Main
                       </Badge>
+                    </div>
+                  )}
+
+                  {/* Drag Handle */}
+                  {currentPhotos.length > 1 && (
+                    <div className="absolute top-1 right-9 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                      <div className="bg-black/60 backdrop-blur-sm rounded p-0.5">
+                        <MoveVertical className="w-3.5 h-3.5 text-white" />
+                      </div>
                     </div>
                   )}
 
@@ -245,16 +268,16 @@ export function PhotoUploadManager({
                   </Button>
 
                   {/* Photo Number */}
-                  <Badge 
-                    variant="outline" 
+                  <Badge
+                    variant="outline"
                     className="absolute bottom-1 left-1 bg-black/70 text-white border-white/30 text-[10px] h-5 px-1.5"
                   >
                     #{index + 1}
                   </Badge>
-                </div>
-              </div>
+                </motion.div>
+              </Reorder.Item>
             ))}
-          </div>
+          </Reorder.Group>
         </div>
       )}
 
