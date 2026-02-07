@@ -1,11 +1,11 @@
 /**
  * Automatic App Update System
- * 
+ *
  * This module handles automatic app updates when new versions are deployed.
  * It uses the Service Worker API to detect updates and force-refresh the app.
- * 
+ *
  * Features:
- * - Automatic update detection on app load
+ * - Automatic update detection on app load using BUILD_TIMESTAMP
  * - User notification when update is available
  * - One-click update with automatic cache clearing
  * - Version tracking to prevent unnecessary updates
@@ -16,8 +16,12 @@ import { useEffect, useState, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
 
-// Current app version - update this when deploying new versions
-export const APP_VERSION = '1.0.0';
+// Get build timestamp from Vite injected environment variable
+// This changes EVERY deployment, ensuring all users get updates
+const BUILD_TIMESTAMP = import.meta.env.VITE_BUILD_TIME || Date.now().toString();
+
+// Current app version - derived from build timestamp for automatic updates
+export const APP_VERSION = `1.0.${BUILD_TIMESTAMP.slice(-6)}`;
 
 // Storage key for version tracking
 const VERSION_STORAGE_KEY = 'zwipes_app_version';
@@ -31,7 +35,7 @@ interface UpdateInfo {
 
 /**
  * Check if a new version is available
- * Returns true if the stored version differs from current
+ * Returns true if the stored version differs from current (build timestamp based)
  */
 export function checkForUpdates(): UpdateInfo {
   if (typeof window === 'undefined') {
@@ -39,9 +43,9 @@ export function checkForUpdates(): UpdateInfo {
   }
 
   const storedVersion = localStorage.getItem(VERSION_STORAGE_KEY);
-  
-  // First visit or version changed
-  if (!storedVersion || storedVersion !== APP_VERSION) {
+
+  // First visit or version changed (always true on new deployment)
+  if (!storedVersion || storedVersion !== BUILD_TIMESTAMP) {
     return {
       available: true,
       version: APP_VERSION,
@@ -54,10 +58,11 @@ export function checkForUpdates(): UpdateInfo {
 
 /**
  * Mark the current version as installed
+ * Stores the BUILD_TIMESTAMP so future deployments will detect changes
  */
 export function markVersionAsInstalled(): void {
   if (typeof window !== 'undefined') {
-    localStorage.setItem(VERSION_STORAGE_KEY, APP_VERSION);
+    localStorage.setItem(VERSION_STORAGE_KEY, BUILD_TIMESTAMP);
   }
 }
 
@@ -250,13 +255,13 @@ export function UpdateNotification() {
 
 /**
  * Force update on app mount - use when you want guaranteed updates
- * This clears all caches and reloads if version changed
+ * This clears all caches and reloads if version changed (based on BUILD_TIMESTAMP)
  */
 export function useForceUpdateOnVersionChange() {
   useEffect(() => {
     const storedVersion = localStorage.getItem(VERSION_STORAGE_KEY);
-    
-    if (storedVersion && storedVersion !== APP_VERSION) {
+
+    if (storedVersion && storedVersion !== BUILD_TIMESTAMP) {
       // Version changed - force update
       forceAppUpdate();
     } else {
@@ -271,14 +276,16 @@ export function useForceUpdateOnVersionChange() {
  */
 export function VersionInfo({ showDetails = false }: { showDetails?: boolean }) {
   const storedVersion = localStorage.getItem(VERSION_STORAGE_KEY);
+  const hasUpdate = storedVersion && storedVersion !== BUILD_TIMESTAMP;
 
   return (
     <div className="text-xs text-gray-500">
       {showDetails && (
         <div className="flex gap-2">
           <span>App: v{APP_VERSION}</span>
-          {storedVersion && storedVersion !== APP_VERSION && (
-            <span className="text-orange-500">(Update available!)</span>
+          <span className="text-gray-400">({BUILD_TIMESTAMP})</span>
+          {hasUpdate && (
+            <span className="text-orange-500 font-bold">(Update available!)</span>
           )}
         </div>
       )}

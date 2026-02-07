@@ -2,7 +2,6 @@ import { motion } from 'framer-motion';
 import { useRadio } from '@/contexts/RadioContext';
 import { getStationById } from '@/data/radioStations';
 import { ArrowLeft, Heart, Shuffle, Play, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -23,9 +22,7 @@ export default function RadioFavoritesPage() {
 
   const handlePlayStation = (stationId: string) => {
     const station = getStationById(stationId);
-    if (station) {
-      play(station);
-    }
+    if (station) play(station);
   };
 
   const handleRemoveFavorite = (stationId: string, e: React.MouseEvent) => {
@@ -39,14 +36,14 @@ export default function RadioFavoritesPage() {
     .filter((s) => s !== undefined);
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-gray-900 to-black -mt-12 overflow-y-auto">
+    <div className="fixed inset-0 bg-black overflow-y-auto">
       {/* Header */}
-      <div className="sticky top-0 bg-gray-900/80 backdrop-blur-lg z-10 border-b border-white/5 px-4 py-4">
+      <div className="sticky top-0 bg-black/80 backdrop-blur-lg z-10 border-b border-white/10 px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate(-1)}
-              className="p-2 hover:bg-white/5 rounded-full transition-colors text-white"
+              className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
@@ -55,19 +52,20 @@ export default function RadioFavoritesPage() {
           <button
             onClick={handleShufflePlay}
             disabled={state.favorites.length === 0}
-            className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 rounded-full transition-colors text-white disabled:opacity-30 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-4 py-2 bg-green-500 rounded-full text-white text-sm font-medium disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <Shuffle className="w-4 h-4" />
-            <span className="text-sm font-medium">Shuffle</span>
+            Shuffle
           </button>
         </div>
       </div>
 
       {/* Content */}
       <div className="p-4 pb-24">
+        {/* Empty State */}
         {favoriteStations.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-white/30">
-            <Heart className="w-20 h-20 mb-4 opacity-20" />
+            <Heart className="w-16 h-16 mb-4 opacity-20" />
             <p className="text-xl font-medium mb-2">No Liked Stations</p>
             <p className="text-sm text-center max-w-xs">Heart your favorite stations while listening to add them here</p>
           </div>
@@ -97,15 +95,15 @@ export default function RadioFavoritesPage() {
                 <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
                     onClick={(e) => handleRemoveFavorite(station!.id, e)}
-                    className="p-3 bg-red-500/20 hover:bg-red-500/30 rounded-full text-red-500 transition-colors"
+                    className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center text-red-500 hover:bg-red-500/30"
                   >
-                    <X className="w-5 h-5" />
+                    <X className="w-4 h-4" />
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); handlePlayStation(station!.id); }}
-                    className="p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
+                    className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white"
                   >
-                    <Play className="w-5 h-5" fill="currentColor" />
+                    <Play className="w-4 h-4" fill="currentColor" />
                   </button>
                 </div>
               </motion.div>
