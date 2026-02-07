@@ -8,7 +8,7 @@ import { PlaylistDialog } from '@/components/radio/PlaylistDialog';
 import { cityThemes } from '@/data/radioStations';
 import { CityLocation, RadioSkin } from '@/types/radio';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ListMusic, Palette, Plus, Heart, Shuffle } from 'lucide-react';
+import { ArrowLeft, List, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -57,11 +57,6 @@ export default function RadioPlayer() {
     setShowPlaylistDialog(true);
   };
 
-  const handleCreatePlaylist = () => {
-    setAddingToPlaylist(false);
-    setShowPlaylistDialog(true);
-  };
-
   if (loading) {
     return (
       <div className="fixed inset-0 bg-gradient-to-br from-gray-900 to-black flex items-center justify-center -mt-12">
@@ -87,46 +82,46 @@ export default function RadioPlayer() {
 
   return (
     <div className="fixed inset-0 overflow-hidden bg-gradient-to-br from-gray-900 to-black -mt-12">
-      {/* Header Bar */}
-      <div className="flex items-center justify-between px-4 pt-14">
+      {/* Header Actions */}
+      <div className="flex justify-between items-center p-4">
         <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={() => navigate(-1)}
-          className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white"
+          className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white"
           aria-label="Go back"
         >
           <ArrowLeft className="w-5 h-5" />
         </motion.button>
 
-        <div className="flex items-center gap-2">
+        <div className="flex gap-2">
           {/* Add to Playlist Button */}
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={handleAddToPlaylist}
-            className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white"
+            className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white"
             aria-label="Add to playlist"
           >
             <Plus className="w-5 h-5" />
-          </motion.button>
-
-          {/* Create Playlist Button */}
-          <motion.button
-            whileTap={{ scale: 0.95 }}
-            onClick={handleCreatePlaylist}
-            className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white"
-            aria-label="Create playlist"
-          >
-            <ListMusic className="w-5 h-5" />
           </motion.button>
 
           {/* Skin Selector */}
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={() => setShowSkinSelector(!showSkinSelector)}
-            className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white"
+            className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white"
             aria-label="Change skin"
           >
-            <Palette className="w-5 h-5" />
+            <span className="text-lg">🎨</span>
+          </motion.button>
+
+          {/* Playlist Button */}
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowPlaylistDialog(true)}
+            className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white"
+            aria-label="Open playlists"
+          >
+            <List className="w-5 h-5" />
           </motion.button>
         </div>
       </div>
@@ -138,10 +133,10 @@ export default function RadioPlayer() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-32 right-4 z-50 bg-gray-800 rounded-xl shadow-2xl p-3 min-w-[160px]"
+            className="fixed top-20 right-4 z-50 bg-gray-800 rounded-lg shadow-2xl p-4 min-w-[150px]"
           >
-            <div className="text-xs font-semibold mb-2 text-gray-400 uppercase tracking-wider">Choose Skin</div>
-            <div className="space-y-1">
+            <div className="text-sm font-semibold mb-2 text-gray-300">Select Skin</div>
+            <div className="space-y-2">
               {(['modern', 'vinyl', 'retro'] as RadioSkin[]).map((skin) => (
                 <button
                   key={skin}
