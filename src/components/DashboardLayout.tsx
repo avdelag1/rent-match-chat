@@ -703,7 +703,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
             navigate(`/owner/properties/new?category=${category}`);
           }}
           onSelectProfile={() => {
-            navigate('/client/profile/edit');
+            navigate('/client/profile');
           }}
         />
       </Suspense>
