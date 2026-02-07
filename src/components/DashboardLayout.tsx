@@ -1,6 +1,7 @@
 
 import React, { ReactNode, useState, useEffect, useCallback, useMemo, lazy, Suspense, useRef } from 'react'
 import { useAuth } from "@/hooks/useAuth"
+import { useAnonymousDrafts } from "@/hooks/useAnonymousDrafts"
 import { supabase } from '@/integrations/supabase/client'
 import { toast } from '@/hooks/use-toast'
 import { useNavigate, useLocation } from 'react-router-dom'
@@ -38,6 +39,7 @@ const SavedSearchesDialog = lazy(() => import('@/components/SavedSearchesDialog'
 const MessageActivationPackages = lazy(() => import('@/components/MessageActivationPackages').then(m => ({ default: m.MessageActivationPackages })))
 const PushNotificationPrompt = lazy(() => import('@/components/PushNotificationPrompt').then(m => ({ default: m.PushNotificationPrompt })))
 const WelcomeNotification = lazy(() => import('@/components/WelcomeNotification').then(m => ({ default: m.WelcomeNotification })))
+const GetStartedModal = lazy(() => import('@/components/GetStartedModal').then(m => ({ default: m.GetStartedModal })))
 
 // Hooks
 import { useListings } from "@/hooks/useListings"
@@ -131,6 +133,9 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const [showSavedSearches, setShowSavedSearches] = useState(false)
   const [showMessageActivations, setShowMessageActivations] = useState(false)
 
+  // Get Started Modal for new users
+  const [showGetStarted, setShowGetStarted] = useState(false)
+
   const [appliedFilters, setAppliedFilters] = useState<any>(null);
 
   // ========== UNIFIED FILTER STATE FROM ZUSTAND STORE ==========
@@ -143,6 +148,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const navigate = useNavigate()
   const location = useLocation()
   const { user } = useAuth()
+  const { restoreDrafts } = useAnonymousDrafts()
   const responsive = useResponsiveContext()
 
   // PERF: Extract stable userId to prevent re-renders when user object reference changes
@@ -267,6 +273,27 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
     }
   }, [userId, onboardingChecked]);
 
+  // Restore anonymous drafts after signup/login
+  useEffect(() => {
+    if (userId) {
+      // Check if there's a pending auth action
+      const pendingAction = sessionStorage.getItem('pending_auth_action');
+      if (pendingAction) {
+        try {
+          const action = JSON.parse(pendingAction);
+          const age = Date.now() - action.timestamp;
+          // Only restore if action is recent (within 24 hours)
+          if (age < 24 * 60 * 60 * 1000) {
+            restoreDrafts();
+          }
+          sessionStorage.removeItem('pending_auth_action');
+        } catch {
+          sessionStorage.removeItem('pending_auth_action');
+        }
+      }
+    }
+  }, [userId, restoreDrafts]);
+
   // PERFORMANCE FIX: Welcome check now handled by useWelcomeState hook
   // This ensures welcome shows only on first signup, never on subsequent sign-ins
   // (survives localStorage clears from Lovable preview URLs)
@@ -389,6 +416,9 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
     return mapping[category] || category;
   }, []);
 
+  // Get the original UI category (before mapping) for display purposes
+  const activeUiCategory = categories.length === 1 ? categories[0] : null;
+
   // Combine quick filters with applied filters - MEMOIZED to prevent identity changes
   // Now reads directly from Zustand store values instead of local state
   const combinedFilters = useMemo(() => {
@@ -416,6 +446,8 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       // Client quick filter categories take precedence if set
       category: categories.length === 0 ? base.category : undefined,
       categories: mappedCategories,
+      // Original UI category for display (empty states, titles, etc.)
+      activeUiCategory: activeUiCategory,
       // Quick filter listing type takes precedence if not 'both'
       listingType: listingType !== 'both' ? listingType : base.listingType,
       // Services filter - derived from categories
@@ -424,7 +456,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       clientGender: clientGender !== 'any' ? clientGender : undefined,
       clientType: clientType !== 'all' ? clientType : undefined,
     };
-  }, [appliedFilters, categories, listingType, clientGender, clientType, mapCategoryToDatabase]);
+  }, [appliedFilters, categories, listingType, clientGender, clientType, mapCategoryToDatabase, activeUiCategory]);
 
   // FIX: Memoize cloned children to prevent infinite re-renders
   const enhancedChildren = useMemo(() => {
@@ -435,11 +467,13 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           onClientInsights: handleClientInsights,
           onMessageClick: handleMessageClick,
           filters: combinedFilters,
+          showGetStarted: !user && isOnDiscoveryPage,
+          onGetStartedClick: () => setShowGetStarted(true),
         } as any);
       }
       return child;
     });
-  }, [children, handlePropertyInsights, handleClientInsights, handleMessageClick, combinedFilters]);
+  }, [children, handlePropertyInsights, handleClientInsights, handleMessageClick, combinedFilters, user, isOnDiscoveryPage, setShowGetStarted]);
 
   // Check if we're on a discovery page where filters should be shown
   const isOnDiscoveryPage = (userRole === 'client' && location.pathname === '/client/dashboard') ||
@@ -680,6 +714,20 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         <WelcomeNotification
           isOpen={shouldShowWelcome}
           onClose={dismissWelcome}
+        />
+      </Suspense>
+
+      {/* Get Started Modal for new users */}
+      <Suspense fallback={null}>
+        <GetStartedModal
+          isOpen={showGetStarted}
+          onClose={() => setShowGetStarted(false)}
+          onSelectListing={(category) => {
+            navigate(`/owner/properties/new?category=${category}`);
+          }}
+          onSelectProfile={() => {
+            navigate('/client/profile/edit');
+          }}
         />
       </Suspense>
     </div>

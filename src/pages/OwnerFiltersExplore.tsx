@@ -1,5 +1,5 @@
 /** SPEED OF LIGHT: DashboardLayout is now rendered at route level */
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,8 @@ import { BicycleClientFilters } from '@/components/filters/BicycleClientFilters'
 import { WorkerClientFilters } from '@/components/filters/WorkerClientFilters';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useFilterStore } from '@/state/filterStore';
+import { useQueryClient } from '@tanstack/react-query';
 
 type CategoryType = 'property' | 'moto' | 'bicycle' | 'services';
 
@@ -23,6 +25,16 @@ const categories: { id: CategoryType; name: string; icon: React.ElementType; col
 
 export default function OwnerFiltersExplore() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  
+  // Connect to filter store
+  const storeCategories = useFilterStore((state) => state.categories);
+  const storeClientGender = useFilterStore((state) => state.clientGender);
+  const storeClientType = useFilterStore((state) => state.clientType);
+  const setClientGender = useFilterStore((state) => state.setClientGender);
+  const setClientType = useFilterStore((state) => state.setClientType);
+  const resetOwnerFilters = useFilterStore((state) => state.resetOwnerFilters);
+  
   const [activeCategory, setActiveCategory] = useState<CategoryType>('property');
   const [filterCounts, setFilterCounts] = useState<Record<CategoryType, number>>({
     property: 0,
@@ -31,20 +43,28 @@ export default function OwnerFiltersExplore() {
     services: 0,
   });
 
-  const handleApplyFilters = () => {
+  const handleApplyFilters = useCallback(() => {
+    // Invalidate queries to refresh with new filters
+    queryClient.invalidateQueries({ queryKey: ['smart-listings'] });
+    queryClient.invalidateQueries({ queryKey: ['listings'] });
+    queryClient.invalidateQueries({ queryKey: ['client-profiles'] });
+    
+    // Navigate back to dashboard
     navigate('/owner/dashboard');
-  };
+  }, [queryClient, navigate]);
 
-  const handleClearAll = () => {
+  const handleClearAll = useCallback(() => {
     setFilterCounts({
       property: 0,
       moto: 0,
       bicycle: 0,
       services: 0,
     });
-  };
+    resetOwnerFilters();
+  }, [resetOwnerFilters]);
 
-  const handleFilterApply = (category: CategoryType, filters: any) => {
+  const handleFilterApply = useCallback((category: CategoryType, filters: any) => {
+    // Count active filters
     const count = Object.entries(filters).filter(([key, value]) => {
       if (Array.isArray(value)) return value.length > 0;
       if (typeof value === 'boolean') return value;
@@ -52,8 +72,17 @@ export default function OwnerFiltersExplore() {
       if (typeof value === 'number') return value > 0;
       return false;
     }).length;
+    
     setFilterCounts(prev => ({ ...prev, [category]: count }));
-  };
+    
+    // Apply gender and clientType filters to store
+    if (filters.gender) {
+      setClientGender(filters.gender);
+    }
+    if (filters.clientType) {
+      setClientType(filters.clientType);
+    }
+  }, [setClientGender, setClientType]);
 
   const totalActiveFilters = Object.values(filterCounts).reduce((a, b) => a + b, 0);
 
@@ -67,10 +96,10 @@ export default function OwnerFiltersExplore() {
               <div className="flex items-center gap-3">
                 <Button
                   variant="ghost"
-                  onClick={() => navigate(-1)}
+                  onClick={() => navigate('/owner/dashboard')}
                   className="text-sm font-medium"
                 >
-                  Back
+                  Cancel
                 </Button>
                 <div>
                   <h1 className="text-xl font-semibold">Find Clients</h1>
@@ -167,7 +196,7 @@ export default function OwnerFiltersExplore() {
           </div>
         </ScrollArea>
 
-        {/* Apply Button - IMPROVED: Larger for better mobile UX */}
+        {/* Apply Button - FIXED: Now properly applies filters and returns to dashboard */}
         <div className="fixed bottom-24 left-0 right-0 p-4 sm:p-6 bg-gradient-to-t from-background via-background/95 to-transparent z-10">
           <motion.div
             initial={{ y: 20, opacity: 0 }}

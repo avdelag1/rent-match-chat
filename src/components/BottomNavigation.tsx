@@ -2,18 +2,7 @@
  * BOTTOM NAVIGATION BAR
  *
  * Full-width, ergonomic bottom navigation optimized for one-handed use.
- *
- * TOUCH OPTIMIZATION:
- * - Expands horizontally to use full screen width
- * - Larger hit areas (minimum 48px) for reliable thumb taps
- * - Generous spacing between touch targets
- * - Safe area handling for iOS home indicator
- *
- * DESIGN:
- * - No visible frames or outlines on buttons
- * - Color-coded icons for active states
- * - Subtle active indicator dot
- * - GPU-accelerated animations
+ * HIGH CONTRAST: Clear active/inactive states with solid colors.
  */
 
 import { startTransition } from 'react';
@@ -23,18 +12,11 @@ import { Home, SlidersHorizontal, Flame, MessageCircle, User, Plus, List, Buildi
 import { cn } from '@/lib/utils';
 import { useUnreadMessageCount } from '@/hooks/useUnreadMessageCount';
 import { useScrollDirection } from '@/hooks/useScrollDirection';
-import { springConfigs } from '@/utils/springConfigs';
 import { prefetchRoute } from '@/utils/routePrefetcher';
 
-/**
- * TOUCH TARGET SIZING
- *
- * Based on Apple HIG (44pt minimum) scaled for comfortable one-handed use.
- * These values ensure "my thumb never misses, even one-handed."
- */
-const ICON_SIZE = 24; // Compact icons for cleaner look
-const TOUCH_TARGET_SIZE = 56; // Expanded touch target with more breathing room
-const NAV_BUTTON_PADDING = 16; // More padding for better icon spacing
+// HIGH CONTRAST SIZING
+const ICON_SIZE = 26; // Larger icons for better visibility
+const TOUCH_TARGET_SIZE = 56;
 
 interface BottomNavigationProps {
   userRole: 'client' | 'owner' | 'admin';
@@ -164,56 +146,57 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
     return location.pathname === item.path;
   };
 
-  // Get icon color class - bright and vibrant
+  // HIGH CONTRAST: Clear color distinction between active and inactive states
   const getIconColorClass = (item: NavItem, active: boolean) => {
     if (!active) {
-      // Inactive icons - much brighter (85% opacity instead of 70%)
-      return 'text-white/85';
+      // Inactive icons - bright and clearly visible against dark background
+      return 'text-white/90';
     }
 
+    // Active icons - solid, high-contrast colors
     switch (item.id) {
       case 'browse':
         return 'text-white';
       case 'likes':
       case 'liked':
-        return 'text-amber-300'; // Brighter orange
+        return 'text-orange-400'; // Bright orange for flames/likes
       case 'messages':
-        return 'text-cyan-300'; // Brighter blue
+        return 'text-cyan-400'; // Bright cyan for messages
       case 'listings':
         return 'text-white';
       case 'profile':
         return 'text-white';
       case 'hire':
       case 'services':
-        return 'text-emerald-300'; // Brighter green
+        return 'text-emerald-400'; // Bright green for services
       case 'filter':
-        return 'text-violet-300'; // Brighter purple
+        return 'text-violet-400'; // Bright purple for filter
       default:
         return 'text-white';
     }
   };
 
-  // Get indicator dot color for active state
+  // HIGH CONTRAST: Clear indicator dot colors
   const getIndicatorColorClass = (item: NavItem) => {
     switch (item.id) {
       case 'browse':
-        return 'bg-red-400';
+        return 'bg-white';
       case 'likes':
       case 'liked':
         return 'bg-orange-400';
       case 'messages':
-        return 'bg-blue-400';
+        return 'bg-cyan-400';
       case 'listings':
-        return 'bg-red-400';
+        return 'bg-white';
       case 'profile':
-        return 'bg-red-400';
+        return 'bg-white';
       case 'hire':
       case 'services':
         return 'bg-emerald-400';
       case 'filter':
-        return 'bg-purple-400';
+        return 'bg-violet-400';
       default:
-        return 'bg-red-400';
+        return 'bg-white';
     }
   };
 
@@ -236,29 +219,36 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
           const active = isActive(item);
 
           return (
-            <motion.button
+            <button
               key={item.id}
               onClick={(e) => handleNavClick(e, item)}
-              // INSTANT NAVIGATION: Prefetch on earliest possible events
               onPointerDown={(e) => { e.stopPropagation(); if (item.path) prefetchRoute(item.path); }}
               onTouchStart={(e) => { e.stopPropagation(); if (item.path) prefetchRoute(item.path); }}
-              onMouseEnter={(e) => { e.stopPropagation(); if (item.path) prefetchRoute(item.path); }}
-              onFocus={(e) => { e.stopPropagation(); if (item.path) prefetchRoute(item.path); }}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.82, transition: { type: 'spring', stiffness: 600, damping: 20, mass: 0.5 } }}
-              // EXPANDED TOUCH TARGETS: Each button has generous hit area
-              className="relative transition-colors duration-75 select-none touch-manipulation flex items-center justify-center rounded-2xl"
+              className={cn(
+                'relative flex items-center justify-center rounded-xl',
+                'transition-all duration-100 ease-out',
+                'active:scale-[0.9]',
+                'touch-manipulation',
+                '-webkit-tap-highlight-color-transparent'
+              )}
               style={{
-                // Ensure minimum touch target size
                 minWidth: TOUCH_TARGET_SIZE,
                 minHeight: TOUCH_TARGET_SIZE,
-                padding: NAV_BUTTON_PADDING,
-                // GPU acceleration
-                transform: 'translateZ(0)',
-                willChange: 'transform',
+                padding: 12,
               }}
             >
-              {/* Notification Badge - Shows unread count number */}
+              {/* HIGH CONTRAST: Visible indicator dot for active state */}
+              {active && (
+                <motion.div
+                  layoutId="activeIndicator"
+                  className={cn(
+                    'absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full',
+                    getIndicatorColorClass(item)
+                  )}
+                />
+              )}
+
+              {/* Notification Badge */}
               <AnimatePresence>
                 {item.badge && item.badge > 0 && (
                   <motion.span
@@ -266,8 +256,8 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
                     animate={{ scale: 1 }}
                     exit={{ scale: 0 }}
                     className={cn(
-                      "absolute -top-0.5 -right-0.5 rounded-full min-w-[20px] h-[20px] flex items-center justify-center shadow-lg ring-2 ring-background text-[11px] font-bold text-white px-1",
-                      item.id === 'messages' ? 'bg-blue-500' : 'bg-orange-500'
+                      "absolute -top-0.5 -right-0.5 rounded-full min-w-[20px] h-[20px] flex items-center justify-center text-[11px] font-bold text-white px-1",
+                      item.id === 'messages' ? 'bg-cyan-500' : 'bg-orange-500'
                     )}
                   >
                     {item.badge > 99 ? '99+' : item.badge}
@@ -277,18 +267,24 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
 
               <Icon
                 className={cn(
-                  'transition-all duration-75',
-                  getIconColorClass(item, active),
-                  active && 'fill-current'
+                  'transition-colors duration-150',
+                  getIconColorClass(item, active)
                 )}
                 style={{
-                  // Use constant for icon size - slightly larger for center items
-                  width: item.isCenter ? ICON_SIZE + 2 : ICON_SIZE,
-                  height: item.isCenter ? ICON_SIZE + 2 : ICON_SIZE,
+                  width: ICON_SIZE,
+                  height: ICON_SIZE,
                 }}
                 strokeWidth={active ? 2.5 : 2}
               />
-            </motion.button>
+              
+              {/* HIGH CONTRAST: Label below icon */}
+              <span className={cn(
+                'absolute -bottom-5 text-[10px] font-medium whitespace-nowrap transition-colors duration-150',
+                active ? 'text-white' : 'text-white/60'
+              )}>
+                {item.label}
+              </span>
+            </button>
           );
         })}
       </div>

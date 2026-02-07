@@ -73,18 +73,44 @@ const getActiveCategoryInfo = (filters?: ListingFilters, storeCategory?: string 
     // Safety: Handle null/undefined filters
     if (!filters) return categoryConfig.property;
 
+    // Check for activeUiCategory first (original UI category before DB mapping)
+    const activeUiCategory = (filters as any).activeUiCategory;
+    if (activeUiCategory && typeof activeUiCategory === 'string' && categoryConfig[activeUiCategory]) {
+      return categoryConfig[activeUiCategory];
+    }
+
     // Check for activeCategory string first (from AdvancedFilters)
     const activeCategory = (filters as any).activeCategory;
     if (activeCategory && typeof activeCategory === 'string' && categoryConfig[activeCategory]) {
       return categoryConfig[activeCategory];
     }
 
-    // Check for categories array (from quick filters - may be DB-mapped names)
+    // Check for categories array (from quick filters) - may be DB-mapped names
     const categories = filters?.categories;
     if (Array.isArray(categories) && categories.length > 0) {
       const cat = categories[0];
-      if (typeof cat === 'string' && categoryConfig[cat]) {
-        return categoryConfig[cat];
+      if (typeof cat === 'string') {
+        // Direct match
+        if (categoryConfig[cat]) {
+          return categoryConfig[cat];
+        }
+        // Handle DB-mapped names back to UI names
+        if (cat === 'worker' && categoryConfig['services']) {
+          return categoryConfig['services'];
+        }
+        // Handle common variations/misspellings
+        const normalized = cat.toLowerCase().replace(/s$/, ''); // Remove trailing 's'
+        if (categoryConfig[normalized]) {
+          return categoryConfig[normalized];
+        }
+        // Map 'services' -> 'worker' (common mapping)
+        if (cat === 'services' && categoryConfig['worker']) {
+          return categoryConfig['worker'];
+        }
+        // Map 'moto' <-> 'motorcycle'
+        if ((cat === 'moto' || cat === 'motorcycle') && categoryConfig['motorcycle']) {
+          return categoryConfig['motorcycle'];
+        }
       }
     }
 
@@ -94,7 +120,7 @@ const getActiveCategoryInfo = (filters?: ListingFilters, storeCategory?: string 
       return categoryConfig[category];
     }
 
-    // Default to properties
+    // Default to properties (no category filter selected)
     return categoryConfig.property;
   } catch (error) {
     logger.error('[TinderentSwipeContainer] Error in getActiveCategoryInfo:', error);
@@ -1145,8 +1171,50 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   if (currentIndex > 0 && currentIndex >= deckQueue.length) {
     const categoryInfo = getActiveCategoryInfo(filters, storeActiveCategory);
     const categoryLabel = String(categoryInfo?.plural || 'Listings');
+    const categoryLower = categoryLabel.toLowerCase();
     const CategoryIcon = categoryInfo?.icon || Home;
     const iconColor = categoryInfo?.color || 'text-primary';
+    
+    // Generate specific message based on category
+    const getCaughtUpMessage = () => {
+      if (categoryLower === 'properties') {
+        return {
+          title: 'All Caught Up!',
+          description: "You've seen all available properties. Check back later for new opportunities!",
+          cta: 'Discover More Properties'
+        };
+      }
+      if (categoryLower === 'motorcycles') {
+        return {
+          title: 'All Caught Up!',
+          description: "You've seen all motorcycles. Check back later for new listings!",
+          cta: 'Discover More Motorcycles'
+        };
+      }
+      if (categoryLower === 'bicycles') {
+        return {
+          title: 'All Caught Up!',
+          description: "You've seen all bicycles. New bikes are added regularly!",
+          cta: 'Discover More Bicycles'
+        };
+      }
+      if (categoryLower === 'workers' || categoryLower === 'services') {
+        return {
+          title: 'All Caught Up!',
+          description: "You've seen all available workers. Check back later for new service providers!",
+          cta: 'Discover More Workers'
+        };
+      }
+      // Generic fallback
+      return {
+        title: 'All Caught Up!',
+        description: `You've seen all available ${categoryLower}. Check back later for new ${categoryLower}!`,
+        cta: `Discover More ${categoryLabel}`
+      };
+    };
+
+    const { title, description, cta } = getCaughtUpMessage();
+    
     return (
       <div className="relative w-full h-full flex-1 flex items-center justify-center px-4">
         {/* UNIFIED animation - all elements animate together, no staggered pop-in */}
@@ -1168,9 +1236,9 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
           </div>
 
           <div className="space-y-2">
-            <h3 className="text-xl font-semibold text-foreground">All Caught Up!</h3>
+            <h3 className="text-xl font-semibold text-foreground">{title}</h3>
             <p className="text-muted-foreground text-sm max-w-xs mx-auto">
-              You've seen all available {categoryLabel.toLowerCase()}. Check back later or refresh for new listings.
+              {description}
             </p>
           </div>
           <div className="flex flex-col gap-3">
@@ -1185,10 +1253,10 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
                 ) : (
                   <RefreshCw className="w-5 h-5" />
                 )}
-                {isRefreshing ? `Scanning for ${categoryLabel}...` : 'Discover More'}
+                {isRefreshing ? `Scanning for ${categoryLabel}...` : cta}
               </Button>
             </motion.div>
-            <p className="text-xs text-muted-foreground">New {categoryLabel.toLowerCase()} are added daily</p>
+            <p className="text-xs text-muted-foreground">New {categoryLower} are added daily</p>
           </div>
         </motion.div>
       </div>
@@ -1206,7 +1274,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
         <Card className="text-center bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20 p-8">
           <div className="text-6xl mb-4">:(</div>
           <h3 className="text-xl font-bold mb-2">Oops! Something went wrong</h3>
-          <p className="text-muted-foreground mb-4">We couldn't load {categoryLabel.toLowerCase()} right now.</p>
+          <p className="text-muted-foreground mb-4">Let's try again to find some {categoryLabel.toLowerCase()}.</p>
           <Button onClick={handleRefresh} variant="outline" className="gap-2">
             <RotateCcw className="w-4 h-4" />
             Try Again
@@ -1220,8 +1288,45 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   if (deckQueue.length === 0) {
     const categoryInfo = getActiveCategoryInfo(filters, storeActiveCategory);
     const categoryLabel = String(categoryInfo?.plural || 'Listings');
+    const categoryLower = categoryLabel.toLowerCase();
     const CategoryIcon = categoryInfo?.icon || Home;
     const iconColor = categoryInfo?.color || 'text-primary';
+    
+    // Generate specific empty message based on category - Action-oriented titles
+    const getEmptyMessage = () => {
+      if (categoryLower === 'properties') {
+        return {
+          title: 'Refresh to discover more Properties',
+          description: 'New opportunities appear every day. Keep swiping!'
+        };
+      }
+      if (categoryLower === 'motorcycles') {
+        return {
+          title: 'Refresh to find more Motorcycles',
+          description: 'New bikes listed daily. Stay tuned!'
+        };
+      }
+      if (categoryLower === 'bicycles') {
+        return {
+          title: 'Refresh to discover more Bicycles',
+          description: 'Fresh rides added regularly. Keep checking!'
+        };
+      }
+      if (categoryLower === 'workers' || categoryLower === 'services') {
+        return {
+          title: 'Refresh to find more Workers',
+          description: 'New professionals join every day.'
+        };
+      }
+      // Generic fallback
+      return {
+        title: `Refresh to discover more ${categoryLabel}`,
+        description: `New ${categoryLabel.toLowerCase()} added regularly.`
+      };
+    };
+
+    const { title, description } = getEmptyMessage();
+    
     return (
       <div className="relative w-full h-full flex-1 flex items-center justify-center px-4">
         {/* UNIFIED animation - all elements animate together, no staggered pop-in */}
@@ -1243,9 +1348,9 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
           </div>
 
           <div className="space-y-2">
-            <h3 className="text-xl font-semibold text-foreground">No {categoryLabel} Found</h3>
+            <h3 className="text-xl font-semibold text-foreground">{title}</h3>
             <p className="text-muted-foreground text-sm max-w-xs mx-auto">
-              Searching for {categoryLabel.toLowerCase()} to browse. Expand your filters or check back regularly for new opportunities.
+              {description}
             </p>
           </div>
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
@@ -1267,6 +1372,12 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     );
   }
 
+  // Get current category info for the page title
+  const activeCategoryInfo = getActiveCategoryInfo(filters);
+  const activeCategoryLabel = String(activeCategoryInfo?.plural || 'Listings');
+  const ActiveCategoryIcon = activeCategoryInfo?.icon || Home;
+  const activeCategoryColor = activeCategoryInfo?.color || 'text-primary';
+
   // Main swipe view - FULL-BLEED edge-to-edge cards (no max-width constraint)
   return (
     <div
@@ -1279,6 +1390,20 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
           - Slows down during swipe animation (when swipeDirection is active)
           - Communicates "swipe marketplace" at first glance */}
       <AmbientSwipeBackground isPaused={swipeDirection !== null} />
+
+      {/* Dynamic page title - shows current category being browsed */}
+      <div className="absolute top-14 left-0 right-0 z-20 flex justify-center pointer-events-none">
+        <motion.div
+          key={activeCategoryLabel}
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+          className={`flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/10 ${activeCategoryColor}`}
+        >
+          <ActiveCategoryIcon className="w-3.5 h-3.5" />
+          <span className="text-xs font-semibold text-white/90">{activeCategoryLabel}</span>
+        </motion.div>
+      </div>
 
       <div className="relative flex-1 w-full">
         {/* NEXT CARD - Visible behind current card (Tinder-style anticipation)

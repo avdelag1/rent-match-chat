@@ -41,17 +41,20 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
 
   if (variant === 'icon') {
     return (
-      <motion.button
+      <button
         onClick={(e) => handleToggle(e)}
         disabled={isSwitching || !canSwitchMode}
         className={cn(
-          'relative flex items-center justify-center rounded-xl transition-all duration-200',
-          'hover:bg-white/10 active:scale-95',
+          'relative flex items-center justify-center rounded-xl',
+          'transition-all duration-100 ease-out',
+          'active:scale-[0.9]',
+          'hover:bg-white/10',
           'disabled:opacity-50 disabled:cursor-not-allowed',
+          'touch-manipulation',
+          '-webkit-tap-highlight-color-transparent',
           size === 'sm' ? 'h-8 w-8' : size === 'md' ? 'h-9 w-9' : 'h-10 w-10',
           className
         )}
-        whileTap={{ scale: 0.82, transition: { type: 'spring', stiffness: 600, damping: 20, mass: 0.5 } }}
         aria-label={`Switch to ${activeMode === 'client' ? 'I own' : 'I Do'} mode`}
       >
         <AnimatePresence mode="wait">
@@ -73,7 +76,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
               exit={{ opacity: 0, scale: 0.8, rotate: 180 }}
               transition={{ type: 'spring', stiffness: 500, damping: 30 }}
             >
-              {/* UPGRADED BRIGHTNESS: Brighter icon colors */}
+              {/* HIGH CONTRAST: Clear icon colors */}
               {activeMode === 'client' ? (
                 <Search className="h-4 w-4 text-orange-400" />
               ) : (
@@ -82,24 +85,27 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.button>
+      </button>
     );
   }
 
   if (variant === 'toggle') {
     return (
-      <motion.button
+      <button
         onClick={(e) => handleToggle(e)}
         disabled={isSwitching || !canSwitchMode}
         className={cn(
           'relative flex items-center gap-2 rounded-full px-3 py-1.5',
           'bg-white/5',
-          'hover:bg-white/10 transition-all duration-200',
+          'hover:bg-white/10',
+          'transition-all duration-100 ease-out',
+          'active:scale-[0.97]',
           'disabled:opacity-50 disabled:cursor-not-allowed',
+          'touch-manipulation',
+          '-webkit-tap-highlight-color-transparent',
           sizeClasses[size],
           className
         )}
-        whileTap={{ scale: 0.9, transition: { type: 'spring', stiffness: 600, damping: 20, mass: 0.5 } }}
         aria-label={`Switch to ${activeMode === 'client' ? 'I own' : 'I Do'} mode`}
       >
         <motion.div
@@ -113,10 +119,10 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
           style={{ willChange: 'left, right' }}
         />
 
-        {/* UPGRADED BRIGHTNESS: Brighter text and active state */}
+        {/* HIGH CONTRAST: Clear active state distinction */}
         <div className={cn(
           'relative z-10 flex items-center gap-1.5 px-2 py-0.5 rounded-full transition-colors duration-200',
-          activeMode === 'client' ? 'text-white font-semibold' : 'text-gray-400'
+          activeMode === 'client' ? 'text-white font-semibold' : 'text-white/60'
         )}>
           <Search className="h-3.5 w-3.5" />
           <span className="font-bold">I Do</span>
@@ -124,7 +130,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
 
         <div className={cn(
           'relative z-10 flex items-center gap-1.5 px-2 py-0.5 rounded-full transition-colors duration-200',
-          activeMode === 'owner' ? 'text-teal-300 font-semibold' : 'text-gray-400'
+          activeMode === 'owner' ? 'text-teal-400 font-semibold' : 'text-white/60'
         )}>
           <Briefcase className="h-3.5 w-3.5" />
           <span className="font-bold">I own</span>
@@ -142,24 +148,25 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.button>
+      </button>
     );
   }
 
   return (
-    <motion.button
+    <button
       onClick={(e) => handleToggle(e)}
       disabled={isSwitching || !canSwitchMode}
       className={cn(
         'relative flex items-center gap-1.5 rounded-xl px-2.5',
         'hover:bg-white/10',
-        'active:scale-[0.97] transition-all duration-200',
+        'transition-all duration-100 ease-out',
+        'active:scale-[0.95]',
         'disabled:opacity-50 disabled:cursor-not-allowed',
+        'touch-manipulation',
+        '-webkit-tap-highlight-color-transparent',
         sizeClasses[size],
         className
       )}
-      whileTap={{ scale: 0.85, transition: { type: 'spring', stiffness: 600, damping: 20, mass: 0.5 } }}
-      transition={{ type: 'spring', stiffness: 500, damping: 30, mass: 0.5 }}
       aria-label={`Switch to ${activeMode === 'client' ? 'I own' : 'Client'} mode`}
     >
       <AnimatePresence mode="wait">
@@ -171,25 +178,25 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
           transition={{ type: 'spring', stiffness: 500, damping: 30 }}
           className="flex items-center gap-1.5"
         >
-          {/* UPGRADED BRIGHTNESS: Brighter text and icons with glow effect */}
+          {/* HIGH CONTRAST: Clear colors without glow effects */}
           {isSwitching ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin text-white" />
           ) : activeMode === 'client' ? (
             <>
-              <Search className="h-3.5 w-3.5 text-orange-400 drop-shadow-[0_0_8px_rgba(251,146,60,0.5)]" />
-              <span className="font-bold text-orange-400 drop-shadow-[0_0_8px_rgba(251,146,60,0.5)]">Client</span>
+              <Search className="h-3.5 w-3.5 text-orange-400" />
+              <span className="font-bold text-orange-400">Client</span>
             </>
           ) : (
             <>
-              <Briefcase className="h-3.5 w-3.5 text-teal-400 drop-shadow-[0_0_8px_rgba(45,212,191,0.5)]" />
-              <span className="font-bold text-teal-400 drop-shadow-[0_0_8px_rgba(45,212,191,0.5)]">I own</span>
+              <Briefcase className="h-3.5 w-3.5 text-teal-400" />
+              <span className="font-bold text-teal-400">I own</span>
             </>
           )}
         </motion.div>
       </AnimatePresence>
 
       <ArrowLeftRight className="h-3 w-3 text-gray-400" />
-    </motion.button>
+    </button>
   );
 }
 
