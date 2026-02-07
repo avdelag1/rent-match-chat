@@ -89,6 +89,8 @@ import { MessagingDashboard } from "./pages/MessagingDashboard";
 import NotificationsPage from "./pages/NotificationsPage";
 import SubscriptionPackagesPage from "./pages/SubscriptionPackagesPage";
 import RadioPlayer from "./pages/RadioPlayer";
+import RadioPlaylists from "./pages/RadioPlaylists";
+import RadioFavorites from "./pages/RadioFavorites";
 
 // Rare pages - lazy loaded (payment, camera, legal, public previews)
 const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
@@ -226,6 +228,8 @@ const App = () => (
                       <Route path="/notifications" element={<NotificationsPage />} />
                       <Route path="/subscription-packages" element={<SubscriptionPackagesPage />} />
                       <Route path="/radio" element={<RadioPlayer />} />
+                      <Route path="/radio/playlists" element={<RadioPlaylists />} />
+                      <Route path="/radio/favorites" element={<RadioFavorites />} />
                     </Route>
 
                     {/* Payment routes - outside layout */}

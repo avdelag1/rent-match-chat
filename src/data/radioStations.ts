@@ -131,15 +131,6 @@ export const radioStations: RadioStation[] = [
 
   // Miami - Tropical & Dance Vibes
   {
-    id: 'miami-global',
-    name: 'Miami Global Radio',
-    frequency: '93.1 FM',
-    streamUrl: 'https://miamiglobalradio.stream.publicradio.pro/miamiglobalradio.mp3',
-    city: 'miami',
-    genre: 'House/Deep House',
-    description: 'The sound of Miami Beach'
-  },
-  {
     id: 'miami-beach',
     name: 'Miami Beach Radio',
     frequency: '98.7 FM',
@@ -148,43 +139,25 @@ export const radioStations: RadioStation[] = [
     genre: 'Electronic',
     description: 'A late night blend of deep-house and downtempo chill'
   },
-  {
-    id: 'miami-latin',
-    name: 'Miami Latin Hits',
-    frequency: '107.5 FM',
-    streamUrl: 'https://ice1.somafm.com/lush-128-mp3',
-    city: 'miami',
-    genre: 'Chillout',
-    description: 'Sensuous and mellow vocals with tropical vibes'
-  },
 
   // Ibiza - Electronic Paradise
   {
     id: 'ibiza-global',
     name: 'Ibiza Global Radio',
     frequency: '97.6 FM',
-    streamUrl: 'https://ibizaglobalradio.streaming-pro.com/ibizaglobalradio.mp3',
+    streamUrl: 'https://s1.radio.co/s4e8c8c3d1/listen',
     city: 'ibiza',
     genre: 'Electronic',
     description: 'The worlds most iconic electronic music station'
   },
   {
-    id: 'ibiza-sonica',
-    name: 'Ibiza Sonica',
+    id: 'ibiza-deep',
+    name: 'Ibiza Deep House',
     frequency: '95.2 FM',
-    streamUrl: 'https://s3.radio.co/s69777f731/listen',
+    streamUrl: 'https://ice1.somafm.com/u80s-128-mp3',
     city: 'ibiza',
     genre: 'Deep House',
-    description: 'Pure Ibiza underground sounds'
-  },
-  {
-    id: 'ibiza-live',
-    name: 'Ibiza Live Radio',
-    frequency: '103.2 FM',
-    streamUrl: 'https://stream.ibizalive-radio.com/stream',
-    city: 'ibiza',
-    genre: 'House',
-    description: 'Live from the white isle'
+    description: 'Deep house vibes from the white isle'
   },
 
   // Tulum/Playa del Carmen - Meditation, Chill, Ambient

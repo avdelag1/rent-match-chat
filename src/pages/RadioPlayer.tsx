@@ -54,7 +54,7 @@ export default function RadioPlayer() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black flex items-center justify-center">
+      <div className="fixed inset-0 bg-gradient-to-br from-gray-900 to-black flex items-center justify-center -mt-12">
         <div className="text-white text-center">
           <div className="text-2xl font-bold mb-4">Loading Radio...</div>
           <div className="animate-pulse">🎵</div>
@@ -65,7 +65,7 @@ export default function RadioPlayer() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black flex items-center justify-center p-6">
+      <div className="fixed inset-0 bg-gradient-to-br from-gray-900 to-black flex items-center justify-center p-6 -mt-12">
         <div className="text-white text-center max-w-md">
           <div className="text-2xl font-bold mb-4 text-red-500">Error</div>
           <div className="mb-6">{error}</div>
@@ -78,12 +78,12 @@ export default function RadioPlayer() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="fixed inset-0 overflow-hidden bg-gradient-to-br from-gray-900 to-black -mt-12">
       {/* Back Button */}
       <motion.button
         whileTap={{ scale: 0.95 }}
         onClick={() => navigate(-1)}
-        className="fixed top-20 left-4 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg"
+        className="fixed top-14 left-4 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg"
         aria-label="Go back"
       >
         <ArrowLeft className="w-5 h-5" />
@@ -93,7 +93,7 @@ export default function RadioPlayer() {
       <motion.button
         whileTap={{ scale: 0.95 }}
         onClick={() => setShowPlaylistDialog(true)}
-        className="fixed top-20 right-4 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg"
+        className="fixed top-14 right-4 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg"
         aria-label="Open playlists"
       >
         <List className="w-5 h-5" />
@@ -103,7 +103,7 @@ export default function RadioPlayer() {
       <motion.button
         whileTap={{ scale: 0.95 }}
         onClick={() => setShowSkinSelector(!showSkinSelector)}
-        className="fixed top-20 right-16 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg"
+        className="fixed top-14 right-16 z-50 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white shadow-lg"
         aria-label="Change skin"
       >
         <span className="text-lg">🎨</span>
@@ -116,7 +116,7 @@ export default function RadioPlayer() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-32 right-4 z-50 bg-white rounded-lg shadow-2xl p-4 min-w-[150px]"
+            className="fixed top-26 right-4 z-50 bg-white rounded-lg shadow-2xl p-4 min-w-[150px]"
           >
             <div className="text-sm font-semibold mb-2 text-gray-900">Select Skin</div>
             <div className="space-y-2">
@@ -148,6 +148,7 @@ export default function RadioPlayer() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            className="w-full h-full"
           >
             <ModernSkin
               station={state.currentStation}
@@ -174,6 +175,7 @@ export default function RadioPlayer() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            className="w-full h-full"
           >
             <VinylSkin
               station={state.currentStation}
@@ -199,6 +201,7 @@ export default function RadioPlayer() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            className="w-full h-full"
           >
             <RetroSkin
               station={state.currentStation}
