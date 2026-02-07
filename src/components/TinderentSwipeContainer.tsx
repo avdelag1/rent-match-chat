@@ -22,6 +22,7 @@ import { useRecordProfileView } from '@/hooks/useProfileRecycling';
 import { usePrefetchImages } from '@/hooks/usePrefetchImages';
 import { useSwipePrefetch, usePrefetchManager } from '@/hooks/usePrefetchManager';
 import { useSwipeDeckStore, persistDeckToSession, getDeckFromSession } from '@/state/swipeDeckStore';
+import { useFilterStore } from '@/state/filterStore';
 import { useSwipeDismissal } from '@/hooks/useSwipeDismissal';
 import { useSwipeSounds } from '@/hooks/useSwipeSounds';
 import { shallow } from 'zustand/shallow';
@@ -61,8 +62,14 @@ const categoryConfig: Record<string, { icon: React.ComponentType<{ className?: s
 };
 
 // Helper to get the active category display info from filters
-const getActiveCategoryInfo = (filters?: ListingFilters) => {
+// Accepts optional storeCategory (directly from Zustand) for guaranteed sync with quick filters
+const getActiveCategoryInfo = (filters?: ListingFilters, storeCategory?: string | null) => {
   try {
+    // PRIORITY 1: Direct store category (most reliable - always in sync with quick filter UI)
+    if (storeCategory && typeof storeCategory === 'string' && categoryConfig[storeCategory]) {
+      return categoryConfig[storeCategory];
+    }
+
     // Safety: Handle null/undefined filters
     if (!filters) return categoryConfig.property;
 
@@ -248,6 +255,11 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   const isClientHydrated = useSwipeDeckStore((state) => state.isClientHydrated);
   const isClientReady = useSwipeDeckStore((state) => state.isClientReady);
   const markClientReady = useSwipeDeckStore((state) => state.markClientReady);
+
+  // Read active category directly from filter store for guaranteed sync with quick filter UI
+  // This ensures empty state messages update instantly when user clicks a quick filter
+  const storeCategories = useFilterStore((state) => state.categories);
+  const storeActiveCategory = storeCategories.length > 0 ? storeCategories[0] : null;
 
   // Local state for immediate UI updates - drives the swipe animation
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -923,7 +935,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
 
     try {
       await refetchSmart();
-      const refreshCategoryInfo = getActiveCategoryInfo(filters);
+      const refreshCategoryInfo = getActiveCategoryInfo(filters, storeActiveCategory);
       const refreshLabel = String(refreshCategoryInfo?.plural || 'Listings').toLowerCase();
       toast({
         title: `${String(refreshCategoryInfo?.plural || 'Listings')} Refreshed`,
@@ -1157,7 +1169,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   // This must come BEFORE error check to prevent errors from showing when deck exhausted
   // Check if currentIndex > 0 (user has swiped at least once) regardless of deck state
   if (currentIndex > 0 && currentIndex >= deckQueue.length) {
-    const categoryInfo = getActiveCategoryInfo(filters);
+    const categoryInfo = getActiveCategoryInfo(filters, storeActiveCategory);
     const categoryLabel = String(categoryInfo?.plural || 'Listings');
     const categoryLower = categoryLabel.toLowerCase();
     const CategoryIcon = categoryInfo?.icon || Home;
@@ -1254,7 +1266,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   // Error state - ONLY show if we have NO cards at all (not when deck is exhausted)
   // FIX: Only show error on initial load (currentIndex === 0), never after swipe exhaustion
   if (error && currentIndex === 0 && deckQueue.length === 0) {
-    const categoryInfo = getActiveCategoryInfo(filters);
+    const categoryInfo = getActiveCategoryInfo(filters, storeActiveCategory);
     // FIX: Ensure categoryLabel is always a string, never an object
     const categoryLabel = String(categoryInfo?.plural || 'listings');
     return (
@@ -1274,7 +1286,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
 
   // Empty state - dynamic based on category (no cards fetched yet)
   if (deckQueue.length === 0) {
-    const categoryInfo = getActiveCategoryInfo(filters);
+    const categoryInfo = getActiveCategoryInfo(filters, storeActiveCategory);
     const categoryLabel = String(categoryInfo?.plural || 'Listings');
     const categoryLower = categoryLabel.toLowerCase();
     const CategoryIcon = categoryInfo?.icon || Home;
