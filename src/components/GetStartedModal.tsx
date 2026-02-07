@@ -33,7 +33,7 @@ export function GetStartedModal({ isOpen, onClose, onSelectListing, onSelectProf
     } else {
       onSelectProfile?.();
       onClose();
-      navigate('/client/profile/edit');
+      navigate('/client/profile');
     }
   }, [onSelectProfile, onClose, navigate]);
 
