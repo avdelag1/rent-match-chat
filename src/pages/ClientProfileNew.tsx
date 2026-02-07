@@ -122,6 +122,21 @@ const ClientProfileNew = () => {
             </div>
           </motion.div>
 
+          {/* Edit Profile Button - Always visible */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ ...fastSpring, delay: 0.03 }}
+          >
+            <Button
+              onClick={() => setShowEditDialog(true)}
+              className="w-full h-12 gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-semibold text-base shadow-lg"
+            >
+              <User className="w-5 h-5" />
+              Edit Profile
+            </Button>
+          </motion.div>
+
           {/* Profile Completion */}
           {completionPercent < 100 && (
             <motion.div
@@ -129,7 +144,7 @@ const ClientProfileNew = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ ...fastSpring, delay: 0.05 }}
             >
-              <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
+              <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20 cursor-pointer" onClick={() => setShowEditDialog(true)}>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
@@ -140,7 +155,7 @@ const ClientProfileNew = () => {
                   </div>
                   <Progress value={completionPercent} className="h-2" />
                   <p className="text-xs text-muted-foreground mt-2">
-                    Complete profiles get more matches!
+                    Complete profiles get more matches! Tap to edit.
                   </p>
                 </CardContent>
               </Card>

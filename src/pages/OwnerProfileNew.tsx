@@ -11,7 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useOwnerStats } from "@/hooks/useOwnerStats";
 import { useOwnerProfile } from "@/hooks/useOwnerProfile";
 import {
-  LogOut, Building2,
+  LogOut, Building2, User,
   Camera, ArrowLeft, Crown, Settings as SettingsIcon,
   Flame, Palette, Heart, Scale, FileText
 } from "lucide-react";
@@ -99,6 +99,21 @@ const OwnerProfileNew = () => {
               </h1>
               <p className="text-sm text-muted-foreground">{user?.email}</p>
             </div>
+          </motion.div>
+
+          {/* Edit Profile Button - Always visible */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ ...fastSpring, delay: 0.03 }}
+          >
+            <Button
+              onClick={() => setShowEditDialog(true)}
+              className="w-full h-12 gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-semibold text-base shadow-lg"
+            >
+              <User className="w-5 h-5" />
+              Edit Profile
+            </Button>
           </motion.div>
 
           {/* Share Profile Section - Earn Free Messages */}
