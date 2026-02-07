@@ -1262,7 +1262,7 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
         <Card className="text-center bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20 p-8">
           <div className="text-6xl mb-4">:(</div>
           <h3 className="text-xl font-bold mb-2">Oops! Something went wrong</h3>
-          <p className="text-muted-foreground mb-4">We couldn't load {categoryLabel.toLowerCase()} right now.</p>
+          <p className="text-muted-foreground mb-4">Let's try again to find some {categoryLabel.toLowerCase()}.</p>
           <Button onClick={handleRefresh} variant="outline" className="gap-2">
             <RotateCcw className="w-4 h-4" />
             Try Again
@@ -1280,36 +1280,36 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     const CategoryIcon = categoryInfo?.icon || Home;
     const iconColor = categoryInfo?.color || 'text-primary';
     
-    // Generate specific empty message based on category
+    // Generate specific empty message based on category - Action-oriented titles
     const getEmptyMessage = () => {
       if (categoryLower === 'properties') {
         return {
-          title: 'No Properties Found',
-          description: 'Try adjusting your filters or check back regularly for new opportunities.'
+          title: 'Refresh to discover more Properties',
+          description: 'New opportunities appear every day. Keep swiping!'
         };
       }
       if (categoryLower === 'motorcycles') {
         return {
-          title: 'No Motorcycles Found',
-          description: 'No motorcycles match your criteria. Try adjusting your filters or check back later.'
+          title: 'Refresh to find more Motorcycles',
+          description: 'New bikes listed daily. Stay tuned!'
         };
       }
       if (categoryLower === 'bicycles') {
         return {
-          title: 'No Bicycles Available',
-          description: 'No bicycles match your criteria right now. Check back soon for new listings!'
+          title: 'Refresh to discover more Bicycles',
+          description: 'Fresh rides added regularly. Keep checking!'
         };
       }
       if (categoryLower === 'workers' || categoryLower === 'services') {
         return {
-          title: 'No Workers Found',
-          description: 'No service providers match your criteria. Try different filters or check back later.'
+          title: 'Refresh to find more Workers',
+          description: 'New professionals join every day.'
         };
       }
       // Generic fallback
       return {
-        title: `No ${categoryLabel} Found`,
-        description: `No ${categoryLower} match your criteria. Try adjusting your filters or refresh to discover new ${categoryLower}.`
+        title: `Refresh to discover more ${categoryLabel}`,
+        description: `New ${categoryLabel.toLowerCase()} added regularly.`
       };
     };
 
