@@ -79,6 +79,7 @@ import OwnerBicycleClientDiscovery from "./pages/OwnerBicycleClientDiscovery";
 import OwnerViewClientProfile from "./pages/OwnerViewClientProfile";
 import OwnerFiltersExplore from "./pages/OwnerFiltersExplore";
 import OwnerLawyerServices from "./pages/OwnerLawyerServices";
+import OwnerDashboardNew from "./pages/OwnerDashboardNew";
 
 // Filter pages - direct imports for instant navigation
 import ClientFilters from "./pages/ClientFilters";

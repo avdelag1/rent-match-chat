@@ -15,7 +15,7 @@ import { useStartConversation } from '@/hooks/useConversations';
 import { toast as sonnerToast } from 'sonner';
 import { 
   Search, RefreshCw, MessageCircle, Heart, User, 
-  MapPin, DollarSign, Home, DirectionsCar, PedalBike 
+  MapPin, DollarSign, Home, Car, Bike 
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -100,8 +100,8 @@ function ClientCard({
   // Get listing type icon
   const getListingTypeIcon = (type: string | null) => {
     switch (type) {
-      case 'moto': return <DirectionsCar className="w-3 h-3" />;
-      case 'bicycle': return <PedalBike className="w-3 h-3" />;
+      case 'moto': return <Car className="w-3 h-3" />;
+      case 'bicycle': return <Bike className="w-3 h-3" />;
       default: return <Home className="w-3 h-3" />;
     }
   };
