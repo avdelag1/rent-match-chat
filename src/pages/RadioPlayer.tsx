@@ -168,7 +168,7 @@ export default function RadioPlayer() {
         </div>
 
         {/* Playback Controls */}
-        <div className="flex items-center justify-center gap-4 mb-8">
+        <div className="flex items-center justify-center gap-4 mb-10">
           <button onClick={() => changeStation('prev')} className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center">
             <SkipBack className="w-5 h-5" />
           </button>
