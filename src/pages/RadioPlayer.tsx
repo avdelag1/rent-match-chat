@@ -148,7 +148,7 @@ export default function RadioPlayer() {
       </div>
 
       {/* Bottom Controls */}
-      <div className="px-4 pb-4">
+      <div className="px-4 pb-2">
         {/* Volume Slider - ONE only */}
         <div className="flex items-center gap-3 mb-4">
           <Volume2 className="w-4 h-4 text-white/40" />
@@ -187,7 +187,7 @@ export default function RadioPlayer() {
         </div>
 
         {/* Bottom Icons - Navigation Layer */}
-        <div className="flex items-center justify-center gap-8">
+        <div className="flex items-center justify-center gap-6">
           <button className="flex flex-col items-center gap-1">
             <Heart className={`w-4 h-4 ${state.currentStation && state.favorites.includes(state.currentStation.id) ? 'text-white' : 'text-white/30'}`}
               fill={state.currentStation && state.favorites.includes(state.currentStation.id) ? "currentColor" : "none"} />
