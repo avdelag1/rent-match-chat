@@ -458,6 +458,10 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
     };
   }, [appliedFilters, categories, listingType, clientGender, clientType, mapCategoryToDatabase, activeUiCategory]);
 
+  // Check if we're on a discovery page where filters should be shown
+  const isOnDiscoveryPage = (userRole === 'client' && location.pathname === '/client/dashboard') ||
+                            (userRole === 'owner' && location.pathname === '/owner/dashboard');
+
   // FIX: Memoize cloned children to prevent infinite re-renders
   const enhancedChildren = useMemo(() => {
     return React.Children.map(children, (child) => {
@@ -474,10 +478,6 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       return child;
     });
   }, [children, handlePropertyInsights, handleClientInsights, handleMessageClick, combinedFilters, user, isOnDiscoveryPage, setShowGetStarted]);
-
-  // Check if we're on a discovery page where filters should be shown
-  const isOnDiscoveryPage = (userRole === 'client' && location.pathname === '/client/dashboard') ||
-                            (userRole === 'owner' && location.pathname === '/owner/dashboard');
 
   // PERF FIX: Detect camera routes to hide TopBar/BottomNav (fullscreen camera UX)
   // Camera routes are now INSIDE layout to prevent dashboard remount on navigate back
