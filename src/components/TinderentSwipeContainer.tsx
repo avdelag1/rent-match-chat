@@ -76,8 +76,24 @@ const getActiveCategoryInfo = (filters?: ListingFilters) => {
     const categories = filters?.categories;
     if (Array.isArray(categories) && categories.length > 0) {
       const cat = categories[0];
-      if (typeof cat === 'string' && categoryConfig[cat]) {
-        return categoryConfig[cat];
+      if (typeof cat === 'string') {
+        // Direct match
+        if (categoryConfig[cat]) {
+          return categoryConfig[cat];
+        }
+        // Handle common variations/misspellings
+        const normalized = cat.toLowerCase().replace(/s$/, ''); // Remove trailing 's'
+        if (categoryConfig[normalized]) {
+          return categoryConfig[normalized];
+        }
+        // Map 'services' -> 'worker' (common mapping)
+        if (cat === 'services' && categoryConfig['worker']) {
+          return categoryConfig['worker'];
+        }
+        // Map 'moto' <-> 'motorcycle'
+        if ((cat === 'moto' || cat === 'motorcycle') && categoryConfig['motorcycle']) {
+          return categoryConfig['motorcycle'];
+        }
       }
     }
 
@@ -87,7 +103,7 @@ const getActiveCategoryInfo = (filters?: ListingFilters) => {
       return categoryConfig[category];
     }
 
-    // Default to properties
+    // Default to properties (no category filter selected)
     return categoryConfig.property;
   } catch (error) {
     logger.error('[TinderentSwipeContainer] Error in getActiveCategoryInfo:', error);
@@ -1158,7 +1174,9 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
           <div className="space-y-2">
             <h3 className="text-xl font-semibold text-foreground">All Caught Up!</h3>
             <p className="text-muted-foreground text-sm max-w-xs mx-auto">
-              You've seen all available {categoryLabel.toLowerCase()}. Check back later or refresh for new listings.
+              {categoryLabel.toLowerCase() === 'properties'
+                ? "You've seen all available properties. Check back later for new opportunities!"
+                : `You've seen all available ${categoryLabel.toLowerCase()}. Check back later for new ${categoryLabel.toLowerCase()}!`}
             </p>
           </div>
           <div className="flex flex-col gap-3">
@@ -1233,7 +1251,9 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
           <div className="space-y-2">
             <h3 className="text-xl font-semibold text-foreground">No {categoryLabel} Found</h3>
             <p className="text-muted-foreground text-sm max-w-xs mx-auto">
-              Searching for {categoryLabel.toLowerCase()} to browse. Expand your filters or check back regularly for new opportunities.
+              {categoryLabel.toLowerCase() === 'properties'
+                ? 'Try adjusting your filters or check back regularly for new opportunities.'
+                : `No ${categoryLabel.toLowerCase()} match your criteria. Try adjusting your filters or refresh to discover new ${categoryLabel.toLowerCase()}.`}
             </p>
           </div>
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
