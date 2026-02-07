@@ -19,6 +19,8 @@ import { PropertyListingForm } from './PropertyListingForm';
 import { WorkerListingForm, WorkerFormData } from './WorkerListingForm';
 import { validateImageFile } from '@/utils/fileValidation';
 import { uploadPhotoBatch } from '@/utils/photoUpload';
+import { useAnonymousDrafts } from '@/hooks/useAnonymousDrafts';
+import { useAuth } from '@/hooks/useAuth';
 
 interface EditingListing {
   id?: string;
@@ -46,6 +48,8 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const { saveListingDraft } = useAnonymousDrafts();
 
   // Get max photos based on category
   const getMaxPhotos = () => {
@@ -335,6 +339,33 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
         toast({ title: "Invalid Title", description: titleError, variant: "destructive" });
         return;
       }
+    }
+
+    // Check if user is authenticated
+    if (!user) {
+      // Save as anonymous draft
+      saveListingDraft(selectedCategory, {
+        ...formData,
+        images: images,
+        mode: selectedMode,
+        latitude: location.lat,
+        longitude: location.lng,
+      });
+      
+      // Store pending action
+      sessionStorage.setItem('pending_auth_action', JSON.stringify({
+        action: 'save_listing',
+        category: selectedCategory,
+        timestamp: Date.now(),
+      }));
+      
+      toast({
+        title: "Draft Saved!",
+        description: "Create an account to publish your listing.",
+        duration: 5000,
+      });
+      handleClose();
+      return;
     }
 
     createListingMutation.mutate();
