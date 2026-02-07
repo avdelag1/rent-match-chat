@@ -168,7 +168,7 @@ export default function RadioPlayer() {
         </div>
 
         {/* Playback Controls */}
-        <div className="flex items-center justify-center gap-4 mb-3">
+        <div className="flex items-center justify-center gap-4 mb-6">
           <button onClick={() => changeStation('prev')} className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center">
             <SkipBack className="w-5 h-5" />
           </button>
@@ -186,7 +186,7 @@ export default function RadioPlayer() {
           </button>
         </div>
 
-        {/* Bottom Icons */}
+        {/* Bottom Icons - Navigation Layer */}
         <div className="flex items-center justify-center gap-8">
           <button className="flex flex-col items-center gap-1">
             <Heart className={`w-4 h-4 ${state.currentStation && state.favorites.includes(state.currentStation.id) ? 'text-white' : 'text-white/30'}`}
