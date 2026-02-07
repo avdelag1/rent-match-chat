@@ -136,12 +136,7 @@ export function useAutomaticUpdates() {
     if (info.available) {
       // Invalidate all React Query caches
       queryClient.clear();
-
-      toast({
-        title: 'New Version Available!',
-        description: `Version ${APP_VERSION} is ready. Tap to update.`,
-        duration: 10000,
-      });
+      // UpdateNotification component handles the visual banner - no toast needed
     }
   }, [queryClient]);
 
@@ -191,17 +186,11 @@ export function useAutomaticUpdates() {
           if (newWorker) {
             newWorker.addEventListener('statechange', () => {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                // New update available
+                // New update available - UpdateNotification component handles the UI
                 setUpdateInfo({
                   available: true,
                   version: APP_VERSION,
                   needsRefresh: true,
-                });
-                
-                toast({
-                  title: 'Update Ready!',
-                  description: 'A new version is available. Tap to restart.',
-                  duration: 10000,
                 });
               }
             });

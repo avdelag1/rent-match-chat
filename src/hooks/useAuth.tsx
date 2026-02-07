@@ -265,7 +265,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (data.user && !data.user.email_confirmed_at) {
         toast({
-          title: "Welcome to Zwipes!",
+          title: "Check Your Email",
           description: "Please check your email to verify your account.",
         });
         return { error: null };
@@ -296,7 +296,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await new Promise(resolve => setTimeout(resolve, 200));
 
         toast({
-          title: "Welcome to Zwipes!",
+          title: "Account Created!",
           description: "Loading your dashboard...",
         });
 
