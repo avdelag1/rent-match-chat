@@ -710,7 +710,7 @@ const ClientSwipeContainerComponent = ({
   // "All Caught Up" - finished swiping through all cards
   if (isDeckFinished) {
     return (
-      <div className="relative w-full h-full flex-1 flex items-center justify-center px-4">
+      <div className="relative w-full h-full flex-1 flex items-center justify-center px-4 bg-black">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -720,13 +720,13 @@ const ClientSwipeContainerComponent = ({
           {/* RADAR SEARCH EFFECT - Premium futuristic scanning animation */}
           <RadarSearchEffect
             size={100}
-            color="hsl(var(--primary))"
+            color="#8B5CF6"
             isActive={isRefreshing}
           />
 
           <div className="space-y-2">
-            <h3 className="text-xl font-semibold text-foreground">All Caught Up!</h3>
-            <p className="text-muted-foreground text-sm max-w-xs mx-auto">
+            <h3 className="text-xl font-semibold text-white">All Caught Up!</h3>
+            <p className="text-white/50 text-sm max-w-xs mx-auto">
               You've seen all available {labels.plural.toLowerCase()}. Check back later or refresh for new listings.
             </p>
           </div>
@@ -735,7 +735,7 @@ const ClientSwipeContainerComponent = ({
               <Button
                 onClick={handleRefresh}
                 disabled={isRefreshing}
-                className="gap-2 rounded-full px-8 py-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg text-base"
+                className="gap-2 rounded-full px-8 py-6 bg-white text-black hover:bg-white/90 shadow-lg text-base font-semibold"
               >
                 {isRefreshing ? (
                   <RadarSearchIcon size={20} isActive={true} />
@@ -745,7 +745,7 @@ const ClientSwipeContainerComponent = ({
                 {String(isRefreshing ? `Scanning for ${labels.plural}...` : 'Discover More')}
               </Button>
             </motion.div>
-            <p className="text-xs text-muted-foreground">New {labels.plural.toLowerCase()} are added daily</p>
+            <p className="text-xs text-white/40">New {labels.plural.toLowerCase()} are added daily</p>
           </div>
         </motion.div>
       </div>
@@ -755,14 +755,14 @@ const ClientSwipeContainerComponent = ({
   // Error state - ONLY show if we have NO cards at all (not when deck is exhausted)
   if (showInitialError) {
     return (
-      <div className="relative w-full h-full flex-1 flex items-center justify-center">
-        <div className="text-center bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20 rounded-xl p-8">
+      <div className="relative w-full h-full flex-1 flex items-center justify-center bg-black">
+        <div className="text-center bg-white/5 border border-white/10 rounded-xl p-8">
           <div className="text-6xl mb-4">😞</div>
-          <h3 className="text-xl font-bold mb-2">Error</h3>
+          <h3 className="text-xl font-bold text-white mb-2">Error</h3>
           <Button
             onClick={handleRefresh}
             variant="outline"
-            className="gap-2"
+            className="gap-2 border-white/20 text-white"
             size="lg"
           >
             <RefreshCw className="w-4 h-4" />
@@ -776,7 +776,7 @@ const ClientSwipeContainerComponent = ({
   // Empty state (no cards fetched yet)
   if (showEmptyState || !topCard) {
     return (
-      <div className="relative w-full h-full flex-1 flex items-center justify-center px-4">
+      <div className="relative w-full h-full flex-1 flex items-center justify-center px-4 bg-black">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -786,13 +786,13 @@ const ClientSwipeContainerComponent = ({
           {/* RADAR SEARCH EFFECT - Calm futuristic scanning animation */}
           <RadarSearchEffect
             size={100}
-            color="hsl(var(--primary))"
+            color="#8B5CF6"
             isActive={isRefreshing}
           />
 
           <div className="space-y-2">
-            <h3 className="text-xl font-semibold text-foreground">No {labels.plural} Found</h3>
-            <p className="text-muted-foreground text-sm max-w-xs mx-auto">
+            <h3 className="text-xl font-semibold text-white">No {labels.plural} Found</h3>
+            <p className="text-white/50 text-sm max-w-xs mx-auto">
               Try adjusting your filters or refresh to discover new {labels.plural.toLowerCase()}
             </p>
           </div>
@@ -800,7 +800,7 @@ const ClientSwipeContainerComponent = ({
             <Button
               onClick={handleRefresh}
               disabled={isRefreshing}
-              className="gap-2 rounded-full px-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg"
+              className="gap-2 rounded-full px-6 bg-white text-black hover:bg-white/90 shadow-lg font-semibold"
             >
               {isRefreshing ? (
                 <RadarSearchIcon size={18} isActive={true} />
@@ -817,7 +817,7 @@ const ClientSwipeContainerComponent = ({
 
   // Main swipe view - edge-to-edge cards with next card visible behind
   return (
-    <div className="relative w-full h-full flex-1 flex flex-col">
+    <div className="relative w-full h-full flex-1 flex flex-col bg-black">
       <div className="relative flex-1 w-full">
         {/* Next card visible behind - creates depth and anticipation */}
         {nextCard && (

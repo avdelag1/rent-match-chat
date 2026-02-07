@@ -63,7 +63,7 @@ import ClientContracts from "./pages/ClientContracts";
 import ClientLawyerServices from "./pages/ClientLawyerServices";
 
 // Owner routes - ALL direct imports for instant navigation
-import OwnerDashboardNew from "./pages/OwnerDashboardNew";
+import EnhancedOwnerDashboard from "./components/EnhancedOwnerDashboard";
 import OwnerProfile from "./pages/OwnerProfileNew";
 import OwnerSettings from "./pages/OwnerSettingsNew";
 import OwnerProperties from "./pages/OwnerProperties";
@@ -204,7 +204,7 @@ const App = () => (
                       <Route path="/client/filters" element={<ClientFilters />} />
 
                       {/* Owner routes */}
-                      <Route path="/owner/dashboard" element={<OwnerDashboardNew />} />
+                      <Route path="/owner/dashboard" element={<EnhancedOwnerDashboard />} />
                       <Route path="/owner/profile" element={<OwnerProfile />} />
                       <Route path="/owner/settings" element={<OwnerSettings />} />
                       <Route path="/owner/properties" element={<OwnerProperties />} />
