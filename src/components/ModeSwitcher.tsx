@@ -148,7 +148,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.button>
+      </button>
     );
   }
 
