@@ -66,6 +66,15 @@ const clientTypeOptions: { id: OwnerClientType; label: string }[] = [
   { id: 'buy', label: 'buying' },
 ];
 
+// Smooth instant button class - works on all devices
+const buttonClass = cn(
+  'transition-all duration-100 ease-out',
+  'active:scale-[0.96]',
+  'hover:brightness-110',
+  'touch-manipulation',
+  '-webkit-tap-highlight-color-transparent'
+);
+
 function CascadeFilterButtonComponent({ filters, onChange, userRole = 'client' }: CascadeFilterButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -84,7 +93,11 @@ function CascadeFilterButtonComponent({ filters, onChange, userRole = 'client' }
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside, { passive: true });
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
   }, []);
 
   const handleCategoryToggle = useCallback((categoryId: QuickFilterCategory) => {
@@ -125,18 +138,17 @@ function CascadeFilterButtonComponent({ filters, onChange, userRole = 'client' }
 
   return (
     <div className="relative">
-      {/* Filter Button */}
-      <motion.button
+      {/* Filter Button - instant feedback */}
+      <button
         ref={buttonRef}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          'flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-medium transition-all duration-200',
-          'border shadow-lg',
+          buttonClass,
+          'flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-medium',
+          'border',
           isOpen || hasActiveFilters
-            ? 'bg-gradient-to-r from-primary to-primary/80 text-primary-foreground border-primary shadow-primary/25'
-            : 'bg-muted/50 text-foreground border-border/50 hover:bg-muted hover:border-border'
+            ? 'bg-primary text-primary-foreground border-primary'
+            : 'bg-muted/50 text-foreground border-border/50'
         )}
       >
         <Filter className="w-4 h-4" />
@@ -146,38 +158,42 @@ function CascadeFilterButtonComponent({ filters, onChange, userRole = 'client' }
             {activeCount}
           </span>
         )}
-        <ChevronDown className={cn('w-4 h-4 transition-transform', isOpen && 'rotate-180')} />
-      </motion.button>
+        <ChevronDown className={cn('w-4 h-4 transition-transform duration-150', isOpen && 'rotate-180')} />
+      </button>
 
-      {/* Cascade Panel */}
+      {/* Cascade Panel - framer-motion for panel animations only */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
             ref={panelRef}
-            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            initial={{ opacity: 0, y: 8, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            transition={{ duration: 0.1, ease: 'easeOut' }}
-            className="absolute top-full left-0 mt-2 z-[100] w-80 bg-popover border border-border rounded-2xl shadow-2xl overflow-hidden"
+            exit={{ opacity: 0, y: 8, scale: 0.98 }}
+            transition={{ duration: 0.15, ease: 'easeOut' }}
+            className="absolute top-full left-0 mt-2 z-[100] w-80 bg-popover border border-border rounded-2xl shadow-xl overflow-hidden"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30">
               <span className="text-sm font-semibold text-foreground">Quick Filter</span>
               <div className="flex items-center gap-2">
                 {hasActiveFilters && (
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                  <button
                     onClick={handleReset}
-                    className="flex items-center gap-1 px-2 py-1 text-xs text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                    className={cn(
+                      buttonClass,
+                      'flex items-center gap-1 px-2 py-1 text-xs text-destructive hover:bg-destructive/10 rounded-lg'
+                    )}
                   >
                     <RotateCcw className="w-3 h-3" />
                     reset
-                  </motion.button>
+                  </button>
                 )}
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="p-1 hover:bg-muted rounded-lg transition-colors"
+                  className={cn(
+                    'p-1 hover:bg-muted rounded-lg transition-colors',
+                    '-webkit-tap-highlight-color-transparent'
+                  )}
                 >
                   <X className="w-4 h-4 text-muted-foreground" />
                 </button>
@@ -196,25 +212,24 @@ function CascadeFilterButtonComponent({ filters, onChange, userRole = 'client' }
                         const isActive = filters.categories.includes(category.id);
                         const isServices = category.id === 'services';
                         return (
-                          <motion.button
+                          <button
                             key={category.id}
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
                             onClick={() => handleCategoryToggle(category.id)}
                             className={cn(
-                              'flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200',
+                              buttonClass,
+                              'flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium',
                               'border',
                               isActive
                                 ? isServices
-                                  ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-emerald-500'
+                                  ? 'bg-emerald-500 text-white border-emerald-500'
                                   : 'bg-primary text-primary-foreground border-primary'
-                                : 'bg-muted/30 text-muted-foreground border-border/50 hover:bg-muted hover:border-border'
+                                : 'bg-muted/30 text-muted-foreground border-border/50'
                             )}
                           >
                             {category.icon}
                             <span>{category.label}</span>
                             {isActive && <Check className="w-3 h-3 ml-auto" />}
-                          </motion.button>
+                          </button>
                         );
                       })}
                     </div>
@@ -227,21 +242,20 @@ function CascadeFilterButtonComponent({ filters, onChange, userRole = 'client' }
                       {listingTypes.map((type) => {
                         const isActive = filters.listingType === type.id;
                         return (
-                          <motion.button
+                          <button
                             key={type.id}
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
                             onClick={() => handleListingTypeChange(type.id)}
                             className={cn(
-                              'flex-1 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200',
+                              buttonClass,
+                              'flex-1 px-3 py-2.5 rounded-xl text-sm font-medium',
                               'border',
                               isActive
-                                ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white border-orange-500'
-                                : 'bg-muted/30 text-muted-foreground border-border/50 hover:bg-muted hover:border-border'
+                                ? 'bg-orange-500 text-white border-orange-500'
+                                : 'bg-muted/30 text-muted-foreground border-border/50'
                             )}
                           >
                             {type.label}
-                          </motion.button>
+                          </button>
                         );
                       })}
                     </div>
@@ -256,22 +270,21 @@ function CascadeFilterButtonComponent({ filters, onChange, userRole = 'client' }
                       {genderOptions.map((option) => {
                         const isActive = filters.clientGender === option.id;
                         return (
-                          <motion.button
+                          <button
                             key={option.id}
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
                             onClick={() => handleGenderChange(option.id)}
                             className={cn(
-                              'flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200',
+                              buttonClass,
+                              'flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-sm font-medium',
                               'border',
                               isActive
-                                ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white border-orange-500'
-                                : 'bg-muted/30 text-muted-foreground border-border/50 hover:bg-muted hover:border-border'
+                                ? 'bg-orange-500 text-white border-orange-500'
+                                : 'bg-muted/30 text-muted-foreground border-border/50'
                             )}
                           >
                             {option.icon}
                             <span>{option.label}</span>
-                          </motion.button>
+                          </button>
                         );
                       })}
                     </div>
@@ -284,21 +297,20 @@ function CascadeFilterButtonComponent({ filters, onChange, userRole = 'client' }
                       {clientTypeOptions.map((option) => {
                         const isActive = filters.clientType === option.id;
                         return (
-                          <motion.button
+                          <button
                             key={option.id}
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
                             onClick={() => handleClientTypeChange(option.id)}
                             className={cn(
-                              'px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200',
+                              buttonClass,
+                              'px-3 py-2.5 rounded-xl text-sm font-medium',
                               'border',
                               isActive
                                 ? 'bg-primary text-primary-foreground border-primary'
-                                : 'bg-muted/30 text-muted-foreground border-border/50 hover:bg-muted hover:border-border'
+                                : 'bg-muted/30 text-muted-foreground border-border/50'
                             )}
                           >
                             {option.label}
-                          </motion.button>
+                          </button>
                         );
                       })}
                     </div>
@@ -309,14 +321,15 @@ function CascadeFilterButtonComponent({ filters, onChange, userRole = 'client' }
 
             {/* Footer */}
             <div className="px-4 py-3 border-t border-border bg-muted/30">
-              <motion.button
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.99 }}
+              <button
                 onClick={() => setIsOpen(false)}
-                className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground font-medium text-sm transition-all duration-200"
+                className={cn(
+                  buttonClass,
+                  'w-full py-2.5 rounded-xl bg-primary text-primary-foreground font-medium text-sm'
+                )}
               >
                 apply filters
-              </motion.button>
+              </button>
             </div>
           </motion.div>
         )}

@@ -219,15 +219,18 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
           const active = isActive(item);
 
           return (
-            <motion.button
+            <button
               key={item.id}
               onClick={(e) => handleNavClick(e, item)}
               onPointerDown={(e) => { e.stopPropagation(); if (item.path) prefetchRoute(item.path); }}
               onTouchStart={(e) => { e.stopPropagation(); if (item.path) prefetchRoute(item.path); }}
-              onMouseEnter={(e) => { e.stopPropagation(); if (item.path) prefetchRoute(item.path); }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.9 }}
-              className="relative flex items-center justify-center rounded-xl transition-colors duration-150"
+              className={cn(
+                'relative flex items-center justify-center rounded-xl',
+                'transition-all duration-100 ease-out',
+                'active:scale-[0.9]',
+                'touch-manipulation',
+                '-webkit-tap-highlight-color-transparent'
+              )}
               style={{
                 minWidth: TOUCH_TARGET_SIZE,
                 minHeight: TOUCH_TARGET_SIZE,
@@ -281,7 +284,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
               )}>
                 {item.label}
               </span>
-            </motion.button>
+            </button>
           );
         })}
       </div>

@@ -82,21 +82,26 @@ function TopBarComponent({
         </div>
 
         {/* Center section: Logo */}
-        <motion.div
+        <div
           className="flex items-center justify-center select-none cursor-pointer flex-shrink-0"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
           onClick={handleLogoClick}
         >
           <SwipessLogo size="xs" />
-        </motion.div>
+        </div>
 
         {/* Right section: Actions */}
         <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0 flex-1 justify-end">
           {/* HIGH CONTRAST: Solid backgrounds with clear hover states */}
           <Button
             variant="ghost"
-            className="relative h-9 sm:h-10 md:h-11 px-2 sm:px-3 md:px-4 hover:bg-white/15 rounded-xl transition-colors duration-150 flex items-center"
+            className={cn(
+              "relative h-9 sm:h-10 md:h-11 px-2 sm:px-3 md:px-4 rounded-xl transition-all duration-100 ease-out",
+              "active:scale-[0.95]",
+              "hover:bg-white/15",
+              "touch-manipulation",
+              "-webkit-tap-highlight-color-transparent",
+              "flex items-center"
+            )}
             onClick={onMessageActivationsClick}
             aria-label="Message activations"
           >
@@ -106,7 +111,14 @@ function TopBarComponent({
           <Button
             variant="ghost"
             size="icon"
-            className="relative h-9 w-9 sm:h-10 sm:w-10 md:h-11 md:w-11 hover:bg-white/15 rounded-xl transition-colors duration-150 group flex-shrink-0"
+            className={cn(
+              "relative h-9 w-9 sm:h-10 sm:w-10 md:h-11 md:w-11 rounded-xl transition-all duration-100 ease-out",
+              "active:scale-[0.95]",
+              "hover:bg-white/15",
+              "group flex-shrink-0",
+              "touch-manipulation",
+              "-webkit-tap-highlight-color-transparent"
+            )}
             onClick={() => navigate('/radio')}
             aria-label="Radio Player"
           >
@@ -116,7 +128,14 @@ function TopBarComponent({
           <Button
             variant="ghost"
             size="icon"
-            className="relative h-9 w-9 sm:h-10 sm:w-10 md:h-11 md:w-11 hover:bg-white/15 rounded-xl transition-colors duration-150 group flex-shrink-0"
+            className={cn(
+              "relative h-9 w-9 sm:h-10 sm:w-10 md:h-11 md:w-11 rounded-xl transition-all duration-100 ease-out",
+              "active:scale-[0.95]",
+              "hover:bg-white/15",
+              "group flex-shrink-0",
+              "touch-manipulation",
+              "-webkit-tap-highlight-color-transparent"
+            )}
             onClick={onNotificationsClick}
             aria-label={`Notifications${notificationCount > 0 ? ` (${notificationCount} unread)` : ''}`}
           >

@@ -70,6 +70,15 @@ function MotorcycleIcon() {
   );
 }
 
+// Smooth instant button class - works on all devices
+const smoothButtonClass = cn(
+  'transition-all duration-100 ease-out',
+  'active:scale-[0.96]',
+  'hover:brightness-110',
+  'touch-manipulation',
+  '-webkit-tap-highlight-color-transparent'
+);
+
 // Dropdown component for compact filters
 function FilterDropdown({ 
   label, 
@@ -98,7 +107,11 @@ function FilterDropdown({
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside, { passive: true });
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
   }, []);
 
   useEffect(() => {
@@ -122,11 +135,12 @@ function FilterDropdown({
           setIsOpen(!isOpen);
         }}
         className={cn(
-          'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-colors duration-150',
+          smoothButtonClass,
+          'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold',
           'border',
           isActive
             ? 'bg-orange-500 text-white border-orange-500'
-            : 'bg-white/15 text-white border-white/30 hover:bg-white/25'
+            : 'bg-white/15 text-white border-white/30'
         )}
       >
         {icon}
@@ -152,10 +166,11 @@ function FilterDropdown({
                 setIsOpen(false);
               }}
               className={cn(
-                'w-full flex items-center gap-2 px-3 py-2.5 text-xs text-left transition-colors duration-150',
+                smoothButtonClass,
+                'w-full flex items-center gap-2 px-3 py-2.5 text-xs text-left',
                 value === option.id
                   ? 'bg-orange-500 text-white'
-                  : 'text-white hover:bg-white/15'
+                  : 'text-white'
               )}
             >
               {option.icon}
@@ -245,14 +260,14 @@ function QuickFilterBarComponent({ filters, onChange, className, userRole = 'cli
               isActive={filters.clientType !== 'all' && filters.clientType !== undefined}
             />
 
-            {/* Reset button */}
-            {hasActiveFilters && (
+          {/* Reset button */}
+          {hasActiveFilters && (
               <button
                 onClick={handleReset}
                 className={cn(
+                  smoothButtonClass,
                   'flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-bold',
-                  'bg-red-500/20 text-red-400 border border-red-500/40',
-                  'hover:bg-red-500/30 transition-colors duration-150 flex-shrink-0'
+                  'bg-red-500/20 text-red-400 border border-red-500/40'
                 )}
               >
                 <RotateCcw className="w-3 h-3" />
@@ -285,13 +300,14 @@ function QuickFilterBarComponent({ filters, onChange, className, userRole = 'cli
                   key={category.id}
                   onClick={() => handleCategoryToggle(category.id)}
                   className={cn(
-                    'flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-bold transition-colors duration-150',
+                    smoothButtonClass,
+                    'flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-bold',
                     'border',
                     isActive
                       ? isServices
                         ? 'bg-emerald-500 text-white border-emerald-500'
                         : 'bg-orange-500 text-white border-orange-500'
-                      : 'bg-white/15 text-white border-white/30 hover:bg-white/25'
+                      : 'bg-white/15 text-white border-white/30'
                   )}
                 >
                   {category.icon}
@@ -318,9 +334,9 @@ function QuickFilterBarComponent({ filters, onChange, className, userRole = 'cli
             <button
               onClick={handleReset}
               className={cn(
+                smoothButtonClass,
                 'flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-bold',
-                'bg-red-500/20 text-red-400 border border-red-500/40',
-                'hover:bg-red-500/30 transition-colors duration-150 flex-shrink-0'
+                'bg-red-500/20 text-red-400 border border-red-500/40'
               )}
             >
               <RotateCcw className="w-3 h-3" />

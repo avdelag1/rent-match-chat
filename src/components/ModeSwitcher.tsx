@@ -41,17 +41,20 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
 
   if (variant === 'icon') {
     return (
-      <motion.button
+      <button
         onClick={(e) => handleToggle(e)}
         disabled={isSwitching || !canSwitchMode}
         className={cn(
-          'relative flex items-center justify-center rounded-xl transition-all duration-200',
-          'hover:bg-white/10 active:scale-95',
+          'relative flex items-center justify-center rounded-xl',
+          'transition-all duration-100 ease-out',
+          'active:scale-[0.9]',
+          'hover:bg-white/10',
           'disabled:opacity-50 disabled:cursor-not-allowed',
+          'touch-manipulation',
+          '-webkit-tap-highlight-color-transparent',
           size === 'sm' ? 'h-8 w-8' : size === 'md' ? 'h-9 w-9' : 'h-10 w-10',
           className
         )}
-        whileTap={{ scale: 0.82, transition: { type: 'spring', stiffness: 600, damping: 20, mass: 0.5 } }}
         aria-label={`Switch to ${activeMode === 'client' ? 'I own' : 'I Do'} mode`}
       >
         <AnimatePresence mode="wait">
@@ -82,24 +85,27 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.button>
+      </button>
     );
   }
 
   if (variant === 'toggle') {
     return (
-      <motion.button
+      <button
         onClick={(e) => handleToggle(e)}
         disabled={isSwitching || !canSwitchMode}
         className={cn(
           'relative flex items-center gap-2 rounded-full px-3 py-1.5',
           'bg-white/5',
-          'hover:bg-white/10 transition-all duration-200',
+          'hover:bg-white/10',
+          'transition-all duration-100 ease-out',
+          'active:scale-[0.97]',
           'disabled:opacity-50 disabled:cursor-not-allowed',
+          'touch-manipulation',
+          '-webkit-tap-highlight-color-transparent',
           sizeClasses[size],
           className
         )}
-        whileTap={{ scale: 0.9, transition: { type: 'spring', stiffness: 600, damping: 20, mass: 0.5 } }}
         aria-label={`Switch to ${activeMode === 'client' ? 'I own' : 'I Do'} mode`}
       >
         <motion.div
@@ -147,19 +153,20 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
   }
 
   return (
-    <motion.button
+    <button
       onClick={(e) => handleToggle(e)}
       disabled={isSwitching || !canSwitchMode}
       className={cn(
         'relative flex items-center gap-1.5 rounded-xl px-2.5',
         'hover:bg-white/10',
-        'active:scale-[0.97] transition-all duration-200',
+        'transition-all duration-100 ease-out',
+        'active:scale-[0.95]',
         'disabled:opacity-50 disabled:cursor-not-allowed',
+        'touch-manipulation',
+        '-webkit-tap-highlight-color-transparent',
         sizeClasses[size],
         className
       )}
-      whileTap={{ scale: 0.85, transition: { type: 'spring', stiffness: 600, damping: 20, mass: 0.5 } }}
-      transition={{ type: 'spring', stiffness: 500, damping: 30, mass: 0.5 }}
       aria-label={`Switch to ${activeMode === 'client' ? 'I own' : 'Client'} mode`}
     >
       <AnimatePresence mode="wait">
@@ -189,7 +196,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
       </AnimatePresence>
 
       <ArrowLeftRight className="h-3 w-3 text-gray-400" />
-    </motion.button>
+    </button>
   );
 }
 
