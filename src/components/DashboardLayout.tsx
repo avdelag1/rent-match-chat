@@ -693,7 +693,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
               clearOnboardingCache();
               toast({
                 title: 'Profile Complete!',
-                description: 'Welcome to Swipess. Start exploring!',
+                description: 'Start exploring and find your perfect match!',
               });
           }}
         />
