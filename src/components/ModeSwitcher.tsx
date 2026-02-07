@@ -73,7 +73,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
               exit={{ opacity: 0, scale: 0.8, rotate: 180 }}
               transition={{ type: 'spring', stiffness: 500, damping: 30 }}
             >
-              {/* UPGRADED BRIGHTNESS: Brighter icon colors */}
+              {/* HIGH CONTRAST: Clear icon colors */}
               {activeMode === 'client' ? (
                 <Search className="h-4 w-4 text-orange-400" />
               ) : (
@@ -113,10 +113,10 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
           style={{ willChange: 'left, right' }}
         />
 
-        {/* UPGRADED BRIGHTNESS: Brighter text and active state */}
+        {/* HIGH CONTRAST: Clear active state distinction */}
         <div className={cn(
           'relative z-10 flex items-center gap-1.5 px-2 py-0.5 rounded-full transition-colors duration-200',
-          activeMode === 'client' ? 'text-white font-semibold' : 'text-gray-400'
+          activeMode === 'client' ? 'text-white font-semibold' : 'text-white/60'
         )}>
           <Search className="h-3.5 w-3.5" />
           <span className="font-bold">I Do</span>
@@ -124,7 +124,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
 
         <div className={cn(
           'relative z-10 flex items-center gap-1.5 px-2 py-0.5 rounded-full transition-colors duration-200',
-          activeMode === 'owner' ? 'text-teal-300 font-semibold' : 'text-gray-400'
+          activeMode === 'owner' ? 'text-teal-400 font-semibold' : 'text-white/60'
         )}>
           <Briefcase className="h-3.5 w-3.5" />
           <span className="font-bold">I own</span>
@@ -171,18 +171,18 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
           transition={{ type: 'spring', stiffness: 500, damping: 30 }}
           className="flex items-center gap-1.5"
         >
-          {/* UPGRADED BRIGHTNESS: Brighter text and icons with glow effect */}
+          {/* HIGH CONTRAST: Clear colors without glow effects */}
           {isSwitching ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin text-white" />
           ) : activeMode === 'client' ? (
             <>
-              <Search className="h-3.5 w-3.5 text-orange-400 drop-shadow-[0_0_8px_rgba(251,146,60,0.5)]" />
-              <span className="font-bold text-orange-400 drop-shadow-[0_0_8px_rgba(251,146,60,0.5)]">Client</span>
+              <Search className="h-3.5 w-3.5 text-orange-400" />
+              <span className="font-bold text-orange-400">Client</span>
             </>
           ) : (
             <>
-              <Briefcase className="h-3.5 w-3.5 text-teal-400 drop-shadow-[0_0_8px_rgba(45,212,191,0.5)]" />
-              <span className="font-bold text-teal-400 drop-shadow-[0_0_8px_rgba(45,212,191,0.5)]">I own</span>
+              <Briefcase className="h-3.5 w-3.5 text-teal-400" />
+              <span className="font-bold text-teal-400">I own</span>
             </>
           )}
         </motion.div>

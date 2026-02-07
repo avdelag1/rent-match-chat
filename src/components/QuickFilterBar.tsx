@@ -122,11 +122,11 @@ function FilterDropdown({
           setIsOpen(!isOpen);
         }}
         className={cn(
-          'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-150',
-          'border will-change-transform active:scale-95',
+          'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-colors duration-150',
+          'border',
           isActive
-            ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white border-orange-500 shadow-lg shadow-orange-500/30'
-            : 'bg-white/10 text-white border-white/20 hover:bg-white/20 hover:border-white/30'
+            ? 'bg-orange-500 text-white border-orange-500'
+            : 'bg-white/15 text-white border-white/30 hover:bg-white/25'
         )}
       >
         {icon}
@@ -140,9 +140,8 @@ function FilterDropdown({
             position: 'fixed',
             top: dropdownPosition.top,
             left: dropdownPosition.left,
-            willChange: 'opacity, transform',
           }}
-          className="z-[9999] min-w-[120px] bg-gray-900 border border-white/20 rounded-lg shadow-xl overflow-hidden pointer-events-auto animate-in fade-in-0 zoom-in-95 duration-150"
+          className="z-[9999] min-w-[120px] bg-gray-900 border border-white/20 rounded-lg overflow-hidden pointer-events-auto"
         >
           {options.map((option) => (
             <button
@@ -155,8 +154,8 @@ function FilterDropdown({
               className={cn(
                 'w-full flex items-center gap-2 px-3 py-2.5 text-xs text-left transition-colors duration-150',
                 value === option.id
-                  ? 'bg-orange-500/20 text-orange-400 font-bold'
-                  : 'text-white hover:bg-white/10'
+                  ? 'bg-orange-500 text-white'
+                  : 'text-white hover:bg-white/15'
               )}
             >
               {option.icon}
@@ -252,8 +251,8 @@ function QuickFilterBarComponent({ filters, onChange, className, userRole = 'cli
                 onClick={handleReset}
                 className={cn(
                   'flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-bold',
-                  'bg-red-500/20 text-red-400 border border-red-500/30',
-                  'hover:bg-red-500/30 transition-all duration-150 flex-shrink-0 active:scale-95 will-change-transform'
+                  'bg-red-500/20 text-red-400 border border-red-500/40',
+                  'hover:bg-red-500/30 transition-colors duration-150 flex-shrink-0'
                 )}
               >
                 <RotateCcw className="w-3 h-3" />
@@ -286,13 +285,13 @@ function QuickFilterBarComponent({ filters, onChange, className, userRole = 'cli
                   key={category.id}
                   onClick={() => handleCategoryToggle(category.id)}
                   className={cn(
-                    'flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-bold transition-all duration-150',
-                    'border active:scale-95 will-change-transform',
+                    'flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-bold transition-colors duration-150',
+                    'border',
                     isActive
                       ? isServices
-                        ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-emerald-500 shadow-lg shadow-emerald-500/30'
-                        : 'bg-orange-500 text-white border-orange-500 shadow-lg shadow-orange-500/30'
-                      : 'bg-white/10 text-white border-white/20 hover:bg-white/20 hover:border-white/30'
+                        ? 'bg-emerald-500 text-white border-emerald-500'
+                        : 'bg-orange-500 text-white border-orange-500'
+                      : 'bg-white/15 text-white border-white/30 hover:bg-white/25'
                   )}
                 >
                   {category.icon}
@@ -320,8 +319,8 @@ function QuickFilterBarComponent({ filters, onChange, className, userRole = 'cli
               onClick={handleReset}
               className={cn(
                 'flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-bold',
-                'bg-red-500/20 text-red-400 border border-red-500/30',
-                'hover:bg-red-500/30 transition-all duration-150 flex-shrink-0 active:scale-95 will-change-transform'
+                'bg-red-500/20 text-red-400 border border-red-500/40',
+                'hover:bg-red-500/30 transition-colors duration-150 flex-shrink-0'
               )}
             >
               <RotateCcw className="w-3 h-3" />
