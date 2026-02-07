@@ -39,7 +39,6 @@ const SavedSearchesDialog = lazy(() => import('@/components/SavedSearchesDialog'
 const MessageActivationPackages = lazy(() => import('@/components/MessageActivationPackages').then(m => ({ default: m.MessageActivationPackages })))
 const PushNotificationPrompt = lazy(() => import('@/components/PushNotificationPrompt').then(m => ({ default: m.PushNotificationPrompt })))
 const WelcomeNotification = lazy(() => import('@/components/WelcomeNotification').then(m => ({ default: m.WelcomeNotification })))
-const GetStartedModal = lazy(() => import('@/components/GetStartedModal').then(m => ({ default: m.GetStartedModal })))
 
 // Hooks
 import { useListings } from "@/hooks/useListings"
@@ -132,9 +131,6 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const [showCategoryDialog, setShowCategoryDialog] = useState(false)
   const [showSavedSearches, setShowSavedSearches] = useState(false)
   const [showMessageActivations, setShowMessageActivations] = useState(false)
-
-  // Get Started Modal for new users
-  const [showGetStarted, setShowGetStarted] = useState(false)
 
   const [appliedFilters, setAppliedFilters] = useState<any>(null);
 
@@ -458,6 +454,11 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
     };
   }, [appliedFilters, categories, listingType, clientGender, clientType, mapCategoryToDatabase, activeUiCategory]);
 
+  // Check if we're on a discovery page where filters should be shown
+  // MUST be declared BEFORE enhancedChildren useMemo that references it
+  const isOnDiscoveryPage = (userRole === 'client' && location.pathname === '/client/dashboard') ||
+                            (userRole === 'owner' && location.pathname === '/owner/dashboard');
+
   // FIX: Memoize cloned children to prevent infinite re-renders
   const enhancedChildren = useMemo(() => {
     return React.Children.map(children, (child) => {
@@ -467,17 +468,11 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           onClientInsights: handleClientInsights,
           onMessageClick: handleMessageClick,
           filters: combinedFilters,
-          showGetStarted: !user && isOnDiscoveryPage,
-          onGetStartedClick: () => setShowGetStarted(true),
         } as any);
       }
       return child;
     });
-  }, [children, handlePropertyInsights, handleClientInsights, handleMessageClick, combinedFilters, user, isOnDiscoveryPage, setShowGetStarted]);
-
-  // Check if we're on a discovery page where filters should be shown
-  const isOnDiscoveryPage = (userRole === 'client' && location.pathname === '/client/dashboard') ||
-                            (userRole === 'owner' && location.pathname === '/owner/dashboard');
+  }, [children, handlePropertyInsights, handleClientInsights, handleMessageClick, combinedFilters]);
 
   // PERF FIX: Detect camera routes to hide TopBar/BottomNav (fullscreen camera UX)
   // Camera routes are now INSIDE layout to prevent dashboard remount on navigate back
@@ -714,20 +709,6 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
         <WelcomeNotification
           isOpen={shouldShowWelcome}
           onClose={dismissWelcome}
-        />
-      </Suspense>
-
-      {/* Get Started Modal for new users */}
-      <Suspense fallback={null}>
-        <GetStartedModal
-          isOpen={showGetStarted}
-          onClose={() => setShowGetStarted(false)}
-          onSelectListing={(category) => {
-            navigate(`/owner/properties/new?category=${category}`);
-          }}
-          onSelectProfile={() => {
-            navigate('/client/profile/edit');
-          }}
         />
       </Suspense>
     </div>

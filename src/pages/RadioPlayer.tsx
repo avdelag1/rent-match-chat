@@ -141,15 +141,16 @@ export default function RadioPlayer() {
                 <button
                   key={skin}
                   onClick={() => handleSkinChange(skin)}
-                  className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
                     state.skin === skin
                       ? 'bg-blue-500 text-white'
                       : 'bg-gray-700 text-gray-200 hover:bg-gray-600'
                   }`}
                 >
-                  {skin === 'modern' && '📻 Modern FM'}
-                  {skin === 'vinyl' && '💿 Vinyl Record'}
-                  {skin === 'retro' && '📼 Retro Cassette'}
+                  {skin === 'modern' && <div className="w-5 h-5 rounded bg-gradient-to-br from-blue-400 to-blue-600" />}
+                  {skin === 'vinyl' && <div className="w-5 h-5 rounded-full bg-gradient-to-br from-purple-400 to-pink-600" />}
+                  {skin === 'retro' && <div className="w-5 h-5 rounded bg-gradient-to-br from-amber-400 to-orange-500" />}
+                  <span className="capitalize">{skin}</span>
                 </button>
               ))}
             </div>
