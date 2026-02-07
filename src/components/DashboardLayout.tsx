@@ -389,6 +389,9 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
     return mapping[category] || category;
   }, []);
 
+  // Get the original UI category (before mapping) for display purposes
+  const activeUiCategory = categories.length === 1 ? categories[0] : null;
+
   // Combine quick filters with applied filters - MEMOIZED to prevent identity changes
   // Now reads directly from Zustand store values instead of local state
   const combinedFilters = useMemo(() => {
@@ -416,6 +419,8 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       // Client quick filter categories take precedence if set
       category: categories.length === 0 ? base.category : undefined,
       categories: mappedCategories,
+      // Original UI category for display (empty states, titles, etc.)
+      activeUiCategory: activeUiCategory,
       // Quick filter listing type takes precedence if not 'both'
       listingType: listingType !== 'both' ? listingType : base.listingType,
       // Services filter - derived from categories
@@ -424,7 +429,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       clientGender: clientGender !== 'any' ? clientGender : undefined,
       clientType: clientType !== 'all' ? clientType : undefined,
     };
-  }, [appliedFilters, categories, listingType, clientGender, clientType, mapCategoryToDatabase]);
+  }, [appliedFilters, categories, listingType, clientGender, clientType, mapCategoryToDatabase, activeUiCategory]);
 
   // FIX: Memoize cloned children to prevent infinite re-renders
   const enhancedChildren = useMemo(() => {

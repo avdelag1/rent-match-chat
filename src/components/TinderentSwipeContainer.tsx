@@ -66,13 +66,19 @@ const getActiveCategoryInfo = (filters?: ListingFilters) => {
     // Safety: Handle null/undefined filters
     if (!filters) return categoryConfig.property;
 
+    // Check for activeUiCategory first (original UI category before DB mapping)
+    const activeUiCategory = (filters as any).activeUiCategory;
+    if (activeUiCategory && typeof activeUiCategory === 'string' && categoryConfig[activeUiCategory]) {
+      return categoryConfig[activeUiCategory];
+    }
+
     // Check for activeCategory string first (from AdvancedFilters)
     const activeCategory = (filters as any).activeCategory;
     if (activeCategory && typeof activeCategory === 'string' && categoryConfig[activeCategory]) {
       return categoryConfig[activeCategory];
     }
 
-    // Check for categories array (from quick filters)
+    // Check for categories array (from quick filters) - may be DB-mapped names
     const categories = filters?.categories;
     if (Array.isArray(categories) && categories.length > 0) {
       const cat = categories[0];
@@ -80,6 +86,10 @@ const getActiveCategoryInfo = (filters?: ListingFilters) => {
         // Direct match
         if (categoryConfig[cat]) {
           return categoryConfig[cat];
+        }
+        // Handle DB-mapped names back to UI names
+        if (cat === 'worker' && categoryConfig['services']) {
+          return categoryConfig['services'];
         }
         // Handle common variations/misspellings
         const normalized = cat.toLowerCase().replace(/s$/, ''); // Remove trailing 's'
@@ -1149,8 +1159,50 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   if (currentIndex > 0 && currentIndex >= deckQueue.length) {
     const categoryInfo = getActiveCategoryInfo(filters);
     const categoryLabel = String(categoryInfo?.plural || 'Listings');
+    const categoryLower = categoryLabel.toLowerCase();
     const CategoryIcon = categoryInfo?.icon || Home;
     const iconColor = categoryInfo?.color || 'text-primary';
+    
+    // Generate specific message based on category
+    const getCaughtUpMessage = () => {
+      if (categoryLower === 'properties') {
+        return {
+          title: 'All Caught Up!',
+          description: "You've seen all available properties. Check back later for new opportunities!",
+          cta: 'Discover More Properties'
+        };
+      }
+      if (categoryLower === 'motorcycles') {
+        return {
+          title: 'All Caught Up!',
+          description: "You've seen all motorcycles. Check back later for new listings!",
+          cta: 'Discover More Motorcycles'
+        };
+      }
+      if (categoryLower === 'bicycles') {
+        return {
+          title: 'All Caught Up!',
+          description: "You've seen all bicycles. New bikes are added regularly!",
+          cta: 'Discover More Bicycles'
+        };
+      }
+      if (categoryLower === 'workers' || categoryLower === 'services') {
+        return {
+          title: 'All Caught Up!',
+          description: "You've seen all available workers. Check back later for new service providers!",
+          cta: 'Discover More Workers'
+        };
+      }
+      // Generic fallback
+      return {
+        title: 'All Caught Up!',
+        description: `You've seen all available ${categoryLower}. Check back later for new ${categoryLower}!`,
+        cta: `Discover More ${categoryLabel}`
+      };
+    };
+
+    const { title, description, cta } = getCaughtUpMessage();
+    
     return (
       <div className="relative w-full h-full flex-1 flex items-center justify-center px-4">
         {/* UNIFIED animation - all elements animate together, no staggered pop-in */}
@@ -1172,11 +1224,9 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
           </div>
 
           <div className="space-y-2">
-            <h3 className="text-xl font-semibold text-foreground">All Caught Up!</h3>
+            <h3 className="text-xl font-semibold text-foreground">{title}</h3>
             <p className="text-muted-foreground text-sm max-w-xs mx-auto">
-              {categoryLabel.toLowerCase() === 'properties'
-                ? "You've seen all available properties. Check back later for new opportunities!"
-                : `You've seen all available ${categoryLabel.toLowerCase()}. Check back later for new ${categoryLabel.toLowerCase()}!`}
+              {description}
             </p>
           </div>
           <div className="flex flex-col gap-3">
@@ -1191,10 +1241,10 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
                 ) : (
                   <RefreshCw className="w-5 h-5" />
                 )}
-                {isRefreshing ? `Scanning for ${categoryLabel}...` : 'Discover More'}
+                {isRefreshing ? `Scanning for ${categoryLabel}...` : cta}
               </Button>
             </motion.div>
-            <p className="text-xs text-muted-foreground">New {categoryLabel.toLowerCase()} are added daily</p>
+            <p className="text-xs text-muted-foreground">New {categoryLower} are added daily</p>
           </div>
         </motion.div>
       </div>
@@ -1226,8 +1276,45 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
   if (deckQueue.length === 0) {
     const categoryInfo = getActiveCategoryInfo(filters);
     const categoryLabel = String(categoryInfo?.plural || 'Listings');
+    const categoryLower = categoryLabel.toLowerCase();
     const CategoryIcon = categoryInfo?.icon || Home;
     const iconColor = categoryInfo?.color || 'text-primary';
+    
+    // Generate specific empty message based on category
+    const getEmptyMessage = () => {
+      if (categoryLower === 'properties') {
+        return {
+          title: 'No Properties Found',
+          description: 'Try adjusting your filters or check back regularly for new opportunities.'
+        };
+      }
+      if (categoryLower === 'motorcycles') {
+        return {
+          title: 'No Motorcycles Found',
+          description: 'No motorcycles match your criteria. Try adjusting your filters or check back later.'
+        };
+      }
+      if (categoryLower === 'bicycles') {
+        return {
+          title: 'No Bicycles Available',
+          description: 'No bicycles match your criteria right now. Check back soon for new listings!'
+        };
+      }
+      if (categoryLower === 'workers' || categoryLower === 'services') {
+        return {
+          title: 'No Workers Found',
+          description: 'No service providers match your criteria. Try different filters or check back later.'
+        };
+      }
+      // Generic fallback
+      return {
+        title: `No ${categoryLabel} Found`,
+        description: `No ${categoryLower} match your criteria. Try adjusting your filters or refresh to discover new ${categoryLower}.`
+      };
+    };
+
+    const { title, description } = getEmptyMessage();
+    
     return (
       <div className="relative w-full h-full flex-1 flex items-center justify-center px-4">
         {/* UNIFIED animation - all elements animate together, no staggered pop-in */}
@@ -1249,11 +1336,9 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
           </div>
 
           <div className="space-y-2">
-            <h3 className="text-xl font-semibold text-foreground">No {categoryLabel} Found</h3>
+            <h3 className="text-xl font-semibold text-foreground">{title}</h3>
             <p className="text-muted-foreground text-sm max-w-xs mx-auto">
-              {categoryLabel.toLowerCase() === 'properties'
-                ? 'Try adjusting your filters or check back regularly for new opportunities.'
-                : `No ${categoryLabel.toLowerCase()} match your criteria. Try adjusting your filters or refresh to discover new ${categoryLabel.toLowerCase()}.`}
+              {description}
             </p>
           </div>
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
