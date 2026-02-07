@@ -46,3 +46,4 @@ android/app/src/main/*
 
 # Supabase CLI cache
 supabase/.temp/
+.vercel

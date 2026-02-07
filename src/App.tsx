@@ -63,7 +63,7 @@ import ClientContracts from "./pages/ClientContracts";
 import ClientLawyerServices from "./pages/ClientLawyerServices";
 
 // Owner routes - ALL direct imports for instant navigation
-import EnhancedOwnerDashboard from "./components/EnhancedOwnerDashboard";
+import OwnerDashboardNew from "./pages/OwnerDashboardNew";
 import OwnerProfile from "./pages/OwnerProfileNew";
 import OwnerSettings from "./pages/OwnerSettingsNew";
 import OwnerProperties from "./pages/OwnerProperties";
