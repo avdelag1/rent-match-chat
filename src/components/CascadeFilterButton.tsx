@@ -66,9 +66,8 @@ const clientTypeOptions: { id: OwnerClientType; label: string }[] = [
   { id: 'buy', label: 'buying' },
 ];
 
-// Smooth instant button class - works on all devices
+// Smooth instant button class - works on all devices, NO transition delays
 const buttonClass = cn(
-  'transition-all duration-100 ease-out',
   'active:scale-[0.96]',
   'hover:brightness-110',
   'touch-manipulation',
@@ -161,15 +160,15 @@ function CascadeFilterButtonComponent({ filters, onChange, userRole = 'client' }
         <ChevronDown className={cn('w-4 h-4 transition-transform duration-150', isOpen && 'rotate-180')} />
       </button>
 
-      {/* Cascade Panel - framer-motion for panel animations only */}
+      {/* Cascade Panel - instant open, no animation delay */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
             ref={panelRef}
-            initial={{ opacity: 0, y: 8, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 8, scale: 0.98 }}
-            transition={{ duration: 0.15, ease: 'easeOut' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0 }}
             className="absolute top-full left-0 mt-2 z-[100] w-80 bg-popover border border-border rounded-2xl shadow-xl overflow-hidden"
           >
             {/* Header */}

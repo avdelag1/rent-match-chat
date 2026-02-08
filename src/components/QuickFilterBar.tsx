@@ -72,16 +72,15 @@ function MotorcycleIcon() {
   );
 }
 
-// Smooth instant button class - works on all devices
+// Smooth instant button class - works on all devices, NO transition delays
 const smoothButtonClass = cn(
-  'transition-all duration-100 ease-out',
   'active:scale-[0.96]',
   'hover:brightness-110',
   'touch-manipulation',
   '-webkit-tap-highlight-color-transparent'
 );
 
-// Dropdown component for compact filters
+// Dropdown component for compact filters - instant response, no delays
 function FilterDropdown({ 
   label, 
   icon, 
@@ -100,7 +99,6 @@ function FilterDropdown({
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -115,16 +113,6 @@ function FilterDropdown({
       document.removeEventListener('touchstart', handleClickOutside);
     };
   }, []);
-
-  useEffect(() => {
-    if (isOpen && buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      setDropdownPosition({
-        top: rect.bottom + 4,
-        left: rect.left,
-      });
-    }
-  }, [isOpen]);
 
   const selectedOption = options.find(o => o.id === value);
 
@@ -147,17 +135,12 @@ function FilterDropdown({
       >
         {icon}
         <span>{selectedOption?.label || label}</span>
-        <ChevronDown className={cn('w-3 h-3 transition-transform duration-150', isOpen && 'rotate-180')} />
+        <ChevronDown className={cn('w-3 h-3', isOpen && 'rotate-180')} />
       </button>
 
       {isOpen && (
         <div
-          style={{
-            position: 'fixed',
-            top: dropdownPosition.top,
-            left: dropdownPosition.left,
-          }}
-          className="z-[9999] min-w-[120px] bg-gray-900 border border-white/20 rounded-lg overflow-hidden pointer-events-auto"
+          className="absolute top-full left-0 mt-1 z-[9999] min-w-[120px] bg-gray-900 border border-white/20 rounded-lg overflow-hidden pointer-events-auto shadow-xl"
         >
           {options.map((option) => (
             <button
@@ -172,7 +155,7 @@ function FilterDropdown({
                 'w-full flex items-center gap-2 px-3 py-2.5 text-xs text-left',
                 value === option.id
                   ? 'bg-orange-500 text-white'
-                  : 'text-white'
+                  : 'text-white hover:bg-white/10'
               )}
             >
               {option.icon}
