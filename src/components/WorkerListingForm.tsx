@@ -1,15 +1,10 @@
 import { useForm, Controller } from 'react-hook-form';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
-import { Briefcase, DollarSign, Clock, MapPin, Globe, Award, Calendar, X } from 'lucide-react';
-
-// (Keep all the constants like SERVICE_CATEGORIES, PRICING_UNITS, etc. as they are)
 
 export const SERVICE_CATEGORIES = [
     { value: 'nanny', label: 'Nanny / Childcare', icon: '👶' },
@@ -101,58 +96,32 @@ export const SERVICE_CATEGORIES = [
     { value: 'senior', label: 'Senior Level (5-10 years)' },
     { value: 'expert', label: 'Expert (10+ years)' },
   ] as const;
-  
-  export const COMMON_SKILLS = {
-    nanny: ['CPR Certified', 'First Aid', 'Newborn Care', 'Special Needs', 'Bilingual', 'Homework Help', 'Potty Training', 'Meal Prep'],
-    baby_sitting: ['CPR Certified', 'First Aid', 'Infant Care', 'Toddler Care', 'Bedtime Routine', 'Light Housekeeping', 'Flexible Hours', 'References Available'],
-    chef: ['Italian Cuisine', 'Mexican Cuisine', 'Vegan/Vegetarian', 'Pastry', 'Meal Prep', 'Catering', 'Food Safety Certified', 'Wine Pairing'],
-    home_cook: ['Meal Prep', 'Dietary Restrictions', 'Gluten-Free', 'Keto/Low-Carb', 'Vegan/Vegetarian', 'Family Style Meals', 'Food Safety', 'Portion Control'],
-    cleaning: ['Deep Cleaning', 'Eco-Friendly Products', 'Organization', 'Laundry', 'Window Cleaning', 'Carpet Cleaning', 'Move-in/Move-out'],
-    massage: ['Swedish Massage', 'Deep Tissue', 'Sports Massage', 'Prenatal', 'Hot Stone', 'Aromatherapy', 'Thai Massage', 'Reflexology'],
-    english_teacher: ['TEFL Certified', 'TESOL', 'Business English', 'Conversational', 'Test Prep', 'Kids Teaching', 'Online Teaching'],
-    spanish_teacher: ['Native Speaker', 'DELE Certified', 'Conversational', 'Business Spanish', 'Kids Teaching', 'Grammar Focus', 'Online Teaching'],
-    yoga: ['Hatha', 'Vinyasa', 'Ashtanga', 'Yin Yoga', 'Power Yoga', 'Prenatal', 'Kids Yoga', 'RYT 200', 'RYT 500'],
-    personal_trainer: ['Weight Loss', 'Muscle Building', 'HIIT', 'CrossFit', 'Nutrition Planning', 'Injury Recovery', 'Senior Fitness', 'Sports-Specific'],
-    handyman: ['Plumbing', 'Electrical', 'Carpentry', 'Painting', 'Drywall', 'Tile Work', 'Appliance Repair', 'General Repairs'],
-    gardener: ['Landscape Design', 'Lawn Care', 'Pruning', 'Irrigation', 'Organic Gardening', 'Tree Care', 'Pest Control', 'Seasonal Planting'],
-    pool_maintenance: ['Chemical Balancing', 'Filter Cleaning', 'Pump Repair', 'Tile Cleaning', 'Equipment Installation', 'Leak Detection', 'Saltwater Systems'],
-    driver: ['Defensive Driving', 'Luxury Vehicles', 'Airport Transfers', 'Long Distance', 'CDL License', 'Clean Record', 'Bilingual', 'Tour Guide'],
-    security: ['Armed', 'Unarmed', 'CCTV Monitoring', 'Patrol', 'Event Security', 'Executive Protection', 'Licensed', 'Background Verified'],
-    broker: ['Residential', 'Commercial', 'Luxury Properties', 'Investment', 'Rental Management', 'MLS Access', 'Bilingual', 'Market Analysis'],
-    tour_guide: ['Historical Tours', 'Food Tours', 'Adventure Tours', 'Cultural Tours', 'Photography Tours', 'Bilingual', 'Licensed', 'Transportation'],
-    photographer: ['Portrait', 'Wedding', 'Event', 'Real Estate', 'Product', 'Food Photography', 'Drone', 'Video Editing'],
-    pet_care: ['Dog Walking', 'Pet Sitting', 'Grooming', 'Training', 'Overnight Care', 'Multiple Pets', 'Medication Admin', 'Special Needs'],
-    pet_sitting: ['Overnight Care', 'Daily Visits', 'Multiple Pets', 'Medication Admin', 'Exercise & Play', 'Feeding', 'House Sitting', 'Pet First Aid'],
-    music_teacher: ['Piano', 'Guitar', 'Vocals', 'Drums', 'Music Theory', 'Kids Teaching', 'Online Lessons', 'Performance Training'],
-    beauty: ['Hair Cutting', 'Hair Coloring', 'Makeup', 'Nails', 'Skincare', 'Waxing', 'Bridal', 'Mobile Service'],
-    other: ['Custom Skills'],
-  } as const;
 
 export interface WorkerFormData {
-    title: string;
+    title?: string;
     description?: string;
-    service_category: ServiceCategory | '';
+    service_category?: ServiceCategory | '';
     custom_service_name?: string;
-    price: number | '';
-    pricing_unit: PricingUnit;
-    work_type: string[];
-    schedule_type: string[];
-    days_available: string[];
-    time_slots_available: string[];
-    location_type: string[];
-    experience_level: string;
-    experience_years: number | '';
-    skills: string[];
-    certifications: string[];
-    tools_equipment: string[];
+    price?: number | '';
+    pricing_unit?: PricingUnit;
+    work_type?: string[];
+    schedule_type?: string[];
+    days_available?: string[];
+    time_slots_available?: string[];
+    location_type?: string[];
+    experience_level?: string;
+    experience_years?: number | '';
+    skills?: string[];
+    certifications?: string[];
+    tools_equipment?: string[];
     service_radius_km?: number;
     minimum_booking_hours?: number;
     offers_emergency_service?: boolean;
     background_check_verified?: boolean;
     insurance_verified?: boolean;
-    languages: string[];
-    city: string;
-    country: string;
+    languages?: string[];
+    city?: string;
+    country?: string;
 }
 
 interface WorkerListingFormProps {
@@ -161,7 +130,7 @@ interface WorkerListingFormProps {
 }
 
 export function WorkerListingForm({ onDataChange, initialData = {} }: WorkerListingFormProps) {
-    const { register, control, watch, setValue, formState: { errors } } = useForm<WorkerFormData>({
+    const { register, control, watch } = useForm<WorkerFormData>({
         defaultValues: {
             ...initialData,
             work_type: initialData.work_type || [],
@@ -185,14 +154,11 @@ export function WorkerListingForm({ onDataChange, initialData = {} }: WorkerList
     }, [formData, onDataChange]);
 
     const watchedServiceCategory = watch('service_category');
-    const availableSkills = watchedServiceCategory && watchedServiceCategory in COMMON_SKILLS
-        ? COMMON_SKILLS[watchedServiceCategory as keyof typeof COMMON_SKILLS]
-        : [];
 
     return (
         <div className="space-y-6">
             <Card>
-                <CardHeader><CardTitle>Service Details</CardTitle></CardHeader>
+                <CardHeader><CardTitle>Service Details (Optional)</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
                     <div>
                         <Label>Service Category</Label>
@@ -208,48 +174,42 @@ export function WorkerListingForm({ onDataChange, initialData = {} }: WorkerList
                                 </Select>
                             )}
                         />
-                        {errors.service_category && <p className="text-sm text-destructive mt-1">{errors.service_category.message}</p>}
                     </div>
 
                     {watchedServiceCategory === 'other' && (
                         <div>
                             <Label>Custom Service Name</Label>
                             <Input {...register('custom_service_name')} placeholder="e.g., Personal Stylist" />
-                            {errors.custom_service_name && <p className="text-sm text-destructive mt-1">{errors.custom_service_name.message}</p>}
                         </div>
                     )}
 
                     <div>
                         <Label>Service Title</Label>
                         <Input {...register('title')} placeholder="e.g., Experienced Yoga Instructor" />
-                        {errors.title && <p className="text-sm text-destructive mt-1">{errors.title.message}</p>}
                     </div>
                 </CardContent>
             </Card>
 
             <Card>
-              <CardHeader><CardTitle>Location</CardTitle></CardHeader>
+              <CardHeader><CardTitle>Location (Optional)</CardTitle></CardHeader>
               <CardContent className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>City</Label>
                   <Input {...register('city')} placeholder="e.g., Tulum" />
-                  {errors.city && <p className="text-sm text-destructive mt-1">{errors.city.message}</p>}
                 </div>
                 <div>
                   <Label>Country</Label>
                   <Input {...register('country')} placeholder="e.g., Mexico" />
-                  {errors.country && <p className="text-sm text-destructive mt-1">{errors.country.message}</p>}
                 </div>
               </CardContent>
             </Card>
 
             <Card>
-                <CardHeader><CardTitle>Pricing</CardTitle></CardHeader>
+                <CardHeader><CardTitle>Pricing (Optional)</CardTitle></CardHeader>
                 <CardContent className="grid grid-cols-2 gap-4">
                     <div>
                         <Label>Price (USD)</Label>
                         <Input type="number" {...register('price', { valueAsNumber: true })} placeholder="25" />
-                        {errors.price && <p className="text-sm text-destructive mt-1">{errors.price.message}</p>}
                     </div>
                     <div>
                         <Label>Pricing Unit</Label>
@@ -265,13 +225,12 @@ export function WorkerListingForm({ onDataChange, initialData = {} }: WorkerList
                                 </Select>
                             )}
                         />
-                        {errors.pricing_unit && <p className="text-sm text-destructive mt-1">{errors.pricing_unit.message}</p>}
                     </div>
                 </CardContent>
             </Card>
 
             <Card>
-                <CardHeader><CardTitle>Experience & Qualifications</CardTitle></CardHeader>
+                <CardHeader><CardTitle>Experience (Optional)</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
                     <div>
                         <Label>Experience Level</Label>
@@ -287,12 +246,10 @@ export function WorkerListingForm({ onDataChange, initialData = {} }: WorkerList
                                 </Select>
                             )}
                         />
-                        {errors.experience_level && <p className="text-sm text-destructive mt-1">{errors.experience_level.message}</p>}
                     </div>
                     <div>
                         <Label>Years of Experience</Label>
                         <Input type="number" {...register('experience_years', { valueAsNumber: true, min: 0 })} placeholder="5" />
-                        {errors.experience_years && <p className="text-sm text-destructive mt-1">{errors.experience_years.message}</p>}
                     </div>
                 </CardContent>
             </Card>

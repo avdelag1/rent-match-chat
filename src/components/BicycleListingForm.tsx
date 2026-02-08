@@ -5,33 +5,31 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { validateNoContactInfo } from '@/utils/contactInfoValidation';
-import { toast } from '@/hooks/use-toast';
 
 export interface BicycleFormData {
   id?: string;
-  title: string;
-  mode: 'sale' | 'rent' | 'both';
+  title?: string;
+  mode?: 'sale' | 'rent' | 'both';
   price?: number;
   rental_rates?: {
     per_hour?: number;
     per_day?: number;
     per_week?: number;
   };
-  bicycle_type: string;
-  brand: string;
-  model: string;
+  bicycle_type?: string;
+  brand?: string;
+  model?: string;
   year?: number;
-  frame_size: string;
-  frame_material: string;
-  wheel_size: string;
-  brake_type: string;
+  frame_size?: string;
+  frame_material?: string;
+  wheel_size?: string;
+  brake_type?: string;
   number_of_gears?: number;
-  electric_assist: boolean;
+  electric_assist?: boolean;
   battery_range?: number;
   motor_power?: string;
-  condition: string;
-  city: string;
+  condition?: string;
+  city?: string;
   neighborhood?: string;
   includes_helmet?: boolean;
   includes_lock?: boolean;
@@ -55,7 +53,7 @@ const CONDITIONS = ['Excellent', 'Good', 'Fair', 'Needs Work'];
 const SUSPENSION_TYPES = ['None (Rigid)', 'Front Only (Hardtail)', 'Full Suspension'];
 
 export function BicycleListingForm({ onDataChange, initialData }: BicycleListingFormProps) {
-  const { register, control, watch, formState: { errors } } = useForm<BicycleFormData>({
+  const { register, control, watch } = useForm<BicycleFormData>({
     defaultValues: initialData || { mode: 'rent', electric_assist: false }
   });
 
@@ -63,17 +61,6 @@ export function BicycleListingForm({ onDataChange, initialData }: BicycleListing
   const isElectric = watch('electric_assist');
 
   useEffect(() => {
-    // Only validate title if it has actual content (not empty or just whitespace)
-    if (formData.title && formData.title.trim().length > 0) {
-      const error = validateNoContactInfo(formData.title);
-      if (error) {
-        toast({
-          title: "Invalid Title",
-          description: error,
-          variant: "destructive"
-        });
-      }
-    }
     onDataChange(formData);
   }, [formData, onDataChange]);
 
@@ -81,7 +68,7 @@ export function BicycleListingForm({ onDataChange, initialData }: BicycleListing
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Basic Information</CardTitle>
+          <CardTitle>Basic Information (Optional)</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
@@ -91,8 +78,6 @@ export function BicycleListingForm({ onDataChange, initialData }: BicycleListing
               {...register('title')}
               placeholder="e.g., 2022 Specialized Turbo Levo"
             />
-            <p className="text-xs text-muted-foreground mt-1">No contact info allowed - share after messaging connection</p>
-            {errors.title && <p className="text-sm text-destructive mt-1">{errors.title.message}</p>}
           </div>
 
           <div>
@@ -113,7 +98,6 @@ export function BicycleListingForm({ onDataChange, initialData }: BicycleListing
                 </Select>
               )}
             />
-            {errors.bicycle_type && <p className="text-sm text-destructive mt-1">{errors.bicycle_type.message}</p>}
           </div>
 
           <div>
@@ -123,24 +107,21 @@ export function BicycleListingForm({ onDataChange, initialData }: BicycleListing
               {...register('city')}
               placeholder="e.g., Tulum, Playa del Carmen"
             />
-            {errors.city && <p className="text-sm text-destructive mt-1">{errors.city.message}</p>}
           </div>
         </CardContent>
       </Card>
 
       <Card>
-        <CardHeader><CardTitle>Bicycle Specifications</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Bicycle Specifications (Optional)</CardTitle></CardHeader>
         <CardContent className="grid md:grid-cols-2 gap-4">
           <div>
             <Label htmlFor="brand">Brand</Label>
             <Input id="brand" {...register('brand')} placeholder="Specialized, Trek, Giant..." />
-            {errors.brand && <p className="text-sm text-destructive mt-1">{errors.brand.message}</p>}
           </div>
 
           <div>
             <Label htmlFor="model">Model</Label>
             <Input id="model" {...register('model')} placeholder="Turbo Levo" />
-            {errors.model && <p className="text-sm text-destructive mt-1">{errors.model.message}</p>}
           </div>
 
           <div>
@@ -162,7 +143,6 @@ export function BicycleListingForm({ onDataChange, initialData }: BicycleListing
                 </Select>
               )}
             />
-            {errors.condition && <p className="text-sm text-destructive mt-1">{errors.condition.message}</p>}
           </div>
 
           <div>
@@ -179,7 +159,6 @@ export function BicycleListingForm({ onDataChange, initialData }: BicycleListing
                 </Select>
               )}
             />
-            {errors.frame_size && <p className="text-sm text-destructive mt-1">{errors.frame_size.message}</p>}
           </div>
 
           <div>
@@ -254,7 +233,7 @@ export function BicycleListingForm({ onDataChange, initialData }: BicycleListing
       </Card>
 
       <Card>
-        <CardHeader><CardTitle>Electric Features</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Electric Features (Optional)</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center space-x-2">
             <Controller name="electric_assist" control={control} render={({ field }) => <Checkbox id="electric_assist" checked={field.value} onCheckedChange={field.onChange} />} />
@@ -277,7 +256,7 @@ export function BicycleListingForm({ onDataChange, initialData }: BicycleListing
       </Card>
 
       <Card>
-        <CardHeader><CardTitle>Included Accessories</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Included Accessories (Optional)</CardTitle></CardHeader>
         <CardContent className="space-y-2">
           <div className="flex items-center space-x-2">
             <Controller name="includes_helmet" control={control} render={({ field }) => <Checkbox id="includes_helmet" checked={field.value} onCheckedChange={field.onChange} />} />

@@ -8,20 +8,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { OwnerLocationSelector } from './location/OwnerLocationSelector';
 
 interface PropertyFormData {
-  title: string;
-  price: number;
-  country: string;
-  city: string;
+  title?: string;
+  price?: number;
+  country?: string;
+  city?: string;
   neighborhood?: string;
-  property_type: string;
-  beds: number;
-  baths: number;
+  property_type?: string;
+  beds?: number;
+  baths?: number;
   square_footage?: number;
-  furnished: boolean;
-  pet_friendly: boolean;
-  amenities: string[];
-  services_included: string[];
-  rental_duration_type: string;
+  furnished?: boolean;
+  pet_friendly?: boolean;
+  amenities?: string[];
+  services_included?: string[];
+  rental_duration_type?: string;
 }
 
 interface PropertyListingFormProps {
@@ -39,8 +39,14 @@ const AMENITIES = ['Pool', 'Gym', 'Parking', 'AC', 'WiFi', 'Security', 'Garden',
 const SERVICES = ['Water', 'Electricity', 'Gas', 'Internet', 'Cleaning', 'Maintenance', 'Trash', 'Cable TV'];
 
 export function PropertyListingForm({ onDataChange, initialData = {} }: PropertyListingFormProps) {
-  const { register, control, watch, setValue, formState: { errors } } = useForm<PropertyFormData>({
-    defaultValues: { amenities: [], services_included: [], ...initialData },
+  const { control, watch, setValue, formState: { errors } } = useForm<PropertyFormData>({
+    defaultValues: { 
+      amenities: [], 
+      services_included: [], 
+      furnished: false,
+      pet_friendly: false,
+      ...initialData 
+    },
   });
 
   const formData = watch();
@@ -60,18 +66,16 @@ export function PropertyListingForm({ onDataChange, initialData = {} }: Property
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader><CardTitle>Basic Information</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Basic Information (Optional)</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           <div>
             <Label>Title</Label>
             <Input {...register('title')} placeholder="Beautiful 2BR Apartment" />
-            {errors.title && <p className="text-sm text-destructive mt-1">{errors.title.message}</p>}
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>Price ($/month)</Label>
               <Input type="number" {...register('price', { valueAsNumber: true })} placeholder="2500" />
-              {errors.price && <p className="text-sm text-destructive mt-1">{errors.price.message}</p>}
             </div>
             <div>
               <Label>Minimum Stay</Label>
@@ -87,7 +91,6 @@ export function PropertyListingForm({ onDataChange, initialData = {} }: Property
                   </Select>
                 )}
               />
-              {errors.rental_duration_type && <p className="text-sm text-destructive mt-1">{errors.rental_duration_type.message}</p>}
             </div>
           </div>
         </CardContent>
@@ -107,11 +110,9 @@ export function PropertyListingForm({ onDataChange, initialData = {} }: Property
           />
         )}
       />
-      {errors.country && <p className="-mt-4 px-6 text-sm text-destructive">Country is required.</p>}
-      {errors.city && <p className="-mt-4 px-6 text-sm text-destructive">City is required.</p>}
 
       <Card>
-        <CardHeader><CardTitle>Property Details</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Property Details (Optional)</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           <div>
             <Label>Property Type</Label>
@@ -127,19 +128,16 @@ export function PropertyListingForm({ onDataChange, initialData = {} }: Property
                 </Select>
               )}
             />
-            {errors.property_type && <p className="text-sm text-destructive mt-1">{errors.property_type.message}</p>}
           </div>
 
           <div className="grid grid-cols-3 gap-4">
             <div>
               <Label>Bedrooms</Label>
               <Input type="number" {...register('beds', { valueAsNumber: true, min: 0 })} placeholder="2" />
-              {errors.beds && <p className="text-sm text-destructive mt-1">{errors.beds.message}</p>}
             </div>
             <div>
               <Label>Bathrooms</Label>
               <Input type="number" step="0.5" {...register('baths', { valueAsNumber: true, min: 0 })} placeholder="2" />
-              {errors.baths && <p className="text-sm text-destructive mt-1">{errors.baths.message}</p>}
             </div>
             <div>
               <Label>Sq. Ft.</Label>
@@ -161,7 +159,7 @@ export function PropertyListingForm({ onDataChange, initialData = {} }: Property
       </Card>
 
       <Card>
-        <CardHeader><CardTitle>Amenities</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Amenities (Optional)</CardTitle></CardHeader>
         <CardContent className="grid grid-cols-2 gap-3">
           {AMENITIES.map(amenity => (
             <div key={amenity} className="flex items-center space-x-2">
@@ -177,7 +175,7 @@ export function PropertyListingForm({ onDataChange, initialData = {} }: Property
       </Card>
 
       <Card>
-        <CardHeader><CardTitle>Services Included</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Services Included (Optional)</CardTitle></CardHeader>
         <CardContent className="grid grid-cols-2 gap-3">
           {SERVICES.map(service => (
             <div key={service} className="flex items-center space-x-2">

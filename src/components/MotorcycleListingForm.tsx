@@ -5,28 +5,26 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { validateNoContactInfo } from '@/utils/contactInfoValidation';
-import { toast } from '@/hooks/use-toast';
 
 export interface MotorcycleFormData {
   id?: string;
-  title: string;
-  motorcycle_type: string;
-  mode: 'sale' | 'rent' | 'both';
+  title?: string;
+  motorcycle_type?: string;
+  mode?: 'sale' | 'rent' | 'both';
   price?: number;
   rental_rates?: {
     per_day?: number;
     per_week?: number;
   };
-  brand: string;
-  model: string;
-  year: number;
-  mileage: number;
-  engine_cc: number;
-  transmission: string;
-  fuel_type: string;
-  condition: string;
-  city: string;
+  brand?: string;
+  model?: string;
+  year?: number;
+  mileage?: number;
+  engine_cc?: number;
+  transmission?: string;
+  fuel_type?: string;
+  condition?: string;
+  city?: string;
   has_abs?: boolean;
   has_traction_control?: boolean;
   has_heated_grips?: boolean;
@@ -44,37 +42,24 @@ const FUEL_TYPES = ['Gasoline', 'Electric', 'Hybrid'];
 const CONDITIONS = ['Excellent', 'Good', 'Fair', 'Needs Work'];
 
 export function MotorcycleListingForm({ onDataChange, initialData }: MotorcycleListingFormProps) {
-  const { register, control, watch, formState: { errors } } = useForm<MotorcycleFormData>({
+  const { register, control, watch } = useForm<MotorcycleFormData>({
     defaultValues: initialData || { mode: 'rent' }
   });
 
   const formData = watch();
 
   useEffect(() => {
-    // Only validate title if it has actual content (not empty or just whitespace)
-    if (formData.title && formData.title.trim().length > 0) {
-      const error = validateNoContactInfo(formData.title);
-      if (error) {
-        toast({
-          title: "Invalid Title",
-          description: error,
-          variant: "destructive"
-        });
-      }
-    }
     onDataChange(formData);
   }, [formData, onDataChange]);
 
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader><CardTitle>Basic Information</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Basic Information (Optional)</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           <div>
             <Label htmlFor="title">Listing Title</Label>
             <Input id="title" {...register('title')} placeholder="e.g., 2021 Yamaha MT-07" />
-            <p className="text-xs text-muted-foreground mt-1">No contact info allowed.</p>
-            {errors.title && <p className="text-sm text-destructive mt-1">{errors.title.message}</p>}
           </div>
 
           <div>
@@ -91,48 +76,41 @@ export function MotorcycleListingForm({ onDataChange, initialData }: MotorcycleL
                 </Select>
               )}
             />
-            {errors.motorcycle_type && <p className="text-sm text-destructive mt-1">{errors.motorcycle_type.message}</p>}
           </div>
 
           <div>
             <Label htmlFor="city">Location / City</Label>
             <Input id="city" {...register('city')} placeholder="e.g., Tulum, Playa del Carmen" />
-            {errors.city && <p className="text-sm text-destructive mt-1">{errors.city.message}</p>}
           </div>
         </CardContent>
       </Card>
 
       <Card>
-        <CardHeader><CardTitle>Motorcycle Specifications</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Motorcycle Specifications (Optional)</CardTitle></CardHeader>
         <CardContent className="grid md:grid-cols-2 gap-4">
           <div>
             <Label htmlFor="brand">Brand</Label>
             <Input id="brand" {...register('brand')} placeholder="Yamaha, Honda, KTM..." />
-            {errors.brand && <p className="text-sm text-destructive mt-1">{errors.brand.message}</p>}
           </div>
 
           <div>
             <Label htmlFor="model">Model</Label>
             <Input id="model" {...register('model')} placeholder="MT-07" />
-            {errors.model && <p className="text-sm text-destructive mt-1">{errors.model.message}</p>}
           </div>
 
           <div>
             <Label htmlFor="year">Year</Label>
             <Input id="year" type="number" {...register('year', { valueAsNumber: true })} placeholder="2021" />
-            {errors.year && <p className="text-sm text-destructive mt-1">{errors.year.message}</p>}
           </div>
 
           <div>
             <Label htmlFor="mileage">Mileage (km)</Label>
             <Input id="mileage" type="number" {...register('mileage', { valueAsNumber: true })} placeholder="e.g., 12,000" />
-            {errors.mileage && <p className="text-sm text-destructive mt-1">{errors.mileage.message}</p>}
           </div>
 
           <div>
             <Label htmlFor="engine_cc">Engine (cc)</Label>
             <Input id="engine_cc" type="number" {...register('engine_cc', { valueAsNumber: true })} placeholder="689" />
-            {errors.engine_cc && <p className="text-sm text-destructive mt-1">{errors.engine_cc.message}</p>}
           </div>
 
           <div>
@@ -149,7 +127,6 @@ export function MotorcycleListingForm({ onDataChange, initialData }: MotorcycleL
                 </Select>
               )}
             />
-            {errors.transmission && <p className="text-sm text-destructive mt-1">{errors.transmission.message}</p>}
           </div>
 
           <div>
@@ -166,7 +143,6 @@ export function MotorcycleListingForm({ onDataChange, initialData }: MotorcycleL
                 </Select>
               )}
             />
-            {errors.fuel_type && <p className="text-sm text-destructive mt-1">{errors.fuel_type.message}</p>}
           </div>
 
           <div>
@@ -183,13 +159,12 @@ export function MotorcycleListingForm({ onDataChange, initialData }: MotorcycleL
                 </Select>
               )}
             />
-            {errors.condition && <p className="text-sm text-destructive mt-1">{errors.condition.message}</p>}
           </div>
         </CardContent>
       </Card>
 
       <Card>
-        <CardHeader><CardTitle>Features</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Features (Optional)</CardTitle></CardHeader>
         <CardContent className="space-y-2">
           <div className="flex items-center space-x-2">
             <Controller name="has_abs" control={control} render={({ field }) => <Checkbox id="has_abs" checked={field.value} onCheckedChange={field.onChange} />} />
