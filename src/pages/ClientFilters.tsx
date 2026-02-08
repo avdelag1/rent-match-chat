@@ -117,8 +117,8 @@ export default function ClientFilters() {
     queryClient.invalidateQueries({ queryKey: ['smart-listings'] });
     queryClient.invalidateQueries({ queryKey: ['listings'] });
     
-    // Navigate back
-    navigate(-1);
+    // Always go back to dashboard, not just -1
+    navigate('/client/dashboard', { replace: true });
   }, [selectedCategories, selectedListingType, setCategories, setListingType, queryClient, navigate]);
   
   const handleReset = useCallback(() => {
@@ -128,7 +128,8 @@ export default function ClientFilters() {
   }, [resetClientFilters]);
   
   const handleBack = useCallback(() => {
-    navigate(-1);
+    // Always go back to dashboard, not just -1
+    navigate('/client/dashboard', { replace: true });
   }, [navigate]);
   
   return (
