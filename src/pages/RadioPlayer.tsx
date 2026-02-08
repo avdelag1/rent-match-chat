@@ -2,10 +2,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRadio } from '@/contexts/RadioContext';
 import { getStationsByCity, cityThemes, CityLocation } from '@/data/radioStations';
-import { ArrowLeft, Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Heart, Mic2, Settings, Shuffle, ListMusic } from 'lucide-react';
+import { ArrowLeft, Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Heart, Shuffle, ListMusic } from 'lucide-react';
 
 export default function RadioPlayer() {
-  const { state, error, togglePlayPause, changeStation, setCity, toggleFavorite, play, setVolume, toggleShuffle, playFavorites } = useRadio();
+  const { state, error, togglePlayPause, changeStation, setCity, toggleFavorite, play, setVolume, toggleShuffle, playFavorites, setSkin } = useRadio();
   const [showCitySelector, setShowCitySelector] = useState(false);
   const [showPlaylist, setShowPlaylist] = useState(false);
 
@@ -89,39 +89,80 @@ export default function RadioPlayer() {
               fill={state.currentStation && state.favorites.includes(state.currentStation.id) ? "currentColor" : "none"} />
           </button>
 
-          <button className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors">
-            <Mic2 className="w-5 h-5 text-white/50" />
-          </button>
-          
-          <button className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors">
-            <Settings className="w-5 h-5 text-white/50" />
+          {/* Skin Selector */}
+          <button 
+            onClick={() => {
+              const skins: Array<'modern' | 'vinyl' | 'retro'> = ['modern', 'vinyl', 'retro'];
+              const currentIndex = skins.indexOf(state.skin as any);
+              const nextSkin = skins[(currentIndex + 1) % skins.length];
+              setSkin(nextSkin);
+            }}
+            className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors"
+            title={`Skin: ${state.skin}`}
+          >
+            {state.skin === 'vinyl' && <div className="w-5 h-5 rounded-full border-2 border-white/50" />}
+            {state.skin === 'retro' && <div className="w-5 h-3 border-2 border-white/50 rounded-sm" />}
+            {state.skin === 'modern' && <div className="w-4 h-4 rounded-sm border-2 border-white/50" />}
           </button>
         </div>
 
-        {/* Vinyl Record */}
+        {/* Vinyl Record - Skin varies */}
         <motion.div
-          className="w-36 h-36 rounded-full relative mb-4"
+          className={`relative mb-4 ${
+            state.skin === 'vinyl' ? 'w-36 h-36 rounded-full' :
+            state.skin === 'retro' ? 'w-40 h-28 rounded-lg' :
+            'w-32 h-32 rounded-3xl'
+          }`}
           style={{
-            background: 'linear-gradient(135deg, #222 0%, #111 50%, #222 100%)',
-            border: '1px solid #333'
+            background: state.skin === 'vinyl' 
+              ? 'linear-gradient(135deg, #222 0%, #111 50%, #222 100%)'
+              : state.skin === 'retro'
+              ? 'linear-gradient(135deg, #8B4513 0%, #5D3A1A 50%, #8B4513 100%)'
+              : 'linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 50%, #1a1a1a 100%)',
+            border: state.skin === 'retro' ? '4px solid #D4A574' : '1px solid #333'
           }}
           animate={{ rotate: state.isPlaying ? 360 : 0 }}
-          transition={{ duration: state.isPlaying ? 4 : 0, repeat: Infinity, ease: "linear" }}
+          transition={{ duration: state.isPlaying ? (state.skin === 'retro' ? 6 : 4) : 0, repeat: Infinity, ease: "linear" }}
         >
-          {/* Vinyl grooves */}
-          <div className="absolute inset-1.5 rounded-full border border-white/10" />
-          <div className="absolute inset-3 rounded-full border border-white/5" />
-          <div className="absolute inset-5 rounded-full border border-white/5" />
+          {state.skin === 'vinyl' && (
+            <>
+              <div className="absolute inset-1.5 rounded-full border border-white/10" />
+              <div className="absolute inset-3 rounded-full border border-white/5" />
+              <div className="absolute inset-5 rounded-full border border-white/5" />
+            </>
+          )}
+          
+          {state.skin === 'retro' && (
+            <>
+              {/* Cassette windows */}
+              <div className="absolute inset-4 bg-black/60 rounded-md flex items-center justify-center gap-2">
+                <div className="w-8 h-6 rounded-full bg-white/20" />
+                <div className="w-8 h-6 rounded-full bg-white/20" />
+              </div>
+              {/* Tape holes */}
+              <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-4 h-6 bg-white rounded-full" />
+              <div className="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-6 bg-white rounded-full" />
+            </>
+          )}
+          
+          {state.skin === 'modern' && (
+            <>
+              <div className="absolute inset-2 rounded-full border border-white/10" />
+              <div className="absolute inset-4 rounded-full border border-white/5" />
+            </>
+          )}
 
           {/* Center label - Station info */}
-          <div className="absolute inset-10 rounded-full bg-white flex flex-col items-center justify-center">
+          <div className={`absolute inset-10 rounded-full bg-white flex flex-col items-center justify-center ${
+            state.skin === 'retro' ? 'inset-8' : ''
+          }`}>
             <span className="text-xs font-bold text-black">{state.currentStation?.frequency || '--.-'}</span>
             <span className="text-[8px] text-black/60 uppercase">{state.currentStation?.genre || '---'}</span>
           </div>
 
           {/* Center hole */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-1.5 h-1.5 rounded-full bg-black" />
+            <div className={`rounded-full bg-black ${state.skin === 'retro' ? 'w-2 h-2' : 'w-1.5 h-1.5'}`} />
           </div>
         </motion.div>
 
