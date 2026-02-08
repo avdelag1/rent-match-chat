@@ -8,7 +8,7 @@
 import { startTransition } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, SlidersHorizontal, Flame, MessageCircle, User, Plus, List, Building2, Heart, Filter } from 'lucide-react';
+import { Home, SlidersHorizontal, Flame, MessageCircle, User, List, Building2, Heart, Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUnreadMessageCount } from '@/hooks/useUnreadMessageCount';
 import { useScrollDirection } from '@/hooks/useScrollDirection';
