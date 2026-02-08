@@ -5,7 +5,7 @@ import { getStationsByCity, cityThemes, CityLocation } from '@/data/radioStation
 import { ArrowLeft, Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Heart, Mic2, Settings, Shuffle, ListMusic } from 'lucide-react';
 
 export default function RadioPlayer() {
-  const { state, loading, error, togglePlayPause, changeStation, setCity, toggleFavorite, play, setVolume, toggleShuffle, favorites, playFavorites } = useRadio();
+  const { state, loading, error, togglePlayPause, changeStation, setCity, toggleFavorite, play, setVolume, toggleShuffle, playFavorites } = useRadio();
   const [showCitySelector, setShowCitySelector] = useState(false);
   const [showPlaylist, setShowPlaylist] = useState(false);
 
@@ -196,8 +196,8 @@ export default function RadioPlayer() {
             <ListMusic className="w-4 h-4 text-white/30" />
           </button>
           <button onClick={() => state.currentStation && toggleFavorite(state.currentStation.id)} className="flex flex-col items-center gap-1">
-            <Heart className={`w-4 h-4 ${state.currentStation && favorites.includes(state.currentStation.id) ? 'text-white' : 'text-white/30'}`}
-              fill={state.currentStation && favorites.includes(state.currentStation.id) ? "currentColor" : "none"} />
+            <Heart className={`w-4 h-4 ${state.currentStation && state.favorites.includes(state.currentStation.id) ? 'text-white' : 'text-white/30'}`}
+              fill={state.currentStation && state.favorites.includes(state.currentStation.id) ? "currentColor" : "none"} />
           </button>
           <button className="flex flex-col items-center gap-1">
             <Mic2 className="w-4 h-4 text-white/30" />
@@ -261,7 +261,7 @@ export default function RadioPlayer() {
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-2">
               {/* Play Favorites */}
-              {favorites.length > 0 && (
+              {state.favorites.length > 0 && (
                 <button
                   onClick={() => { playFavorites(); setShowPlaylist(false); }}
                   className="w-full p-4 rounded-xl bg-white/20 flex items-center gap-4"
@@ -271,7 +271,7 @@ export default function RadioPlayer() {
                   </div>
                   <div className="flex-1 text-left">
                     <p className="font-medium">Favorites</p>
-                    <p className="text-white/40 text-sm">{favorites.length} stations</p>
+                    <p className="text-white/40 text-sm">{state.favorites.length} stations</p>
                   </div>
                 </button>
               )}
@@ -291,7 +291,7 @@ export default function RadioPlayer() {
                     <p className="font-medium text-sm">{station.name}</p>
                     <p className="text-white/40 text-xs">{station.genre}</p>
                   </div>
-                  {favorites.includes(station.id) && (
+                  {state.favorites.includes(station.id) && (
                     <Heart className="w-4 h-4 text-white" fill="currentColor" />
                   )}
                 </button>
