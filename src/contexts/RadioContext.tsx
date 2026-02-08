@@ -92,14 +92,23 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
   }, [state.volume]);
 
   const loadUserPreferences = async () => {
+    // Set default station immediately
+    const defaultStations = getStationsByCity('tulum');
+    const defaultStation = defaultStations.length > 0 ? defaultStations[0] : null;
+    
     if (!user?.id) {
-      const stations = getStationsByCity('tulum');
-      if (stations.length > 0) {
-        setState(prev => ({ ...prev, currentStation: stations[0] }));
+      if (defaultStation) {
+        setState(prev => ({ ...prev, currentStation: defaultStation }));
       }
       setLoading(false);
       return;
     }
+
+    // Set defaults immediately before fetching
+    setState(prev => ({
+      ...prev,
+      currentStation: defaultStation || prev.currentStation
+    }));
 
     try {
       const { data, error } = await supabase
@@ -109,7 +118,6 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
         .single();
 
       if (error) {
-        logger.info('[RadioPlayer] Using default preferences');
         setLoading(false);
         return;
       }
@@ -128,7 +136,7 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
           ...prev,
           skin: (data.radio_skin as RadioSkin) || 'modern',
           currentCity: city,
-          currentStation: currentStation,
+          currentStation: currentStation || defaultStation,
           volume: data.radio_volume || 0.7,
           isShuffle: data.radio_shuffle_mode || false,
           favorites: data.radio_favorite_stations || []

@@ -44,17 +44,8 @@ export default function RadioPlayer() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [togglePlayPause, changeStation, setVolume, state.volume]);
 
-  // Error display - subtle inline, not blocking
-  if (error && !state.isPlaying) {
-    return (
-      <div className="fixed inset-0 bg-black text-white flex flex-col items-center justify-center">
-        <p className="text-white/40 mb-4">{error}</p>
-        <button onClick={() => window.location.reload()} className="px-6 py-2 bg-white/10 text-white rounded-full text-sm">
-          Retry
-        </button>
-      </div>
-    );
-  }
+  // No loading spinner - UI renders immediately
+  // Error is shown inline if stream fails
 
   return (
     <div className="fixed inset-0 bg-black text-white flex flex-col">
