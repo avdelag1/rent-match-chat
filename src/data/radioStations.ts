@@ -139,6 +139,42 @@ export const radioStations: RadioStation[] = [
     genre: 'Electronic',
     description: 'A late night blend of deep-house and downtempo chill'
   },
+  {
+    id: 'miami-vibes',
+    name: 'Miami Vibes',
+    frequency: '97.5 FM',
+    streamUrl: 'https://ice1.somafm.com/groovesalad-128-mp3',
+    city: 'miami',
+    genre: 'Chillout',
+    description: 'Smooth tropical beats for sunset sessions'
+  },
+  {
+    id: 'miami-latin',
+    name: 'Miami Latin',
+    frequency: '99.1 FM',
+    streamUrl: 'https://ice1.somafm.com/u80s-128-mp3',
+    city: 'miami',
+    genre: 'Latin Fusion',
+    description: 'Latin rhythms with modern electronic twist'
+  },
+  {
+    id: 'miami-poolside',
+    name: 'Poolside FM',
+    frequency: '100.5 FM',
+    streamUrl: 'https://ice1.somafm.com/poptron-128-mp3',
+    city: 'miami',
+    genre: 'Poolside Pop',
+    description: 'Sunny daytime vibes for pool parties'
+  },
+  {
+    id: 'miami-deep',
+    name: 'Miami Deep House',
+    frequency: '96.9 FM',
+    streamUrl: 'https://ice1.somafm.com/fluid-128-mp3',
+    city: 'miami',
+    genre: 'Deep House',
+    description: 'Deep underground house music'
+  },
 
   // Ibiza - Electronic Paradise
   {
@@ -154,10 +190,46 @@ export const radioStations: RadioStation[] = [
     id: 'ibiza-deep',
     name: 'Ibiza Deep House',
     frequency: '95.2 FM',
-    streamUrl: 'https://ice1.somafm.com/u80s-128-mp3',
+    streamUrl: 'https://ice1.somafm.com/fluid-128-mp3',
     city: 'ibiza',
     genre: 'Deep House',
     description: 'Deep house vibes from the white isle'
+  },
+  {
+    id: 'ibiza-club',
+    name: 'Ibiza Club Classics',
+    frequency: '98.4 FM',
+    streamUrl: 'https://ice1.somafm.com/beatblender-128-mp3',
+    city: 'ibiza',
+    genre: 'Club Classics',
+    description: 'Iconic club tracks from the island legends'
+  },
+  {
+    id: 'ibiza-chill',
+    name: 'Ibiza Sunset Chill',
+    frequency: '92.8 FM',
+    streamUrl: 'https://ice1.somafm.com/lush-128-mp3',
+    city: 'ibiza',
+    genre: 'Chillout',
+    description: 'Sunset sounds for the beach clubs'
+  },
+  {
+    id: 'ibiza-trance',
+    name: 'Ibiza Trance',
+    frequency: '94.6 FM',
+    streamUrl: 'https://ice1.somafm.com/sonicuniverse-128-mp3',
+    city: 'ibiza',
+    genre: 'Trance',
+    description: 'Progressive trance and melodic journeys'
+  },
+  {
+    id: 'ibiza-afterhours',
+    name: 'Ibiza Afterhours',
+    frequency: '91.2 FM',
+    streamUrl: 'https://ice1.somafm.com/spacestation-128-mp3',
+    city: 'ibiza',
+    genre: 'Ambient Electronic',
+    description: 'Late night ambient for sunrise sessions'
   },
 
   // Tulum/Playa del Carmen - Meditation, Chill, Ambient

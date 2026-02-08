@@ -2,11 +2,12 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRadio } from '@/contexts/RadioContext';
 import { getStationsByCity, cityThemes, CityLocation } from '@/data/radioStations';
-import { ArrowLeft, Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Heart, Mic2, Settings } from 'lucide-react';
+import { ArrowLeft, Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Heart, Mic2, Settings, Shuffle, ListMusic } from 'lucide-react';
 
 export default function RadioPlayer() {
-  const { state, loading, error, togglePlayPause, changeStation, setCity, toggleFavorite, play, setVolume } = useRadio();
+  const { state, loading, error, togglePlayPause, changeStation, setCity, toggleFavorite, play, setVolume, toggleShuffle, favorites, playFavorites } = useRadio();
   const [showCitySelector, setShowCitySelector] = useState(false);
+  const [showPlaylist, setShowPlaylist] = useState(false);
 
   const cityStations = getStationsByCity(state.currentCity);
   const currentStationIndex = cityStations.findIndex(s => s.id === state.currentStation?.id);
@@ -188,9 +189,15 @@ export default function RadioPlayer() {
 
         {/* Bottom Icons - Navigation Layer */}
         <div className="flex items-center justify-center gap-6">
-          <button className="flex flex-col items-center gap-1">
-            <Heart className={`w-4 h-4 ${state.currentStation && state.favorites.includes(state.currentStation.id) ? 'text-white' : 'text-white/30'}`}
-              fill={state.currentStation && state.favorites.includes(state.currentStation.id) ? "currentColor" : "none"} />
+          <button onClick={toggleShuffle} className="flex flex-col items-center gap-1">
+            <Shuffle className={`w-4 h-4 ${state.isShuffle ? 'text-white' : 'text-white/30'}`} />
+          </button>
+          <button onClick={() => setShowPlaylist(true)} className="flex flex-col items-center gap-1">
+            <ListMusic className="w-4 h-4 text-white/30" />
+          </button>
+          <button onClick={() => state.currentStation && toggleFavorite(state.currentStation.id)} className="flex flex-col items-center gap-1">
+            <Heart className={`w-4 h-4 ${state.currentStation && favorites.includes(state.currentStation.id) ? 'text-white' : 'text-white/30'}`}
+              fill={state.currentStation && favorites.includes(state.currentStation.id) ? "currentColor" : "none"} />
           </button>
           <button className="flex flex-col items-center gap-1">
             <Mic2 className="w-4 h-4 text-white/30" />
@@ -230,6 +237,63 @@ export default function RadioPlayer() {
                     <p className="font-medium">{cityThemes[city].name}</p>
                     <p className="text-white/40 text-sm">{getStationsByCity(city).length} stations</p>
                   </div>
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Playlist Modal */}
+      <AnimatePresence>
+        {showPlaylist && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/95 z-50 flex flex-col"
+          >
+            <div className="flex items-center justify-between p-4 border-b border-white/10">
+              <span className="font-semibold">Playlist</span>
+              <button onClick={() => setShowPlaylist(false)} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 space-y-2">
+              {/* Play Favorites */}
+              {favorites.length > 0 && (
+                <button
+                  onClick={() => { playFavorites(); setShowPlaylist(false); }}
+                  className="w-full p-4 rounded-xl bg-white/20 flex items-center gap-4"
+                >
+                  <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center">
+                    <Heart className="w-6 h-6 text-black" fill="currentColor" />
+                  </div>
+                  <div className="flex-1 text-left">
+                    <p className="font-medium">Favorites</p>
+                    <p className="text-white/40 text-sm">{favorites.length} stations</p>
+                  </div>
+                </button>
+              )}
+
+              {/* Current City Stations */}
+              <p className="text-white/40 text-sm mt-4 mb-2">{cityThemes[state.currentCity].name}</p>
+              {cityStations.map((station) => (
+                <button
+                  key={station.id}
+                  onClick={() => { play(station); setShowPlaylist(false); }}
+                  className={`w-full p-3 rounded-xl flex items-center gap-3 ${state.currentStation?.id === station.id ? 'bg-white/20' : 'bg-white/5'}`}
+                >
+                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white font-bold text-xs">
+                    {station.frequency}
+                  </div>
+                  <div className="flex-1 text-left">
+                    <p className="font-medium text-sm">{station.name}</p>
+                    <p className="text-white/40 text-xs">{station.genre}</p>
+                  </div>
+                  {favorites.includes(station.id) && (
+                    <Heart className="w-4 h-4 text-white" fill="currentColor" />
+                  )}
                 </button>
               ))}
             </div>
