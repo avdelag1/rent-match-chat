@@ -11,7 +11,7 @@ const buttonVariants = cva(
   // - scale(0.97) for subtle press (not aggressive 0.92)
   // - No hover:scale on touch devices (iOS-like)
   // - Cubic-bezier for iOS spring physics
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl text-sm font-semibold transition-transform duration-[50ms] ease-[cubic-bezier(0.25,0.1,0.25,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-[0.97] select-none touch-manipulation will-change-transform transform-gpu",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl text-sm font-semibold transition-transform duration-75 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-[0.97] select-none touch-manipulation will-change-transform transform-gpu",
   {
     variants: {
       variant: {
