@@ -135,33 +135,31 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
     return location.pathname === item.path;
   };
 
-  // HIGH CONTRAST: Clear color distinction between active and inactive states - VIBRANT ORANGE
-  const getIconColorClass = (item: NavItem, active: boolean) => {
-    if (!active) {
-      // Inactive icons - BRIGHT and clearly visible against light background
-      return 'text-gray-500';
+  // HIGH CONTRAST: Clear color distinction between active and inactive states
+  const getIconColorClass = (active: boolean) => {
+    // Active icons - VIBRANT orange with glow
+    if (active) {
+      return 'text-orange-500 drop-shadow-[0_0_8px_rgba(249,115,22,0.5)]';
     }
-
-    // Active icons - VIBRANT orange
-    return 'text-orange-500';
+    // Inactive icons - BRIGHT white for visibility on any background
+    return 'text-white';
   };
 
   // HIGH CONTRAST: Clear indicator dot colors - VIBRANT ORANGE
-  const getIndicatorColorClass = (item: NavItem) => {
-    return 'bg-orange-500';
+  const getIndicatorColorClass = () => {
+    return 'bg-orange-500 drop-shadow-[0_0_6px_rgba(249,115,22,0.6)]';
   };
 
 
   return (
     <nav className={cn("app-bottom-bar pointer-events-none px-1", !isVisible && "nav-hidden")}>
       <div
-        // BRIGHT STYLE: Clean light background with vibrant buttons
-        className="flex items-center justify-between w-full max-w-xl mx-auto px-2 py-2 pointer-events-auto"
+        // DARK BACKGROUND: Makes white icons visible
+        className="flex items-center justify-between w-full max-w-xl mx-auto px-2 py-2 pointer-events-auto bg-gray-900/90 backdrop-blur-sm"
         style={{
           // GPU acceleration for smooth animations
           transform: 'translateZ(0)',
           backfaceVisibility: 'hidden',
-          // Clean light background
         }}
       >
         {navItems.map((item, index) => {
@@ -178,7 +176,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
                 'relative flex items-center justify-center rounded-xl',
                 'transition-all duration-100 ease-out',
                 'active:scale-[0.9]',
-                'hover:bg-orange-100',
+                'hover:bg-orange-500/30',
                 'touch-manipulation',
                 '-webkit-tap-highlight-color-transparent'
               )}
@@ -194,7 +192,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
                   layoutId="activeIndicator"
                   className={cn(
                     'absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full',
-                    getIndicatorColorClass(item)
+                    getIndicatorColorClass()
                   )}
                 />
               )}
@@ -219,7 +217,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
               <Icon
                 className={cn(
                   'transition-colors duration-150',
-                  getIconColorClass(item, active)
+                  getIconColorClass(active)
                 )}
                 style={{
                   width: ICON_SIZE,
