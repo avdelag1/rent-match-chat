@@ -2,8 +2,7 @@
  * BOTTOM NAVIGATION BAR
  *
  * Full-width, ergonomic bottom navigation optimized for one-handed use.
- * HIGH CONTRAST: Clear active/inactive states with solid colors.
- * BRIGHT & VIBRANT: Clean light background with vivid orange accents.
+ * DARK MODE: Clean dark background with white icons for premium look.
  */
 
 import { startTransition } from 'react';
@@ -15,8 +14,8 @@ import { useUnreadMessageCount } from '@/hooks/useUnreadMessageCount';
 import { useScrollDirection } from '@/hooks/useScrollDirection';
 import { prefetchRoute } from '@/utils/routePrefetcher';
 
-// HIGH CONTRAST SIZING
-const ICON_SIZE = 26; // Larger icons for better visibility
+// ICON SIZING
+const ICON_SIZE = 26;
 const TOUCH_TARGET_SIZE = 56;
 
 interface BottomNavigationProps {
@@ -135,22 +134,6 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
     return location.pathname === item.path;
   };
 
-  // HIGH CONTRAST: Clear color distinction between active and inactive states
-  const getIconColorClass = (active: boolean) => {
-    // Active icons - VIBRANT orange with glow
-    if (active) {
-      return 'text-orange-500 drop-shadow-[0_0_8px_rgba(249,115,22,0.5)]';
-    }
-    // Inactive icons - BRIGHT white for visibility on any background
-    return 'text-white';
-  };
-
-  // HIGH CONTRAST: Clear indicator dot colors - VIBRANT ORANGE
-  const getIndicatorColorClass = () => {
-    return 'bg-orange-500 drop-shadow-[0_0_6px_rgba(249,115,22,0.6)]';
-  };
-
-
   return (
     <nav className={cn("app-bottom-bar pointer-events-none px-1", !isVisible && "nav-hidden")}>
       <div
@@ -185,13 +168,13 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
                 padding: 12,
               }}
             >
-              {/* HIGH CONTRAST: Visible indicator dot for active state */}
+              {/* Active indicator dot */}
               {active && (
                 <motion.div
                   layoutId="activeIndicator"
                   className={cn(
                     'absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full',
-                    getIndicatorColorClass()
+                    'bg-orange-500'
                   )}
                 />
               )}
@@ -216,7 +199,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
               <Icon
                 className={cn(
                   'transition-colors duration-150',
-                  getIconColorClass(active)
+                  active ? 'text-orange-500' : 'text-white/70'
                 )}
                 style={{
                   width: ICON_SIZE,
