@@ -55,7 +55,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
           size === 'sm' ? 'h-8 w-8' : size === 'md' ? 'h-9 w-9' : 'h-10 w-10',
           className
         )}
-        aria-label={`Switch to ${activeMode === 'client' ? 'I Can Do' : 'I Need'} mode`}
+        aria-label={`Switch to ${activeMode === 'client' ? 'I can Do' : 'I own'} mode`}
       >
         <AnimatePresence mode="wait">
           {isSwitching ? (
@@ -106,7 +106,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
           sizeClasses[size],
           className
         )}
-        aria-label={`Switch to ${activeMode === 'client' ? 'I Can Do' : 'I Need'} mode`}
+        aria-label={`Switch to ${activeMode === 'client' ? 'I can Do' : 'I own'} mode`}
       >
         <motion.div
           className="absolute inset-y-1 rounded-full bg-gradient-to-r from-primary/30 to-primary/20"
@@ -125,7 +125,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
           activeMode === 'client' ? 'text-teal-400 font-semibold' : 'text-white/60'
         )}>
           <Briefcase className="h-3.5 w-3.5" />
-          <span className="font-bold">I Can Do</span>
+          <span className="font-bold">I can Do</span>
         </div>
 
         <div className={cn(
@@ -133,7 +133,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
           activeMode === 'owner' ? 'text-orange-400 font-semibold' : 'text-white/60'
         )}>
           <Search className="h-3.5 w-3.5" />
-          <span className="font-bold">I Need</span>
+          <span className="font-bold">I own</span>
         </div>
 
         <AnimatePresence>
@@ -167,7 +167,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
         sizeClasses[size],
         className
       )}
-      aria-label={`Switch to ${activeMode === 'client' ? 'I Can Do' : 'I Need'} mode`}
+      aria-label={`Switch to ${activeMode === 'client' ? 'I can Do' : 'I own'} mode`}
     >
       <AnimatePresence mode="wait">
         <motion.div
@@ -184,12 +184,12 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
           ) : activeMode === 'client' ? (
             <>
               <Briefcase className="h-3.5 w-3.5 text-teal-400" />
-              <span className="font-bold text-teal-400">I Can Do</span>
+              <span className="font-bold text-teal-400">I can Do</span>
             </>
           ) : (
             <>
               <Search className="h-3.5 w-3.5 text-orange-400" />
-              <span className="font-bold text-orange-400">I Need</span>
+              <span className="font-bold text-orange-400">I own</span>
             </>
           )}
         </motion.div>
