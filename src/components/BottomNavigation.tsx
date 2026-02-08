@@ -84,14 +84,14 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
     return location.pathname === item.path;
   };
 
-  // BRIGHT: Clear active/inactive with enhanced white colors
+  // BRIGHT: Clear active/inactive with enhanced colors
   const getIconColorClass = (active: boolean) => {
-    return active ? 'text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]' : 'text-white/70';
+    return active ? 'text-orange-400 drop-shadow-[0_0_8px_rgba(251,146,60,0.6)]' : 'text-white/80';
   };
 
   // BRIGHT: Indicator dot
-  const getIndicatorColorClass = (item: NavItem) => {
-    return 'bg-white drop-shadow-[0_0_6px_rgba(255,255,255,0.6)]';
+  const getIndicatorColorClass = () => {
+    return 'bg-orange-400 drop-shadow-[0_0_6px_rgba(251,146,60,0.6)]';
   };
 
 
@@ -99,7 +99,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
     <nav className={cn("app-bottom-bar pointer-events-none px-1", !isVisible && "nav-hidden")}>
       <div
         // TRANSPARENT: No background, floating on content
-        className="flex items-center justify-between w-full max-w-xl mx-auto px-2 pointer-events-auto"
+        className="flex items-center justify-between w-full max-w-xl mx-auto px-2 pointer-events-auto bg-transparent"
         style={{
           transform: 'translateZ(0)',
           backfaceVisibility: 'hidden',
@@ -135,7 +135,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
                   layoutId="activeIndicator"
                   className={cn(
                     'absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full',
-                    getIndicatorColorClass(item)
+                    getIndicatorColorClass()
                   )}
                 />
               )}
