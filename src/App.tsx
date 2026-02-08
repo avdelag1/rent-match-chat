@@ -23,8 +23,8 @@ import { useForceUpdateOnVersionChange, UpdateNotification } from "@/hooks/useAu
 // SPEED OF LIGHT: Persistent layout wrapper - mounted ONCE, never remounts
 import { PersistentDashboardLayout } from "@/components/PersistentDashboardLayout";
 
-// AMBIENT DEPTH: Global parallax background - mounted ONCE at root
-import { DepthParallaxBackground } from "@/components/DepthParallaxBackground";
+// DISABLED: DepthParallaxBackground was causing performance issues
+// import { DepthParallaxBackground } from "@/components/DepthParallaxBackground";
 
 // Import UI components directly (not lazy) to avoid useContext issues with ThemeProvider
 import { Toaster } from "@/components/ui/toaster";
@@ -158,8 +158,8 @@ const App = () => (
             <ResponsiveProvider>
             <UpdateWrapper>
               <NotificationWrapper>
-                {/* Global ambient parallax background - mounted once, persists across screens */}
-                <DepthParallaxBackground />
+                {/* DISABLED: DepthParallaxBackground was causing performance issues */}
+                {/* <DepthParallaxBackground /> */}
                 
                 {/* Update notification banner */}
                 <UpdateNotification />

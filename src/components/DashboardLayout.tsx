@@ -15,7 +15,8 @@ import type { QuickFilterCategory } from '@/types/filters'
 import { TopBar } from '@/components/TopBar'
 import { BottomNavigation } from '@/components/BottomNavigation'
 import { AdvancedFilters } from '@/components/AdvancedFilters'
-import { LiveHDBackground } from '@/components/LiveHDBackground'
+// DISABLED: LiveHDBackground was causing performance issues
+// import { LiveHDBackground } from '@/components/LiveHDBackground'
 import { RadioMiniPlayer } from '@/components/RadioMiniPlayer'
 
 // Lazy-loaded Dialogs (improves bundle size and initial load)
@@ -494,11 +495,10 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
 
   return (
     <div className="app-root min-h-screen min-h-dvh overflow-hidden relative" style={{ width: '100%', maxWidth: '100vw' }}>
-      {/* LIVE HD BACKGROUND: Subtle animated background for premium feel
-          - GPU-accelerated CSS animations (no JS loop)
-          - Respects reduced motion preferences
-          - Zero battery impact */}
-      <LiveHDBackground theme="default" showOrbs={true} intensity={0.7} />
+      {/* DISABLED: LiveHDBackground was causing performance issues on mobile
+          - Animated orbs and CSS animations were slowing down page transitions
+          - Removed for snappier navigation */}
+      {/* <LiveHDBackground theme="default" showOrbs={true} intensity={0.7} /> */}
 
       {/* REMOVED: NotificationSystem was causing duplicate realtime subscriptions.
           Global notification handling is now done exclusively by NotificationWrapper (useNotifications)
