@@ -65,7 +65,7 @@ export default function RadioPlayer() {
       {/* Center - Vinyl & Controls */}
       <div className="flex-1 flex flex-col items-center justify-center px-4">
         
-        {/* Quick Controls - Shuffle, Playlist, Favorites - Close to vinyl */}
+        {/* Quick Controls - Shuffle, Playlist, Favorites, Settings, Mic */}
         <div className="flex items-center justify-center gap-4 mb-4">
           <button 
             onClick={toggleShuffle}
@@ -87,6 +87,14 @@ export default function RadioPlayer() {
           >
             <Heart className={`w-5 h-5 ${state.currentStation && state.favorites.includes(state.currentStation.id) ? 'text-white' : 'text-white/50'}`}
               fill={state.currentStation && state.favorites.includes(state.currentStation.id) ? "currentColor" : "none"} />
+          </button>
+
+          <button className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors">
+            <Mic2 className="w-5 h-5 text-white/50" />
+          </button>
+          
+          <button className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors">
+            <Settings className="w-5 h-5 text-white/50" />
           </button>
         </div>
 
@@ -189,16 +197,6 @@ export default function RadioPlayer() {
 
           <button onClick={() => changeStation('next')} className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center">
             <SkipForward className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Bottom Icons */}
-        <div className="flex items-center justify-center gap-6">
-          <button className="flex flex-col items-center gap-1">
-            <Mic2 className="w-4 h-4 text-white/30" />
-          </button>
-          <button className="flex flex-col items-center gap-1">
-            <Settings className="w-4 h-4 text-white/30" />
           </button>
         </div>
       </div>
