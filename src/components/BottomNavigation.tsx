@@ -154,10 +154,9 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
   return (
     <nav className={cn("app-bottom-bar pointer-events-none px-1", !isVisible && "nav-hidden")}>
       <div
-        // DARK BACKGROUND: Makes white icons visible
-        className="flex items-center justify-between w-full max-w-xl mx-auto px-2 py-2 pointer-events-auto bg-gray-900/90 backdrop-blur-sm"
+        // DARK MODE: Clean dark background for premium look
+        className="flex items-center justify-between w-full max-w-xl mx-auto px-2 py-2 pointer-events-auto bg-[#1C1C1E] rounded-t-2xl"
         style={{
-          // GPU acceleration for smooth animations
           transform: 'translateZ(0)',
           backfaceVisibility: 'hidden',
         }}
@@ -176,7 +175,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
                 'relative flex items-center justify-center rounded-xl',
                 'transition-all duration-100 ease-out',
                 'active:scale-[0.9]',
-                'hover:bg-orange-500/30',
+                'hover:bg-white/10',
                 'touch-manipulation',
                 '-webkit-tap-highlight-color-transparent'
               )}
@@ -205,7 +204,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
                     animate={{ scale: 1 }}
                     exit={{ scale: 0 }}
                     className={cn(
-                      "absolute -top-0.5 -right-0.5 rounded-full min-w-[20px] h-[20px] flex items-center justify-center text-[11px] font-bold text-white px-1",
+                      "absolute -top-0.5 -right-0.5 rounded-full min-w-[20px] h-[20px] flex items-center justify-center text-[11px] font-bold text-white px-1 z-10",
                       "bg-orange-500"
                     )}
                   >
