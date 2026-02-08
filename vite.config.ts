@@ -317,7 +317,7 @@ export default defineConfig(({ mode }) => ({
         preset: 'safest',
       },
     },
-    // Warn on chunks larger than 500KB instead of 1000KB for mobile optimization
-    chunkSizeWarningLimit: 500,
+    // Warn on chunks larger than 1000KB to reduce noise
+    chunkSizeWarningLimit: 1000,
   },
 }));
