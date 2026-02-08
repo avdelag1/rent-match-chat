@@ -2,8 +2,8 @@
  * BOTTOM NAVIGATION BAR
  *
  * Full-width, ergonomic bottom navigation optimized for one-handed use.
- * TRANSPARENT: No background, floating on content.
- * BRIGHT: White icons with enhanced visibility.
+ * HIGH CONTRAST: Clear active/inactive states with solid colors.
+ * BRIGHT & VIBRANT: Clean light background with vivid orange accents.
  */
 
 import { startTransition } from 'react';
@@ -15,8 +15,8 @@ import { useUnreadMessageCount } from '@/hooks/useUnreadMessageCount';
 import { useScrollDirection } from '@/hooks/useScrollDirection';
 import { prefetchRoute } from '@/utils/routePrefetcher';
 
-// BRIGHT ICON SIZING
-const ICON_SIZE = 26;
+// HIGH CONTRAST SIZING
+const ICON_SIZE = 26; // Larger icons for better visibility
 const TOUCH_TARGET_SIZE = 56;
 
 interface BottomNavigationProps {
@@ -47,32 +47,83 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
     targetSelector: '#dashboard-scroll-container'
   });
 
-  // Client/Renter Navigation Items
+  // Client/Renter Navigation Items - Profile next to Browse, Filter at the end
   const clientNavItems: NavItem[] = [
-    { id: 'browse', icon: Home, path: '/client/dashboard' },
-    { id: 'profile', icon: User, path: '/client/profile' },
-    { id: 'likes', icon: Flame, path: '/client/liked-properties' },
-    { id: 'messages', icon: MessageCircle, path: '/messages', badge: unreadCount },
-    { id: 'filter', icon: Filter, path: '/client/filters' },
+    {
+      id: 'browse',
+      icon: Home,
+      path: '/client/dashboard',
+    },
+    {
+      id: 'profile',
+      icon: User,
+      path: '/client/profile',
+    },
+    {
+      id: 'likes',
+      icon: Flame,
+      path: '/client/liked-properties',
+    },
+    {
+      id: 'messages',
+      icon: MessageCircle,
+      path: '/messages',
+      badge: unreadCount,
+    },
+    {
+      id: 'filter',
+      icon: Filter,
+      path: '/client/filters',
+    },
   ];
 
-  // Owner/Landlord Navigation Items
+  // Owner/Landlord Navigation Items - Profile next to Browse, Filter at the end
   const ownerNavItems: NavItem[] = [
-    { id: 'browse', icon: Building2, path: '/owner/dashboard' },
-    { id: 'profile', icon: User, path: '/owner/profile' },
-    { id: 'liked', icon: Heart, path: '/owner/liked-clients' },
-    { id: 'listings', icon: List, path: '/owner/properties', isCenter: true },
-    { id: 'messages', icon: MessageCircle, path: '/messages', badge: unreadCount },
-    { id: 'filter', icon: SlidersHorizontal, path: '/owner/filters' },
+    {
+      id: 'browse',
+      icon: Building2,
+      path: '/owner/dashboard',
+    },
+    {
+      id: 'profile',
+      icon: User,
+      path: '/owner/profile',
+    },
+    {
+      id: 'liked',
+      icon: Heart,
+      path: '/owner/liked-clients',
+    },
+    {
+      id: 'listings',
+      icon: List,
+      path: '/owner/properties',
+      isCenter: true,
+    },
+    {
+      id: 'messages',
+      icon: MessageCircle,
+      path: '/messages',
+      badge: unreadCount,
+    },
+    {
+      id: 'filter',
+      icon: SlidersHorizontal,
+      path: '/owner/filters',
+    },
   ];
 
   const navItems = userRole === 'client' ? clientNavItems : ownerNavItems;
 
   const handleNavClick = (event: React.MouseEvent, item: NavItem) => {
+    // Prevent event bubbling to avoid accidental triggers of other buttons
     event.stopPropagation();
+
     if (item.onClick) {
       item.onClick();
     } else if (item.path) {
+      // INSTANT NAVIGATION: Use startTransition to keep current UI responsive
+      // while React prepares the new route - feels like native app
       startTransition(() => {
         navigate(item.path!);
       });
@@ -84,28 +135,36 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
     return location.pathname === item.path;
   };
 
-  // BRIGHT: Clear active/inactive with enhanced colors
-  const getIconColorClass = (active: boolean) => {
-    return active ? 'text-orange-400 drop-shadow-[0_0_8px_rgba(251,146,60,0.6)]' : 'text-white/80';
+  // HIGH CONTRAST: Clear color distinction between active and inactive states - VIBRANT ORANGE
+  const getIconColorClass = (item: NavItem, active: boolean) => {
+    if (!active) {
+      // Inactive icons - BRIGHT and clearly visible against light background
+      return 'text-gray-500';
+    }
+
+    // Active icons - VIBRANT orange
+    return 'text-orange-500';
   };
 
-  // BRIGHT: Indicator dot
-  const getIndicatorColorClass = () => {
-    return 'bg-orange-400 drop-shadow-[0_0_6px_rgba(251,146,60,0.6)]';
+  // HIGH CONTRAST: Clear indicator dot colors - VIBRANT ORANGE
+  const getIndicatorColorClass = (item: NavItem) => {
+    return 'bg-orange-500';
   };
 
 
   return (
     <nav className={cn("app-bottom-bar pointer-events-none px-1", !isVisible && "nav-hidden")}>
       <div
-        // TRANSPARENT: No background, floating on content
-        className="flex items-center justify-between w-full max-w-xl mx-auto px-2 pointer-events-auto bg-transparent"
+        // BRIGHT STYLE: Clean light background with vibrant buttons
+        className="flex items-center justify-between w-full max-w-xl mx-auto px-2 py-2 pointer-events-auto"
         style={{
+          // GPU acceleration for smooth animations
           transform: 'translateZ(0)',
           backfaceVisibility: 'hidden',
+          // Clean light background
         }}
       >
-        {navItems.map((item) => {
+        {navItems.map((item, index) => {
           const Icon = item.icon;
           const active = isActive(item);
 
@@ -119,7 +178,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
                 'relative flex items-center justify-center rounded-xl',
                 'transition-all duration-100 ease-out',
                 'active:scale-[0.9]',
-                'hover:bg-white/10',
+                'hover:bg-orange-100',
                 'touch-manipulation',
                 '-webkit-tap-highlight-color-transparent'
               )}
@@ -129,18 +188,18 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
                 padding: 12,
               }}
             >
-              {/* BRIGHT: Active indicator dot */}
+              {/* HIGH CONTRAST: Visible indicator dot for active state */}
               {active && (
                 <motion.div
                   layoutId="activeIndicator"
                   className={cn(
                     'absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full',
-                    getIndicatorColorClass()
+                    getIndicatorColorClass(item)
                   )}
                 />
               )}
 
-              {/* Notification Badge - BRIGHT orange */}
+              {/* Notification Badge */}
               <AnimatePresence>
                 {item.badge && item.badge > 0 && (
                   <motion.span
@@ -148,8 +207,8 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
                     animate={{ scale: 1 }}
                     exit={{ scale: 0 }}
                     className={cn(
-                      "absolute -top-0.5 -right-0.5 rounded-full min-w-[20px] h-[20px] flex items-center justify-center text-[11px] font-bold text-white px-1 z-10",
-                      "bg-orange-500 drop-shadow-[0_0_6px_rgba(249,115,22,0.6)]"
+                      "absolute -top-0.5 -right-0.5 rounded-full min-w-[20px] h-[20px] flex items-center justify-center text-[11px] font-bold text-white px-1",
+                      "bg-orange-500"
                     )}
                   >
                     {item.badge > 99 ? '99+' : item.badge}
@@ -159,9 +218,8 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
 
               <Icon
                 className={cn(
-                  'transition-all duration-150',
-                  getIconColorClass(active),
-                  active && 'fill-current'
+                  'transition-colors duration-150',
+                  getIconColorClass(item, active)
                 )}
                 style={{
                   width: ICON_SIZE,

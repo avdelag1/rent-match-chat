@@ -55,7 +55,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
           size === 'sm' ? 'h-8 w-8' : size === 'md' ? 'h-9 w-9' : 'h-10 w-10',
           className
         )}
-        aria-label={`Switch to ${activeMode === 'owner' ? 'I can Do' : 'I own'} mode`}
+        aria-label={`Switch to ${activeMode === 'client' ? 'I Can Do' : 'I Need'} mode`}
       >
         <AnimatePresence mode="wait">
           {isSwitching ? (
@@ -106,7 +106,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
           sizeClasses[size],
           className
         )}
-        aria-label={`Switch to ${activeMode === 'owner' ? 'I can Do' : 'I own'} mode`}
+        aria-label={`Switch to ${activeMode === 'client' ? 'I Can Do' : 'I Need'} mode`}
       >
         <motion.div
           className="absolute inset-y-1 rounded-full bg-gradient-to-r from-primary/30 to-primary/20"
@@ -122,18 +122,18 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
         {/* HIGH CONTRAST: Clear active state distinction */}
         <div className={cn(
           'relative z-10 flex items-center gap-1.5 px-2 py-0.5 rounded-full transition-colors duration-200',
-          activeMode === 'owner' ? 'text-teal-400 font-semibold' : 'text-white/60'
+          activeMode === 'client' ? 'text-teal-400 font-semibold' : 'text-white/60'
         )}>
           <Briefcase className="h-3.5 w-3.5" />
-          <span className="font-bold">I own</span>
+          <span className="font-bold">I Can Do</span>
         </div>
 
         <div className={cn(
           'relative z-10 flex items-center gap-1.5 px-2 py-0.5 rounded-full transition-colors duration-200',
-          activeMode === 'client' ? 'text-orange-400 font-semibold' : 'text-white/60'
+          activeMode === 'owner' ? 'text-orange-400 font-semibold' : 'text-white/60'
         )}>
           <Search className="h-3.5 w-3.5" />
-          <span className="font-bold">I can Do</span>
+          <span className="font-bold">I Need</span>
         </div>
 
         <AnimatePresence>
@@ -167,7 +167,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
         sizeClasses[size],
         className
       )}
-      aria-label={`Switch to ${activeMode === 'owner' ? 'I can Do' : 'I own'} mode`}
+      aria-label={`Switch to ${activeMode === 'client' ? 'I Can Do' : 'I Need'} mode`}
     >
       <AnimatePresence mode="wait">
         <motion.div
@@ -181,15 +181,15 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
           {/* HIGH CONTRAST: Clear colors without glow effects */}
           {isSwitching ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin text-white" />
-          ) : activeMode === 'owner' ? (
+          ) : activeMode === 'client' ? (
             <>
               <Briefcase className="h-3.5 w-3.5 text-teal-400" />
-              <span className="font-bold text-teal-400">I own</span>
+              <span className="font-bold text-teal-400">I Can Do</span>
             </>
           ) : (
             <>
               <Search className="h-3.5 w-3.5 text-orange-400" />
-              <span className="font-bold text-orange-400">I can Do</span>
+              <span className="font-bold text-orange-400">I Need</span>
             </>
           )}
         </motion.div>
