@@ -8,7 +8,7 @@
 import { startTransition } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, SlidersHorizontal, Flame, MessageCircle, User, Plus, List, Building2, Heart, Filter } from 'lucide-react';
+import { Home, SlidersHorizontal, Flame, MessageCircle, User, List, Building2, Heart, Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUnreadMessageCount } from '@/hooks/useUnreadMessageCount';
 import { useScrollDirection } from '@/hooks/useScrollDirection';
@@ -28,6 +28,7 @@ interface BottomNavigationProps {
 interface NavItem {
   id: string;
   icon: React.ElementType;
+  label: string;
   path?: string;
   onClick?: () => void;
   badge?: number;
@@ -51,27 +52,32 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
     {
       id: 'browse',
       icon: Home,
+      label: 'Home',
       path: '/client/dashboard',
     },
     {
       id: 'profile',
       icon: User,
+      label: 'Profile',
       path: '/client/profile',
     },
     {
       id: 'likes',
       icon: Flame,
+      label: 'Likes',
       path: '/client/liked-properties',
     },
     {
       id: 'messages',
       icon: MessageCircle,
+      label: 'Messages',
       path: '/messages',
       badge: unreadCount,
     },
     {
       id: 'filter',
       icon: Filter,
+      label: 'Filters',
       path: '/client/filters',
     },
   ];
@@ -81,33 +87,39 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
     {
       id: 'browse',
       icon: Building2,
+      label: 'Home',
       path: '/owner/dashboard',
     },
     {
       id: 'profile',
       icon: User,
+      label: 'Profile',
       path: '/owner/profile',
     },
     {
       id: 'liked',
       icon: Heart,
+      label: 'Likes',
       path: '/owner/liked-clients',
     },
     {
       id: 'listings',
       icon: List,
+      label: 'Listings',
       path: '/owner/properties',
       isCenter: true,
     },
     {
       id: 'messages',
       icon: MessageCircle,
+      label: 'Messages',
       path: '/messages',
       badge: unreadCount,
     },
     {
       id: 'filter',
       icon: SlidersHorizontal,
+      label: 'Filters',
       path: '/owner/filters',
     },
   ];
@@ -155,7 +167,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
               onPointerDown={(e) => { e.stopPropagation(); if (item.path) prefetchRoute(item.path); }}
               onTouchStart={(e) => { e.stopPropagation(); if (item.path) prefetchRoute(item.path); }}
               className={cn(
-                'relative flex items-center justify-center rounded-xl',
+                'relative flex flex-col items-center justify-center rounded-xl gap-0.5',
                 'transition-all duration-100 ease-out',
                 'active:scale-[0.9]',
                 'hover:bg-white/10',
@@ -165,7 +177,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
               style={{
                 minWidth: TOUCH_TARGET_SIZE,
                 minHeight: TOUCH_TARGET_SIZE,
-                padding: 12,
+                padding: '8px 4px',
               }}
             >
               {/* Active indicator dot */}
@@ -187,7 +199,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
                     animate={{ scale: 1 }}
                     exit={{ scale: 0 }}
                     className={cn(
-                      "absolute -top-0.5 -right-0.5 rounded-full min-w-[20px] h-[20px] flex items-center justify-center text-[11px] font-bold text-white px-1 z-10",
+                      "absolute top-0.5 right-0.5 rounded-full min-w-[18px] h-[18px] flex items-center justify-center text-[10px] font-bold text-white px-1 z-10",
                       "bg-orange-500"
                     )}
                   >
@@ -202,11 +214,17 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
                   active ? 'text-orange-500' : 'text-white/70'
                 )}
                 style={{
-                  width: ICON_SIZE,
-                  height: ICON_SIZE,
+                  width: ICON_SIZE - 4,
+                  height: ICON_SIZE - 4,
                 }}
                 strokeWidth={active ? 2.5 : 2}
               />
+              <span className={cn(
+                'text-[10px] leading-tight font-medium transition-colors duration-150',
+                active ? 'text-orange-500' : 'text-white/70'
+              )}>
+                {item.label}
+              </span>
             </button>
           );
         })}
