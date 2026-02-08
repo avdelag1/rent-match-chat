@@ -153,10 +153,10 @@ export default function RadioPlayer() {
         </div>
       </div>
 
-      {/* Bottom Controls */}
-      <div className="px-4 pb-2">
+      {/* Bottom Controls - Radio Player Area */}
+      <div className="px-4 pb-12">
         {/* Volume Slider */}
-        <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-3 mb-8">
           <Volume2 className="w-4 h-4 text-white/40" />
           <input
             type="range"
@@ -174,7 +174,7 @@ export default function RadioPlayer() {
         </div>
 
         {/* Playback Controls */}
-        <div className="flex items-center justify-center gap-4 mb-4">
+        <div className="flex items-center justify-center gap-4 mb-10">
           <button onClick={() => changeStation('prev')} className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center">
             <SkipBack className="w-5 h-5" />
           </button>
