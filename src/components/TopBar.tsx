@@ -10,13 +10,13 @@ import { QuickFilterDropdown } from './QuickFilterDropdown';
 import { ModeSwitcher } from './ModeSwitcher';
 import { useScrollDirection } from '@/hooks/useScrollDirection';
 
-// HIGH CONTRAST: Solid colors with no gradients for maximum readability
+// HIGH CONTRAST: Bright colors on light background
 const MessageActivationText = () => (
   <>
-    <span className="hidden sm:inline font-bold text-sm tracking-tight text-yellow-400 whitespace-nowrap">
+    <span className="hidden sm:inline font-bold text-sm tracking-tight text-orange-500 whitespace-nowrap">
       Message Activation
     </span>
-    <Zap className="sm:hidden h-5 w-5 text-yellow-400" />
+    <Zap className="sm:hidden h-5 w-5 text-orange-500" />
   </>
 );
 
@@ -97,7 +97,7 @@ function TopBarComponent({
             className={cn(
               "relative h-9 sm:h-10 md:h-11 px-2 sm:px-3 md:px-4 rounded-xl transition-all duration-100 ease-out",
               "active:scale-[0.95]",
-              "hover:bg-white/15",
+              "hover:bg-orange-100",
               "touch-manipulation",
               "-webkit-tap-highlight-color-transparent",
               "flex items-center"
@@ -114,7 +114,7 @@ function TopBarComponent({
             className={cn(
               "relative h-9 w-9 sm:h-10 sm:w-10 md:h-11 md:w-11 rounded-xl transition-all duration-100 ease-out",
               "active:scale-[0.95]",
-              "hover:bg-white/15",
+              "hover:bg-orange-100",
               "group flex-shrink-0",
               "touch-manipulation",
               "-webkit-tap-highlight-color-transparent"
@@ -122,7 +122,7 @@ function TopBarComponent({
             onClick={() => navigate('/radio')}
             aria-label="Radio Player"
           >
-            <Radio className="h-5 w-5 sm:h-6 sm:w-6 text-white group-hover:text-yellow-300 transition-colors duration-150" />
+            <Radio className="h-5 w-5 sm:h-6 sm:w-6 text-orange-500 group-hover:text-orange-600 transition-colors duration-150" />
           </Button>
 
           <Button
@@ -131,7 +131,7 @@ function TopBarComponent({
             className={cn(
               "relative h-9 w-9 sm:h-10 sm:w-10 md:h-11 md:w-11 rounded-xl transition-all duration-100 ease-out",
               "active:scale-[0.95]",
-              "hover:bg-white/15",
+              "hover:bg-orange-100",
               "group flex-shrink-0",
               "touch-manipulation",
               "-webkit-tap-highlight-color-transparent"
@@ -145,8 +145,8 @@ function TopBarComponent({
                 className={cn(
                   "h-5 w-5 sm:h-6 sm:w-6 transition-colors duration-150",
                   notificationCount > 0
-                    ? "text-amber-400 group-hover:text-amber-300"
-                    : "text-white group-hover:text-yellow-300"
+                    ? "text-orange-500 group-hover:text-orange-600"
+                    : "text-gray-700 group-hover:text-orange-500"
                 )}
               />
               <AnimatePresence>
@@ -160,7 +160,7 @@ function TopBarComponent({
                       repeat: Infinity,
                       ease: "easeOut"
                     }}
-                    className="absolute inset-0 rounded-full border-2 border-orange-400"
+                    className="absolute inset-0 rounded-full border-2 border-orange-500"
                   />
                 )}
               </AnimatePresence>
@@ -173,7 +173,7 @@ function TopBarComponent({
                   animate={{ scale: 1, opacity: 1 }}
                   exit={{ scale: 0, opacity: 0 }}
                   transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-                  className="absolute -top-0.5 -right-0.5 bg-orange-500 text-white text-[10px] font-bold rounded-full min-w-[18px] sm:min-w-[20px] h-[18px] sm:h-[20px] flex items-center justify-center ring-2 ring-background"
+                  className="absolute -top-0.5 -right-0.5 bg-orange-500 text-white text-[10px] font-bold rounded-full min-w-[18px] sm:min-w-[20px] h-[18px] sm:h-[20px] flex items-center justify-center ring-2 ring-white"
                 >
                   {notificationCount > 99 ? '99+' : notificationCount}
                 </motion.span>

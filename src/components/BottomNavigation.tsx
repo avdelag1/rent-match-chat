@@ -3,6 +3,7 @@
  *
  * Full-width, ergonomic bottom navigation optimized for one-handed use.
  * HIGH CONTRAST: Clear active/inactive states with solid colors.
+ * BRIGHT & VIBRANT: Clean light background with vivid orange accents.
  */
 
 import { startTransition } from 'react';
@@ -134,72 +135,33 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
     return location.pathname === item.path;
   };
 
-  // HIGH CONTRAST: Clear color distinction between active and inactive states
+  // HIGH CONTRAST: Clear color distinction between active and inactive states - VIBRANT ORANGE
   const getIconColorClass = (item: NavItem, active: boolean) => {
     if (!active) {
-      // Inactive icons - bright and clearly visible against dark background
-      return 'text-white/90';
+      // Inactive icons - BRIGHT and clearly visible against light background
+      return 'text-gray-500';
     }
 
-    // Active icons - solid, high-contrast colors
-    switch (item.id) {
-      case 'browse':
-        return 'text-white';
-      case 'likes':
-      case 'liked':
-        return 'text-orange-400'; // Bright orange for flames/likes
-      case 'messages':
-        return 'text-cyan-400'; // Bright cyan for messages
-      case 'listings':
-        return 'text-white';
-      case 'profile':
-        return 'text-white';
-      case 'hire':
-      case 'services':
-        return 'text-emerald-400'; // Bright green for services
-      case 'filter':
-        return 'text-violet-400'; // Bright purple for filter
-      default:
-        return 'text-white';
-    }
+    // Active icons - VIBRANT orange
+    return 'text-orange-500';
   };
 
-  // HIGH CONTRAST: Clear indicator dot colors
+  // HIGH CONTRAST: Clear indicator dot colors - VIBRANT ORANGE
   const getIndicatorColorClass = (item: NavItem) => {
-    switch (item.id) {
-      case 'browse':
-        return 'bg-white';
-      case 'likes':
-      case 'liked':
-        return 'bg-orange-400';
-      case 'messages':
-        return 'bg-cyan-400';
-      case 'listings':
-        return 'bg-white';
-      case 'profile':
-        return 'bg-white';
-      case 'hire':
-      case 'services':
-        return 'bg-emerald-400';
-      case 'filter':
-        return 'bg-violet-400';
-      default:
-        return 'bg-white';
-    }
+    return 'bg-orange-500';
   };
 
 
   return (
     <nav className={cn("app-bottom-bar pointer-events-none px-1", !isVisible && "nav-hidden")}>
       <div
-        // TINDER-STYLE: No background frame - buttons float on gradient overlay
-        // The swipe card's GradientMaskBottom provides the visual contrast
+        // BRIGHT STYLE: Clean light background with vibrant buttons
         className="flex items-center justify-between w-full max-w-xl mx-auto px-2 py-2 pointer-events-auto"
         style={{
           // GPU acceleration for smooth animations
           transform: 'translateZ(0)',
           backfaceVisibility: 'hidden',
-          // No background - pure transparent for Tinder-style floating buttons
+          // Clean light background
         }}
       >
         {navItems.map((item, index) => {
@@ -216,6 +178,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
                 'relative flex items-center justify-center rounded-xl',
                 'transition-all duration-100 ease-out',
                 'active:scale-[0.9]',
+                'hover:bg-orange-100',
                 'touch-manipulation',
                 '-webkit-tap-highlight-color-transparent'
               )}
@@ -245,7 +208,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
                     exit={{ scale: 0 }}
                     className={cn(
                       "absolute -top-0.5 -right-0.5 rounded-full min-w-[20px] h-[20px] flex items-center justify-center text-[11px] font-bold text-white px-1",
-                      item.id === 'messages' ? 'bg-cyan-500' : 'bg-orange-500'
+                      "bg-orange-500"
                     )}
                   >
                     {item.badge > 99 ? '99+' : item.badge}
