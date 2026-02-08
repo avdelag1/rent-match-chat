@@ -32,19 +32,19 @@ const categories: { id: QuickFilterCategory; label: string; icon: React.ReactNod
 ];
 
 const listingTypes: { id: QuickFilterListingType; label: string }[] = [
-  { id: 'both', label: 'All' },
-  { id: 'rent', label: 'Rent' },
-  { id: 'sale', label: 'Buy' },
+  { id: 'both', label: 'All Types' },
+  { id: 'rent', label: 'Rent Only' },
+  { id: 'sale', label: 'Buy Only' },
 ];
 
 const genderOptions: { id: OwnerClientGender; label: string; icon: React.ReactNode }[] = [
-  { id: 'any', label: 'All', icon: <Users className="w-4 h-4" /> },
-  { id: 'female', label: 'Women', icon: <User className="w-4 h-4" /> },
-  { id: 'male', label: 'Men', icon: <User className="w-4 h-4" /> },
+  { id: 'any', label: 'All Genders', icon: <Users className="w-4 h-4" /> },
+  { id: 'female', label: 'Women Only', icon: <User className="w-4 h-4" /> },
+  { id: 'male', label: 'Men Only', icon: <User className="w-4 h-4" /> },
 ];
 
 const clientTypeOptions: { id: OwnerClientType; label: string }[] = [
-  { id: 'all', label: 'All' },
+  { id: 'all', label: 'All Clients' },
   { id: 'hire', label: 'Hiring' },
   { id: 'rent', label: 'Renting' },
   { id: 'buy', label: 'Buying' },
