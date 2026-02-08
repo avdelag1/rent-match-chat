@@ -211,10 +211,10 @@ export function ActiveModeProvider({ children }: { children: ReactNode }) {
 
     // 8. Show success toast
     toast({
-      title: `Switched to ${newMode === 'client' ? 'I Need' : 'I Offer'} mode`,
+      title: `Switched to ${newMode === 'client' ? 'I Can Do' : 'I Need'} mode`,
       description: newMode === 'client'
-        ? 'Now browsing deals, services, and properties'
-        : 'Now managing your offerings',
+        ? 'Now offering properties, bikes, motors & services'
+        : 'Now browsing deals, services and properties',
     });
 
     // 8. Success haptic
