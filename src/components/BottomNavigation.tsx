@@ -2,8 +2,7 @@
  * BOTTOM NAVIGATION BAR
  *
  * Full-width, ergonomic bottom navigation optimized for one-handed use.
- * HIGH CONTRAST: Clear active/inactive states with solid colors.
- * BRIGHT & VIBRANT: Clean light background with vivid orange accents.
+ * DARK MODE: Clean dark background with white icons for premium look.
  */
 
 import { startTransition } from 'react';
@@ -15,8 +14,8 @@ import { useUnreadMessageCount } from '@/hooks/useUnreadMessageCount';
 import { useScrollDirection } from '@/hooks/useScrollDirection';
 import { prefetchRoute } from '@/utils/routePrefetcher';
 
-// HIGH CONTRAST SIZING
-const ICON_SIZE = 26; // Larger icons for better visibility
+// ICON SIZING
+const ICON_SIZE = 26;
 const TOUCH_TARGET_SIZE = 56;
 
 interface BottomNavigationProps {
@@ -135,29 +134,12 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
     return location.pathname === item.path;
   };
 
-  // HIGH CONTRAST: Clear color distinction between active and inactive states
-  const getIconColorClass = (active: boolean) => {
-    // Active icons - VIBRANT orange with glow
-    if (active) {
-      return 'text-orange-500 drop-shadow-[0_0_8px_rgba(249,115,22,0.5)]';
-    }
-    // Inactive icons - BRIGHT white for visibility on any background
-    return 'text-white';
-  };
-
-  // HIGH CONTRAST: Clear indicator dot colors - VIBRANT ORANGE
-  const getIndicatorColorClass = () => {
-    return 'bg-orange-500 drop-shadow-[0_0_6px_rgba(249,115,22,0.6)]';
-  };
-
-
   return (
     <nav className={cn("app-bottom-bar pointer-events-none px-1", !isVisible && "nav-hidden")}>
       <div
-        // DARK BACKGROUND: Makes white icons visible
-        className="flex items-center justify-between w-full max-w-xl mx-auto px-2 py-2 pointer-events-auto bg-gray-900/90 backdrop-blur-sm"
+        // DARK MODE: Clean dark background for premium look
+        className="flex items-center justify-between w-full max-w-xl mx-auto px-2 py-2 pointer-events-auto bg-[#1C1C1E] rounded-t-2xl"
         style={{
-          // GPU acceleration for smooth animations
           transform: 'translateZ(0)',
           backfaceVisibility: 'hidden',
         }}
@@ -176,7 +158,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
                 'relative flex items-center justify-center rounded-xl',
                 'transition-all duration-100 ease-out',
                 'active:scale-[0.9]',
-                'hover:bg-orange-500/30',
+                'hover:bg-white/10',
                 'touch-manipulation',
                 '-webkit-tap-highlight-color-transparent'
               )}
@@ -186,13 +168,13 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
                 padding: 12,
               }}
             >
-              {/* HIGH CONTRAST: Visible indicator dot for active state */}
+              {/* Active indicator dot */}
               {active && (
                 <motion.div
                   layoutId="activeIndicator"
                   className={cn(
                     'absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full',
-                    getIndicatorColorClass()
+                    'bg-orange-500'
                   )}
                 />
               )}
@@ -205,7 +187,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
                     animate={{ scale: 1 }}
                     exit={{ scale: 0 }}
                     className={cn(
-                      "absolute -top-0.5 -right-0.5 rounded-full min-w-[20px] h-[20px] flex items-center justify-center text-[11px] font-bold text-white px-1",
+                      "absolute -top-0.5 -right-0.5 rounded-full min-w-[20px] h-[20px] flex items-center justify-center text-[11px] font-bold text-white px-1 z-10",
                       "bg-orange-500"
                     )}
                   >
@@ -217,7 +199,7 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
               <Icon
                 className={cn(
                   'transition-colors duration-150',
-                  getIconColorClass(active)
+                  active ? 'text-orange-500' : 'text-white/70'
                 )}
                 style={{
                   width: ICON_SIZE,

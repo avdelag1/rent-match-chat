@@ -10,13 +10,13 @@ import { QuickFilterDropdown } from './QuickFilterDropdown';
 import { ModeSwitcher } from './ModeSwitcher';
 import { useScrollDirection } from '@/hooks/useScrollDirection';
 
-// HIGH CONTRAST: Bright colors on light background
+// DARK MODE: White text on dark background
 const MessageActivationText = () => (
   <>
-    <span className="hidden sm:inline font-bold text-sm tracking-tight text-orange-500 whitespace-nowrap">
+    <span className="hidden sm:inline font-bold text-sm tracking-tight text-white whitespace-nowrap">
       Message Activation
     </span>
-    <Zap className="sm:hidden h-5 w-5 text-orange-500" />
+    <Zap className="sm:hidden h-5 w-5 text-white" />
   </>
 );
 
@@ -61,7 +61,7 @@ function TopBarComponent({
     <header
       className={cn(
         'app-header',
-        'bg-transparent border-transparent backdrop-blur-none',
+        'bg-[#1C1C1E] border-transparent backdrop-blur-md',
         shouldHide && 'header-hidden',
         className
       )}
@@ -91,13 +91,13 @@ function TopBarComponent({
 
         {/* Right section: Actions */}
         <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0 flex-1 justify-end">
-          {/* HIGH CONTRAST: Solid backgrounds with clear hover states */}
+          {/* DARK MODE: Dark backgrounds with light icons */}
           <Button
             variant="ghost"
             className={cn(
               "relative h-9 sm:h-10 md:h-11 px-2 sm:px-3 md:px-4 rounded-xl transition-all duration-100 ease-out",
               "active:scale-[0.95]",
-              "hover:bg-orange-100",
+              "hover:bg-white/10",
               "touch-manipulation",
               "-webkit-tap-highlight-color-transparent",
               "flex items-center"
@@ -114,7 +114,7 @@ function TopBarComponent({
             className={cn(
               "relative h-9 w-9 sm:h-10 sm:w-10 md:h-11 md:w-11 rounded-xl transition-all duration-100 ease-out",
               "active:scale-[0.95]",
-              "hover:bg-orange-100",
+              "hover:bg-white/10",
               "group flex-shrink-0",
               "touch-manipulation",
               "-webkit-tap-highlight-color-transparent"
@@ -122,7 +122,7 @@ function TopBarComponent({
             onClick={() => navigate('/radio')}
             aria-label="Radio Player"
           >
-            <Radio className="h-5 w-5 sm:h-6 sm:w-6 text-orange-500 group-hover:text-orange-600 transition-colors duration-150" />
+            <Radio className="h-5 w-5 sm:h-6 sm:w-6 text-white group-hover:text-white/80 transition-colors duration-150" />
           </Button>
 
           <Button
@@ -131,7 +131,7 @@ function TopBarComponent({
             className={cn(
               "relative h-9 w-9 sm:h-10 sm:w-10 md:h-11 md:w-11 rounded-xl transition-all duration-100 ease-out",
               "active:scale-[0.95]",
-              "hover:bg-orange-100",
+              "hover:bg-white/10",
               "group flex-shrink-0",
               "touch-manipulation",
               "-webkit-tap-highlight-color-transparent"
@@ -140,13 +140,13 @@ function TopBarComponent({
             aria-label={`Notifications${notificationCount > 0 ? ` (${notificationCount} unread)` : ''}`}
           >
             <div className="relative">
-              {/* HIGH CONTRAST: Clear icon colors */}
+              {/* DARK MODE: White icon colors */}
               <Bell
                 className={cn(
                   "h-5 w-5 sm:h-6 sm:w-6 transition-colors duration-150",
                   notificationCount > 0
-                    ? "text-orange-500 group-hover:text-orange-600"
-                    : "text-gray-700 group-hover:text-orange-500"
+                    ? "text-white group-hover:text-white/80"
+                    : "text-white/70 group-hover:text-white"
                 )}
               />
               <AnimatePresence>
