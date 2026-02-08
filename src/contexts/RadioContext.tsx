@@ -39,7 +39,8 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
     favorites: []
   });
 
-  const [loading, setLoading] = useState(true);
+  // Set loading to false immediately - don't block UI for preferences
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Initialize audio element once

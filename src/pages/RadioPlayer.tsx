@@ -5,7 +5,7 @@ import { getStationsByCity, cityThemes, CityLocation } from '@/data/radioStation
 import { ArrowLeft, Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Heart, Mic2, Settings, Shuffle, ListMusic } from 'lucide-react';
 
 export default function RadioPlayer() {
-  const { state, loading, error, togglePlayPause, changeStation, setCity, toggleFavorite, play, setVolume, toggleShuffle, playFavorites } = useRadio();
+  const { state, error, togglePlayPause, changeStation, setCity, toggleFavorite, play, setVolume, toggleShuffle, playFavorites } = useRadio();
   const [showCitySelector, setShowCitySelector] = useState(false);
   const [showPlaylist, setShowPlaylist] = useState(false);
 
@@ -44,26 +44,14 @@ export default function RadioPlayer() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [togglePlayPause, changeStation, setVolume, state.volume]);
 
-  if (loading) {
+  // Error display - subtle inline, not blocking
+  if (error && !state.isPlaying) {
     return (
-      <div className="fixed inset-0 bg-black flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-2 border-white/20 border-t-white rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-white/60">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="fixed inset-0 bg-black flex items-center justify-center p-6">
-        <div className="text-center">
-          <p className="text-white/60 mb-4">{error}</p>
-          <button onClick={() => window.location.reload()} className="px-6 py-2 bg-white text-black rounded-full">
-            Retry
-          </button>
-        </div>
+      <div className="fixed inset-0 bg-black text-white flex flex-col items-center justify-center">
+        <p className="text-white/40 mb-4">{error}</p>
+        <button onClick={() => window.location.reload()} className="px-6 py-2 bg-white/10 text-white rounded-full text-sm">
+          Retry
+        </button>
       </div>
     );
   }
