@@ -83,8 +83,34 @@ export default function RadioPlayer() {
         </div>
       </div>
 
-      {/* Center - Vinyl */}
+      {/* Center - Vinyl & Controls */}
       <div className="flex-1 flex flex-col items-center justify-center px-4">
+        
+        {/* Quick Controls - Shuffle, Playlist, Favorites - Close to vinyl */}
+        <div className="flex items-center justify-center gap-4 mb-4">
+          <button 
+            onClick={toggleShuffle}
+            className={`p-2 rounded-full transition-colors ${state.isShuffle ? 'bg-white/20' : 'bg-white/5'}`}
+          >
+            <Shuffle className={`w-5 h-5 ${state.isShuffle ? 'text-white' : 'text-white/50'}`} />
+          </button>
+          
+          <button 
+            onClick={() => setShowPlaylist(true)}
+            className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors"
+          >
+            <ListMusic className="w-5 h-5 text-white/50" />
+          </button>
+          
+          <button 
+            onClick={() => state.currentStation && toggleFavorite(state.currentStation.id)}
+            className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors"
+          >
+            <Heart className={`w-5 h-5 ${state.currentStation && state.favorites.includes(state.currentStation.id) ? 'text-white' : 'text-white/50'}`}
+              fill={state.currentStation && state.favorites.includes(state.currentStation.id) ? "currentColor" : "none"} />
+          </button>
+        </div>
+
         {/* Vinyl Record */}
         <motion.div
           className="w-36 h-36 rounded-full relative mb-4"
@@ -114,10 +140,18 @@ export default function RadioPlayer() {
 
         {/* Station Name */}
         <h1 className="text-lg font-bold text-white mb-1">{state.currentStation?.name || 'Select Station'}</h1>
-        <p className="text-white/40 text-sm mb-4">{cityThemes[state.currentCity].name}</p>
+        <p className="text-white/40 text-sm mb-2">{cityThemes[state.currentCity].name}</p>
+
+        {/* City Selector */}
+        <button
+          onClick={() => setShowCitySelector(true)}
+          className="px-3 py-1 bg-white/10 rounded-full mb-4"
+        >
+          <span className="text-xs text-white/70">{cityThemes[state.currentCity].name}</span>
+        </button>
 
         {/* Station Dial */}
-        <div className="w-full max-w-xs mb-4">
+        <div className="w-full max-w-xs">
           <input
             type="range"
             min="0"
@@ -138,19 +172,11 @@ export default function RadioPlayer() {
             <span className="text-[10px] text-white/30">{cityStations[cityStations.length - 1]?.name}</span>
           </div>
         </div>
-
-        {/* City Selector */}
-        <button
-          onClick={() => setShowCitySelector(true)}
-          className="px-4 py-1.5 bg-white/10 rounded-full"
-        >
-          <span className="text-xs text-white/70">{cityThemes[state.currentCity].name}</span>
-        </button>
       </div>
 
       {/* Bottom Controls */}
       <div className="px-4 pb-2">
-        {/* Volume Slider - ONE only */}
+        {/* Volume Slider */}
         <div className="flex items-center gap-3 mb-4">
           <Volume2 className="w-4 h-4 text-white/40" />
           <input
@@ -169,7 +195,7 @@ export default function RadioPlayer() {
         </div>
 
         {/* Playback Controls */}
-        <div className="flex items-center justify-center gap-4 mb-10">
+        <div className="flex items-center justify-center gap-4 mb-4">
           <button onClick={() => changeStation('prev')} className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center">
             <SkipBack className="w-5 h-5" />
           </button>
@@ -187,18 +213,8 @@ export default function RadioPlayer() {
           </button>
         </div>
 
-        {/* Bottom Icons - Navigation Layer */}
+        {/* Bottom Icons */}
         <div className="flex items-center justify-center gap-6">
-          <button onClick={toggleShuffle} className="flex flex-col items-center gap-1">
-            <Shuffle className={`w-4 h-4 ${state.isShuffle ? 'text-white' : 'text-white/30'}`} />
-          </button>
-          <button onClick={() => setShowPlaylist(true)} className="flex flex-col items-center gap-1">
-            <ListMusic className="w-4 h-4 text-white/30" />
-          </button>
-          <button onClick={() => state.currentStation && toggleFavorite(state.currentStation.id)} className="flex flex-col items-center gap-1">
-            <Heart className={`w-4 h-4 ${state.currentStation && state.favorites.includes(state.currentStation.id) ? 'text-white' : 'text-white/30'}`}
-              fill={state.currentStation && state.favorites.includes(state.currentStation.id) ? "currentColor" : "none"} />
-          </button>
           <button className="flex flex-col items-center gap-1">
             <Mic2 className="w-4 h-4 text-white/30" />
           </button>
@@ -215,7 +231,7 @@ export default function RadioPlayer() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/95 z-50 flex flex-col"
+            className="fixed inset-x-4 inset-y-16 bg-black/95 z-50 flex flex-col rounded-2xl"
           >
             <div className="flex items-center justify-between p-4 border-b border-white/10">
               <span className="font-semibold">Select City</span>
@@ -251,7 +267,7 @@ export default function RadioPlayer() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/95 z-50 flex flex-col"
+            className="fixed inset-x-4 inset-y-16 bg-black/95 z-50 flex flex-col rounded-2xl"
           >
             <div className="flex items-center justify-between p-4 border-b border-white/10">
               <span className="font-semibold">Playlist</span>
