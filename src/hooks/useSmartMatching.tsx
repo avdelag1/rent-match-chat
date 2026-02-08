@@ -680,7 +680,7 @@ export function useSmartListingMatching(
     },
     enabled: !!userId,
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    refetchOnMount: true, // FIXED: Allow refetch on mount when data is stale to prevent empty decks
     refetchOnReconnect: false,
     retry: 1,
     retryDelay: 1000,
@@ -1055,7 +1055,9 @@ export function useSmartClientMatching(
 
         // CRITICAL: Only show CLIENT profiles to owners, exclude admins and other owners
         // PERF: Select only fields needed for owner's client swipe cards (reduces payload ~50%)
-        // FIXED: Removed non-existent columns (property_types, moto_types, bicycle_types)
+        // FIXED: Use profiles.role column instead of user_roles inner join.
+        // The inner join was excluding profiles that didn't have a user_roles entry,
+        // causing empty results. The profiles table already has a role column.
         const CLIENT_SWIPE_CARD_FIELDS = `
           id,
           full_name,
@@ -1077,15 +1079,17 @@ export function useSmartClientMatching(
           nationality,
           languages_spoken,
           neighborhood,
-          user_roles!inner(role)
+          role
         `;
 
         // Build the query with SQL-level exclusions
+        // FIXED: Filter by profiles.role directly instead of inner-joining user_roles table.
+        // This ensures profiles are returned even if user_roles table entries are missing.
         let profileQuery = supabase
           .from('profiles')
           .select(CLIENT_SWIPE_CARD_FIELDS)
           .neq('id', userId) // CRITICAL: Never show user their own profile
-          .eq('user_roles.role', 'client')
+          .or('role.eq.client,role.is.null') // Show clients and profiles without explicit role (default to client)
           .or('is_active.is.null,is_active.eq.true'); // Only show active profiles (null or true)
 
         // CRITICAL FIX: Exclude swiped profiles at SQL level (not JavaScript)
@@ -1116,6 +1120,9 @@ export function useSmartClientMatching(
         // Map profiles with placeholder images
         // NOTE: Swiped profiles are now excluded at SQL level (see query above)
         // CRITICAL: Also filter out profiles with mock/fake images (unsplash, placeholder URLs, etc.)
+        // FIXED: Removed hasMockImages filter that was too aggressive.
+        // It was filtering out ALL profiles with images from unsplash, picsum, etc.
+        // which are commonly used for real profile photos and seed data.
         let filteredProfiles = (profiles as any[])
           .filter(profile => {
             // DEFENSE IN DEPTH: Double-check - never show user their own profile
@@ -1125,7 +1132,6 @@ export function useSmartClientMatching(
             }
             return true;
           })
-          .filter(profile => !hasMockImages(profile.images)) // Remove profiles with fake/mock photos
           .map(profile => ({
             ...profile,
             images: profile.images && profile.images.length > 0
@@ -1378,7 +1384,7 @@ export function useSmartClientMatching(
     },
     enabled: !!userId,
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    refetchOnMount: true, // FIXED: Allow refetch on mount when data is stale to prevent empty decks
     refetchOnReconnect: false,
     retry: 1,
     retryDelay: 1000,

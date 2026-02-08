@@ -8,15 +8,15 @@ import { CategorySelectionDialog } from '@/components/CategorySelectionDialog';
 import { useSmartClientMatching } from '@/hooks/useSmartMatching';
 import { useAuth } from '@/hooks/useAuth';
 import { useNotificationSystem } from '@/hooks/useNotificationSystem';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
+import type { DashboardOutletContext } from '@/components/DashboardLayout';
 
-interface EnhancedOwnerDashboardProps {
-  onClientInsights?: (clientId: string) => void;
-  onMessageClick?: () => void;
-  filters?: any; // Combined quick filters + advanced filters from DashboardLayout
-}
-
-const EnhancedOwnerDashboard = ({ onClientInsights, onMessageClick, filters }: EnhancedOwnerDashboardProps) => {
+/**
+ * FIXED: Uses useOutletContext to receive filters from DashboardLayout.
+ * Previously relied on React.cloneElement on <Outlet />, which doesn't forward props.
+ */
+const EnhancedOwnerDashboard = () => {
+  const { filters, onClientInsights, onMessageClick } = useOutletContext<DashboardOutletContext>();
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [insightsOpen, setInsightsOpen] = useState(false);
 

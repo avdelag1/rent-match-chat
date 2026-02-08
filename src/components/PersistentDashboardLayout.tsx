@@ -1,4 +1,4 @@
-import { Outlet, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { useActiveMode } from '@/hooks/useActiveMode';
 import { useFilterPersistence } from '@/hooks/useFilterPersistence';
@@ -70,9 +70,7 @@ export function PersistentDashboardLayout() {
   }, [location.pathname, activeMode, syncMode]);
 
   return (
-    <DashboardLayout userRole={userRole}>
-      <Outlet />
-    </DashboardLayout>
+    <DashboardLayout userRole={userRole} />
   );
 }
 

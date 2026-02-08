@@ -1,27 +1,21 @@
 import { useState, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useOutletContext } from 'react-router-dom';
 import { TinderentSwipeContainer } from '@/components/TinderentSwipeContainer';
 import { PropertyInsightsDialog } from '@/components/PropertyInsightsDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { ListingFilters } from '@/hooks/useSmartMatching';
 import { Listing } from '@/hooks/useListings';
-
-interface ClientDashboardProps {
-  onPropertyInsights?: (listingId: string) => void;
-  onMessageClick?: () => void;
-  filters?: ListingFilters;
-}
+import type { DashboardOutletContext } from '@/components/DashboardLayout';
 
 /**
  * SPEED OF LIGHT: Client Dashboard
  * DashboardLayout is now rendered ONCE at route level via PersistentDashboardLayout
  * This component only renders its inner content
+ * FIXED: Uses useOutletContext to receive filters from DashboardLayout
  */
-export default function ClientDashboard({ 
-  onPropertyInsights, 
-  onMessageClick, 
-  filters 
-}: ClientDashboardProps) {
+export default function ClientDashboard() {
+  const { filters, onPropertyInsights: parentOnPropertyInsights, onMessageClick } = useOutletContext<DashboardOutletContext>();
   const [insightsOpen, setInsightsOpen] = useState(false);
   const [selectedListingId, setSelectedListingId] = useState<string | null>(null);
 
@@ -49,8 +43,8 @@ export default function ClientDashboard({
   const handleListingTap = useCallback((listingId: string) => {
     setSelectedListingId(listingId);
     setInsightsOpen(true);
-    onPropertyInsights?.(listingId);
-  }, [onPropertyInsights]);
+    parentOnPropertyInsights?.(listingId);
+  }, [parentOnPropertyInsights]);
 
   return (
     <>

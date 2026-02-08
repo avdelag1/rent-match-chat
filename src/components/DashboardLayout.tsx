@@ -1,10 +1,10 @@
 
-import React, { ReactNode, useState, useEffect, useCallback, useMemo, lazy, Suspense, useRef } from 'react'
+import React, { useState, useEffect, useCallback, useMemo, lazy, Suspense, useRef } from 'react'
 import { useAuth } from "@/hooks/useAuth"
 import { useAnonymousDrafts } from "@/hooks/useAnonymousDrafts"
 import { supabase } from '@/integrations/supabase/client'
 import { toast } from '@/hooks/use-toast'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useResponsiveContext } from '@/contexts/ResponsiveContext'
 import { prefetchRoleRoutes } from '@/utils/routePrefetcher'
 import { logger } from '@/utils/prodLogger'
@@ -100,12 +100,19 @@ function clearOnboardingCache(): void {
 
 // =============================================================================
 
+// Context type for data passed through Outlet to page components
+export interface DashboardOutletContext {
+  filters?: any;
+  onPropertyInsights?: (listingId: string) => void;
+  onClientInsights?: (clientId: string) => void;
+  onMessageClick?: () => void;
+}
+
 interface DashboardLayoutProps {
-  children: ReactNode
   userRole: 'client' | 'owner' | 'admin'
 }
 
-export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
+export function DashboardLayout({ userRole }: DashboardLayoutProps) {
   const [showSubscriptionPackages, setShowSubscriptionPackages] = useState(false)
   const [showLikedProperties, setShowLikedProperties] = useState(false)
   const [showPreferences, setShowPreferences] = useState(false)
@@ -460,20 +467,15 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const isOnDiscoveryPage = (userRole === 'client' && location.pathname === '/client/dashboard') ||
                             (userRole === 'owner' && location.pathname === '/owner/dashboard');
 
-  // FIX: Memoize cloned children to prevent infinite re-renders
-  const enhancedChildren = useMemo(() => {
-    return React.Children.map(children, (child) => {
-      if (React.isValidElement(child)) {
-        return React.cloneElement(child as React.ReactElement, {
-          onPropertyInsights: handlePropertyInsights,
-          onClientInsights: handleClientInsights,
-          onMessageClick: handleMessageClick,
-          filters: combinedFilters,
-        } as any);
-      }
-      return child;
-    });
-  }, [children, handlePropertyInsights, handleClientInsights, handleMessageClick, combinedFilters]);
+  // FIXED: Use Outlet context instead of React.cloneElement
+  // React Router's Outlet doesn't forward arbitrary props to route elements.
+  // Using Outlet's `context` prop is the correct React Router v6 pattern.
+  const outletContext = useMemo<DashboardOutletContext>(() => ({
+    filters: combinedFilters,
+    onPropertyInsights: handlePropertyInsights,
+    onClientInsights: handleClientInsights,
+    onMessageClick: handleMessageClick,
+  }), [combinedFilters, handlePropertyInsights, handleClientInsights, handleMessageClick]);
 
   // PERF FIX: Detect camera routes to hide TopBar/BottomNav (fullscreen camera UX)
   // Camera routes are now INSIDE layout to prevent dashboard remount on navigate back
@@ -539,7 +541,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           willChange: 'contents',
         }}
       >
-        {enhancedChildren}
+        <Outlet context={outletContext} />
       </main>
 
       {/* Bottom Navigation - Fixed with safe-area-bottom. Hidden on camera routes for fullscreen UX */}
