@@ -16,6 +16,7 @@ import { TopBar } from '@/components/TopBar'
 import { BottomNavigation } from '@/components/BottomNavigation'
 import { AdvancedFilters } from '@/components/AdvancedFilters'
 import { LiveHDBackground } from '@/components/LiveHDBackground'
+import { RadioMiniPlayer } from '@/components/RadioMiniPlayer'
 
 // Lazy-loaded Dialogs (improves bundle size and initial load)
 const SubscriptionPackages = lazy(() => import("@/components/SubscriptionPackages").then(m => ({ default: m.SubscriptionPackages })))
@@ -550,6 +551,9 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           onListingsClick={handleListingsClick}
         />
       )}
+
+      {/* Radio Mini Player */}
+      <RadioMiniPlayer />
 
       {/* Advanced Filters Dialog */}
       <AdvancedFilters
