@@ -27,7 +27,6 @@ interface BottomNavigationProps {
 
 interface NavItem {
   id: string;
-  label: string;
   icon: React.ElementType;
   path?: string;
   onClick?: () => void;
@@ -51,32 +50,27 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
   const clientNavItems: NavItem[] = [
     {
       id: 'browse',
-      label: 'Browse',
       icon: Home,
       path: '/client/dashboard',
     },
     {
       id: 'profile',
-      label: 'Profile',
       icon: User,
       path: '/client/profile',
     },
     {
       id: 'likes',
-      label: 'Flames',
       icon: Flame,
       path: '/client/liked-properties',
     },
     {
       id: 'messages',
-      label: 'Messages',
       icon: MessageCircle,
       path: '/messages',
       badge: unreadCount,
     },
     {
       id: 'filter',
-      label: 'Filter',
       icon: Filter,
       path: '/client/filters',
     },
@@ -86,39 +80,33 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
   const ownerNavItems: NavItem[] = [
     {
       id: 'browse',
-      label: 'Browse',
       icon: Building2,
       path: '/owner/dashboard',
     },
     {
       id: 'profile',
-      label: 'Profile',
       icon: User,
       path: '/owner/profile',
     },
     {
       id: 'liked',
-      label: 'Liked',
       icon: Heart,
       path: '/owner/liked-clients',
     },
     {
       id: 'listings',
-      label: 'Listings',
       icon: List,
       path: '/owner/properties',
       isCenter: true,
     },
     {
       id: 'messages',
-      label: 'Messages',
       icon: MessageCircle,
       path: '/messages',
       badge: unreadCount,
     },
     {
       id: 'filter',
-      label: 'Filter',
       icon: SlidersHorizontal,
       path: '/owner/filters',
     },
@@ -276,14 +264,6 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
                 }}
                 strokeWidth={active ? 2.5 : 2}
               />
-              
-              {/* HIGH CONTRAST: Label below icon */}
-              <span className={cn(
-                'absolute -bottom-5 text-[10px] font-medium whitespace-nowrap transition-colors duration-150',
-                active ? 'text-white' : 'text-white/60'
-              )}>
-                {item.label}
-              </span>
             </button>
           );
         })}
