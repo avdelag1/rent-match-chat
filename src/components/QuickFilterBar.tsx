@@ -1,6 +1,6 @@
 import { memo, useCallback, useState, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Bike, RotateCcw, Briefcase, Users, User, ChevronDown, Wrench, Filter, X, Check } from 'lucide-react';
+import { Home, Bike, RotateCcw, Briefcase, Users, User, ChevronDown, Wrench, Filter, X, Check, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { QuickFilterCategory, QuickFilters, ClientGender, ClientType } from '@/types/filters';
 
@@ -21,6 +21,8 @@ interface QuickFilterBarProps {
   className?: string;
   userRole?: 'client' | 'owner';
 }
+
+const allCategories: QuickFilterCategory[] = ['property', 'motorcycle', 'bicycle', 'services'];
 
 const categories: { id: QuickFilterCategory; label: string; icon: React.ReactNode }[] = [
   { id: 'property', label: 'Property', icon: <Home className="w-4 h-4" /> },
@@ -290,6 +292,39 @@ function QuickFilterBarComponent({ filters, onChange, className, userRole = 'cli
       <div className="max-w-screen-xl mx-auto">
         {/* Main filter row */}
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+          {/* "All" category button - shows everything */}
+          {userRole === 'client' && (
+            <button
+              onClick={() => {
+                const isAllSelected = filters.categories.length === allCategories.length;
+                if (isAllSelected) {
+                  // Deselect all if already all selected
+                  onChange({ ...filters, categories: [] });
+                } else {
+                  // Select all categories
+                  onChange({ ...filters, categories: [...allCategories] });
+                }
+              }}
+              className={cn(
+                smoothButtonClass,
+                'flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-bold',
+                'border',
+                filters.categories.length === allCategories.length
+                  ? 'bg-gradient-to-r from-orange-500 via-pink-500 to-purple-500 text-white border-transparent'
+                  : 'bg-white/15 text-white border-white/30'
+              )}
+            >
+              <Globe className="w-4 h-4" />
+              <span className="hidden sm:inline">All</span>
+              {filters.categories.length === allCategories.length && (
+                <Check className="w-3 h-3" />
+              )}
+            </button>
+          )}
+
+          {/* Divider */}
+          <div className="w-px h-6 bg-white/20 flex-shrink-0" />
+
           {/* Category chips - all listing types including services */}
           <div className="flex items-center gap-1 flex-shrink-0">
             {categories.map((category) => {
