@@ -240,6 +240,14 @@ export default function OwnerDashboardNew() {
 
   return (
     <div className="h-full flex flex-col bg-black">
+      {/* DEBUG OVERLAY - Remove when fixed */}
+      <div className="bg-red-900/50 p-4 text-xs text-white font-mono border-b border-red-500/30">
+        <div>🔍 DEBUG: User ID = {user?.id || 'NO USER'}</div>
+        <div>📊 Clients loaded = {clients?.length || 0}</div>
+        <div>⏳ Loading = {isLoading ? 'YES' : 'NO'}</div>
+        <div>❌ Error = {error?.message || 'NONE'}</div>
+      </div>
+
       {/* Header */}
       <div className="flex-shrink-0 p-4 border-b border-white/10 bg-black/50">
         <div className="flex items-center justify-between mb-4">
