@@ -337,6 +337,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (error) {
         logger.error('[Auth] Sign in error:', error);
+        
+        // Better error handling for common Supabase auth errors
+        let userFriendlyMessage = "Sign in failed. Please check your credentials and try again.";
+        
+        if (error.message?.includes('Database error granting user')) {
+          // This is a server-side issue - trigger or RLS problem
+          userFriendlyMessage = "Temporary server issue. Please wait a few seconds and try again. If the problem persists, contact support.";
+        } else if (error.message?.includes('Invalid login credentials')) {
+          userFriendlyMessage = "Invalid email or password. Please check your credentials.";
+        } else if (error.message?.includes('Email not confirmed')) {
+          userFriendlyMessage = "Please verify your email address first.";
+        } else if (error.message?.includes('Too many requests')) {
+          userFriendlyMessage = "Too many attempts. Please wait a moment and try again.";
+        }
+        
+        toast({
+          title: "Sign In Failed",
+          description: userFriendlyMessage,
+          variant: "destructive"
+        });
+        
         throw error;
       }
 
