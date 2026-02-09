@@ -288,8 +288,8 @@ export default function OwnerDashboardNew() {
           </div>
           <Button
             onClick={handleRefresh}
-            variant="outline"
-            className="border-purple-500/50 text-purple-500 hover:bg-purple-500/20"
+            variant="secondary"
+            className="bg-purple-600 hover:bg-purple-700 text-white border-purple-600"
             disabled={isLoading || isRefetching}
           >
             <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
