@@ -107,6 +107,9 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
 
       console.log('[Listings] User ID:', user.user.id);
       console.log('[Listings] User email:', user.user.email);
+      console.log('[Listings] Selected category:', selectedCategory);
+      console.log('[Listings] Selected mode:', selectedMode);
+      console.log('[Listings] Listing type:', selectedCategory === 'worker' ? 'service' : (selectedMode === 'rent' ? 'rent' : 'buy'));
 
       if (images.length + imageFiles.length < 1) {
         throw new Error('At least 1 photo required');
@@ -122,7 +125,8 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
       const listingData: Record<string, unknown> = {
         owner_id: user.user.id,
         category: selectedCategory,
-        listing_type: selectedMode === 'rent' ? 'rent' : selectedMode === 'sale' ? 'buy' : 'service',
+        // Workers MUST use 'service' listing_type - ignore mode selection
+        listing_type: selectedCategory === 'worker' ? 'service' : (selectedMode === 'rent' ? 'rent' : 'buy'),
         status: 'active' as const,
         is_active: true,
         images: allImages,
