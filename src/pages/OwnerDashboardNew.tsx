@@ -186,7 +186,8 @@ export default function OwnerDashboardNew() {
   debugLog('Smart matching result:', { 
     clientsCount: clients?.length,
     isLoading,
-    error: error?.message
+    error: error?.message,
+    rawData: clients
   });
 
   const startConversation = useStartConversation();
