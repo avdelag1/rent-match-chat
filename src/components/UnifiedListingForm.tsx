@@ -158,8 +158,8 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
         location_type,
         // Property fields
         property_type: formData.property_type ? String(formData.property_type).toLowerCase() : null,
-        bedrooms: formData.beds || null,
-        bathrooms: formData.baths || null,
+        beds: formData.beds || null,
+        baths: formData.baths || null,
         square_footage: formData.square_footage || null,
         furnished: formData.furnished || false,
         pet_friendly: formData.pet_friendly || false,
@@ -200,53 +200,6 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
         
         if (error) throw error;
         listingResult = data;
-      }
-
-      // Insert into vehicle_listings for motorcycles/bicycles
-      if ((selectedCategory === 'motorcycle' || selectedCategory === 'bicycle') && listingResult?.id) {
-        const vehicleData = {
-          id: listingResult.id,
-          vehicle_type: selectedCategory,
-          vehicle_brand: formData.brand,
-          vehicle_model: formData.model,
-          vehicle_condition: formData.condition ? String(formData.condition).toLowerCase() : null,
-          year: formData.year,
-          mileage: formData.mileage,
-          engine_cc: formData.engine_cc,
-          fuel_type: formData.fuel_type,
-          transmission_type: formData.transmission,
-          // Motorcycle specific
-          motorcycle_type: selectedCategory === 'motorcycle' ? formData.motorcycle_type : null,
-          has_abs: formData.has_abs || false,
-          has_traction_control: formData.has_traction_control || false,
-          has_heated_grips: formData.has_heated_grips || false,
-          has_luggage_rack: formData.has_luggage_rack || false,
-          includes_helmet: formData.includes_helmet || false,
-          includes_gear: formData.includes_gear || false,
-          // Bicycle specific
-          bicycle_type: selectedCategory === 'bicycle' ? formData.bicycle_type : null,
-          frame_size: formData.frame_size,
-          frame_material: formData.frame_material,
-          number_of_gears: formData.number_of_gears,
-          suspension_type: formData.suspension_type,
-          brake_type: formData.brake_type,
-          wheel_size: formData.wheel_size,
-          electric_assist: formData.electric_assist || false,
-          battery_range: formData.battery_range,
-          includes_lock: formData.includes_lock || false,
-          includes_lights: formData.includes_lights || false,
-          includes_basket: formData.includes_basket || false,
-          includes_pump: formData.includes_pump || false,
-        };
-
-        const { error: vehicleError } = await supabase
-          .from('vehicle_listings')
-          .upsert(vehicleData);
-        
-        if (vehicleError) {
-          console.error('Vehicle insert error:', vehicleError);
-          // Don't throw - listing was created successfully
-        }
       }
 
       return listingResult;
