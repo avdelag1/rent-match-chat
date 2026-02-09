@@ -1321,6 +1321,7 @@ export type Database = {
           frame_size: string | null
           fuel_type: string | null
           has_abs: boolean | null
+          has_esc: boolean | null
           has_heated_grips: boolean | null
           has_luggage_rack: boolean | null
           has_traction_control: boolean | null
@@ -1406,6 +1407,7 @@ export type Database = {
           frame_size?: string | null
           fuel_type?: string | null
           has_abs?: boolean | null
+          has_esc?: boolean | null
           has_heated_grips?: boolean | null
           has_luggage_rack?: boolean | null
           has_traction_control?: boolean | null
@@ -1491,6 +1493,7 @@ export type Database = {
           frame_size?: string | null
           fuel_type?: string | null
           has_abs?: boolean | null
+          has_esc?: boolean | null
           has_heated_grips?: boolean | null
           has_luggage_rack?: boolean | null
           has_traction_control?: boolean | null
