@@ -168,6 +168,12 @@ export default function OwnerDashboardNew() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
 
+  debugLog('User from auth:', { 
+    userId: user?.id, 
+    email: user?.email,
+    hasUser: !!user 
+  });
+
   // Fetch client profiles using the proper smart matching hook
   const { 
     data: clients = [], 
@@ -176,6 +182,12 @@ export default function OwnerDashboardNew() {
     refetch,
     isRefetching 
   } = useSmartClientMatching(user?.id, undefined, 0, 50, false);
+
+  debugLog('Smart matching result:', { 
+    clientsCount: clients?.length,
+    isLoading,
+    error: error?.message
+  });
 
   const startConversation = useStartConversation();
 
