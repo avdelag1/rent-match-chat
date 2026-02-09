@@ -306,6 +306,8 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
 
   const handleImageAdd = () => {
     const totalImages = images.length + imageFiles.length;
+    console.log('[Listings] Current images before add:', { imagesCount: images.length, filesCount: imageFiles.length, total: totalImages });
+    
     if (totalImages >= maxPhotos) {
       toast({ title: "Maximum Photos Reached", description: `You can upload up to ${maxPhotos} photos.`, variant: "destructive" });
       return;
@@ -318,6 +320,8 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
 
     input.onchange = (e) => {
       const files = Array.from((e.target as HTMLInputElement).files || []);
+      console.log('[Listings] Files selected:', files.length, files.map(f => f.name));
+      
       if (files.length === 0) return;
 
       const availableSlots = maxPhotos - totalImages;
@@ -328,13 +332,19 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
 
       const validatedFiles = files.filter(file => {
         const validation = validateImageFile(file);
+        console.log('[Listings] File validation:', file.name, validation);
         if (!validation.isValid) {
           toast({ title: "Invalid File", description: `${file.name}: ${validation.error}`, variant: "destructive" });
         }
         return validation.isValid;
       });
 
-      setImageFiles(prev => [...prev, ...validatedFiles]);
+      console.log('[Listings] Valid files to add:', validatedFiles.length);
+      setImageFiles(prev => {
+        const newState = [...prev, ...validatedFiles];
+        console.log('[Listings] ImageFiles state updated:', { previous: prev.length, added: validatedFiles.length, newTotal: newState.length });
+        return newState;
+      });
     };
 
     input.click();
@@ -349,7 +359,10 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
   };
 
   const handleSubmit = () => {
-    if (images.length + imageFiles.length < 1) {
+    const totalImages = images.length + imageFiles.length;
+    console.log('[Listings] Photo check:', { images: images.length, imageFiles: imageFiles.length, total: totalImages });
+    
+    if (totalImages < 1) {
       toast({ title: "Photo Required", description: "Please upload at least 1 photo.", variant: "destructive" });
       return;
     }
