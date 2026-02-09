@@ -1,3 +1,7 @@
+/**
+ * UnifiedListingForm - Creates listings for all categories
+ * Updated to match new normalized schema with JSONB arrays
+ */
 import { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,7 +15,6 @@ import { toast } from '@/hooks/use-toast';
 import { notifications } from '@/utils/notifications';
 import { Upload, X, Bike, CircleDot } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { validateNoContactInfo } from '@/utils/contactInfoValidation';
 import { CategorySelector, Category, Mode } from './CategorySelector';
 import { MotorcycleListingForm, MotorcycleFormData } from './MotorcycleListingForm';
 import { BicycleListingForm, BicycleFormData } from './BicycleListingForm';
@@ -25,7 +28,7 @@ import { useAuth } from '@/hooks/useAuth';
 interface EditingListing {
   id?: string;
   category?: 'property' | 'motorcycle' | 'bicycle' | 'worker';
-  mode?: 'rent' | 'sale';
+  mode?: 'rent' | 'sale' | 'both';
   images?: string[];
   latitude?: number;
   longitude?: number;
@@ -51,7 +54,6 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
   const { user } = useAuth();
   const { saveListingDraft } = useAnonymousDrafts();
 
-  // Get max photos based on category
   const getMaxPhotos = () => {
     switch (selectedCategory) {
       case 'property': return 15;
@@ -74,10 +76,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
       setImages(editingProperty.images || []);
       setImageFiles([]);
       setFormData(editingProperty);
-      setLocation({
-        lat: editingProperty.latitude,
-        lng: editingProperty.longitude
-      });
+      setLocation({ lat: editingProperty.latitude, lng: editingProperty.longitude });
     } else if (editingProperty?.category) {
       setEditingId(null);
       setSelectedCategory(editingProperty.category);
@@ -85,10 +84,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
       setImages(editingProperty.images || []);
       setImageFiles([]);
       setFormData(editingProperty.images ? editingProperty : { mode: editingProperty.mode || 'rent' });
-      setLocation({
-        lat: editingProperty.latitude,
-        lng: editingProperty.longitude
-      });
+      setLocation({ lat: editingProperty.latitude, lng: editingProperty.longitude });
     } else {
       setEditingId(null);
       setSelectedCategory('property');
@@ -105,12 +101,6 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) throw new Error('Not authenticated');
 
-      console.log('[Listings] User ID:', user.user.id);
-      console.log('[Listings] User email:', user.user.email);
-      console.log('[Listings] Selected category:', selectedCategory);
-      console.log('[Listings] Selected mode:', selectedMode);
-      console.log('[Listings] Listing type:', selectedCategory === 'worker' ? 'service' : (selectedMode === 'rent' ? 'rent' : 'buy'));
-
       if (images.length + imageFiles.length < 1) {
         throw new Error('At least 1 photo required');
       }
@@ -122,162 +112,152 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
 
       const allImages = [...images, ...uploadedImageUrls];
 
-      const listingData: Record<string, unknown> = {
+      // Convert arrays to JSONB format
+      const amenities = formData.amenities ? JSON.parse(JSON.stringify(formData.amenities)) : [];
+      const services_included = formData.services_included ? JSON.parse(JSON.stringify(formData.services_included)) : [];
+      const skills = formData.skills ? JSON.parse(JSON.stringify(formData.skills)) : [];
+      const certifications = formData.certifications ? JSON.parse(JSON.stringify(formData.certifications)) : [];
+      const tools_equipment = formData.tools_equipment ? JSON.parse(JSON.stringify(formData.tools_equipment)) : [];
+      const days_available = formData.days_available ? JSON.parse(JSON.stringify(formData.days_available)) : [];
+      const time_slots_available = formData.time_slots_available ? JSON.parse(JSON.stringify(formData.time_slots_available)) : [];
+      const work_type = formData.work_type ? JSON.parse(JSON.stringify(formData.work_type)) : [];
+      const schedule_type = formData.schedule_type ? JSON.parse(JSON.stringify(formData.schedule_type)) : [];
+      const location_type = formData.location_type ? JSON.parse(JSON.stringify(formData.location_type)) : [];
+
+      // Main listing data
+      const listingData = {
         owner_id: user.user.id,
         category: selectedCategory,
-        // Workers MUST use 'service' listing_type - ignore mode selection
         listing_type: selectedCategory === 'worker' ? 'service' : (selectedMode === 'rent' ? 'rent' : 'buy'),
-        status: 'active' as const,
+        mode: selectedMode,
+        status: 'active',
         is_active: true,
-        images: allImages,
         title: formData.title || 'Untitled',
         price: formData.price || 0,
+        currency: 'USD',
         rental_rates: formData.rental_rates,
-        city: formData.city || 'Unknown',
-        state: formData.state || formData.city || 'Unknown',
+        rental_duration_type: formData.rental_duration_type,
         country: formData.country || 'Mexico',
+        state: formData.state || formData.city || 'Unknown',
+        city: formData.city || 'Unknown',
         neighborhood: formData.neighborhood,
+        address: formData.address,
         latitude: selectedCategory === 'property' ? null : (location.lat || null),
         longitude: selectedCategory === 'property' ? null : (location.lng || null),
+        // JSONB arrays
+        images: allImages,
+        amenities,
+        services_included,
+        skills,
+        certifications,
+        tools_equipment,
+        days_available,
+        time_slots_available,
+        work_type,
+        schedule_type,
+        location_type,
+        // Property fields
+        property_type: formData.property_type ? String(formData.property_type).toLowerCase() : null,
+        bedrooms: formData.beds || null,
+        bathrooms: formData.baths || null,
+        square_footage: formData.square_footage || null,
+        furnished: formData.furnished || false,
+        pet_friendly: formData.pet_friendly || false,
+        house_rules: formData.house_rules || null,
+        // Worker fields
+        service_category: selectedCategory === 'worker' ? formData.service_category : null,
+        custom_service_name: selectedCategory === 'worker' ? formData.custom_service_name : null,
+        pricing_unit: selectedCategory === 'worker' ? formData.pricing_unit : null,
+        experience_level: selectedCategory === 'worker' ? formData.experience_level : null,
+        experience_years: selectedCategory === 'worker' ? formData.experience_years : null,
+        service_radius_km: selectedCategory === 'worker' ? formData.service_radius_km : null,
+        minimum_booking_hours: selectedCategory === 'worker' ? formData.minimum_booking_hours : null,
+        offers_emergency_service: selectedCategory === 'worker' ? formData.offers_emergency_service : false,
+        background_check_verified: selectedCategory === 'worker' ? formData.background_check_verified : false,
+        insurance_verified: selectedCategory === 'worker' ? formData.insurance_verified : false,
       };
 
-      if (selectedCategory === 'motorcycle') {
-        Object.assign(listingData, {
-          motorcycle_type: formData.motorcycle_type,
+      let listingResult;
+
+      if (editingId) {
+        // Update existing listing
+        const { data, error } = await supabase
+          .from('listings')
+          .update(listingData)
+          .eq('id', editingId)
+          .select()
+          .single();
+        
+        if (error) throw error;
+        listingResult = data;
+      } else {
+        // Insert new listing
+        const { data, error } = await supabase
+          .from('listings')
+          .insert(listingData)
+          .select()
+          .single();
+        
+        if (error) throw error;
+        listingResult = data;
+      }
+
+      // Insert into vehicle_listings for motorcycles/bicycles
+      if ((selectedCategory === 'motorcycle' || selectedCategory === 'bicycle') && listingResult?.id) {
+        const vehicleData = {
+          id: listingResult.id,
+          vehicle_type: selectedCategory,
           vehicle_brand: formData.brand,
           vehicle_model: formData.model,
-          vehicle_condition: typeof formData.condition === 'string' ? formData.condition.toLowerCase() : formData.condition,
+          vehicle_condition: formData.condition ? String(formData.condition).toLowerCase() : null,
           year: formData.year,
           mileage: formData.mileage,
           engine_cc: formData.engine_cc,
           fuel_type: formData.fuel_type,
           transmission_type: formData.transmission,
-          has_abs: formData.has_abs,
-          has_traction_control: formData.has_traction_control,
-          has_heated_grips: formData.has_heated_grips,
-          has_luggage_rack: formData.has_luggage_rack,
-          includes_helmet: formData.includes_helmet,
-          includes_gear: formData.includes_gear,
-        });
-      } else if (selectedCategory === 'bicycle') {
-        Object.assign(listingData, {
-          bicycle_type: formData.bicycle_type || formData.vehicle_type,
-          vehicle_brand: formData.brand,
-          vehicle_model: formData.model,
-          vehicle_condition: typeof formData.condition === 'string' ? formData.condition.toLowerCase() : formData.condition,
-          year: formData.year,
+          // Motorcycle specific
+          motorcycle_type: selectedCategory === 'motorcycle' ? formData.motorcycle_type : null,
+          has_abs: formData.has_abs || false,
+          has_traction_control: formData.has_traction_control || false,
+          has_heated_grips: formData.has_heated_grips || false,
+          has_luggage_rack: formData.has_luggage_rack || false,
+          includes_helmet: formData.includes_helmet || false,
+          includes_gear: formData.includes_gear || false,
+          // Bicycle specific
+          bicycle_type: selectedCategory === 'bicycle' ? formData.bicycle_type : null,
           frame_size: formData.frame_size,
           frame_material: formData.frame_material,
           number_of_gears: formData.number_of_gears,
-          electric_assist: formData.electric_assist,
-          battery_range: formData.battery_range,
           suspension_type: formData.suspension_type,
           brake_type: formData.brake_type,
           wheel_size: formData.wheel_size,
-          includes_lock: formData.includes_lock,
-          includes_lights: formData.includes_lights,
-          includes_basket: formData.includes_basket,
-          includes_pump: formData.includes_pump,
-        });
-      } else if (selectedCategory === 'property') {
-        // Remove bathrooms field - doesn't exist in production DB
-        Object.assign(listingData, {
-          address: formData.address,
-          property_type: typeof formData.property_type === 'string' ? formData.property_type.toLowerCase() : formData.property_type,
-          bedrooms: formData.beds,
-          square_footage: formData.square_footage,
-          furnished: formData.furnished,
-          pet_friendly: formData.pet_friendly,
-          amenities: formData.amenities,
-          services_included: formData.services_included,
-          house_rules: formData.house_rules,
-          rental_duration_type: formData.rental_duration_type,
-          listing_type: selectedMode === 'rent' ? 'rent' : 'buy',
-        });
-      } else if (selectedCategory === 'worker') {
-        // Remove languages and description fields - using structured data only
-        Object.assign(listingData, {
-          service_category: formData.service_category,
-          custom_service_name: formData.custom_service_name,
-          pricing_unit: formData.pricing_unit,
-          work_type: formData.work_type,
-          schedule_type: formData.schedule_type,
-          days_available: formData.days_available,
-          time_slots_available: formData.time_slots_available,
-          location_type: formData.location_type,
-          experience_level: formData.experience_level,
-          experience_years: formData.experience_years,
-          worker_skills: formData.skills,
-          certifications: formData.certifications,
-          tools_equipment: formData.tools_equipment,
-          service_radius_km: formData.service_radius_km,
-          minimum_booking_hours: formData.minimum_booking_hours,
-          offers_emergency_service: formData.offers_emergency_service,
-          background_check_verified: formData.background_check_verified,
-          insurance_verified: formData.insurance_verified,
-          listing_type: 'service',
-        });
-      }
+          electric_assist: formData.electric_assist || false,
+          battery_range: formData.battery_range,
+          includes_lock: formData.includes_lock || false,
+          includes_lights: formData.includes_lights || false,
+          includes_basket: formData.includes_basket || false,
+          includes_pump: formData.includes_pump || false,
+        };
 
-      if (editingId) {
-        queryClient.setQueryData(['owner-listings'], (oldData: unknown[] | undefined) => {
-          if (!oldData) return oldData;
-          return oldData.map((item: unknown) => {
-            const listing = item as { id: string };
-            return listing.id === editingId ? { ...listing, ...listingData } : item;
-          });
-        });
-
-        const { data, error } = await supabase
-          .from('listings')
-          .update(listingData as any)
-          .eq('id', editingId)
-          .select()
-          .single();
-
-        if (error) throw error;
-        return data;
-      } else {
-        console.log('[Listings] Inserting listing with data:', JSON.stringify(listingData, null, 2));
+        const { error: vehicleError } = await supabase
+          .from('vehicle_listings')
+          .upsert(vehicleData);
         
-        const { data, error } = await supabase
-          .from('listings')
-          .insert(listingData as any)
-          .select()
-          .single();
-
-        if (error) {
-          console.error('[Listings] Supabase insert error:', {
-            code: error.code,
-            message: error.message,
-            details: error.details,
-            hint: error.hint,
-            listingData: JSON.stringify(listingData, null, 2)
-          });
-          throw error;
+        if (vehicleError) {
+          console.error('Vehicle insert error:', vehicleError);
+          // Don't throw - listing was created successfully
         }
-        
-        console.log('[Listings] Insert success:', data);
-        
-        queryClient.setQueryData(['owner-listings'], (oldData: unknown[] | undefined) => {
-          return oldData ? [data, ...oldData] : [data];
-        });
-        
-        return data;
       }
+
+      return listingResult;
     },
     onSuccess: () => {
-      // Close dialog immediately for instant feedback
       handleClose();
-
-      // Show notification after closing
       if (editingId) {
         notifications.listing.updated(selectedCategory);
       } else {
         notifications.listing.created(selectedCategory);
       }
-
-      // Invalidate queries to refresh the listing page
       queryClient.invalidateQueries({ queryKey: ['owner-listings'] });
       queryClient.invalidateQueries({ queryKey: ['listings'] });
     },
@@ -285,9 +265,9 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
       queryClient.invalidateQueries({ queryKey: ['owner-listings'] });
       queryClient.invalidateQueries({ queryKey: ['listings'] });
       toast({
-        title: "Error",
-        description: error.message || "Failed to save listing.",
-        variant: "destructive"
+        title: 'Error',
+        description: error.message || 'Failed to save listing.',
+        variant: 'destructive'
       });
     }
   });
@@ -305,7 +285,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
   const handleImageAdd = () => {
     const totalImages = images.length + imageFiles.length;
     if (totalImages >= maxPhotos) {
-      toast({ title: "Maximum Photos Reached", description: `You can upload up to ${maxPhotos} photos.`, variant: "destructive" });
+      toast({ title: 'Maximum Photos Reached', description: `You can upload up to ${maxPhotos} photos.`, variant: 'destructive' });
       return;
     }
 
@@ -320,14 +300,14 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
 
       const availableSlots = maxPhotos - totalImages;
       if (files.length > availableSlots) {
-        toast({ title: "Too Many Photos", description: `You can only add ${availableSlots} more.`, variant: "destructive" });
+        toast({ title: 'Too Many Photos', description: `You can only add ${availableSlots} more.`, variant: 'destructive' });
         files.splice(availableSlots);
       }
 
       const validatedFiles = files.filter(file => {
         const validation = validateImageFile(file);
         if (!validation.isValid) {
-          toast({ title: "Invalid File", description: `${file.name}: ${validation.error}`, variant: "destructive" });
+          toast({ title: 'Invalid File', description: `${file.name}: ${validation.error}`, variant: 'destructive' });
         }
         return validation.isValid;
       });
@@ -348,31 +328,19 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
 
   const handleSubmit = () => {
     if (images.length + imageFiles.length < 1) {
-      toast({ title: "Photo Required", description: "Please upload at least 1 photo.", variant: "destructive" });
+      toast({ title: 'Photo Required', description: 'Please upload at least 1 photo.', variant: 'destructive' });
       return;
     }
 
-    // Only validate title if it has actual content (not empty or just whitespace)
-    if (formData.title && typeof formData.title === 'string' && formData.title.trim().length > 0) {
-      const titleError = validateNoContactInfo(formData.title as string);
-      if (titleError) {
-        toast({ title: "Invalid Title", description: titleError, variant: "destructive" });
-        return;
-      }
-    }
-
-    // Check if user is authenticated
     if (!user) {
-      // Save as anonymous draft
       saveListingDraft(selectedCategory, {
         ...formData,
-        images: images,
+        images,
         mode: selectedMode,
         latitude: location.lat,
         longitude: location.lng,
       });
       
-      // Store pending action
       sessionStorage.setItem('pending_auth_action', JSON.stringify({
         action: 'save_listing',
         category: selectedCategory,
@@ -380,8 +348,8 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
       }));
       
       toast({
-        title: "Draft Saved!",
-        description: "Create an account to publish your listing.",
+        title: 'Draft Saved!',
+        description: 'Create an account to publish your listing.',
         duration: 5000,
       });
       handleClose();
@@ -411,7 +379,6 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
               onModeChange={setSelectedMode}
             />
 
-            {/* Category Indicator for Motorcycle and Bicycle */}
             {(selectedCategory === 'motorcycle' || selectedCategory === 'bicycle') && (
               <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20">
                 <div className={`p-2.5 sm:p-3 rounded-lg sm:rounded-xl ${
@@ -494,15 +461,13 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
                 <p className="text-sm text-muted-foreground mt-2">
                   {selectedCategory === 'bicycle' 
                     ? '📋 Optional: Upload purchase receipt to earn a blue verification checkmark'
-                    : '🛡️ Upload ownership documents to earn a blue verification star and build trust with clients'
-                  }
+                    : '🛡️ Upload ownership documents to earn a blue verification star and build trust with clients'}
                 </p>
               </CardHeader>
               <CardContent>
                 <p className="text-xs text-muted-foreground mb-3">Note: You can upload documents now or after creating the listing.</p>
               </CardContent>
             </Card>
-
           </div>
         </ScrollArea>
 
