@@ -71,7 +71,7 @@ const QuickFilterText = ({ hasActiveFilters }: { hasActiveFilters: boolean }) =>
       "hidden sm:inline font-bold text-sm tracking-tight whitespace-nowrap bg-clip-text text-transparent",
       hasActiveFilters
         ? "bg-gradient-to-r from-pink-400 to-rose-400"
-        : "bg-gradient-to-r from-gray-200 to-gray-400"
+        : "bg-gradient-to-r from-white to-gray-300"
     )}>
       Quick Filter
     </span>
@@ -79,7 +79,7 @@ const QuickFilterText = ({ hasActiveFilters }: { hasActiveFilters: boolean }) =>
       "sm:hidden font-bold text-xs tracking-tight whitespace-nowrap bg-clip-text text-transparent",
       hasActiveFilters
         ? "bg-gradient-to-r from-pink-400 to-rose-400"
-        : "bg-gradient-to-r from-gray-200 to-gray-400"
+        : "bg-gradient-to-r from-white to-gray-300"
     )}>
       Filter
     </span>
