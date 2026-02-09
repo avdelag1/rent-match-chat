@@ -242,10 +242,18 @@ export default function OwnerDashboardNew() {
     <div className="h-full flex flex-col bg-black">
       {/* DEBUG OVERLAY - Remove when fixed */}
       <div className="bg-red-900/50 p-4 text-xs text-white font-mono border-b border-red-500/30">
-        <div>🔍 DEBUG: User ID = {user?.id || 'NO USER'}</div>
-        <div>📊 Clients loaded = {clients?.length || 0}</div>
+        <div className="font-bold mb-2">🔍 DEBUG INFO:</div>
+        <div>👤 User ID = {user?.id || 'NO USER - CHECK IF LOGGED IN'}</div>
+        <div>📊 Clients raw = {clients?.length || 0}</div>
+        <div>🔎 Filtered clients = {filteredClients?.length || 0}</div>
         <div>⏳ Loading = {isLoading ? 'YES' : 'NO'}</div>
         <div>❌ Error = {error?.message || 'NONE'}</div>
+        {clients?.length > 0 && (
+          <div className="mt-2">
+            <div>First client:</div>
+            <pre className="text-xs mt-1">{JSON.stringify(clients[0], null, 2)}</pre>
+          </div>
+        )}
       </div>
 
       {/* Header */}
