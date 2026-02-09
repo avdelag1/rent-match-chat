@@ -109,6 +109,10 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
         throw new Error('At least 1 photo required');
       }
 
+      console.log('[Listings] Submitting form data:', JSON.stringify(formData, null, 2));
+      console.log('[Listings] Selected category:', selectedCategory);
+      console.log('[Listings] Location:', location);
+
       let uploadedImageUrls: string[] = [];
       if (imageFiles.length > 0) {
         uploadedImageUrls = await uploadPhotoBatch(user.user.id, imageFiles, 'listing-images');
@@ -187,6 +191,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
           rental_duration_type: formData.rental_duration_type,
           listing_type: selectedMode === 'rent' ? 'rent' : 'buy',
         });
+        console.log('[Listings] Property data:', JSON.stringify(listingData, null, 2));
       } else if (selectedCategory === 'worker') {
         // Remove languages and description fields - using structured data only
         Object.assign(listingData, {
@@ -210,6 +215,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
           insurance_verified: formData.insurance_verified,
           listing_type: 'service',
         });
+        console.log('[Listings] Worker data:', JSON.stringify(listingData, null, 2));
       }
 
       if (editingId) {
@@ -264,9 +270,25 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
     onError: (error: Error) => {
       queryClient.invalidateQueries({ queryKey: ['owner-listings'] });
       queryClient.invalidateQueries({ queryKey: ['listings'] });
+      
+      // Better error messages for common issues
+      let userMessage = error.message || "Failed to save listing.";
+      
+      if (userMessage.includes('null value in column')) {
+        const columnMatch = userMessage.match/null value in column "(\w+)"/);
+        const column = columnMatch ? columnMatch[1] : 'unknown';
+        userMessage = `Missing required field: ${column}. Please fill in all required information.`;
+      } else if (userMessage.includes('duplicate key')) {
+        userMessage = "A listing with similar information already exists.";
+      } else if (userMessage.includes('authentication')) {
+        userMessage = "Your session expired. Please sign in again.";
+      }
+      
+      console.error('[Listings] Save error:', error);
+      
       toast({
-        title: "Error",
-        description: error.message || "Failed to save listing.",
+        title: "Error Saving Listing",
+        description: userMessage,
         variant: "destructive"
       });
     }
