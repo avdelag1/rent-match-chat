@@ -114,8 +114,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
 
       // Convert arrays to JSONB format
       const amenities = formData.amenities ? JSON.parse(JSON.stringify(formData.amenities)) : [];
-      const services_included = formData.services_included ? JSON.parse(JSON.stringify(formData.services_included)) : [];
-      const skills = formData.skills ? JSON.parse(JSON.stringify(formData.skills)) : [];
+      const worker_skills = formData.skills ? JSON.parse(JSON.stringify(formData.skills)) : [];
       const certifications = formData.certifications ? JSON.parse(JSON.stringify(formData.certifications)) : [];
       const tools_equipment = formData.tools_equipment ? JSON.parse(JSON.stringify(formData.tools_equipment)) : [];
       const days_available = formData.days_available ? JSON.parse(JSON.stringify(formData.days_available)) : [];
@@ -147,8 +146,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
         // JSONB arrays
         images: allImages,
         amenities,
-        services_included,
-        skills,
+        worker_skills,
         certifications,
         tools_equipment,
         days_available,
@@ -158,12 +156,43 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
         location_type,
         // Property fields
         property_type: formData.property_type ? String(formData.property_type).toLowerCase() : null,
-        bedrooms: formData.beds || null,
-        bathrooms: formData.baths || null,
+        beds: formData.beds || null,
+        baths: formData.baths || null,
         square_footage: formData.square_footage || null,
-        furnished: formData.furnished || false,
-        pet_friendly: formData.pet_friendly || false,
-        house_rules: formData.house_rules || null,
+        rules: formData.rules || formData.house_rules || null,
+        // Vehicle fields (motorcycle & bicycle)
+        vehicle_type: (selectedCategory === 'motorcycle' || selectedCategory === 'bicycle') ? selectedCategory : null,
+        vehicle_brand: formData.brand || null,
+        vehicle_model: formData.model || null,
+        vehicle_condition: formData.condition ? String(formData.condition).toLowerCase() : null,
+        year: formData.year || null,
+        mileage: formData.mileage || null,
+        engine_cc: formData.engine_cc || null,
+        fuel_type: formData.fuel_type || null,
+        transmission_type: formData.transmission || null,
+        color: formData.color || null,
+        // Motorcycle specific
+        motorcycle_type: selectedCategory === 'motorcycle' ? formData.motorcycle_type : null,
+        has_abs: formData.has_abs || false,
+        has_traction_control: formData.has_traction_control || false,
+        has_heated_grips: formData.has_heated_grips || false,
+        has_luggage_rack: formData.has_luggage_rack || false,
+        includes_helmet: formData.includes_helmet || false,
+        includes_gear: formData.includes_gear || false,
+        // Bicycle specific
+        bicycle_type: selectedCategory === 'bicycle' ? formData.bicycle_type : null,
+        frame_size: formData.frame_size || null,
+        frame_material: formData.frame_material || null,
+        number_of_gears: formData.number_of_gears || null,
+        suspension_type: formData.suspension_type || null,
+        brake_type: formData.brake_type || null,
+        wheel_size: formData.wheel_size || null,
+        electric_assist: formData.electric_assist || false,
+        battery_range: formData.battery_range || null,
+        includes_lock: formData.includes_lock || false,
+        includes_lights: formData.includes_lights || false,
+        includes_basket: formData.includes_basket || false,
+        includes_pump: formData.includes_pump || false,
         // Worker fields
         service_category: selectedCategory === 'worker' ? formData.service_category : null,
         custom_service_name: selectedCategory === 'worker' ? formData.custom_service_name : null,
@@ -200,53 +229,6 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
         
         if (error) throw error;
         listingResult = data;
-      }
-
-      // Insert into vehicle_listings for motorcycles/bicycles
-      if ((selectedCategory === 'motorcycle' || selectedCategory === 'bicycle') && listingResult?.id) {
-        const vehicleData = {
-          id: listingResult.id,
-          vehicle_type: selectedCategory,
-          vehicle_brand: formData.brand,
-          vehicle_model: formData.model,
-          vehicle_condition: formData.condition ? String(formData.condition).toLowerCase() : null,
-          year: formData.year,
-          mileage: formData.mileage,
-          engine_cc: formData.engine_cc,
-          fuel_type: formData.fuel_type,
-          transmission_type: formData.transmission,
-          // Motorcycle specific
-          motorcycle_type: selectedCategory === 'motorcycle' ? formData.motorcycle_type : null,
-          has_abs: formData.has_abs || false,
-          has_traction_control: formData.has_traction_control || false,
-          has_heated_grips: formData.has_heated_grips || false,
-          has_luggage_rack: formData.has_luggage_rack || false,
-          includes_helmet: formData.includes_helmet || false,
-          includes_gear: formData.includes_gear || false,
-          // Bicycle specific
-          bicycle_type: selectedCategory === 'bicycle' ? formData.bicycle_type : null,
-          frame_size: formData.frame_size,
-          frame_material: formData.frame_material,
-          number_of_gears: formData.number_of_gears,
-          suspension_type: formData.suspension_type,
-          brake_type: formData.brake_type,
-          wheel_size: formData.wheel_size,
-          electric_assist: formData.electric_assist || false,
-          battery_range: formData.battery_range,
-          includes_lock: formData.includes_lock || false,
-          includes_lights: formData.includes_lights || false,
-          includes_basket: formData.includes_basket || false,
-          includes_pump: formData.includes_pump || false,
-        };
-
-        const { error: vehicleError } = await supabase
-          .from('vehicle_listings')
-          .upsert(vehicleData);
-        
-        if (vehicleError) {
-          console.error('Vehicle insert error:', vehicleError);
-          // Don't throw - listing was created successfully
-        }
       }
 
       return listingResult;
