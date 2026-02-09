@@ -9,8 +9,7 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { useSmartClientMatching, ClientFilters } from '@/hooks/useSmartMatching';
 import { useStartConversation } from '@/hooks/useConversations';
 import { toast as sonnerToast } from 'sonner';
 import { 
@@ -27,52 +26,6 @@ const debugLog = (message: string, data?: any) => {
   console.log(`[OwnerDashboard] ${message}`, data || '');
 };
 
-interface ClientProfile {
-  id: string;
-  user_id: string;
-  name: string | null;
-  age: number | null;
-  city: string | null;
-  profile_images: string[] | null;
-  budget_min: number | null;
-  budget_max: number | null;
-  preferred_listing_type: string | null;
-  verified: boolean | null;
-  created_at: string | null;
-}
-
-// Fetch ALL client profiles directly from profiles table
-async function fetchAllClients(): Promise<ClientProfile[]> {
-  debugLog('Fetching all client profiles...');
-  
-  const { data, error } = await supabase
-    .from('profiles')
-    .select(`
-      id,
-      user_id,
-      name,
-      age,
-      city,
-      profile_images,
-      budget_min,
-      budget_max,
-      preferred_listing_type,
-      verified,
-      created_at,
-      user_roles!inner (role)
-    `)
-    .eq('user_roles.role', 'client')
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    debugLog('Error fetching clients:', error);
-    throw error;
-  }
-
-  debugLog(`Found ${data?.length || 0} clients`);
-  return (data || []) as unknown as ClientProfile[];
-}
-
 // Simple client card component with SWIPE-STYLE design
 function ClientCard({ 
   client, 
@@ -80,15 +33,15 @@ function ClientCard({
   onMessage, 
   onView 
 }: { 
-  client: ClientProfile; 
+  client: any; 
   onLike: () => void;
   onMessage: () => void;
   onView: () => void;
 }) {
   const [imageLoaded, setImageLoaded] = useState(false);
   
-  const hasPhotos = client.profile_images && client.profile_images.length > 0;
-  const mainImage = hasPhotos ? client.profile_images[0] : null;
+  const hasPhotos = client.images && client.images.length > 0;
+  const mainImage = hasPhotos ? client.images[0] : null;
   
   // Calculate budget text
   const budgetText = client.budget_min && client.budget_max
@@ -102,6 +55,7 @@ function ClientCard({
     switch (type) {
       case 'moto': return <Car className="w-3 h-3" />;
       case 'bicycle': return <Bike className="w-3 h-3" />;
+      case 'motorcycle': return <Car className="w-3 h-3" />;
       default: return <Home className="w-3 h-3" />;
     }
   };
@@ -118,7 +72,7 @@ function ClientCard({
         {mainImage ? (
           <img
             src={mainImage}
-            alt={client.name || 'Client'}
+            alt={client.full_name || 'Client'}
             className="w-full h-full object-cover"
             onLoad={() => setImageLoaded(true)}
             onError={(e) => {
@@ -142,7 +96,7 @@ function ClientCard({
         <div className="absolute bottom-0 left-0 right-0 p-4">
           <div className="flex items-end gap-2">
             <h3 className="text-2xl font-bold text-white">
-              {client.name || 'Anonymous'}
+              {client.full_name || 'Anonymous'}
             </h3>
             {client.age && (
               <span className="text-white/70 text-lg mb-0.5">{client.age}</span>
@@ -214,18 +168,14 @@ export default function OwnerDashboardNew() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Fetch ALL client profiles
+  // Fetch client profiles using the proper smart matching hook
   const { 
     data: clients = [], 
     isLoading, 
     error, 
     refetch,
     isRefetching 
-  } = useQuery({
-    queryKey: ['all-clients'],
-    queryFn: fetchAllClients,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
+  } = useSmartClientMatching(user?.id, undefined, 0, 50, false);
 
   const startConversation = useStartConversation();
 
@@ -233,8 +183,8 @@ export default function OwnerDashboardNew() {
   const filteredClients = useMemo(() => {
     if (!searchQuery.trim()) return clients;
     const query = searchQuery.toLowerCase();
-    return clients.filter(client =>
-      client.name?.toLowerCase().includes(query) ||
+    return clients.filter((client: any) =>
+      client.full_name?.toLowerCase().includes(query) ||
       client.city?.toLowerCase().includes(query)
     );
   }, [clients, searchQuery]);
