@@ -1357,6 +1357,7 @@ export type Database = {
           schedule_type: string | null
           service_category: string | null
           service_radius_km: number | null
+          services_included: string[] | null
           service_type: string | null
           square_footage: number | null
           state: string | null
@@ -1441,6 +1442,7 @@ export type Database = {
           schedule_type?: string | null
           service_category?: string | null
           service_radius_km?: number | null
+          services_included?: string[] | null
           service_type?: string | null
           square_footage?: number | null
           state?: string | null
@@ -1525,6 +1527,7 @@ export type Database = {
           schedule_type?: string | null
           service_category?: string | null
           service_radius_km?: number | null
+          services_included?: string[] | null
           service_type?: string | null
           square_footage?: number | null
           state?: string | null
