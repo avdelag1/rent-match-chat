@@ -2,6 +2,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,8 +12,10 @@ interface PropertyFormData {
   title?: string;
   price?: number;
   country?: string;
+  state?: string;
   city?: string;
   neighborhood?: string;
+  address?: string;
   property_type?: string;
   beds?: number;
   baths?: number;
@@ -22,6 +25,7 @@ interface PropertyFormData {
   amenities?: string[];
   services_included?: string[];
   rental_duration_type?: string;
+  house_rules?: string;
 }
 
 interface PropertyListingFormProps {
@@ -37,6 +41,7 @@ const RENTAL_DURATIONS = [
 ];
 const AMENITIES = ['Pool', 'Gym', 'Parking', 'AC', 'WiFi', 'Security', 'Garden', 'Balcony', 'Elevator', 'Storage'];
 const SERVICES = ['Water', 'Electricity', 'Gas', 'Internet', 'Cleaning', 'Maintenance', 'Trash', 'Cable TV'];
+const STATES = ['Aguascalientes', 'Baja California', 'Baja California Sur', 'Campeche', 'Chiapas', 'Chihuahua', 'Mexico City', 'Coahuila', 'Colima', 'Durango', 'Guanajuato', 'Guerrero', 'Hidalgo', 'Jalisco', 'Mexico State', 'Michoacán', 'Morelos', 'Nayarit', 'Nuevo León', 'Oaxaca', 'Puebla', 'Querétaro', 'Quintana Roo', 'San Luis Potosí', 'Sinaloa', 'Sonora', 'Tabasco', 'Tamaulipas', 'Tlaxcala', 'Veracruz', 'Yucatán', 'Zacatecas'];
 
 export function PropertyListingForm({ onDataChange, initialData = {} }: PropertyListingFormProps) {
   const { register, control, watch, setValue, formState: { errors } } = useForm<PropertyFormData>({
@@ -93,26 +98,51 @@ export function PropertyListingForm({ onDataChange, initialData = {} }: Property
               />
             </div>
           </div>
+          <div>
+            <Label>Address</Label>
+            <Input {...register('address')} placeholder="123 Main Street" />
+          </div>
         </CardContent>
       </Card>
 
-      <Controller
-        name="country"
-        control={control}
-        render={({ field }) => (
-          <OwnerLocationSelector
-            country={field.value}
-            onCountryChange={field.onChange}
-            city={watch('city')}
-            onCityChange={(city) => setValue('city', city)}
-            neighborhood={watch('neighborhood')}
-            onNeighborhoodChange={(neighborhood) => setValue('neighborhood', neighborhood)}
+      <Card>
+        <CardHeader><CardTitle>Location</CardTitle></CardHeader>
+        <CardContent className="space-y-4">
+          <Controller
+            name="country"
+            control={control}
+            render={({ field }) => (
+              <OwnerLocationSelector
+                country={field.value}
+                onCountryChange={field.onChange}
+                city={watch('city')}
+                onCityChange={(city) => setValue('city', city)}
+                neighborhood={watch('neighborhood')}
+                onNeighborhoodChange={(neighborhood) => setValue('neighborhood', neighborhood)}
+              />
+            )}
           />
-        )}
-      />
+
+          <div>
+            <Label>State</Label>
+            <Controller
+              name="state"
+              control={control}
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value || ''}>
+                  <SelectTrigger><SelectValue placeholder="Select state" /></SelectTrigger>
+                  <SelectContent>
+                    {STATES.map(state => <SelectItem key={state} value={state}>{state}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
-        <CardHeader><CardTitle>Property Details (Optional)</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Property Details</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           <div>
             <Label>Property Type</Label>
@@ -159,7 +189,18 @@ export function PropertyListingForm({ onDataChange, initialData = {} }: Property
       </Card>
 
       <Card>
-        <CardHeader><CardTitle>Amenities (Optional)</CardTitle></CardHeader>
+        <CardHeader><CardTitle>House Rules</CardTitle></CardHeader>
+        <CardContent>
+          <Textarea
+            {...register('house_rules')}
+            placeholder="Enter any house rules or restrictions (e.g., No smoking, Quiet hours after 10 PM, etc.)"
+            className="min-h-24"
+          />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader><CardTitle>Amenities</CardTitle></CardHeader>
         <CardContent className="grid grid-cols-2 gap-3">
           {AMENITIES.map(amenity => (
             <div key={amenity} className="flex items-center space-x-2">
@@ -175,7 +216,7 @@ export function PropertyListingForm({ onDataChange, initialData = {} }: Property
       </Card>
 
       <Card>
-        <CardHeader><CardTitle>Services Included (Optional)</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Services Included</CardTitle></CardHeader>
         <CardContent className="grid grid-cols-2 gap-3">
           {SERVICES.map(service => (
             <div key={service} className="flex items-center space-x-2">
