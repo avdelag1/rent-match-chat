@@ -2,16 +2,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { Home, Bike, CircleDot, ArrowRight, Sparkles, Briefcase } from "lucide-react";
+import { Home, Bike, CircleDot, ArrowRight, Sparkles, Briefcase, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 
 interface CategorySelectionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onCategorySelect?: (category: 'property' | 'motorcycle' | 'bicycle' | 'worker', mode: 'rent' | 'sale' | 'both') => void;
+  onAIOpen?: () => void;
   navigateToNewPage?: boolean;
 }
 
@@ -71,6 +72,7 @@ export function CategorySelectionDialog({
   open, 
   onOpenChange, 
   onCategorySelect,
+  onAIOpen,
   navigateToNewPage = false
 }: CategorySelectionDialogProps) {
   const navigate = useNavigate();
@@ -147,10 +149,28 @@ export function CategorySelectionDialog({
     }
   };
 
+  const handleOpenAI = () => {
+    onOpenChange(false);
+    if (onAIOpen) {
+      onAIOpen();
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden">
         <DialogHeader className="shrink-0 px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4 border-b bg-gradient-to-r from-primary/5 via-background to-background">
+          
+          {/* AI BUTTON - Prominent at top */}
+          <Button
+            onClick={handleOpenAI}
+            className="w-full mb-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0 shadow-lg shadow-purple-500/25"
+            size="lg"
+          >
+            <Zap className="w-5 h-5 mr-2" />
+            ✨ Generate Listing with AI
+          </Button>
+          
           <div className="flex items-center gap-3">
             <div className="p-2 sm:p-2.5 rounded-xl bg-primary/10">
               <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
@@ -162,8 +182,7 @@ export function CategorySelectionDialog({
               <DialogDescription className="text-xs sm:text-sm">
                 {step === 'category'
                   ? 'Select the type of listing you want to create'
-                  : 'Choose how you want to list this item'
-                }
+                  : 'Choose how you want to list this item'}
               </DialogDescription>
             </div>
           </div>
