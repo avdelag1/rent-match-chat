@@ -39,7 +39,7 @@ const AMENITIES = ['Pool', 'Gym', 'Parking', 'AC', 'WiFi', 'Security', 'Garden',
 const SERVICES = ['Water', 'Electricity', 'Gas', 'Internet', 'Cleaning', 'Maintenance', 'Trash', 'Cable TV'];
 
 export function PropertyListingForm({ onDataChange, initialData = {} }: PropertyListingFormProps) {
-  const { control, watch, setValue, formState: { errors } } = useForm<PropertyFormData>({
+  const { register, control, watch, setValue, formState: { errors } } = useForm<PropertyFormData>({
     defaultValues: { 
       amenities: [], 
       services_included: [], 
