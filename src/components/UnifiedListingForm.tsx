@@ -105,6 +105,9 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) throw new Error('Not authenticated');
 
+      console.log('[Listings] User ID:', user.user.id);
+      console.log('[Listings] User email:', user.user.email);
+
       if (images.length + imageFiles.length < 1) {
         throw new Error('At least 1 photo required');
       }
@@ -231,13 +234,26 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
         if (error) throw error;
         return data;
       } else {
+        console.log('[Listings] Inserting listing with data:', JSON.stringify(listingData, null, 2));
+        
         const { data, error } = await supabase
           .from('listings')
           .insert(listingData as any)
           .select()
           .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error('[Listings] Supabase insert error:', {
+            code: error.code,
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            listingData: JSON.stringify(listingData, null, 2)
+          });
+          throw error;
+        }
+        
+        console.log('[Listings] Insert success:', data);
         
         queryClient.setQueryData(['owner-listings'], (oldData: unknown[] | undefined) => {
           return oldData ? [data, ...oldData] : [data];
