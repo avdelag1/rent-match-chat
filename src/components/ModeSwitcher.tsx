@@ -195,7 +195,7 @@ function ModeSwitcherComponent({ className, size = 'sm', variant = 'pill' }: Mod
         </motion.div>
       </AnimatePresence>
 
-      <ArrowLeftRight className="h-3 w-3 text-gray-400" />
+      <ArrowLeftRight className="h-3 w-3 text-white/80" />
     </button>
   );
 }

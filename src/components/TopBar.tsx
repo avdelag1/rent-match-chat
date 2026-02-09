@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useUnreadNotifications } from '@/hooks/useUnreadNotifications';
 import { useNavigate } from 'react-router-dom';
-import { SwipessLogo } from './SwipessLogo';
+
 import { QuickFilterDropdown } from './QuickFilterDropdown';
 import { ModeSwitcher } from './ModeSwitcher';
 import { useScrollDirection } from '@/hooks/useScrollDirection';
@@ -47,14 +47,6 @@ function TopBarComponent({
   const { unreadCount: notificationCount } = useUnreadNotifications();
   const navigate = useNavigate();
 
-  const handleLogoClick = () => {
-    if (userRole === 'owner') {
-      navigate('/owner/dashboard');
-    } else {
-      navigate('/client/dashboard');
-    }
-  };
-
   const shouldHide = hideOnScroll && !isVisible;
 
   return (
@@ -79,14 +71,6 @@ function TopBarComponent({
               <QuickFilterDropdown userRole={userRole} />
             </div>
           )}
-        </div>
-
-        {/* Center section: Logo */}
-        <div
-          className="flex items-center justify-center select-none cursor-pointer flex-shrink-0"
-          onClick={handleLogoClick}
-        >
-          <SwipessLogo size="xs" />
         </div>
 
         {/* Right section: Actions */}
@@ -146,7 +130,7 @@ function TopBarComponent({
                   "h-5 w-5 sm:h-6 sm:w-6 transition-colors duration-150",
                   notificationCount > 0
                     ? "text-white group-hover:text-white/80"
-                    : "text-white/70 group-hover:text-white"
+                    : "text-white/90 group-hover:text-white"
                 )}
               />
               <AnimatePresence>
