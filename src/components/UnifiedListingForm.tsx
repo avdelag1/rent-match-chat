@@ -124,7 +124,7 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
       const schedule_type = formData.schedule_type ? JSON.parse(JSON.stringify(formData.schedule_type)) : [];
       const location_type = formData.location_type ? JSON.parse(JSON.stringify(formData.location_type)) : [];
 
-      // Main listing data
+      // Main listing data - ALL fields in listings table (vehicle_listings table was dropped)
       const listingData = {
         owner_id: user.user.id,
         category: selectedCategory,
@@ -158,8 +158,8 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
         location_type,
         // Property fields
         property_type: formData.property_type ? String(formData.property_type).toLowerCase() : null,
-        bedrooms: formData.beds || null,
-        bathrooms: formData.baths || null,
+        beds: formData.beds || null,
+        baths: formData.baths || null,
         square_footage: formData.square_footage || null,
         furnished: formData.furnished || false,
         pet_friendly: formData.pet_friendly || false,
@@ -175,6 +175,39 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
         offers_emergency_service: selectedCategory === 'worker' ? formData.offers_emergency_service : false,
         background_check_verified: selectedCategory === 'worker' ? formData.background_check_verified : false,
         insurance_verified: selectedCategory === 'worker' ? formData.insurance_verified : false,
+        // Vehicle fields (motorcycle/bicycle) - ALL in listings table now
+        vehicle_type: (selectedCategory === 'motorcycle' || selectedCategory === 'bicycle') ? selectedCategory : null,
+        vehicle_brand: (selectedCategory === 'motorcycle' || selectedCategory === 'bicycle') ? formData.brand : null,
+        vehicle_model: (selectedCategory === 'motorcycle' || selectedCategory === 'bicycle') ? formData.model : null,
+        vehicle_condition: (selectedCategory === 'motorcycle' || selectedCategory === 'bicycle') ? (formData.condition ? String(formData.condition).toLowerCase() : null) : null,
+        year: (selectedCategory === 'motorcycle' || selectedCategory === 'bicycle') ? formData.year : null,
+        mileage: (selectedCategory === 'motorcycle' || selectedCategory === 'bicycle') ? formData.mileage : null,
+        engine_cc: (selectedCategory === 'motorcycle' || selectedCategory === 'bicycle') ? formData.engine_cc : null,
+        fuel_type: (selectedCategory === 'motorcycle' || selectedCategory === 'bicycle') ? formData.fuel_type : null,
+        transmission: (selectedCategory === 'motorcycle' || selectedCategory === 'bicycle') ? formData.transmission : null,
+        // Motorcycle specific
+        motorcycle_type: selectedCategory === 'motorcycle' ? formData.motorcycle_type : null,
+        has_abs: selectedCategory === 'motorcycle' ? (formData.has_abs || false) : null,
+        has_esc: selectedCategory === 'motorcycle' ? (formData.has_esc || false) : null,
+        has_traction_control: selectedCategory === 'motorcycle' ? (formData.has_traction_control || false) : null,
+        has_heated_grips: selectedCategory === 'motorcycle' ? (formData.has_heated_grips || false) : null,
+        has_luggage_rack: selectedCategory === 'motorcycle' ? (formData.has_luggage_rack || false) : null,
+        includes_helmet: selectedCategory === 'motorcycle' ? (formData.includes_helmet || false) : null,
+        includes_gear: selectedCategory === 'motorcycle' ? (formData.includes_gear || false) : null,
+        // Bicycle specific
+        bicycle_type: selectedCategory === 'bicycle' ? formData.bicycle_type : null,
+        frame_size: selectedCategory === 'bicycle' ? formData.frame_size : null,
+        frame_material: selectedCategory === 'bicycle' ? formData.frame_material : null,
+        number_of_gears: selectedCategory === 'bicycle' ? formData.number_of_gears : null,
+        suspension_type: selectedCategory === 'bicycle' ? formData.suspension_type : null,
+        brake_type: selectedCategory === 'bicycle' ? formData.brake_type : null,
+        wheel_size: selectedCategory === 'bicycle' ? formData.wheel_size : null,
+        electric_assist: selectedCategory === 'bicycle' ? (formData.electric_assist || false) : null,
+        battery_range: selectedCategory === 'bicycle' ? formData.battery_range : null,
+        includes_lock: selectedCategory === 'bicycle' ? (formData.includes_lock || false) : null,
+        includes_lights: selectedCategory === 'bicycle' ? (formData.includes_lights || false) : null,
+        includes_basket: selectedCategory === 'bicycle' ? (formData.includes_basket || false) : null,
+        includes_pump: selectedCategory === 'bicycle' ? (formData.includes_pump || false) : null,
       };
 
       let listingResult;
@@ -200,53 +233,6 @@ export function UnifiedListingForm({ isOpen, onClose, editingProperty }: Unified
         
         if (error) throw error;
         listingResult = data;
-      }
-
-      // Insert into vehicle_listings for motorcycles/bicycles
-      if ((selectedCategory === 'motorcycle' || selectedCategory === 'bicycle') && listingResult?.id) {
-        const vehicleData = {
-          id: listingResult.id,
-          vehicle_type: selectedCategory,
-          vehicle_brand: formData.brand,
-          vehicle_model: formData.model,
-          vehicle_condition: formData.condition ? String(formData.condition).toLowerCase() : null,
-          year: formData.year,
-          mileage: formData.mileage,
-          engine_cc: formData.engine_cc,
-          fuel_type: formData.fuel_type,
-          transmission_type: formData.transmission,
-          // Motorcycle specific
-          motorcycle_type: selectedCategory === 'motorcycle' ? formData.motorcycle_type : null,
-          has_abs: formData.has_abs || false,
-          has_traction_control: formData.has_traction_control || false,
-          has_heated_grips: formData.has_heated_grips || false,
-          has_luggage_rack: formData.has_luggage_rack || false,
-          includes_helmet: formData.includes_helmet || false,
-          includes_gear: formData.includes_gear || false,
-          // Bicycle specific
-          bicycle_type: selectedCategory === 'bicycle' ? formData.bicycle_type : null,
-          frame_size: formData.frame_size,
-          frame_material: formData.frame_material,
-          number_of_gears: formData.number_of_gears,
-          suspension_type: formData.suspension_type,
-          brake_type: formData.brake_type,
-          wheel_size: formData.wheel_size,
-          electric_assist: formData.electric_assist || false,
-          battery_range: formData.battery_range,
-          includes_lock: formData.includes_lock || false,
-          includes_lights: formData.includes_lights || false,
-          includes_basket: formData.includes_basket || false,
-          includes_pump: formData.includes_pump || false,
-        };
-
-        const { error: vehicleError } = await supabase
-          .from('vehicle_listings')
-          .upsert(vehicleData);
-        
-        if (vehicleError) {
-          console.error('Vehicle insert error:', vehicleError);
-          // Don't throw - listing was created successfully
-        }
       }
 
       return listingResult;
