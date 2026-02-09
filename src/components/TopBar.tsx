@@ -53,7 +53,8 @@ function TopBarComponent({
     <header
       className={cn(
         'app-header',
-        'bg-[#1C1C1E] border-transparent backdrop-blur-md',
+        // Transparent - no background, no blur, no border
+        transparent ? 'bg-transparent border-transparent backdrop-blur-none' : 'bg-[#1C1C1E] border-transparent',
         shouldHide && 'header-hidden',
         className
       )}

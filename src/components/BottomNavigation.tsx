@@ -149,8 +149,8 @@ export function BottomNavigation({ userRole, onFilterClick, onAddListingClick, o
   return (
     <nav className={cn("app-bottom-bar pointer-events-none px-1", !isVisible && "nav-hidden")}>
       <div
-        // DARK MODE: Clean dark background for premium look
-        className="flex items-center justify-between w-full max-w-xl mx-auto px-2 py-2 pointer-events-auto bg-[#1C1C1E] rounded-t-2xl"
+        // Transparent - no background, no rounded corners
+        className="flex items-center justify-between w-full max-w-xl mx-auto px-2 py-2 pointer-events-auto bg-transparent"
         style={{
           transform: 'translateZ(0)',
           backfaceVisibility: 'hidden',
