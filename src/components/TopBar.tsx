@@ -1,10 +1,9 @@
 import { memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, Zap, Radio } from 'lucide-react';
+import { Bell, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useUnreadNotifications } from '@/hooks/useUnreadNotifications';
-import { useNavigate } from 'react-router-dom';
 
 import { QuickFilterDropdown } from './QuickFilterDropdown';
 import { ModeSwitcher } from './ModeSwitcher';
@@ -28,6 +27,7 @@ interface TopBarProps {
   userRole?: 'client' | 'owner';
   transparent?: boolean;
   hideOnScroll?: boolean;
+  title?: string;
 }
 
 function TopBarComponent({
@@ -38,6 +38,7 @@ function TopBarComponent({
   userRole,
   transparent = false,
   hideOnScroll = false,
+  title,
 }: TopBarProps) {
   const { isVisible } = useScrollDirection({ 
     threshold: 15, 
@@ -60,9 +61,16 @@ function TopBarComponent({
       )}
     >
       <div className="flex items-center justify-between h-12 max-w-screen-xl mx-auto gap-2">
-        {/* Left section: Mode switcher + filters */}
-        <div className="flex items-center gap-2 min-w-0 flex-shrink flex-1">
-          <div className="flex-shrink-0">
+        {/* Left section: Title + Mode switcher + filters */}
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          {/* Title on the left - NEW */}
+          {title && (
+            <div className="hidden sm:block flex-shrink-0 font-bold text-sm sm:text-base text-white whitespace-nowrap">
+              {title}
+            </div>
+          )}
+
+          <div className="flex items-center gap-2 flex-shrink-0">
             <ModeSwitcher variant="pill" size="sm" className="md:hidden" />
             <ModeSwitcher variant="pill" size="md" className="hidden md:flex" />
           </div>
@@ -75,7 +83,7 @@ function TopBarComponent({
         </div>
 
         {/* Right section: Actions */}
-        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0 flex-1 justify-end">
+        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0 justify-end">
           {/* DARK MODE: Dark backgrounds with light icons */}
           <Button
             variant="ghost"
@@ -91,23 +99,6 @@ function TopBarComponent({
             aria-label="Message activations"
           >
             <MessageActivationText />
-          </Button>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            className={cn(
-              "relative h-9 w-9 sm:h-10 sm:w-10 md:h-11 md:w-11 rounded-xl transition-all duration-100 ease-out",
-              "active:scale-[0.95]",
-              "hover:bg-white/10",
-              "group flex-shrink-0",
-              "touch-manipulation",
-              "-webkit-tap-highlight-color-transparent"
-            )}
-            onClick={() => navigate('/radio')}
-            aria-label="Radio Player"
-          >
-            <Radio className="h-5 w-5 sm:h-6 sm:w-6 text-white group-hover:text-white/80 transition-colors duration-150" />
           </Button>
 
           <Button
