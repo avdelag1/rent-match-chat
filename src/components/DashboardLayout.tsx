@@ -484,9 +484,32 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   // On these routes, TopBar becomes transparent and content extends behind it
   const isImmersiveDashboard = useMemo(() => {
     const path = location.pathname;
-    return path === '/client/dashboard' || 
+    return path === '/client/dashboard' ||
            path === '/owner/dashboard' ||
            path.includes('discovery');
+  }, [location.pathname]);
+
+  // Get page title based on location for TopBar display
+  const pageTitle = useMemo(() => {
+    const path = location.pathname;
+
+    // Dashboard/discovery pages show swipes/listings count or title
+    if (path === '/client/dashboard') return 'Browsing';
+    if (path === '/owner/dashboard') return 'Your Matches';
+    if (path.includes('discovery')) return 'Discover';
+
+    // Other pages show section names
+    if (path.includes('/profile')) return 'Profile';
+    if (path.includes('/settings')) return 'Settings';
+    if (path.includes('/messages')) return 'Messages';
+    if (path.includes('/notifications')) return 'Notifications';
+    if (path.includes('/liked')) return 'Liked';
+    if (path.includes('/properties')) return 'Properties';
+    if (path.includes('/listings')) return 'Listings';
+    if (path.includes('/filters')) return 'Filters';
+    if (path.includes('/contracts')) return 'Contracts';
+
+    return '';
   }, [location.pathname]);
 
   // Calculate responsive layout values
@@ -515,6 +538,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           userRole={userRole === 'admin' ? 'client' : userRole}
           transparent={isImmersiveDashboard}
           hideOnScroll={true}
+          title={pageTitle}
         />
       )}
 
