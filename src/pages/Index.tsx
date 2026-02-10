@@ -49,31 +49,59 @@ const Index = () => {
     queryFn: async () => {
       if (!user) return null;
       logger.log("[Index] Fetching role for user:", user.id);
-      const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", user.id).maybeSingle();
+      
+      // First try to fetch existing role
+      const { data: existingRole, error: fetchError } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .maybeSingle();
 
-      if (error) {
-        logger.error("[Index] Role fetch error:", error);
-        throw error;
+      if (fetchError) {
+        logger.error("[Index] Role fetch error:", fetchError);
+        // Don't throw - try to create role as fallback
       }
-      logger.log("[Index] Role fetched successfully:", data?.role);
-      return data?.role;
+
+      // If role exists, return it
+      if (existingRole?.role) {
+        logger.log("[Index] Role fetched successfully:", existingRole.role);
+        return existingRole.role;
+      }
+
+      // Role doesn't exist - create it from metadata
+      const metadataRole = user.user_metadata?.role as 'client' | 'owner' | undefined;
+      if (metadataRole) {
+        logger.log("[Index] Creating role from metadata:", metadataRole);
+        const { error: insertError } = await supabase
+          .from("user_roles")
+          .insert({ user_id: user.id, role: metadataRole });
+        
+        if (insertError) {
+          logger.error("[Index] Role insert error:", insertError);
+        } else {
+          logger.log("[Index] Role created successfully:", metadataRole);
+          return metadataRole;
+        }
+      }
+
+      // Last resort: default to 'client'
+      logger.log("[Index] No role found, defaulting to 'client'");
+      return 'client';
     },
     enabled: !!user && initialized,
-    retry: 10, // More retries for reliability
-    retryDelay: (attemptIndex) => Math.min(500 * 2 ** attemptIndex, 5000),
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(500 * 2 ** attemptIndex, 3000),
     staleTime: 30000,
     gcTime: 300000,
     refetchOnWindowFocus: false,
     refetchOnMount: true,
-    // Poll for role until we have one (not based on user age - that can cause issues)
-    // Stop polling after 30 seconds to prevent infinite polling
+    // Poll for role until we have one
+    // Stop polling after 30 seconds (user age check)
     refetchInterval: (query) => {
       const role = query.state.data as string | null | undefined;
-      // Stop if no user, or we have a role
       if (!user || role) return false;
-      // Stop polling after 30 seconds (user age check)
       if (userAgeMs > 30000) return false;
-      return 800; // Poll every 800ms while waiting for role
+      return 800;
     },
   });
 
