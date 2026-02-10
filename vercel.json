@@ -187,7 +187,7 @@
   ],
   "rewrites": [
     {
-      "source": "/((?!api/).*)",
+      "source": "/((?!api/|assets/|icons/|sw\\.js|manifest\\.|favicon\\.|robots\\.txt|_next/).*)",
       "destination": "/index.html"
     }
   ]
