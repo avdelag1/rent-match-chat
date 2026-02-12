@@ -86,15 +86,6 @@ export function useSwipeWithMatch(options?: SwipeWithMatchOptions) {
             throw new Error('This user profile is no longer available');
           }
 
-          // Check if profile is active
-          if (clientExists.is_active === false) {
-            logger.warn('[useSwipeWithMatch] Attempted to like inactive profile:', {
-              clientId: targetId,
-              fullName: clientExists.full_name
-            });
-            throw new Error('This user is no longer active');
-          }
-
           // For owner → client likes, use likes table with target_type='profile'
           // First, check if like already exists
           const { data: existingLike } = await supabase

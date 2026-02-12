@@ -286,11 +286,13 @@ export function useSmartListingMatching(
 
   return useQuery({
     queryKey: ['smart-listings', userId, filtersKey, page, isRefreshMode], // Stable query key with userId
-    // PERF: Longer stale time for listings since they don't change frequently
-    staleTime: 10 * 60 * 1000, // 10 minutes - listings are stable
-    gcTime: 15 * 60 * 1000, // 15 minutes cache time
+    // PERF: Short stale time for listings since new ones are added frequently
+    staleTime: 60 * 1000, // 1 minute - new listings should appear quickly
+    gcTime: 5 * 60 * 1000, // 5 minutes cache time
     // PERF: Keep previous data while fetching new data to prevent UI flash
     placeholderData: (prev) => prev,
+    refetchOnWindowFocus: true, // Auto-refresh when user returns to app
+    refetchOnMount: true, // Always fetch fresh data on mount
     queryFn: async () => {
       // PERF: userId is passed in, no need for async getUser() call
       if (!userId) {
@@ -961,11 +963,13 @@ export function useSmartClientMatching(
 
   return useQuery<MatchedClientProfile[]>({
     queryKey: ['smart-clients', userId, category, page, isRefreshMode, filtersKey],
-    // PERF: Longer stale time for client profiles since they don't change frequently
-    staleTime: 10 * 60 * 1000, // 10 minutes - profiles are stable
-    gcTime: 15 * 60 * 1000, // 15 minutes cache time
+    // PERF: Short stale time since new clients join frequently
+    staleTime: 60 * 1000, // 1 minute - new clients should appear quickly
+    gcTime: 5 * 60 * 1000, // 5 minutes cache time
     // PERF: Keep previous data while fetching new data to prevent UI flash
     placeholderData: (prev) => prev,
+    refetchOnWindowFocus: true, // Auto-refresh when user returns to app
+    refetchOnMount: true, // Always fetch fresh data on mount
     queryFn: async () => {
       // PERF: userId is passed in, no need for async getUser() call
       if (!userId) {
@@ -1084,15 +1088,19 @@ export function useSmartClientMatching(
         let profileQuery = supabase
           .from('profiles')
           .select(CLIENT_SWIPE_CARD_FIELDS)
-          .neq('id', userId) // CRITICAL: Never show user their own profile
-          .eq('user_roles.role', 'client')
-          .or('is_active.is.null,is_active.eq.true'); // Only show active profiles (null or true)
+          .eq('user_roles.role', 'client');
 
-        // CRITICAL FIX: Exclude swiped profiles at SQL level (not JavaScript)
-        // This ensures pagination works correctly
+        // CRITICAL: Filter out own profile using user_id column (matches auth.users.id)
+        // This happens in JS because we can't filter by related column in simple select
+        // We exclude after fetch to handle the join correctly
+
+        // CRITICAL FIX: Exclude swiped profiles at SQL level using user_id (UUID)
+        // The swipe mutation uses profile.user_id as targetId, so we must exclude by user_id
         if (swipedProfileIds.size > 0) {
           const idsToExclude = Array.from(swipedProfileIds);
-          profileQuery = profileQuery.not('id', 'in', `(${idsToExclude.map(id => `"${id}"`).join(',')})`);
+          // Convert Set to array and quote each UUID properly
+          const quotedIds = idsToExclude.map(id => `"${id}"`).join(',');
+          profileQuery = profileQuery.not('user_id', 'in', `(${quotedIds})`);
         }
 
         const start = page * pageSize;
@@ -1119,8 +1127,9 @@ export function useSmartClientMatching(
         let filteredProfiles = (profiles as any[])
           .filter(profile => {
             // DEFENSE IN DEPTH: Double-check - never show user their own profile
-            if (profile.id === userId) {
-              logger.warn('[SmartMatching] CRITICAL: Own profile leaked through DB query, filtering it out:', profile.id);
+            // Compare user_id (auth.users.id UUID) with current userId
+            if (profile.user_id === userId) {
+              logger.warn('[SmartMatching] CRITICAL: Own profile leaked through DB query, filtering it out:', profile.user_id);
               return false;
             }
             return true;

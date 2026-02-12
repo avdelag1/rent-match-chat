@@ -933,7 +933,12 @@ const TinderentSwipeContainerComponent = ({ onListingTap, onInsights, onMessageC
     // Reset store
     resetClientDeck();
 
+    // Clear session storage to force fresh data
+    sessionStorage.removeItem('swipess_client_deck_listings');
+
     try {
+      // Invalidate cache to force fresh fetch
+      await queryClient.invalidateQueries({ queryKey: ['smart-listings'] });
       await refetchSmart();
       const refreshCategoryInfo = getActiveCategoryInfo(filters, storeActiveCategory);
       const refreshLabel = String(refreshCategoryInfo?.plural || 'Listings').toLowerCase();
