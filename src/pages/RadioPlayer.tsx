@@ -62,6 +62,34 @@ export default function RadioPlayer() {
         </div>
       </div>
 
+      {/* Error Banner - Shows when stream fails */}
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="mx-4 mt-2 px-4 py-3 bg-red-500/20 border border-red-500/50 rounded-xl flex items-center justify-between"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-red-500/30 flex items-center justify-center">
+                <span className="text-red-400 text-sm">⚠</span>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-red-400">Stream unavailable</p>
+                <p className="text-xs text-red-400/60">Tap skip to try another station</p>
+              </div>
+            </div>
+            <button
+              onClick={() => changeStation('next')}
+              className="px-3 py-1.5 bg-red-500/30 hover:bg-red-500/50 rounded-lg text-xs font-medium text-red-400 transition-colors"
+            >
+              Skip
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Center - Vinyl & Controls */}
       <div className="flex-1 flex flex-col items-center justify-center px-4">
         

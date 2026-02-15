@@ -28,6 +28,7 @@ const RadioContext = createContext<RadioContextType | undefined>(undefined);
 export function RadioProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const skipTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const [state, setState] = useState<RadioPlayerState>({
     isPlaying: false,
@@ -61,23 +62,56 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
     };
 
     const handleAudioError = (e: Event) => {
+      // Only handle error if we're actually trying to play
       if (audioRef.current?.paused === false) {
         logger.error('[RadioPlayer] Audio error:', e);
         setError('Stream unavailable');
-        setTimeout(() => {
-          changeStation('next');
-        }, 3000);
+        // Auto-skip after delay, but don't block manual controls
+        if (state.isPlaying) {
+          skipTimeoutRef.current = setTimeout(() => {
+            changeStation('next');
+          }, 3000);
+        }
+      }
+    };
+
+    // Clear error when audio successfully plays
+    const handleCanPlay = () => {
+      setError(null);
+      if (skipTimeoutRef.current) {
+        clearTimeout(skipTimeoutRef.current);
+        skipTimeoutRef.current = null;
       }
     };
 
     audioRef.current.addEventListener('ended', handleTrackEnded);
     audioRef.current.addEventListener('error', handleAudioError);
+    audioRef.current.addEventListener('canplay', handleCanPlay);
 
     return () => {
       audioRef.current?.removeEventListener('ended', handleTrackEnded);
       audioRef.current?.removeEventListener('error', handleAudioError);
+      audioRef.current?.removeEventListener('canplay', handleCanPlay);
+      if (skipTimeoutRef.current) {
+        clearTimeout(skipTimeoutRef.current);
+        skipTimeoutRef.current = null;
+      }
     };
-  }, [state.isPlaying, state.currentStation, state.isShuffle, state.currentCity]);
+  }, [state.isPlaying, state.currentStation, state.isShuffle, state.currentCity, changeStation]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (skipTimeoutRef.current) {
+        clearTimeout(skipTimeoutRef.current);
+        skipTimeoutRef.current = null;
+      }
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+      }
+    };
+  }, []);
 
   // Load user preferences from Supabase
   useEffect(() => {
@@ -170,7 +204,21 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
     const targetStation = station || state.currentStation;
     if (!targetStation || !audioRef.current) return;
 
+    // Clear any pending skip timeout
+    if (skipTimeoutRef.current) {
+      clearTimeout(skipTimeoutRef.current);
+      skipTimeoutRef.current = null;
+    }
+
+    // Clear error state when starting to play
+    setError(null);
+
     try {
+      // Reset audio element to clear error state
+      audioRef.current.pause();
+      audioRef.current.src = '';
+      audioRef.current.load();
+
       if (audioRef.current.src !== targetStation.streamUrl) {
         audioRef.current.src = targetStation.streamUrl;
         audioRef.current.load();
@@ -206,6 +254,13 @@ export function RadioProvider({ children }: { children: React.ReactNode }) {
     const city = state.currentCity;
     const stations = getStationsByCity(city);
     if (stations.length === 0) return;
+
+    // Clear error and any pending timeout when manually skipping
+    setError(null);
+    if (skipTimeoutRef.current) {
+      clearTimeout(skipTimeoutRef.current);
+      skipTimeoutRef.current = null;
+    }
 
     if (state.isShuffle) {
       play(getRandomStation());
